@@ -1,6 +1,14 @@
 <Solution>
-  <Folder Name="/Solution Items/">
-    <File Path="ProductsCatalog-master.zip" />
+  <Folder Name="/Solution Items/" />
+  <Folder Name="/src/">
+    <Project Path="src/ECommerceStoreInvoice.API/ECommerceStoreInvoice.API.csproj" />
+    <Project Path="src/ECommerceStoreInvoice.Application/ECommerceStoreInvoice.Application.csproj" />
+    <Project Path="src/ECommerceStoreInvoice.Domain/ECommerceStoreInvoice.Domain.csproj" />
+    <Project Path="src/ECommerceStoreInvoice.Infrastructure/ECommerceStoreInvoice.Infrastructure.csproj" />
   </Folder>
-  <Project Path="src/ECommerceStoreInvoice.API/ECommerceStoreInvoice.API.csproj" />
+  <Folder Name="/tests/">
+    <Project Path="tests/ECommerceStoreInvoice.Acceptance.Tests/ECommerceStoreInvoice.Acceptance.Tests.csproj" />
+    <Project Path="tests/ECommerceStoreInvoice.Application.UnitTests/ECommerceStoreInvoice.Application.UnitTests.csproj" />
+    <Project Path="tests/ECommerceStoreInvoice.Domain.UnitTests/ECommerceStoreInvoice.Domain.UnitTests.csproj" />
+  </Folder>
 </Solution>
