@@ -1,1 +1,6 @@
-<Solution />
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="ProductsCatalog-master.zip" />
+  </Folder>
+  <Project Path="src/ECommerceStoreInvoice.API/ECommerceStoreInvoice.API.csproj" />
+</Solution>
