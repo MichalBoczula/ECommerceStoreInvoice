@@ -1,4 +1,4 @@
-﻿namespace ProductCatalogECommerceStoreInvoice.Domain.Validation.Common
+﻿namespace ECommerceStoreInvoice.Domain.Validation.Common
 {
     public sealed class ResourceNotFoundException : Exception
     {

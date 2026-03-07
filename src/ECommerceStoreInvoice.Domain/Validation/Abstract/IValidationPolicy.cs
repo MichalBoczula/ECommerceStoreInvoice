@@ -1,4 +1,5 @@
-﻿using ProductCatalogECommerceStoreInvoice.Domain.Validation.Common;
+﻿
+using ECommerceStoreInvoice.Domain.Validation.Common;
 
 namespace ECommerceStoreInvoice.Domain.Validation.Abstract
 {

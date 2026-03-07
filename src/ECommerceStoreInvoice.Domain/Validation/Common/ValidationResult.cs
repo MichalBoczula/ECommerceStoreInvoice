@@ -1,4 +1,4 @@
-﻿namespace ProductCatalogECommerceStoreInvoice.Domain.Validation.Common
+﻿namespace ECommerceStoreInvoice.Domain.Validation.Common
 {
     public sealed class ValidationResult
     {
@@ -10,6 +10,6 @@
             _validationErrors.Add(validationError);
         }
 
-        public IReadOnlyList<ValidationError> GetValidatonErrors() => _validationErrors.AsReadOnly();
+        public IReadOnlyList<ValidationError> GetValidationErrors() => _validationErrors.AsReadOnly();
     }
 }

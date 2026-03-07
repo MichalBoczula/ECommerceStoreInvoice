@@ -1,6 +1,6 @@
-﻿using ProductCatalogECommerceStoreInvoice.Domain.Validation.Common;
+﻿using ECommerceStoreInvoice.Domain.Validation.Common;
 
-namespace ProductCatalogECommerceStoreInvoice.Domain.Validation.Abstract
+namespace ECommerceStoreInvoice.Domain.Validation.Abstract
 {
     public interface IValidationRule<T>
     {

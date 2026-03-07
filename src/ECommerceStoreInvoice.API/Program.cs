@@ -1,17 +1,25 @@
+using ECommerceStoreInvoice.API.Configuration;
+using ECommerceStoreInvoice.Domain.Validation.Common;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
+builder.Services.AddSwaggerGen(c => c.SupportNonNullableReferenceTypes());
+builder.Services.AddOpenApiDocument();
+builder.Services.AddExceptionHandler<ExceptionHandler>();
+builder.Services.AddProblemDetails();
+builder.Services.AddOpenApiDocument();
+
 var app = builder.Build();
+app.UseExceptionHandler(_ => { });
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-}
+app.MapOpenApi();
 
+app.UseSwagger();
+app.UseSwaggerUI();
 app.UseHttpsRedirection();
 
 var summaries = new[]
@@ -21,6 +29,7 @@ var summaries = new[]
 
 app.MapGet("/weatherforecast", () =>
 {
+    throw new ResourceNotFoundException("test", Guid.NewGuid(), "test");
     var forecast = Enumerable.Range(1, 5).Select(index =>
         new WeatherForecast
         (
