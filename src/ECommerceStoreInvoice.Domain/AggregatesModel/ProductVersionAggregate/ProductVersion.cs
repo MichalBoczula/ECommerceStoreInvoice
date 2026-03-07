@@ -4,15 +4,14 @@ namespace ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate
 {
     public sealed class ProductVersion
     {
-        public Guid Id { get; private set; }
+        public Guid Id { get; init; }
         public bool IsActive { get; private set; }
-        public DateTime ChangedAt { get; private set; }
-        public Guid ProductId { get; private set; }
-        public Money Price { get; private set; }
-        public string Name { get; private set; }
-        public string Brand { get; private set; }
-
-        public void SetChangeDate() => ChangedAt = DateTime.UtcNow;
+        public DateTime CreatedAt { get; init; }
+        public DateTime? DeactivatedAt { get; private set; }
+        public Guid ProductId { get; init; }
+        public Money Price { get; init; }
+        public string Name { get; init; }
+        public string Brand { get; init; }
 
         public void Deactivate()
         {
@@ -20,7 +19,7 @@ namespace ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate
                 return;
 
             IsActive = false;
-            SetChangeDate();
+            DeactivatedAt = DateTime.UtcNow;
         }
 
         public ProductVersion(
@@ -31,7 +30,8 @@ namespace ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate
         {
             Id = Guid.NewGuid();
             IsActive = true;
-            ChangedAt = DateTime.UtcNow;
+            CreatedAt = DateTime.UtcNow;
+            DeactivatedAt = null;
             ProductId = productId;
             Price = price;
             Name = name;

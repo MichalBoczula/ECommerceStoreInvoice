@@ -4,11 +4,13 @@ namespace ECommerceStoreInvoice.Domain.AggregatesModel.InvoiceAggregate
 {
     public sealed class Invoice
     {
-        public Guid Id { get; private set; }
-        public OrderSnapshot Order { get; private set; }
-        public ClientSnapshot Client { get; private set; }
-        public DateTime CreatedAt { get; private set; }
-        public string InvoiceNumber { get; private set; }
+        public Guid Id { get; init; }
+        public OrderSnapshot Order { get; init; }
+        public ClientSnapshot Client { get; init; }
+        public DateTime CreatedAt { get; init; }
+        public string InvoiceNumber { get; init; }
+        public bool PdfGenerated { get; private set; }
+        public string? PdfUrl { get; private set; }
 
         public Invoice(OrderSnapshot order, ClientSnapshot client)
         {
@@ -22,6 +24,12 @@ namespace ECommerceStoreInvoice.Domain.AggregatesModel.InvoiceAggregate
         private string GenerateInvoiceNumber()
         {
             throw new NotImplementedException();
+        }
+
+        private void GeneratePdf()
+        {
+            PdfGenerated = true;
+            PdfUrl = $"https://example.com/invoices/{Id}.pdf";
         }
     }
 }
