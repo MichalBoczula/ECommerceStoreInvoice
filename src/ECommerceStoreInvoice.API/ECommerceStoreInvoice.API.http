@@ -1,6 +1,7 @@
 @ECommerceStoreInvoice.API_HostAddress = http://localhost:5039
+@ProductVersionId = 00000000-0000-0000-0000-000000000001
 
-GET {{ECommerceStoreInvoice.API_HostAddress}}/weatherforecast/
+GET {{ECommerceStoreInvoice.API_HostAddress}}/product-versions/{{ProductVersionId}}
 Accept: application/json
 
 ###
