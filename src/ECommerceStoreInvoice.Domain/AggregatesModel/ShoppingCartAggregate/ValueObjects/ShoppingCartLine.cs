@@ -2,7 +2,7 @@
 
 namespace ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.ValueObjects
 {
-    public record struct ShoppingCartLine
+    public record ShoppingCartLine
     {
         public Guid ProductVersionId { get; init; }
         public string Name { get; init; }
