@@ -1,12 +1,22 @@
 ﻿namespace ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate.ValueObjects
 {
-    public sealed class OrderLine
+    public readonly record struct OrderLine
     {
-        public Guid ProductVersionId { get; }
-        public string Name { get; }
-        public string Brand { get; }
-        public int Quantity { get; }
-        public decimal UnitPriceAmount { get; }
-        public decimal TotalAmount => UnitPriceAmount * Quantity;
+        public Guid ProductVersionId { get; init; }
+        public string Name { get; init; }
+        public string Brand { get; init; }
+        public int Quantity { get; init; }
+        public decimal UnitPriceAmount { get; init; }
+        public decimal TotalAmount { get; init; }
+
+        public OrderLine(Guid productVersionId, string name, string brand, int quantity, decimal unitPriceAmount, decimal totalAmount)
+        {
+            ProductVersionId = productVersionId;
+            Name = name;
+            Brand = brand;
+            Quantity = quantity;
+            UnitPriceAmount = unitPriceAmount;
+            TotalAmount = totalAmount;
+        }
     }
 }

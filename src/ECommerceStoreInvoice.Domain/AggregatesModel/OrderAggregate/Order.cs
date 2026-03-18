@@ -5,13 +5,13 @@ namespace ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate
 {
     public sealed class Order
     {
-        public Guid Id { get; }
-        public Guid ClientId { get; }
-        public IReadOnlyCollection<OrderLine> Lines { get; }
-        public DateTime CreatedAt { get; }
+        public Guid Id { get; init; }
+        public Guid ClientId { get; init; }
+        public IReadOnlyCollection<OrderLine> Lines { get; init; }
+        public DateTime CreatedAt { get; init; }
         public OrderStatus Status { get; private set; }
-        public string Currency { get; }
-        public decimal TotalAmount { get; }
+        public string Currency { get; init; }
+        public decimal TotalAmount { get; init; }
 
         public Order(Guid clientId, IEnumerable<OrderLine> lines, string currency)
         {

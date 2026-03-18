@@ -2,15 +2,14 @@
 
 namespace ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.ValueObjects
 {
-    public sealed class ShoppingCartLine
+    public record struct ShoppingCartLine
     {
-        public Guid ProductVersionId { get; }
-        public string Name { get; private set; }
-        public string Brand { get; private set; }
-        public Money UnitPrice { get; private set; }
+        public Guid ProductVersionId { get; init; }
+        public string Name { get; init; }
+        public string Brand { get; init; }
+        public Money UnitPrice { get; init; }
         public int Quantity { get; private set; }
-
-        public Money Total => new(UnitPrice.Amount * Quantity, UnitPrice.Currency);
+        public Money Total { get; private set; }
 
         public ShoppingCartLine(
             Guid productVersionId,
@@ -24,21 +23,18 @@ namespace ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.Val
             Brand = brand;
             UnitPrice = unitPrice;
             Quantity = quantity;
+            CalculateTotal();
         }
 
-        public void Increase(int quantity)
+        private void CalculateTotal()
         {
-            Quantity += quantity;
+            Total = new(UnitPrice.Amount * Quantity, UnitPrice.Currency);
         }
 
         public void ChangeQuantity(int quantity)
         {
             Quantity = quantity;
-        }
-
-        public void UpdatePrice(Money newUnitPrice)
-        {
-            UnitPrice = newUnitPrice;
+            CalculateTotal();
         }
     }
 }

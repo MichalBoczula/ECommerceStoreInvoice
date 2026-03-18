@@ -5,10 +5,10 @@ namespace ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate
 {
     public sealed class ShoppingCart
     {
-        public Guid Id { get; }
-        public Guid ClientId { get; }
+        public Guid Id { get; init; }
+        public Guid ClientId { get; init; }
         public IReadOnlyCollection<ShoppingCartLine> Lines => _lines.AsReadOnly();
-        public DateTime CreatedAt { get; }
+        public DateTime CreatedAt { get; init; }
         public DateTime UpdatedAt { get; private set; }
         public bool CheckedOut { get; private set; }
 
@@ -24,9 +24,9 @@ namespace ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate
 
         public void AddItem(ProductVersion productVersion, int quantity)
         {
-            var existing = _lines.FirstOrDefault(x => x.ProductVersionId == productVersion.Id);
+            var isProductExist = _lines.Any(x => x.ProductVersionId == productVersion.Id);
 
-            if (existing is null)
+            if (!isProductExist)
             {
                 _lines.Add(new ShoppingCartLine(
                     productVersion.Id,
@@ -37,7 +37,8 @@ namespace ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate
             }
             else
             {
-                existing.Increase(quantity);
+                var existing = _lines.First(x => x.ProductVersionId == productVersion.Id);
+                existing.ChangeQuantity(quantity);
             }
 
             UpdatedAt = DateTime.UtcNow;

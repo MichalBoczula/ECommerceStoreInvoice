@@ -13,6 +13,7 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["src/ECommerceStoreInvoice.API/ECommerceStoreInvoice.API.csproj", "src/ECommerceStoreInvoice.API/"]
+COPY ["src/ECommerceStoreInvoice.Domain/ECommerceStoreInvoice.Domain.csproj", "src/ECommerceStoreInvoice.Domain/"]
 RUN dotnet restore "./src/ECommerceStoreInvoice.API/ECommerceStoreInvoice.API.csproj"
 COPY . .
 WORKDIR "/src/src/ECommerceStoreInvoice.API"
