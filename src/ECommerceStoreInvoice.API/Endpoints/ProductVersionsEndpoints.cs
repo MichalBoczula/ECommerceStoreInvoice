@@ -1,4 +1,6 @@
 using ECommerceStoreInvoice.API.Configuration.Common;
+using ECommerceStoreInvoice.Application.Common.ResponsesDto;
+using ECommerceStoreInvoice.Application.Services.Abstract;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ECommerceStoreInvoice.API.Endpoints
@@ -21,18 +23,17 @@ namespace ECommerceStoreInvoice.API.Endpoints
 
         private static void MapProductVersionsQueries(IEndpointRouteBuilder group)
         {
-            group.MapGet("/{id:guid}", (Guid id) =>
+            group.MapGet("/{id:guid}", async (Guid id, IProductVersionService productVersionService) =>
             {
-                return Results.Ok(new ProductVersionResponse(id, "Blueprint product version"));
+                return Results.Ok();
             })
             .WithSummary("Get product version by Id.")
-            .WithDescription("Returns a product version blueprint response.")
+            .WithDescription("Returns a product snapshot by id; 404 otherwise.")
             .WithName("GetProductVersionById")
-            .Produces<ProductVersionResponse>(StatusCodes.Status200OK)
+            .Produces<ProductVersionResponseDto>(StatusCodes.Status200OK)
             .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest)
+            .Produces<NotFoundProblemDetails>(StatusCodes.Status404NotFound)
             .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
         }
-
-        private sealed record ProductVersionResponse(Guid Id, string Name);
     }
 }
