@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using ECommerceStoreInvoice.Domain.AggregatesModel.InvoiceAggregate.Repositories;
 
 namespace ECommerceStoreInvoice.Infrastructure.Repositories
 {
-    internal class InvoiceRepository
+    internal class InvoiceRepository : IInvoiceRepository
     {
     }
 }

@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ECommerceStoreInvoice.Domain.AggregatesModel.InvoiceAggregate.Repositories
+﻿namespace ECommerceStoreInvoice.Domain.AggregatesModel.InvoiceAggregate.Repositories
 {
-    internal interface IInvoiceRepository
+    public interface IInvoiceRepository
     {
     }
 }

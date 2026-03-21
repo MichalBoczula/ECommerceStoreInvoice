@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.Repositories;
 
 namespace ECommerceStoreInvoice.Infrastructure.Repositories
 {
-    internal class ShoppingCartRepository
+    internal class ShoppingCartRepository : IShoppingCartRepository
     {
     }
 }

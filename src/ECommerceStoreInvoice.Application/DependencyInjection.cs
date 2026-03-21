@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using ECommerceStoreInvoice.Application.Services.Abstract;
+using ECommerceStoreInvoice.Application.Services.Concrete;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ECommerceStoreInvoice.Application
 {
@@ -7,6 +9,10 @@ namespace ECommerceStoreInvoice.Application
         public static IServiceCollection AddApplication(
             this IServiceCollection services)
         {
+            services.AddScoped<IProductVersionService, ProductVersionService>();
+            services.AddScoped<IInvoiceService, InvoiceService>();
+            services.AddScoped<IShoppingCartService, ShoppingCartService>();
+
             return services;
         }
     }
