@@ -24,7 +24,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ECommerceStoreInvoice.Application\ECommerceStoreInvoice.Application.csproj" />
     <ProjectReference Include="..\ECommerceStoreInvoice.Domain\ECommerceStoreInvoice.Domain.csproj" />
+    <ProjectReference Include="..\ECommerceStoreInvoice.Infrastructure\ECommerceStoreInvoice.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

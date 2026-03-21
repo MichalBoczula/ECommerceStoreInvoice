@@ -1,6 +1,8 @@
 using ECommerceStoreInvoice.API.Configuration;
 using ECommerceStoreInvoice.API.Endpoints;
 using ECommerceStoreInvoice.Domain;
+using ECommerceStoreInvoice.Infrastructure;
+using ECommerceStoreInvoice.Application;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +13,8 @@ builder.Services.AddExceptionHandler<ExceptionHandler>();
 builder.Services.AddProblemDetails();
 
 builder.Services.AddDomain();
+builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddApplication();
 
 var app = builder.Build();
 
@@ -22,6 +26,7 @@ app.UseHttpsRedirection();
 
 app.MapInvoicesEndpoints();
 app.MapProductVersionsEndpoints();
+app.MapShoppingCartsEndpoints();
 
 app.MapHealthChecks("/health");
 
