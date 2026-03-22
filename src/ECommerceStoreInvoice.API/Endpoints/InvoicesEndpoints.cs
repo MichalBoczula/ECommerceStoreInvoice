@@ -20,11 +20,22 @@ namespace ECommerceStoreInvoice.API.Endpoints
 
         private static void MapInvoicesCommands(IEndpointRouteBuilder group)
         {
+            group.MapPost("/{orderId:guid}", async (Guid orderId, IInvoiceService invoiceService) =>
+            {
+                throw new ResourceNotFoundException("test", Guid.NewGuid(), "test");
+            })
+           .WithSummary("Create Invoice for order identify by Id.")
+           .WithDescription("Create a new invoice when the Id exists and i has not been created before; 404 otherwise.")
+           .WithName("CreateInvoiceFororder")
+           .Produces<InvoiceResponseDto>(StatusCodes.Status200OK)
+           .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest)
+           .Produces<NotFoundProblemDetails>(StatusCodes.Status404NotFound)
+           .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
         }
 
         private static void MapInvoicesQueries(IEndpointRouteBuilder group)
         {
-            group.MapGet("/{id:guid}", async (Guid id, IInvoiceService invoiceService) =>
+            group.MapGet("/{invoiceId:guid}", async (Guid invoiceId, IInvoiceService invoiceService) =>
             {
                 throw new ResourceNotFoundException("test", Guid.NewGuid(), "test");
             })
