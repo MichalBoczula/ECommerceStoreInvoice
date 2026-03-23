@@ -1,4 +1,5 @@
-﻿using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate;
+﻿using ECommerceStoreInvoice.Domain.AggregatesModel.Common.ValueObjects;
+using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.ValueObjects;
 
 namespace ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate
@@ -10,7 +11,7 @@ namespace ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate
         public IReadOnlyCollection<ShoppingCartLine> Lines => _lines.AsReadOnly();
         public DateTime CreatedAt { get; init; }
         public DateTime UpdatedAt { get; private set; }
-        public bool CheckedOut { get; private set; }
+        public Money Total { get; private set; }
 
         private readonly List<ShoppingCartLine> _lines = [];
 
@@ -20,6 +21,7 @@ namespace ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate
             ClientId = clientId;
             CreatedAt = DateTime.UtcNow;
             UpdatedAt = DateTime.UtcNow;
+            CalculateTotal();
         }
 
         public void AddItem(ProductVersion productVersion, int quantity)
@@ -44,10 +46,29 @@ namespace ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate
             UpdatedAt = DateTime.UtcNow;
         }
 
-        public void Checkout()
+        public void RemoveItem(Guid productVersionId, bool all)
         {
-            CheckedOut = true;
-            UpdatedAt = DateTime.UtcNow;
+            var existing = _lines.FirstOrDefault(x => x.ProductVersionId == productVersionId);
+            
+            if (existing is null) return;
+
+            if (all)
+            {
+                _lines.Remove(existing);
+                UpdatedAt = DateTime.UtcNow;
+            }
+            else if (existing.Quantity > 1)
+            {
+                existing.ChangeQuantity(-1);
+                UpdatedAt = DateTime.UtcNow;
+            }
+
+            CalculateTotal();
+        }
+
+        public void CalculateTotal()
+        {
+            Total = new(_lines.Sum(x => x.Total.Amount), _lines.FirstOrDefault()?.Total.Currency ?? "USD");
         }
     }
 }
