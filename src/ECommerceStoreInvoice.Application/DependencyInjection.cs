@@ -12,6 +12,7 @@ namespace ECommerceStoreInvoice.Application
             services.AddScoped<IProductVersionService, ProductVersionService>();
             services.AddScoped<IInvoiceService, InvoiceService>();
             services.AddScoped<IShoppingCartService, ShoppingCartService>();
+            services.AddScoped<IOrderService, OrderService>();
 
             return services;
         }

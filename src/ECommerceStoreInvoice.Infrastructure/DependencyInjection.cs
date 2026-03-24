@@ -1,4 +1,5 @@
 ﻿using ECommerceStoreInvoice.Domain.AggregatesModel.InvoiceAggregate.Repositories;
+using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate.Repositories;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate.Repositories;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.Repositories;
 using ECommerceStoreInvoice.Infrastructure.Repositories;
@@ -16,7 +17,8 @@ namespace ECommerceStoreInvoice.Infrastructure
             services.AddScoped<IProductVersionRepository, ProductVersionRepository>();
             services.AddScoped<IInvoiceRepository, InvoiceRepository>();
             services.AddScoped<IShoppingCartRepository, ShoppingCartRepository>();
-
+            services.AddScoped<IOrderRepository, OrderRepository>();
+          
             return services;
         }
     }
