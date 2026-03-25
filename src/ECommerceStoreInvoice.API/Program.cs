@@ -3,8 +3,12 @@ using ECommerceStoreInvoice.API.Endpoints;
 using ECommerceStoreInvoice.Domain;
 using ECommerceStoreInvoice.Infrastructure;
 using ECommerceStoreInvoice.Application;
+using ECommerceStoreInvoice.Infrastructure.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.Configure<MongoDbSettings>(
+        builder.Configuration.GetSection("MongoDbSettings"));
 
 builder.Services.AddOpenApiDocument();
 builder.Services.AddHealthChecks();
@@ -26,7 +30,6 @@ app.UseHttpsRedirection();
 
 app.MapInvoicesEndpoints();
 app.MapProductVersionsEndpoints();
-app.MapShoppingCartsEndpoints();
 app.MapOrdersEndpoints();
 
 app.MapHealthChecks("/health");
