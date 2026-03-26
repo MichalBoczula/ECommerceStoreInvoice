@@ -16,12 +16,16 @@ namespace ECommerceStoreInvoice.Infrastructure
             this IServiceCollection services,
             IConfiguration configuration)
         {
+            services.Configure<MongoDbSettings>(
+                configuration.GetSection(MongoDbSettings.SectionName));
+
+            services.AddSingleton<MongoDbContext>();
+            services.AddScoped<MongoInitializer>();
+
             services.AddScoped<IProductVersionRepository, ProductVersionRepository>();
             services.AddScoped<IInvoiceRepository, InvoiceRepository>();
             services.AddScoped<IShoppingCartRepository, ShoppingCartRepository>();
             services.AddScoped<IOrderRepository, OrderRepository>();
-            services.AddScoped<DbContext>();
-            services.AddScoped<MongoInitializer>();
 
             return services;
         }

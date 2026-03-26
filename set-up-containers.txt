@@ -1,0 +1,12 @@
+--mongoDB
+-start
+docker compose -f mongo-compose.yml up -d
+
+-stop
+docker compose -f mongo-compose.yml down
+
+-logs
+docker compose -f mongo-compose.yml logs -f
+
+-check
+docker compose -f mongo-compose.yml ps

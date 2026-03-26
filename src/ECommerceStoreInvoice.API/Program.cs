@@ -1,14 +1,11 @@
 using ECommerceStoreInvoice.API.Configuration;
 using ECommerceStoreInvoice.API.Endpoints;
+using ECommerceStoreInvoice.Application;
 using ECommerceStoreInvoice.Domain;
 using ECommerceStoreInvoice.Infrastructure;
-using ECommerceStoreInvoice.Application;
 using ECommerceStoreInvoice.Infrastructure.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.Configure<MongoDbSettings>(
-        builder.Configuration.GetSection("MongoDbSettings"));
 
 builder.Services.AddOpenApiDocument();
 builder.Services.AddHealthChecks();
@@ -21,6 +18,8 @@ builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplication();
 
 var app = builder.Build();
+
+await app.Services.InitializeInfrastructureAsync();
 
 app.UseExceptionHandler();
 

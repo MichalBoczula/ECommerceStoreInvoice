@@ -1,6 +1,8 @@
 <Solution>
   <Folder Name="/Solution Items/">
     <File Path=".github/workflows/dotnet.yml" />
+    <File Path="mongo-compose.yml" />
+    <File Path="set-up-containers.txt" />
   </Folder>
   <Folder Name="/src/">
     <Project Path="src/ECommerceStoreInvoice.API/ECommerceStoreInvoice.API.csproj" />
