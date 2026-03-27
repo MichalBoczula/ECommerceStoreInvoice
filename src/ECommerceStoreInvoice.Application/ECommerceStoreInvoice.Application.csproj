@@ -14,8 +14,4 @@
     <ProjectReference Include="..\ECommerceStoreInvoice.Domain\ECommerceStoreInvoice.Domain.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Common\Dtos\" />
-  </ItemGroup>
-
 </Project>

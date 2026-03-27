@@ -1,5 +1,4 @@
 ﻿using ECommerceStoreInvoice.Domain.AggregatesModel.Common.ValueObjects;
-using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.ValueObjects;
 
 public sealed class ShoppingCart
@@ -30,53 +29,16 @@ public sealed class ShoppingCart
         UpdatedAt = updatedAt;
     }
 
-    public void AddItem(ProductVersion productVersion, int quantity)
-    {
-        var isProductExist = _lines.Any(x => x.ProductVersionId == productVersion.Id);
-
-        if (!isProductExist)
-        {
-            _lines.Add(new ShoppingCartLine(
-                productVersion.Id,
-                productVersion.Name,
-                productVersion.Brand,
-                productVersion.Price,
-                quantity));
-        }
-        else
-        {
-            var existing = _lines.First(x => x.ProductVersionId == productVersion.Id);
-            existing.ChangeQuantity(quantity);
-        }
-
-        UpdatedAt = DateTime.UtcNow;
-        CalculateTotal();
-    }
-
-    public void RemoveItem(Guid productVersionId, bool all)
-    {
-        var existing = _lines.FirstOrDefault(x => x.ProductVersionId == productVersionId);
-
-        if (existing is null)
-            return;
-
-        if (all)
-        {
-            _lines.Remove(existing);
-            UpdatedAt = DateTime.UtcNow;
-        }
-        else if (existing.Quantity > 1)
-        {
-            existing.ChangeQuantity(-1);
-            UpdatedAt = DateTime.UtcNow;
-        }
-
-        CalculateTotal();
-    }
-
     private void CalculateTotal()
     {
         Total = new(_lines.Sum(x => x.Total.Amount), _lines.FirstOrDefault()?.Total.Currency ?? "USD");
+    }
+
+    public void Clear()
+    {
+        _lines.Clear();
+        UpdatedAt = DateTime.UtcNow;
+        CalculateTotal();
     }
 
     public static ShoppingCart Rehydrate(

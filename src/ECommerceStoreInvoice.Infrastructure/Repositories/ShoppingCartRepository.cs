@@ -14,14 +14,14 @@ namespace ECommerceStoreInvoice.Infrastructure.Repositories
             _context = context;
         }
 
-        public async Task<ShoppingCart?> GetShoppingCartById(Guid shoppingCartId)
+        public async Task<ShoppingCart?> GetShoppingCartByClientId(Guid clientId)
         {
             var shoppingCartDocument = await _context.ShoppingCarts
-                .Find(x => x.Id == shoppingCartId)
+                .Find(x => x.ClientId == clientId)
                 .FirstOrDefaultAsync();
 
             if (shoppingCartDocument is null)
-                throw new InvalidOperationException($"Shopping cart with id '{shoppingCartId}' was not found.");
+                return null;
 
             return ShoppingCartMapping.MapToDomain(shoppingCartDocument);
         }
@@ -47,14 +47,6 @@ namespace ECommerceStoreInvoice.Infrastructure.Repositories
                 throw new InvalidOperationException($"Shopping cart with id '{shoppingCart.Id}' was not found.");
 
             return shoppingCart;
-        }
-
-        public async Task DeleteShoppingCart(Guid shoppingCartId)
-        {
-            var result = await _context.ShoppingCarts.DeleteOneAsync(x => x.Id == shoppingCartId);
-
-            if (result.DeletedCount == 0)
-                throw new InvalidOperationException($"Shopping cart with id '{shoppingCartId}' was not found.");
         }
     }
 }

@@ -30,6 +30,7 @@ app.UseHttpsRedirection();
 app.MapInvoicesEndpoints();
 app.MapProductVersionsEndpoints();
 app.MapOrdersEndpoints();
+app.MapShoppingCartEndpoints();
 
 app.MapHealthChecks("/health");
 
