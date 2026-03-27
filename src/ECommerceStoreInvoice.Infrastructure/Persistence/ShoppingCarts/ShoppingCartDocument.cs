@@ -2,13 +2,13 @@
 
 namespace ECommerceStoreInvoice.Infrastructure.Persistence.ShoppingCarts
 {
-    public sealed class ShoppingCartDocument
+    internal sealed record ShoppingCartDocument
     {
         [BsonId]
-        public Guid Id { get; set; }
-
-        public Guid ClientId { get; set; }
-
-        public List<ShoppingCartLineDocument> Lines { get; set; } = [];
+        public required Guid Id { get; init; }
+        public required Guid ClientId { get; init; }
+        public required DateTime CreatedAt { get; init; }
+        public required DateTime UpdatedAt { get; init; }
+        public required IReadOnlyCollection<ShoppingCartLineDocument> Lines { get; init; }
     }
 }

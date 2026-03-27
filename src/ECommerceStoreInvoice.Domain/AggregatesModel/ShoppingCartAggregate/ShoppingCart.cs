@@ -2,73 +2,95 @@
 using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.ValueObjects;
 
-namespace ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate
+public sealed class ShoppingCart
 {
-    public sealed class ShoppingCart
+    public Guid Id { get; init; }
+    public Guid ClientId { get; init; }
+    public DateTime CreatedAt { get; init; }
+    public DateTime UpdatedAt { get; private set; }
+    public IReadOnlyCollection<ShoppingCartLine> Lines => _lines.AsReadOnly();
+    public Money Total { get; private set; }
+
+    private readonly List<ShoppingCartLine> _lines = [];
+
+    public ShoppingCart(Guid clientId)
     {
-        public Guid Id { get; init; }
-        public Guid ClientId { get; init; }
-        public IReadOnlyCollection<ShoppingCartLine> Lines => _lines.AsReadOnly();
-        public DateTime CreatedAt { get; init; }
-        public DateTime UpdatedAt { get; private set; }
-        public Money Total { get; private set; }
+        Id = Guid.NewGuid();
+        ClientId = clientId;
+        CreatedAt = DateTime.UtcNow;
+        UpdatedAt = DateTime.UtcNow;
+        CalculateTotal();
+    }
 
-        private readonly List<ShoppingCartLine> _lines = [];
+    private ShoppingCart(Guid id, Guid clientId, DateTime createdAt, DateTime updatedAt)
+    {
+        Id = id;
+        ClientId = clientId;
+        CreatedAt = createdAt;
+        UpdatedAt = updatedAt;
+    }
 
-        public ShoppingCart(Guid clientId)
+    public void AddItem(ProductVersion productVersion, int quantity)
+    {
+        var isProductExist = _lines.Any(x => x.ProductVersionId == productVersion.Id);
+
+        if (!isProductExist)
         {
-            Id = Guid.NewGuid();
-            ClientId = clientId;
-            CreatedAt = DateTime.UtcNow;
+            _lines.Add(new ShoppingCartLine(
+                productVersion.Id,
+                productVersion.Name,
+                productVersion.Brand,
+                productVersion.Price,
+                quantity));
+        }
+        else
+        {
+            var existing = _lines.First(x => x.ProductVersionId == productVersion.Id);
+            existing.ChangeQuantity(quantity);
+        }
+
+        UpdatedAt = DateTime.UtcNow;
+        CalculateTotal();
+    }
+
+    public void RemoveItem(Guid productVersionId, bool all)
+    {
+        var existing = _lines.FirstOrDefault(x => x.ProductVersionId == productVersionId);
+
+        if (existing is null)
+            return;
+
+        if (all)
+        {
+            _lines.Remove(existing);
             UpdatedAt = DateTime.UtcNow;
-            CalculateTotal();
         }
-
-        public void AddItem(ProductVersion productVersion, int quantity)
+        else if (existing.Quantity > 1)
         {
-            var isProductExist = _lines.Any(x => x.ProductVersionId == productVersion.Id);
-
-            if (!isProductExist)
-            {
-                _lines.Add(new ShoppingCartLine(
-                    productVersion.Id,
-                    productVersion.Name,
-                    productVersion.Brand,
-                    productVersion.Price,
-                    quantity));
-            }
-            else
-            {
-                var existing = _lines.First(x => x.ProductVersionId == productVersion.Id);
-                existing.ChangeQuantity(quantity);
-            }
-
+            existing.ChangeQuantity(-1);
             UpdatedAt = DateTime.UtcNow;
         }
 
-        public void RemoveItem(Guid productVersionId, bool all)
-        {
-            var existing = _lines.FirstOrDefault(x => x.ProductVersionId == productVersionId);
-            
-            if (existing is null) return;
+        CalculateTotal();
+    }
 
-            if (all)
-            {
-                _lines.Remove(existing);
-                UpdatedAt = DateTime.UtcNow;
-            }
-            else if (existing.Quantity > 1)
-            {
-                existing.ChangeQuantity(-1);
-                UpdatedAt = DateTime.UtcNow;
-            }
+    private void CalculateTotal()
+    {
+        Total = new(_lines.Sum(x => x.Total.Amount), _lines.FirstOrDefault()?.Total.Currency ?? "USD");
+    }
 
-            CalculateTotal();
-        }
+    public static ShoppingCart Rehydrate(
+        Guid id,
+        Guid clientId,
+        DateTime createdAt,
+        DateTime updatedAt,
+        IEnumerable<ShoppingCartLine> lines)
+    {
+        var shoppingCart = new ShoppingCart(id, clientId, createdAt, updatedAt);
 
-        public void CalculateTotal()
-        {
-            Total = new(_lines.Sum(x => x.Total.Amount), _lines.FirstOrDefault()?.Total.Currency ?? "USD");
-        }
+        shoppingCart._lines.AddRange(lines);
+        shoppingCart.CalculateTotal();
+
+        return shoppingCart;
     }
 }

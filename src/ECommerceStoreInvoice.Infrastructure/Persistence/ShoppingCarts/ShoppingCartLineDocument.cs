@@ -1,21 +1,14 @@
 ﻿namespace ECommerceStoreInvoice.Infrastructure.Persistence.ShoppingCarts
 {
-    public sealed class ShoppingCartLineDocument
+    internal sealed record ShoppingCartLineDocument
     {
-        public Guid ProductVersionId { get; set; }
-
-        public string Name { get; set; } = string.Empty;
-
-        public string Brand { get; set; } = string.Empty;
-
-        public decimal UnitPriceAmount { get; set; }
-
-        public string UnitPriceCurrency { get; set; } = string.Empty;
-
-        public int Quantity { get; set; }
-
-        public decimal TotalAmount { get; set; }
-
-        public string TotalCurrency { get; set; } = string.Empty;
+        public required Guid ProductVersionId { get; init; }
+        public required string Name { get; init; }
+        public required string Brand { get; init; }
+        public required decimal UnitPriceAmount { get; init; }
+        public required string UnitPriceCurrency { get; init; }
+        public required int Quantity { get; init; }
+        public required decimal TotalAmount { get; init; }
+        public required string TotalCurrency { get; init; }
     }
 }
