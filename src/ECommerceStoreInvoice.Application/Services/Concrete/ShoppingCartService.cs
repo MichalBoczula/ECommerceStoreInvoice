@@ -29,9 +29,14 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete
             return MappingConfig.MapToResponse(createdShoppingCart);
         }
 
-        public async Task<ShoppingCartResponseDto> UpdateShoppingCart(UpdateShoppingCartRequestDto request)
+        public async Task<ShoppingCartResponseDto> UpdateShoppingCart(Guid clientId, UpdateShoppingCartRequestDto request)
         {
-            var shoppingCart = MappingConfig.MapToDomain(request);
+            var shoppingCart = await shoppingCartRepository.GetShoppingCartByClientId(clientId)
+                ?? throw new InvalidOperationException($"Shopping cart for client '{clientId}' was not found.");
+
+            var lines = MappingConfig.MapToDomain(request.Lines);
+
+            shoppingCart.ReplaceLines(lines);
 
             var updatedShoppingCart = await shoppingCartRepository.UpdateShoppingCart(shoppingCart);
 

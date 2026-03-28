@@ -7,6 +7,6 @@ namespace ECommerceStoreInvoice.Application.Services.Abstract
     {
         Task<ShoppingCartResponseDto?> GetShoppingCartByClientId(Guid clientId);
         Task<ShoppingCartResponseDto> CreateShoppingCart(Guid clientId);
-        Task<ShoppingCartResponseDto> UpdateShoppingCart(UpdateShoppingCartRequestDto request);
+        Task<ShoppingCartResponseDto> UpdateShoppingCart(Guid clientId, UpdateShoppingCartRequestDto request);
     }
 }

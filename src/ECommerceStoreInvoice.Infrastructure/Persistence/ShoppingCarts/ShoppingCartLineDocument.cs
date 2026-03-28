@@ -2,7 +2,6 @@
 {
     internal sealed record ShoppingCartLineDocument
     {
-        public required Guid ProductVersionId { get; init; }
         public required string Name { get; init; }
         public required string Brand { get; init; }
         public required decimal UnitPriceAmount { get; init; }

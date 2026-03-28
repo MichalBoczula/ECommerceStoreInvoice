@@ -58,14 +58,17 @@ namespace ECommerceStoreInvoice.API.Endpoints
             .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest)
             .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
 
-            group.MapPut("/", async (UpdateShoppingCartRequestDto request, IShoppingCartService shoppingCartService) =>
+            group.MapPut("/{clientId:guid}", async (
+                Guid clientId,
+                UpdateShoppingCartRequestDto request,
+                IShoppingCartService shoppingCartService) =>
             {
-                var shoppingCart = await shoppingCartService.UpdateShoppingCart(request);
+                var shoppingCart = await shoppingCartService.UpdateShoppingCart(clientId, request);
 
                 return Results.Ok(shoppingCart);
             })
             .WithSummary("Update shopping cart.")
-            .WithDescription("Updates the shopping cart state including lines, quantities and total based on the provided request payload.")
+            .WithDescription("Updates shopping cart lines for the provided client identifier.")
             .WithName("UpdateShoppingCart")
             .Produces<ShoppingCartResponseDto>(StatusCodes.Status200OK)
             .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest)

@@ -7,16 +7,10 @@ namespace ECommerceStoreInvoice.Application.Mapping
 {
     internal static class MappingConfig
     {
-        public static ShoppingCart MapToDomain(UpdateShoppingCartRequestDto request)
+        public static IReadOnlyCollection<ShoppingCartLine> MapToDomain(
+            IReadOnlyCollection<ShoppingCartLineRequestDto> requestLines)
         {
-            var lines = request.Lines.Select(MapToDomain).ToList();
-
-            return ShoppingCart.Rehydrate(
-                request.Id,
-                request.ClientId,
-                request.CreatedAt,
-                request.UpdatedAt,
-                lines);
+            return requestLines.Select(MapToDomain).ToList();
         }
 
         public static ShoppingCartResponseDto MapToResponse(ShoppingCart shoppingCart)
@@ -36,7 +30,6 @@ namespace ECommerceStoreInvoice.Application.Mapping
         private static ShoppingCartLine MapToDomain(ShoppingCartLineRequestDto request)
         {
             return new ShoppingCartLine(
-                request.ProductVersionId,
                 request.Name,
                 request.Brand,
                 new Money(request.UnitPriceAmount, request.UnitPriceCurrency),
@@ -47,7 +40,6 @@ namespace ECommerceStoreInvoice.Application.Mapping
         {
             return new ShoppingCartLineResponseDto
             {
-                ProductVersionId = shoppingCartLine.ProductVersionId,
                 Name = shoppingCartLine.Name,
                 Brand = shoppingCartLine.Brand,
                 UnitPriceAmount = shoppingCartLine.UnitPrice.Amount,

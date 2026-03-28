@@ -41,6 +41,14 @@ public sealed class ShoppingCart
         CalculateTotal();
     }
 
+    public void ReplaceLines(IEnumerable<ShoppingCartLine> lines)
+    {
+        _lines.Clear();
+        _lines.AddRange(lines);
+        UpdatedAt = DateTime.UtcNow;
+        CalculateTotal();
+    }
+
     public static ShoppingCart Rehydrate(
         Guid id,
         Guid clientId,
