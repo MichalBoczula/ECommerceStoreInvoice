@@ -1,4 +1,7 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.ValueObjects;
+using ECommerceStoreInvoice.Domain.Validation.Abstract;
+using ECommerceStoreInvoice.Domain.Validation.Concrete.Policies;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ECommerceStoreInvoice.Domain
 {
@@ -7,8 +10,10 @@ namespace ECommerceStoreInvoice.Domain
         public static IServiceCollection AddDomain(
             this IServiceCollection services)
         {
-            //services.AddScoped<IValidationPolicy<T>, T>();
-            //services.AddScoped<IValidationPolicyDescriptorProvider, T>();
+            services.AddScoped<IValidationPolicy<IReadOnlyCollection<ShoppingCartLine>>, ShoppingCartLineValidationPolicy>();
+            services.AddScoped<IValidationPolicyDescriptorProvider, ShoppingCartLineValidationPolicy>();
+            services.AddScoped<IValidationPolicy<Guid>, GuidValidationPolicy>();
+            services.AddScoped<IValidationPolicyDescriptorProvider, GuidValidationPolicy>();
             return services;
         }
     }
