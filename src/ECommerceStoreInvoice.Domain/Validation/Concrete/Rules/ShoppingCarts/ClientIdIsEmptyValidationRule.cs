@@ -3,13 +3,13 @@ using ECommerceStoreInvoice.Domain.Validation.Common;
 
 namespace ECommerceStoreInvoice.Domain.Validation.Concrete.Rules.ShoppingCarts
 {
-    internal class ClientIdIsEmptyValidationRule : IValidationRule<Guid>
+    internal sealed class ClientIdIsEmptyValidationRule : IValidationRule<Guid>
     {
-        private readonly ValidationError emptyClientId;
+        private readonly ValidationError clientIdCannotBeEmpty;
 
         public ClientIdIsEmptyValidationRule()
         {
-            emptyClientId = new ValidationError
+            clientIdCannotBeEmpty = new ValidationError
             {
                 Message = "ClientId cannot be empty Guid.",
                 Name = nameof(ClientIdIsEmptyValidationRule),
@@ -20,14 +20,12 @@ namespace ECommerceStoreInvoice.Domain.Validation.Concrete.Rules.ShoppingCarts
         public async Task IsValid(Guid entity, ValidationResult validationResults)
         {
             if (entity == Guid.Empty)
-            {
-                validationResults.AddValidationError(emptyClientId);
-            }
+                validationResults.AddValidationError(clientIdCannotBeEmpty);
         }
 
         public List<ValidationError> Describe()
         {
-            return [emptyClientId];
+            return [clientIdCannotBeEmpty];
         }
     }
 }
