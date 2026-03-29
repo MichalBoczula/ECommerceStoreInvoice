@@ -30,6 +30,10 @@ namespace ECommerceStoreInvoice.API.Configuration
                     JsonDeserializationExceptionHandlerExtension.HandleJsonDeserializationException(
                         context, jsonException, cancellationToken),
 
+                ResourceAlreadyExistsException resourceAlreadyExistsException =>
+                    ResourceAlreadyExistsExceptionHandlerExtension.HandleResourceAlreadyExistsException(
+                        context, resourceAlreadyExistsException, cancellationToken),
+
                 _ => DefaultExceptionHandlerExtension.HandleDefaultException(context, cancellationToken)
             });
 
