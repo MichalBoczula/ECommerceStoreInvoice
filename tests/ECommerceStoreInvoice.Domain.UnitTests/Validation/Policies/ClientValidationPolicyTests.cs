@@ -1,5 +1,4 @@
-﻿using ECommerceStoreInvoice.Domain.Validation.Common;
-using ECommerceStoreInvoice.Domain.Validation.Concrete.Rules.ShoppingCarts;
+﻿using ECommerceStoreInvoice.Domain.Validation.Concrete.Policies;
 using Shouldly;
 
 namespace ECommerceStoreInvoice.Domain.UnitTests.Validation.Policies
@@ -7,48 +6,53 @@ namespace ECommerceStoreInvoice.Domain.UnitTests.Validation.Policies
     public class ClientValidationPolicyTests
     {
         [Fact]
-        public async Task Validate_GuidIsEmpty_ShouldReturnError()
+        public async Task Validate_ClientIdIsEmpty_ShouldReturnValidationError()
         {
-            //Arrange
-            var policy = new ClientIdIsEmptyValidationRule();
-            var validationResult = new ValidationResult();
+            // Arrange
+            var policy = new ClientValidationPolicy();
 
-            //Act
-            await policy.IsValid(Guid.Empty, validationResult);
+            // Act
+            var result = await policy.Validate(Guid.Empty);
 
-            //Assert
-            validationResult.GetValidationErrors().Count.ShouldBe(1);
-            validationResult.GetValidationErrors().ShouldContain(e => e.Name == "ClientIdIsEmptyValidationRule");
+            // Assert
+            result.GetValidationErrors().Count.ShouldBe(1);
+            result.GetValidationErrors().ShouldContain(e => e.Name == "ClientIdIsEmptyValidationRule");
+            result.GetValidationErrors().ShouldContain(e => e.Message == "ClientId cannot be empty Guid.");
+            result.GetValidationErrors().ShouldContain(e => e.Entity == "ShoppingCart");
         }
 
         [Fact]
-        public async Task Validate_GuidIsNotEmpty_ShouldBeValid()
+        public async Task Validate_ClientIdIsNotEmpty_ShouldBeValid()
         {
-            //Arrange
-            var policy = new ClientIdIsEmptyValidationRule();
-            var validationResult = new ValidationResult();
+            // Arrange
+            var policy = new ClientValidationPolicy();
 
-            //Act
-            await policy.IsValid(Guid.NewGuid(), validationResult);
+            // Act
+            var result = await policy.Validate(Guid.NewGuid());
 
-            //Assert
-            validationResult.GetValidationErrors().Count.ShouldBe(0);
+            // Assert
+            result.IsValid.ShouldBeTrue();
+            result.GetValidationErrors().Count.ShouldBe(0);
         }
 
         [Fact]
-        public void Describe_ShouldReturnDescriptionForAllRules()
+        public void Describe_ShouldReturnPolicyWithClientRuleDescriptor()
         {
-            //Arrange
-            var policy = new ClientIdIsEmptyValidationRule();
+            // Arrange
+            var policy = new ClientValidationPolicy();
 
-            //Act
-            var result = policy.Describe();
+            // Act
+            var descriptor = policy.Describe();
 
-            //Assert
-            result.Count.ShouldBe(1);
-            result[0].Name.ShouldBe("ClientIdIsEmptyValidationRule");
-            result[0].Message.ShouldBe("ClientId cannot be empty Guid.");
-            result[0].Entity.ShouldBe("ShoppingCart");
+            // Assert
+            descriptor.PolicyName.ShouldBe("ClientValidationPolicy");
+            descriptor.Rules.Count.ShouldBe(1);
+
+            descriptor.Rules[0].RuleName.ShouldBe("ClientIdIsEmptyValidationRule");
+            descriptor.Rules[0].Rules.Count.ShouldBe(1);
+            descriptor.Rules[0].Rules[0].Message.ShouldBe("ClientId cannot be empty Guid.");
+            descriptor.Rules[0].Rules[0].Name.ShouldBe("ClientIdIsEmptyValidationRule");
+            descriptor.Rules[0].Rules[0].Entity.ShouldBe("ShoppingCart");
         }
     }
 }
