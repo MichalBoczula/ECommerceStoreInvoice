@@ -4,13 +4,13 @@ using ECommerceStoreInvoice.Domain.Validation.Concrete.Rules.ShoppingCarts;
 
 namespace ECommerceStoreInvoice.Domain.Validation.Concrete.Policies
 {
-    internal sealed class GuidValidationPolicy : IValidationPolicy<Guid>, IValidationPolicyDescriptorProvider
+    internal sealed class ClientValidationPolicy : IValidationPolicy<Guid>, IValidationPolicyDescriptorProvider
     {
         private readonly List<IValidationRule<Guid>> _rules = [];
 
-        public GuidValidationPolicy()
+        public ClientValidationPolicy()
         {
-            _rules.Add(new GuidIsEmptyValidationRule());
+            _rules.Add(new ClientIdIsEmptyValidationRule());
         }
 
         public async Task<ValidationResult> Validate(Guid entity)
@@ -35,7 +35,7 @@ namespace ECommerceStoreInvoice.Domain.Validation.Concrete.Policies
 
             return new ValidationPolicyDescriptor
             {
-                PolicyName = nameof(GuidValidationPolicy),
+                PolicyName = nameof(ClientValidationPolicy),
                 Rules = allErrors
             };
         }

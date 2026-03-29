@@ -12,8 +12,8 @@ namespace ECommerceStoreInvoice.Domain
         {
             services.AddScoped<IValidationPolicy<IReadOnlyCollection<ShoppingCartLine>>, ShoppingCartLineValidationPolicy>();
             services.AddScoped<IValidationPolicyDescriptorProvider, ShoppingCartLineValidationPolicy>();
-            services.AddScoped<IValidationPolicy<Guid>, GuidValidationPolicy>();
-            services.AddScoped<IValidationPolicyDescriptorProvider, GuidValidationPolicy>();
+            services.AddScoped<IValidationPolicy<Guid>, ClientValidationPolicy>();
+            services.AddScoped<IValidationPolicyDescriptorProvider, ClientValidationPolicy>();
             return services;
         }
     }

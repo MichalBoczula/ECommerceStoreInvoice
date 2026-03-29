@@ -3,16 +3,16 @@ using ECommerceStoreInvoice.Domain.Validation.Common;
 
 namespace ECommerceStoreInvoice.Domain.Validation.Concrete.Rules.ShoppingCarts
 {
-    internal class GuidIsEmptyValidationRule : IValidationRule<Guid>
+    internal class ClientIdIsEmptyValidationRule : IValidationRule<Guid>
     {
         private readonly ValidationError emptyClientId;
 
-        public GuidIsEmptyValidationRule()
+        public ClientIdIsEmptyValidationRule()
         {
             emptyClientId = new ValidationError
             {
                 Message = "ClientId cannot be empty Guid.",
-                Name = nameof(GuidIsEmptyValidationRule),
+                Name = nameof(ClientIdIsEmptyValidationRule),
                 Entity = nameof(ShoppingCart)
             };
         }
