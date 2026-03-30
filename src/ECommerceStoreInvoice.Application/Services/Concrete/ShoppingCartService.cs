@@ -1,5 +1,7 @@
-﻿using ECommerceStoreInvoice.Application.Common.RequestsDto.ShoppingCarts;
+﻿using ECommerceStoreInvoice.Application.Common.FlowDescriptors;
+using ECommerceStoreInvoice.Application.Common.RequestsDto.ShoppingCarts;
 using ECommerceStoreInvoice.Application.Common.ResponsesDto.ShoppingCarts;
+using ECommerceStoreInvoice.Application.Flows.ShoppingCarts.Descriptors;
 using ECommerceStoreInvoice.Application.Mapping;
 using ECommerceStoreInvoice.Application.Services.Abstract;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.Repositories;
@@ -17,19 +19,15 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete
     {
         public async Task<ShoppingCartResponseDto?> GetShoppingCartByClientId(Guid clientId)
         {
-            var validationResult = await _guidValidationPolicy.Validate(clientId);
+            var descriptor = new GetShoppingCartByClientIdDescriptor();
 
-            if (!validationResult.IsValid)
-            {
-                throw new ValidationException(validationResult);
-            }
+            var validationResult = await descriptor.ValidateClientId(clientId, _guidValidationPolicy);
+            descriptor.ThrowValidationExceptionIfClientIdInvalid(validationResult);
 
-            var shoppingCart = await shoppingCartRepository.GetShoppingCartByClientId(clientId);
+            var shoppingCart = await descriptor.LoadShoppingCart(clientId, shoppingCartRepository);
+            descriptor.ThrowNotFoundExceptionIfShoppingCartMissing(clientId, shoppingCart);
 
-            if (shoppingCart is null)
-                throw new ResourceNotFoundException(nameof(GetShoppingCartByClientId), clientId, nameof(ShoppingCart));
-
-            return MappingConfig.MapToResponse(shoppingCart);
+            return descriptor.MapToResponse(shoppingCart!);
         }
 
         public async Task<ShoppingCartResponseDto> CreateShoppingCart(Guid clientId)
@@ -53,33 +51,36 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete
             return MappingConfig.MapToResponse(createdShoppingCart);
         }
 
+        public FlowDescriptor GetShoppingCartByClientIdDescriptor()
+        {
+            var descriptor = new GetShoppingCartByClientIdDescriptor();
+            return descriptor.Describe();
+        }
+
+        public FlowDescriptor GetUpdateShoppingCartDescriptor()
+        {
+            var descriptor = new UpdateShoppingCartDescriptor();
+            return descriptor.Describe();
+        }
+
         public async Task<ShoppingCartResponseDto> UpdateShoppingCart(Guid clientId, UpdateShoppingCartRequestDto request)
         {
-            var validationResult = await _guidValidationPolicy.Validate(clientId);
+            var descriptor = new UpdateShoppingCartDescriptor();
 
-            if (!validationResult.IsValid)
-            {
-                throw new ValidationException(validationResult);
-            }
+            var validationResult = await descriptor.ValidateClientId(clientId, _guidValidationPolicy);
+            descriptor.ThrowValidationExceptionIfClientIdInvalid(validationResult);
 
-            var shoppingCart = await shoppingCartRepository.GetShoppingCartByClientId(clientId);
+            var shoppingCart = await descriptor.LoadShoppingCart(clientId, shoppingCartRepository);
+            descriptor.ThrowNotFoundExceptionIfShoppingCartMissing(clientId, shoppingCart);
 
-            if (shoppingCart is null)
-                throw new ResourceNotFoundException(nameof(GetShoppingCartByClientId), clientId, nameof(ShoppingCart));
+            var lines = descriptor.MapRequestLines(request);
+            descriptor.ReplaceShoppingCartLines(shoppingCart!, lines);
 
-            var lines = MappingConfig.MapToDomain(request.Lines);
+            validationResult = await descriptor.ValidateLines(lines, _shoppingCartLineValidationPolicy);
+            descriptor.ThrowValidationExceptionIfLinesInvalid(validationResult);
 
-            shoppingCart.ReplaceLines(lines);
-
-            validationResult = await _shoppingCartLineValidationPolicy.Validate(lines);
-
-            if (!validationResult.IsValid)
-            {
-                throw new ValidationException(validationResult);
-            }
-            var updatedShoppingCart = await shoppingCartRepository.UpdateShoppingCart(shoppingCart);
-
-            return MappingConfig.MapToResponse(updatedShoppingCart);
+            var updatedShoppingCart = await descriptor.SaveShoppingCart(shoppingCart!, shoppingCartRepository);
+            return descriptor.MapToResponse(updatedShoppingCart);
         }
     }
 }

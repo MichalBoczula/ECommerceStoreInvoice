@@ -41,6 +41,9 @@ namespace ECommerceStoreInvoice.API.Endpoints
             .Produces<ShoppingCartResponseDto>(StatusCodes.Status200OK)
             .Produces<NotFoundProblemDetails>(StatusCodes.Status404NotFound)
             .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
+
+
+
         }
 
         private static void MapShoppingCartCommands(IEndpointRouteBuilder group)
