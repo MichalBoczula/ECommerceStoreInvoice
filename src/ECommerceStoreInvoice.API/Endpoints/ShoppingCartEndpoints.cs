@@ -1,7 +1,7 @@
 ﻿using ECommerceStoreInvoice.API.Configuration.Common;
 using ECommerceStoreInvoice.Application.Common.RequestsDto.ShoppingCarts;
 using ECommerceStoreInvoice.Application.Common.ResponsesDto.ShoppingCarts;
-using ECommerceStoreInvoice.Application.Services.Abstract;
+using ECommerceStoreInvoice.Application.Services.Abstract.ShoppingCarts;
 using ECommerceStoreInvoice.Domain.Validation.Common;
 using Microsoft.AspNetCore.Mvc;
 
@@ -41,9 +41,6 @@ namespace ECommerceStoreInvoice.API.Endpoints
             .Produces<ShoppingCartResponseDto>(StatusCodes.Status200OK)
             .Produces<NotFoundProblemDetails>(StatusCodes.Status404NotFound)
             .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
-
-
-
         }
 
         private static void MapShoppingCartCommands(IEndpointRouteBuilder group)

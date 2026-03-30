@@ -7,19 +7,19 @@ using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.ValueOb
 using ECommerceStoreInvoice.Domain.Validation.Abstract;
 using ECommerceStoreInvoice.Domain.Validation.Common;
 
-namespace ECommerceStoreInvoice.Application.Flows.ShoppingCarts.Descriptors
+namespace ECommerceStoreInvoice.Application.Descriptors.ShoppingCarts
 {
     internal sealed record UpdateShoppingCart;
 
     internal sealed class UpdateShoppingCartDescriptor : FlowDescriberBase<UpdateShoppingCart>
     {
-        [FlowStep(order: 1, bpmnId: "Task_UpdateShoppingCart_ValidateClientId")]
+        [FlowStep(order: 1, bpmnId: "ValidateClientId")]
         public async Task<ValidationResult> ValidateClientId(Guid clientId, IValidationPolicy<Guid> guidValidationPolicy)
         {
             return await guidValidationPolicy.Validate(clientId);
         }
 
-        [FlowStep(order: 2, bpmnId: "Gateway_UpdateShoppingCart_ClientIdValid")]
+        [FlowStep(order: 2, bpmnId: "IsClientIdValid")]
         public void ThrowValidationExceptionIfClientIdInvalid(ValidationResult validationResult)
         {
             if (!validationResult.IsValid)
@@ -28,13 +28,13 @@ namespace ECommerceStoreInvoice.Application.Flows.ShoppingCarts.Descriptors
             }
         }
 
-        [FlowStep(order: 3, bpmnId: "Task_UpdateShoppingCart_LoadExistingShoppingCart")]
+        [FlowStep(order: 3, bpmnId: "LoadExistingShoppingCart")]
         public async Task<ShoppingCart?> LoadShoppingCart(Guid clientId, IShoppingCartRepository shoppingCartRepository)
         {
             return await shoppingCartRepository.GetShoppingCartByClientId(clientId);
         }
 
-        [FlowStep(order: 4, bpmnId: "Gateway_UpdateShoppingCart_ShoppingCartExists")]
+        [FlowStep(order: 4, bpmnId: "IsShoppingCartExists")]
         public void ThrowNotFoundExceptionIfShoppingCartMissing(Guid clientId, ShoppingCart? shoppingCart)
         {
             if (shoppingCart is null)
@@ -43,19 +43,19 @@ namespace ECommerceStoreInvoice.Application.Flows.ShoppingCarts.Descriptors
             }
         }
 
-        [FlowStep(order: 5, bpmnId: "Task_UpdateShoppingCart_MapRequestLines")]
+        [FlowStep(order: 5, bpmnId: "MapShoppingCartLinesRequest")]
         public IReadOnlyCollection<ShoppingCartLine> MapRequestLines(UpdateShoppingCartRequestDto request)
         {
             return MappingConfig.MapToDomain(request.Lines);
         }
 
-        [FlowStep(order: 6, bpmnId: "Task_UpdateShoppingCart_AssignLines")]
+        [FlowStep(order: 6, bpmnId: "AssignShoppingCartLines")]
         public void ReplaceShoppingCartLines(ShoppingCart shoppingCart, IReadOnlyCollection<ShoppingCartLine> lines)
         {
             shoppingCart.ReplaceLines(lines);
         }
 
-        [FlowStep(order: 7, bpmnId: "Task_UpdateShoppingCart_ValidateLines")]
+        [FlowStep(order: 7, bpmnId: "ValidateShoppingCartLines")]
         public async Task<ValidationResult> ValidateLines(
             IReadOnlyCollection<ShoppingCartLine> lines,
             IValidationPolicy<IReadOnlyCollection<ShoppingCartLine>> shoppingCartLineValidationPolicy)
@@ -63,7 +63,7 @@ namespace ECommerceStoreInvoice.Application.Flows.ShoppingCarts.Descriptors
             return await shoppingCartLineValidationPolicy.Validate(lines);
         }
 
-        [FlowStep(order: 8, bpmnId: "Gateway_UpdateShoppingCart_LinesValid")]
+        [FlowStep(order: 8, bpmnId: "IsShoppingCartLinesValid")]
         public void ThrowValidationExceptionIfLinesInvalid(ValidationResult validationResult)
         {
             if (!validationResult.IsValid)
@@ -72,13 +72,13 @@ namespace ECommerceStoreInvoice.Application.Flows.ShoppingCarts.Descriptors
             }
         }
 
-        [FlowStep(order: 9, bpmnId: "Task_UpdateShoppingCart_Save")]
+        [FlowStep(order: 9, bpmnId: "SaveShoppingCart")]
         public async Task<ShoppingCart> SaveShoppingCart(ShoppingCart shoppingCart, IShoppingCartRepository shoppingCartRepository)
         {
             return await shoppingCartRepository.UpdateShoppingCart(shoppingCart);
         }
 
-        [FlowStep(order: 10, bpmnId: "Task_UpdateShoppingCart_MapResponse")]
+        [FlowStep(order: 10, bpmnId: "MapShoppingCartResponse")]
         public ShoppingCartResponseDto MapToResponse(ShoppingCart shoppingCart)
         {
             return MappingConfig.MapToResponse(shoppingCart);

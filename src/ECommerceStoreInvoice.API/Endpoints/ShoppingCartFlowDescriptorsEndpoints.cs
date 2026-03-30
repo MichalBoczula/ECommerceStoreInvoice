@@ -1,6 +1,6 @@
 using ECommerceStoreInvoice.Application.Common.FlowDescriptors;
 using ECommerceStoreInvoice.Application.Common.ResponsesDto.ShoppingCarts;
-using ECommerceStoreInvoice.Application.Services.Abstract;
+using ECommerceStoreInvoice.Application.Services.Abstract.ShoppingCarts;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ECommerceStoreInvoice.API.Endpoints
@@ -11,7 +11,7 @@ namespace ECommerceStoreInvoice.API.Endpoints
         {
             var group = app.MapGroup("/shopping-carts/flow-descriptors").WithTags("Shopping Cart Flows");
 
-            group.MapGet("/", (IShoppingCartService shoppingCartService) =>
+            group.MapGet("/", (IShoppingCartDescriptorService descriptor) =>
             {
                 var response = new ShoppingCartFlowsResponseDto
                 {
@@ -19,11 +19,11 @@ namespace ECommerceStoreInvoice.API.Endpoints
                     [
                         new Dictionary<string, FlowDescriptor>
                         {
-                            ["GetShoppingCartByClientIdDescriptor"] = shoppingCartService.GetShoppingCartByClientIdDescriptor()
+                            [nameof(descriptor.GetShoppingCartByClientIdDescriptor)] = descriptor.GetShoppingCartByClientIdDescriptor()
                         },
                         new Dictionary<string, FlowDescriptor>
                         {
-                            ["UpdateShoppingCartDescriptor"] = shoppingCartService.GetUpdateShoppingCartDescriptor()
+                            [nameof(descriptor.GetUpdateShoppingCartDescriptor)] = descriptor.GetUpdateShoppingCartDescriptor()
                         }
                     ]
                 };
