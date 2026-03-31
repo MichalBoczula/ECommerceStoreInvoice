@@ -1,7 +1,7 @@
 ﻿using ECommerceStoreInvoice.API.Configuration.Common;
-using ECommerceStoreInvoice.Application.Common.ResponsesDto;
+using ECommerceStoreInvoice.Application.Common.RequestsDto.Orders;
+using ECommerceStoreInvoice.Application.Common.ResponsesDto.Orders;
 using ECommerceStoreInvoice.Application.Services.Abstract;
-using ECommerceStoreInvoice.Domain.Validation.Common;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ECommerceStoreInvoice.API.Endpoints
@@ -20,28 +20,32 @@ namespace ECommerceStoreInvoice.API.Endpoints
 
         private static void MapOrdersCommands(IEndpointRouteBuilder group)
         {
-            group.MapPost("/checkout/{shoppingCartId:guid}", async (Guid shoppingCartId, IInvoiceService invoiceService) =>
+            group.MapPost("/", async (CreateOrderRequestDto request, IOrderService orderService) =>
             {
-                throw new ResourceNotFoundException("test", Guid.NewGuid(), "test");
+                var order = await orderService.CreateOrder(request);
+
+                return Results.Ok(order);
             })
-           .WithSummary("Checkout create order.")
-           .WithDescription("Returns newly created order based on shopping cart identify by id.")
+           .WithSummary("Create order.")
+           .WithDescription("Creates a new order based on the provided request payload.")
            .WithName("CreateOrder")
-           .Produces<InvoiceResponseDto>(StatusCodes.Status200OK)
+           .Produces<OrderResponseDto>(StatusCodes.Status200OK)
            .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest)
            .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
         }
 
         private static void MapOrdersQueries(IEndpointRouteBuilder group)
         {
-            group.MapGet("/{orderId:guid}", async (Guid orderId, IInvoiceService invoiceService) =>
+            group.MapGet("/{orderId:guid}", async (Guid orderId, IOrderService orderService) =>
             {
-                throw new ResourceNotFoundException("test", Guid.NewGuid(), "test");
+                var order = await orderService.GetOrderByOrderId(orderId);
+
+                return Results.Ok(order);
             })
             .WithSummary("Get order by Id.")
-            .WithDescription("Returns the invoice order when the Id exists; 404 otherwise.")
+            .WithDescription("Returns the order when the Id exists; 404 otherwise.")
             .WithName("GetOrderById")
-            .Produces<InvoiceResponseDto>(StatusCodes.Status200OK)
+            .Produces<OrderResponseDto>(StatusCodes.Status200OK)
             .Produces<NotFoundProblemDetails>(StatusCodes.Status404NotFound)
             .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
         }
