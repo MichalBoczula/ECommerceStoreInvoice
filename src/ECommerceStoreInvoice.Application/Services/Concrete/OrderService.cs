@@ -1,21 +1,29 @@
-﻿using ECommerceStoreInvoice.Application.Common.RequestsDto.Orders;
-using ECommerceStoreInvoice.Application.Common.ResponsesDto.Orders;
+﻿using ECommerceStoreInvoice.Application.Common.ResponsesDto.Orders;
 using ECommerceStoreInvoice.Application.Mapping;
 using ECommerceStoreInvoice.Application.Services.Abstract;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate.Repositories;
+using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.Repositories;
 using ECommerceStoreInvoice.Domain.Validation.Common;
 
 namespace ECommerceStoreInvoice.Application.Services.Concrete
 {
     internal sealed class OrderService(
-        IOrderRepository orderRepository)
+        IOrderRepository orderRepository,
+        IShoppingCartRepository shoppingCartRepository)
         : IOrderService
     {
-        public async Task<OrderResponseDto> CreateOrder(CreateOrderRequestDto request)
+        public async Task<OrderResponseDto> CreateOrder(Guid clientId)
         {
-            var order = MappingConfig.MapToDomain(request);
+            var shoppingCart = await shoppingCartRepository.GetShoppingCartByClientId(clientId);
+
+            if (shoppingCart is null)
+                throw new ResourceNotFoundException(nameof(shoppingCartRepository.GetShoppingCartByClientId), clientId, "Shopping cart was not found.");
+
+            var order = MappingConfig.MapToDomain(shoppingCart);
             var createdOrder = await orderRepository.CreateOrder(order);
+            shoppingCart.Clear();
+            await shoppingCartRepository.UpdateShoppingCart(shoppingCart);
 
             return MappingConfig.MapToResponse(createdOrder);
         }
