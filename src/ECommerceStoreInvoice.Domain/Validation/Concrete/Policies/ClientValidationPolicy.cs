@@ -1,6 +1,7 @@
 ﻿using ECommerceStoreInvoice.Domain.Validation.Abstract;
 using ECommerceStoreInvoice.Domain.Validation.Common;
-using ECommerceStoreInvoice.Domain.Validation.Concrete.Rules.ShoppingCarts;
+using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate;
+using ECommerceStoreInvoice.Domain.Validation.Concrete.Rules.Common;
 
 namespace ECommerceStoreInvoice.Domain.Validation.Concrete.Policies
 {
@@ -10,7 +11,7 @@ namespace ECommerceStoreInvoice.Domain.Validation.Concrete.Policies
 
         public ClientValidationPolicy()
         {
-            _rules.Add(new ClientIdIsEmptyValidationRule());
+            _rules.Add(new ClientIdIsEmptyValidationRule(nameof(ShoppingCart)));
         }
 
         public async Task<ValidationResult> Validate(Guid entity)
