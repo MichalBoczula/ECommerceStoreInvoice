@@ -31,16 +31,16 @@ namespace ECommerceStoreInvoice.Infrastructure.Repositories
             return OrderMapping.MapToDomain(orderDocument);
         }
 
-        public async Task<Order> UpdateOrder(Guid orderId, Order order)
+        public async Task<Order> UpdateOrder(Order order)
         {
             var orderDocument = OrderMapping.MapToDocument(order);
 
             var result = await _context.Orders.ReplaceOneAsync(
-                x => x.Id == orderId,
+                x => x.Id == order.Id,
                 orderDocument);
 
             if (result.MatchedCount == 0)
-                throw new InvalidOperationException($"Order with id '{orderId}' was not found.");
+                throw new InvalidOperationException($"Order with id '{order.Id}' was not found.");
 
             return order;
         }
