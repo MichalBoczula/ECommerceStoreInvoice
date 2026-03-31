@@ -24,6 +24,10 @@ namespace ECommerceStoreInvoice.API.Endpoints
                         new Dictionary<string, FlowDescriptor>
                         {
                             [nameof(descriptor.GetUpdateShoppingCartDescriptor)] = descriptor.GetUpdateShoppingCartDescriptor()
+                        },
+                        new Dictionary<string, FlowDescriptor>
+                        {
+                            [nameof(descriptor.GetCreateShoppingCartDescriptor)] = descriptor.GetCreateShoppingCartDescriptor()
                         }
                     ]
                 };
