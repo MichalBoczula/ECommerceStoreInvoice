@@ -6,6 +6,12 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.ShoppingCarts
 {
     internal class ShoppingCartDescriptorService : IShoppingCartDescriptorService
     {
+        public FlowDescriptor GetCreateShoppingCartDescriptor()
+        {
+            var descriptor = new CreateShoppingCartDescriptor();
+            return descriptor.Describe();
+        }
+
         public FlowDescriptor GetShoppingCartByClientIdDescriptor()
         {
             var descriptor = new GetShoppingCartByClientIdDescriptor();

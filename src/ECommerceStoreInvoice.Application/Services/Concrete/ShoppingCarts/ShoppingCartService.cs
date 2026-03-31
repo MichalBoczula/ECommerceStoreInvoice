@@ -2,7 +2,6 @@
 using ECommerceStoreInvoice.Application.Common.RequestsDto.ShoppingCarts;
 using ECommerceStoreInvoice.Application.Common.ResponsesDto.ShoppingCarts;
 using ECommerceStoreInvoice.Application.Descriptors.ShoppingCarts;
-using ECommerceStoreInvoice.Application.Mapping;
 using ECommerceStoreInvoice.Application.Services.Abstract.ShoppingCarts;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.Repositories;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.ValueObjects;
@@ -32,23 +31,18 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.ShoppingCarts
 
         public async Task<ShoppingCartResponseDto> CreateShoppingCart(Guid clientId)
         {
-            var validationResult = await _guidValidationPolicy.Validate(clientId);
+            var descriptor = new CreateShoppingCartDescriptor();
 
-            if (!validationResult.IsValid)
-            {
-                throw new ValidationException(validationResult);
-            }
+            var validationResult = await descriptor.ValidateClientId(clientId, _guidValidationPolicy);
+            descriptor.ThrowValidationExceptionIfClientIdInvalid(validationResult);
 
-            var existingShoppingCart = await shoppingCartRepository.GetShoppingCartByClientId(clientId);
+            var existingShoppingCart = await descriptor.LoadShoppingCart(clientId, shoppingCartRepository);
+            descriptor.ThrowAlreadyExistsExceptionIfShoppingCartExists(clientId, existingShoppingCart);
 
-            if (existingShoppingCart is not null)
-                throw new ResourceAlreadyExistsException(nameof(GetShoppingCartByClientId), clientId, nameof(ShoppingCart));
+            var shoppingCart = descriptor.Create(clientId);
+            var createdShoppingCart = await descriptor.SaveShoppingCart(shoppingCart, shoppingCartRepository);
 
-            var shoppingCart = new ShoppingCart(clientId);
-
-            var createdShoppingCart = await shoppingCartRepository.CreateShoppingCart(shoppingCart);
-
-            return MappingConfig.MapToResponse(createdShoppingCart);
+            return descriptor.MapToResponse(createdShoppingCart);
         }
 
         public async Task<ShoppingCartResponseDto> UpdateShoppingCart(Guid clientId, UpdateShoppingCartRequestDto request)

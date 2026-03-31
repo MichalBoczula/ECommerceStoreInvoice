@@ -6,5 +6,6 @@ namespace ECommerceStoreInvoice.Application.Services.Abstract.ShoppingCarts
     {
         FlowDescriptor GetUpdateShoppingCartDescriptor();
         FlowDescriptor GetShoppingCartByClientIdDescriptor();
+        FlowDescriptor GetCreateShoppingCartDescriptor();
     }
 }
