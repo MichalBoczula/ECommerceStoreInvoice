@@ -1,4 +1,6 @@
 ﻿using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate;
+using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate.ValueObjects;
+using ECommerceStoreInvoice.Domain.AggregatesModel.Common.ValueObjects;
 using ECommerceStoreInvoice.Domain.Validation.Concrete.Policies;
 using Shouldly;
 
@@ -28,11 +30,11 @@ namespace ECommerceStoreInvoice.Domain.UnitTests.Validation.Policies.Orders
         {
             // Arrange
             var policy = new OrderValidationPolicy();
-            var line = new Domain.AggregatesModel.OrderAggregate.ValueObjects.OrderLine(
+            var line = new OrderLine(
                 Guid.NewGuid(),
                 "Keyboard",
                 "Logi",
-                new Domain.AggregatesModel.Common.ValueObjects.Money(99, "USD"),
+                new Money(99, "USD"),
                 1);
             var order = new Order(Guid.NewGuid(), [line]);
 
