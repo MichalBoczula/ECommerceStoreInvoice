@@ -1,5 +1,4 @@
-﻿using ECommerceStoreInvoice.Application.Common.RequestsDto.Orders;
-using ECommerceStoreInvoice.Application.Common.RequestsDto.ShoppingCarts;
+﻿using ECommerceStoreInvoice.Application.Common.RequestsDto.ShoppingCarts;
 using ECommerceStoreInvoice.Application.Common.ResponsesDto.Orders;
 using ECommerceStoreInvoice.Application.Common.ResponsesDto.ShoppingCarts;
 using ECommerceStoreInvoice.Domain.AggregatesModel.Common.ValueObjects;
@@ -18,11 +17,11 @@ namespace ECommerceStoreInvoice.Application.Mapping
             return requestLines.Select(MapToDomain).ToList();
         }
 
-        public static Order MapToDomain(CreateOrderRequestDto request)
+        public static Order MapToDomain(ShoppingCart shoppingCart)
         {
             return new Order(
-                request.ClientId,
-                request.Lines.Select(MapToDomain).ToList());
+                shoppingCart.ClientId,
+                shoppingCart.Lines.Select(MapToDomain).ToList());
         }
 
         public static ShoppingCartResponseDto MapToResponse(ShoppingCart shoppingCart)
@@ -63,14 +62,14 @@ namespace ECommerceStoreInvoice.Application.Mapping
                 request.Quantity);
         }
 
-        private static OrderLine MapToDomain(OrderLineRequestDto request)
+        private static OrderLine MapToDomain(ShoppingCartLine shoppingCartLine)
         {
             return new OrderLine(
-                request.ProductVersionId,
-                request.Name,
-                request.Brand,
-                new Money(request.UnitPriceAmount, request.UnitPriceCurrency),
-                request.Quantity);
+                Guid.Empty,
+                shoppingCartLine.Name,
+                shoppingCartLine.Brand,
+                shoppingCartLine.UnitPrice,
+                shoppingCartLine.Quantity);
         }
 
         private static ShoppingCartLineResponseDto MapToResponse(ShoppingCartLine shoppingCartLine)

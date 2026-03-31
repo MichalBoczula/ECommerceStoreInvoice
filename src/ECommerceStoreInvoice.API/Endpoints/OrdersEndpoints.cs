@@ -1,5 +1,4 @@
 ﻿using ECommerceStoreInvoice.API.Configuration.Common;
-using ECommerceStoreInvoice.Application.Common.RequestsDto.Orders;
 using ECommerceStoreInvoice.Application.Common.ResponsesDto.Orders;
 using ECommerceStoreInvoice.Application.Services.Abstract;
 using Microsoft.AspNetCore.Mvc;
@@ -20,14 +19,14 @@ namespace ECommerceStoreInvoice.API.Endpoints
 
         private static void MapOrdersCommands(IEndpointRouteBuilder group)
         {
-            group.MapPost("/", async (CreateOrderRequestDto request, IOrderService orderService) =>
+            group.MapPost("/{clientId:guid}", async (Guid clientId, IOrderService orderService) =>
             {
-                var order = await orderService.CreateOrder(request);
+                var order = await orderService.CreateOrder(clientId);
 
                 return Results.Ok(order);
             })
            .WithSummary("Create order.")
-           .WithDescription("Creates a new order based on the provided request payload.")
+           .WithDescription("Creates a new order based on the current shopping cart for the provided client.")
            .WithName("CreateOrder")
            .Produces<OrderResponseDto>(StatusCodes.Status200OK)
            .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest)
