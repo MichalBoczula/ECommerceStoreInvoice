@@ -1,46 +1,89 @@
 using ECommerceStoreInvoice.Application.Common.FlowDescriptors;
-using ECommerceStoreInvoice.Application.Common.ResponsesDto.ShoppingCarts;
+using ECommerceStoreInvoice.Application.Common.ResponsesDto;
+using ECommerceStoreInvoice.Application.Services.Abstract;
 using ECommerceStoreInvoice.Application.Services.Abstract.ShoppingCarts;
+using ECommerceStoreInvoice.Domain.Validation.Abstract;
+using ECommerceStoreInvoice.Domain.Validation.Common;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ECommerceStoreInvoice.API.Endpoints
 {
-    public static class ShoppingCartFlowDescriptorsEndpoints
+    public static class DocumentationEndpoints
     {
-        public static IEndpointRouteBuilder MapShoppingCartFlowDescriptorsEndpoints(this IEndpointRouteBuilder app)
+        public static IEndpointRouteBuilder MapDocumentationEndpoints(this IEndpointRouteBuilder app)
         {
-            var group = app.MapGroup("/shopping-carts/flow-descriptors").WithTags("Shopping Cart Flows");
+            var group = app.MapGroup("/documentation").WithTags("Documentation");
 
-            group.MapGet("/", (IShoppingCartDescriptorService descriptor) =>
+            MapFlowDocumentation(group);
+            MapValidationDocumentation(group);
+
+            return group;
+        }
+
+        private static void MapFlowDocumentation(IEndpointRouteBuilder group)
+        {
+            group.MapGet("/flows", (IShoppingCartDescriptorService shoppingCartDescriptor, IOrderDescriptorService orderDescriptor) =>
             {
-                var response = new ShoppingCartFlowsResponseDto
+                var response = new FlowDescriptorsResponseDto
                 {
-                    ShoppingCartFlows =
+                    Flows =
                     [
                         new Dictionary<string, FlowDescriptor>
                         {
-                            [nameof(descriptor.GetShoppingCartByClientIdDescriptor)] = descriptor.GetShoppingCartByClientIdDescriptor()
+                            [nameof(shoppingCartDescriptor.GetShoppingCartByClientIdDescriptor)] = shoppingCartDescriptor.GetShoppingCartByClientIdDescriptor()
                         },
                         new Dictionary<string, FlowDescriptor>
                         {
-                            [nameof(descriptor.GetUpdateShoppingCartDescriptor)] = descriptor.GetUpdateShoppingCartDescriptor()
+                            [nameof(shoppingCartDescriptor.GetUpdateShoppingCartDescriptor)] = shoppingCartDescriptor.GetUpdateShoppingCartDescriptor()
                         },
                         new Dictionary<string, FlowDescriptor>
                         {
-                            [nameof(descriptor.GetCreateShoppingCartDescriptor)] = descriptor.GetCreateShoppingCartDescriptor()
+                            [nameof(shoppingCartDescriptor.GetCreateShoppingCartDescriptor)] = shoppingCartDescriptor.GetCreateShoppingCartDescriptor()
+                        },
+                        new Dictionary<string, FlowDescriptor>
+                        {
+                            [nameof(orderDescriptor.GetOrderByIdDescriptor)] = orderDescriptor.GetOrderByIdDescriptor()
+                        },
+                        new Dictionary<string, FlowDescriptor>
+                        {
+                            [nameof(orderDescriptor.GetCreateOrderDescriptor)] = orderDescriptor.GetCreateOrderDescriptor()
                         }
                     ]
                 };
 
                 return Results.Ok(response);
             })
-            .WithSummary("Get shopping cart flow descriptors.")
-            .WithDescription("Returns shopping cart flow descriptors mapped by descriptor name.")
-            .WithName("GetShoppingCartFlowDescriptors")
-            .Produces<ShoppingCartFlowsResponseDto>(StatusCodes.Status200OK)
+            .WithSummary("Get flow documentation.")
+            .WithDescription("Returns flow descriptors mapped by descriptor name.")
+            .WithName("GetFlowDocumentation")
+            .Produces<FlowDescriptorsResponseDto>(StatusCodes.Status200OK)
             .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
+        }
 
-            return group;
+        private static void MapValidationDocumentation(IEndpointRouteBuilder group)
+        {
+            group.MapGet("/validations", (IEnumerable<IValidationPolicyDescriptorProvider> validationDescriptorProviders) =>
+            {
+                var validationDescriptors = validationDescriptorProviders
+                    .Select(provider => provider.Describe())
+                    .Select(descriptor => new Dictionary<string, ValidationPolicyDescriptor>
+                    {
+                        [descriptor.PolicyName] = descriptor
+                    })
+                    .ToList();
+
+                var response = new ValidationDescriptorsResponseDto
+                {
+                    Validations = validationDescriptors
+                };
+
+                return Results.Ok(response);
+            })
+            .WithSummary("Get validation documentation.")
+            .WithDescription("Returns validation descriptors mapped by policy name.")
+            .WithName("GetValidationDocumentation")
+            .Produces<ValidationDescriptorsResponseDto>(StatusCodes.Status200OK)
+            .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
         }
     }
 }

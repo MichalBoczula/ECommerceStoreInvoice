@@ -1,11 +1,10 @@
 ﻿using ECommerceStoreInvoice.Application.Common.ResponsesDto.Orders;
-using ECommerceStoreInvoice.Application.Mapping;
+using ECommerceStoreInvoice.Application.Descriptors.Orders;
 using ECommerceStoreInvoice.Application.Services.Abstract;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate.Repositories;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.Repositories;
 using ECommerceStoreInvoice.Domain.Validation.Abstract;
-using ECommerceStoreInvoice.Domain.Validation.Common;
 
 namespace ECommerceStoreInvoice.Application.Services.Concrete
 {
@@ -17,32 +16,30 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete
     {
         public async Task<OrderResponseDto> CreateOrder(Guid clientId)
         {
-            var shoppingCart = await shoppingCartRepository.GetShoppingCartByClientId(clientId);
+            var descriptor = new CreateOrderDescriptor();
 
-            if (shoppingCart is null)
-                throw new ResourceNotFoundException(nameof(shoppingCartRepository.GetShoppingCartByClientId), clientId, "Shopping cart was not found.");
+            var shoppingCart = await descriptor.LoadShoppingCart(clientId, shoppingCartRepository);
+            descriptor.ThrowNotFoundExceptionIfShoppingCartMissing(clientId, shoppingCart);
 
-            var order = MappingConfig.MapToDomain(shoppingCart);
-            var validationResult = await orderValidationPolicy.Validate(order);
+            var order = descriptor.MapToDomain(shoppingCart!);
+            var validationResult = await descriptor.ValidateOrder(order, orderValidationPolicy);
+            descriptor.ThrowValidationExceptionIfOrderInvalid(validationResult);
 
-            if (!validationResult.IsValid)
-                throw new ValidationException(validationResult);
+            var createdOrder = await descriptor.SaveOrder(order, orderRepository);
+            descriptor.ClearShoppingCart(shoppingCart!);
+            await descriptor.SaveShoppingCart(shoppingCart!, shoppingCartRepository);
 
-            var createdOrder = await orderRepository.CreateOrder(order);
-            shoppingCart.Clear();
-            await shoppingCartRepository.UpdateShoppingCart(shoppingCart);
-
-            return MappingConfig.MapToResponse(createdOrder);
+            return descriptor.MapToResponse(createdOrder);
         }
 
         public async Task<OrderResponseDto> GetOrderByOrderId(Guid orderId)
         {
-            var order = await orderRepository.GetOrderByOrderId(orderId);
+            var descriptor = new GetOrderByIdDescriptor();
 
-            if (order is null)
-                throw new ResourceNotFoundException(nameof(Order), orderId, $"Order with id '{orderId}' was not found.");
+            var order = await descriptor.LoadOrder(orderId, orderRepository);
+            descriptor.ThrowNotFoundExceptionIfOrderMissing(orderId, order);
 
-            return MappingConfig.MapToResponse(order);
+            return descriptor.MapToResponse(order!);
         }
     }
 }

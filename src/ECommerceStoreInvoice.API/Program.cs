@@ -41,7 +41,7 @@ app.MapInvoicesEndpoints();
 app.MapProductVersionsEndpoints();
 app.MapOrdersEndpoints();
 app.MapShoppingCartEndpoints();
-app.MapShoppingCartFlowDescriptorsEndpoints();
+app.MapDocumentationEndpoints();
 
 app.MapHealthChecks("/health");
 
