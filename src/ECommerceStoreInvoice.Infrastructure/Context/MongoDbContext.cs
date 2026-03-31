@@ -1,4 +1,5 @@
 ﻿using ECommerceStoreInvoice.Infrastructure.Configuration;
+using ECommerceStoreInvoice.Infrastructure.Persistence.Orders;
 using ECommerceStoreInvoice.Infrastructure.Persistence.ShoppingCarts;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
@@ -23,11 +24,17 @@ namespace ECommerceStoreInvoice.Infrastructure.Context
             if (string.IsNullOrWhiteSpace(_settings.ShoppingCartsCollectionName))
                 throw new InvalidOperationException("MongoDbSettings.ShoppingCartsCollectionName is not configured.");
 
+            if (string.IsNullOrWhiteSpace(_settings.OrdersCollectionName))
+                throw new InvalidOperationException("MongoDbSettings.OrdersCollectionName is not configured.");
+
             var client = new MongoClient(_settings.ConnectionString);
             _database = client.GetDatabase(_settings.DatabaseName);
         }
 
         public IMongoCollection<ShoppingCartDocument> ShoppingCarts =>
             _database.GetCollection<ShoppingCartDocument>(_settings.ShoppingCartsCollectionName);
+
+        public IMongoCollection<OrderDocument> Orders =>
+            _database.GetCollection<OrderDocument>(_settings.OrdersCollectionName);
     }
 }

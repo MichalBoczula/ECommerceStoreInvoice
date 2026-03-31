@@ -2,5 +2,8 @@
 {
     public interface IOrderRepository
     {
+        Task<Order> CreateOrder(Order order);
+        Task<Order?> GetOrderByOrderId(Guid orderId);
+        Task<Order> UpdateOrder(Order order);
     }
 }

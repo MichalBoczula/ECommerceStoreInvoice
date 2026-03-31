@@ -25,10 +25,47 @@ namespace ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate
             Total = new(Lines.Sum(x => x.Total.Amount), Lines.FirstOrDefault()?.Total.Currency ?? "USD");
         }
 
+        private Order(
+            Guid id,
+            Guid clientId,
+            IReadOnlyCollection<OrderLine> lines,
+            DateTime createdAt,
+            DateTime updatedAt,
+            OrderStatus status,
+            Money total)
+        {
+            Id = id;
+            ClientId = clientId;
+            Lines = lines;
+            CreatedAt = createdAt;
+            UpdatedAt = updatedAt;
+            Status = status;
+            Total = total;
+        }
+
         public void ChangeOrderStatus(OrderStatus status)
         {
             Status = status;
             UpdatedAt = DateTime.UtcNow;
+        }
+
+        public static Order Rehydrate(
+            Guid id,
+            Guid clientId,
+            IReadOnlyCollection<OrderLine> lines,
+            DateTime createdAt,
+            DateTime updatedAt,
+            OrderStatus status,
+            Money total)
+        {
+            return new Order(
+                id,
+                clientId,
+                lines,
+                createdAt,
+                updatedAt,
+                status,
+                total);
         }
     }
 }
