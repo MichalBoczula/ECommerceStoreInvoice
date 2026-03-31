@@ -57,10 +57,10 @@ namespace ECommerceStoreInvoice.Domain.UnitTests.Domain.OrderAggregate
 
             // Act
             Thread.Sleep(5);
-            order.ChangeOrderStatus(OrderStatus.PendingConfirmation);
+            order.ChangeOrderStatus(OrderStatus.Cancelled);
 
             // Assert
-            order.Status.ShouldBe(OrderStatus.PendingConfirmation);
+            order.Status.ShouldBe(OrderStatus.Cancelled);
             order.UpdatedAt.ShouldBeGreaterThan(originalUpdatedAt);
         }
 
