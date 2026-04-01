@@ -5,3 +5,14 @@ GET {{ECommerceStoreInvoice.API_HostAddress}}/product-versions/{{ProductVersionI
 Accept: application/json
 
 ###
+
+POST {{ECommerceStoreInvoice.API_HostAddress}}/product-versions
+Content-Type: application/json
+
+{
+  "productId": "11111111-1111-1111-1111-111111111111",
+  "priceAmount": 12.99,
+  "priceCurrency": "USD",
+  "name": "Sample Product",
+  "brand": "Sample Brand"
+}

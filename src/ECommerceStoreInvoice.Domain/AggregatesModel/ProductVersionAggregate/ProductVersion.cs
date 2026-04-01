@@ -37,5 +37,46 @@ namespace ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate
             Name = name;
             Brand = brand;
         }
+
+        private ProductVersion(
+            Guid id,
+            bool isActive,
+            DateTime createdAt,
+            DateTime? deactivatedAt,
+            Guid productId,
+            Money price,
+            string name,
+            string brand)
+        {
+            Id = id;
+            IsActive = isActive;
+            CreatedAt = createdAt;
+            DeactivatedAt = deactivatedAt;
+            ProductId = productId;
+            Price = price;
+            Name = name;
+            Brand = brand;
+        }
+
+        public static ProductVersion Rehydrate(
+            Guid id,
+            bool isActive,
+            DateTime createdAt,
+            DateTime? deactivatedAt,
+            Guid productId,
+            Money price,
+            string name,
+            string brand)
+        {
+            return new ProductVersion(
+                id,
+                isActive,
+                createdAt,
+                deactivatedAt,
+                productId,
+                price,
+                name,
+                brand);
+        }
     }
 }

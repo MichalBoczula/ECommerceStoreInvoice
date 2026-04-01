@@ -1,6 +1,6 @@
-﻿namespace ECommerceStoreInvoice.Application.Common.ResponsesDto
+﻿namespace ECommerceStoreInvoice.Infrastructure.Persistence.ProductVersions
 {
-    public sealed record ProductVersionResponseDto
+    internal sealed record ProductVersionDocument
     {
         public required Guid Id { get; init; }
         public required bool IsActive { get; init; }
