@@ -1,12 +1,10 @@
 ﻿using ECommerceStoreInvoice.Application.Common.RequestsDto.ProductVersions;
 using ECommerceStoreInvoice.Application.Common.ResponsesDto;
-using ECommerceStoreInvoice.Application.Mapping;
+using ECommerceStoreInvoice.Application.Descriptors.ProductVersions;
 using ECommerceStoreInvoice.Application.Services.Abstract;
-using ECommerceStoreInvoice.Domain.AggregatesModel.Common.ValueObjects;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate.Repositories;
 using ECommerceStoreInvoice.Domain.Validation.Abstract;
-using ECommerceStoreInvoice.Domain.Validation.Common;
 
 namespace ECommerceStoreInvoice.Application.Services.Concrete
 {
@@ -17,30 +15,26 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete
     {
         public async Task<ProductVersionResponseDto> CreateProductVersion(CreateProductVersionRequestDto request)
         {
-            var productVersion = new ProductVersion(
-                request.ProductId,
-                new Money(request.PriceAmount, request.PriceCurrency),
-                request.Name,
-                request.Brand);
+            var descriptor = new CreateProductVersionDescriptor();
 
-            var validationResult = await productVersionValidationPolicy.Validate(productVersion);
+            var productVersion = descriptor.MapToDomain(request);
+            var validationResult = await descriptor.Validate(productVersion, productVersionValidationPolicy);
+            descriptor.ThrowValidationExceptionIfInvalid(validationResult);
 
-            if (!validationResult.IsValid)
-                throw new ValidationException(validationResult);
-
-            var createdProductVersion = await productVersionRepository.CreateProductVersion(productVersion);
-
-            return MappingConfig.MapToResponse(createdProductVersion);
+            var createdProductVersion = await descriptor.Save(productVersion, productVersionRepository);
+            return descriptor.MapToResponse(createdProductVersion);
         }
 
         public async Task<ProductVersionResponseDto?> GetProductVersionById(Guid id)
         {
-            var productVersion = await productVersionRepository.GetProductVersionById(id);
+            var descriptor = new GetProductVersionByIdDescriptor();
+
+            var productVersion = await descriptor.LoadProductVersion(id, productVersionRepository);
 
             if (productVersion is null)
                 return null;
 
-            return MappingConfig.MapToResponse(productVersion);
+            return descriptor.MapToResponse(productVersion);
         }
     }
 }
