@@ -1,9 +1,11 @@
 ﻿using ECommerceStoreInvoice.Application.Common.RequestsDto.ShoppingCarts;
+using ECommerceStoreInvoice.Application.Common.ResponsesDto;
 using ECommerceStoreInvoice.Application.Common.ResponsesDto.Orders;
 using ECommerceStoreInvoice.Application.Common.ResponsesDto.ShoppingCarts;
 using ECommerceStoreInvoice.Domain.AggregatesModel.Common.ValueObjects;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate.ValueObjects;
+using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.ValueObjects;
 
@@ -50,6 +52,22 @@ namespace ECommerceStoreInvoice.Application.Mapping
                 TotalAmount = order.Total.Amount,
                 TotalCurrency = order.Total.Currency,
                 Lines = order.Lines.Select(MapToResponse).ToList()
+            };
+        }
+
+        public static ProductVersionResponseDto MapToResponse(ProductVersion productVersion)
+        {
+            return new ProductVersionResponseDto
+            {
+                Id = productVersion.Id,
+                IsActive = productVersion.IsActive,
+                CreatedAt = productVersion.CreatedAt,
+                DeactivatedAt = productVersion.DeactivatedAt,
+                ProductId = productVersion.ProductId,
+                PriceAmount = productVersion.Price.Amount,
+                PriceCurrency = productVersion.Price.Currency,
+                Name = productVersion.Name,
+                Brand = productVersion.Brand
             };
         }
 

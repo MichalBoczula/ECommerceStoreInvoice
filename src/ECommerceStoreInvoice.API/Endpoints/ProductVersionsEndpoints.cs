@@ -1,6 +1,8 @@
 using ECommerceStoreInvoice.API.Configuration.Common;
+using ECommerceStoreInvoice.Application.Common.RequestsDto.ProductVersions;
 using ECommerceStoreInvoice.Application.Common.ResponsesDto;
 using ECommerceStoreInvoice.Application.Services.Abstract;
+using ECommerceStoreInvoice.Domain.Validation.Common;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ECommerceStoreInvoice.API.Endpoints
@@ -19,13 +21,37 @@ namespace ECommerceStoreInvoice.API.Endpoints
 
         private static void MapProductVersionsCommands(IEndpointRouteBuilder group)
         {
+            group.MapPost("", async (
+                CreateProductVersionRequestDto request,
+                IProductVersionService productVersionService) =>
+            {
+                var productVersion = await productVersionService.CreateProductVersion(request);
+
+                return Results.Ok(productVersion);
+            })
+            .WithSummary("Create product version.")
+            .WithDescription("Creates a new product version.")
+            .WithName("CreateProductVersion")
+            .Produces<ProductVersionResponseDto>(StatusCodes.Status200OK)
+            .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest)
+            .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
         }
 
         private static void MapProductVersionsQueries(IEndpointRouteBuilder group)
         {
             group.MapGet("/{id:guid}", async (Guid id, IProductVersionService productVersionService) =>
             {
-                return Results.Ok();
+                var productVersion = await productVersionService.GetProductVersionById(id);
+
+                if (productVersion is null)
+                {
+                    throw new ResourceNotFoundException(
+                        "ProductVersion",
+                        id,
+                        "Id");
+                }
+
+                return Results.Ok(productVersion);
             })
             .WithSummary("Get product version by Id.")
             .WithDescription("Returns a product snapshot by id; 404 otherwise.")
