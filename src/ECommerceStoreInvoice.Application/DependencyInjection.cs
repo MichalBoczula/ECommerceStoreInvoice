@@ -17,6 +17,7 @@ namespace ECommerceStoreInvoice.Application
             services.AddScoped<IOrderService, OrderService>();
             services.AddScoped<IOrderDescriptorService, OrderDescriptorService>();
             services.AddScoped<IShoppingCartDescriptorService, ShoppingCartDescriptorService>();
+            services.AddScoped<IProductVersionDescriptorService, ProductVersionDescriptorService>();
 
             return services;
         }

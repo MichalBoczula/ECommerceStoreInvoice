@@ -22,7 +22,7 @@ namespace ECommerceStoreInvoice.API.Endpoints
 
         private static void MapFlowDocumentation(IEndpointRouteBuilder group)
         {
-            group.MapGet("/flows", (IShoppingCartDescriptorService shoppingCartDescriptor, IOrderDescriptorService orderDescriptor) =>
+            group.MapGet("/flows", (IShoppingCartDescriptorService shoppingCartDescriptor, IOrderDescriptorService orderDescriptor, IProductVersionDescriptorService productVersionDescriptor) =>
             {
                 var response = new FlowDescriptorsResponseDto
                 {
@@ -47,7 +47,15 @@ namespace ECommerceStoreInvoice.API.Endpoints
                         new Dictionary<string, FlowDescriptor>
                         {
                             [nameof(orderDescriptor.GetCreateOrderDescriptor)] = orderDescriptor.GetCreateOrderDescriptor()
-                        }
+                        },
+                        new Dictionary<string, FlowDescriptor>
+                        {
+                            [nameof(productVersionDescriptor.GetProductVersionByIdDescriptor)] = productVersionDescriptor.GetProductVersionByIdDescriptor()
+                        },
+                        new Dictionary<string, FlowDescriptor>
+                        {
+                            [nameof(productVersionDescriptor.GetCreateProductVersionDescriptor)] = productVersionDescriptor.GetCreateProductVersionDescriptor()
+                        },
                     ]
                 };
 
