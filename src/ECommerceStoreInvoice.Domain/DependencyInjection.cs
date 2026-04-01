@@ -1,4 +1,5 @@
 ﻿using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate;
+using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.ValueObjects;
 using ECommerceStoreInvoice.Domain.Validation.Abstract;
 using ECommerceStoreInvoice.Domain.Validation.Concrete.Policies;
@@ -17,6 +18,8 @@ namespace ECommerceStoreInvoice.Domain
             services.AddScoped<IValidationPolicyDescriptorProvider, ClientValidationPolicy>();
             services.AddScoped<IValidationPolicy<Order>, OrderValidationPolicy>();
             services.AddScoped<IValidationPolicyDescriptorProvider, OrderValidationPolicy>();
+            services.AddScoped<IValidationPolicy<ProductVersion>, ProductVersionValidationPolicy>();
+            services.AddScoped<IValidationPolicyDescriptorProvider, ProductVersionValidationPolicy>();
             return services;
         }
     }
