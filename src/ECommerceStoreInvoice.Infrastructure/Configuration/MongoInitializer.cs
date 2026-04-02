@@ -1,4 +1,5 @@
 ﻿using ECommerceStoreInvoice.Infrastructure.Context;
+using ECommerceStoreInvoice.Infrastructure.Persistence.Invoices;
 using ECommerceStoreInvoice.Infrastructure.Persistence.ShoppingCarts;
 using MongoDB.Driver;
 
@@ -16,6 +17,23 @@ namespace ECommerceStoreInvoice.Infrastructure.Configuration
         public async Task InitializeAsync(CancellationToken cancellationToken = default)
         {
             await CreateShoppingCartIndexesAsync(cancellationToken);
+            await CreateInvoiceIndexesAsync(cancellationToken);
+        }
+
+
+        private async Task CreateInvoiceIndexesAsync(CancellationToken cancellationToken)
+        {
+            var orderIdIndex = new CreateIndexModel<InvoiceDocument>(
+                Builders<InvoiceDocument>.IndexKeys.Ascending(x => x.OrderId),
+                new CreateIndexOptions
+                {
+                    Unique = true,
+                    Name = "UX_Invoice_OrderId"
+                });
+
+            await _context.Invoices.Indexes.CreateOneAsync(
+                orderIdIndex,
+                cancellationToken: cancellationToken);
         }
 
         private async Task CreateShoppingCartIndexesAsync(CancellationToken cancellationToken)

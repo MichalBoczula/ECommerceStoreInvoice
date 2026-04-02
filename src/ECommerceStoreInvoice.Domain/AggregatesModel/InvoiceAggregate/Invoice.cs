@@ -1,35 +1,39 @@
-﻿using ECommerceStoreInvoice.Domain.AggregatesModel.InvoiceAggregate.ValueObjects;
-
-namespace ECommerceStoreInvoice.Domain.AggregatesModel.InvoiceAggregate
+﻿namespace ECommerceStoreInvoice.Domain.AggregatesModel.InvoiceAggregate
 {
     public sealed class Invoice
     {
         public Guid Id { get; init; }
-        public OrderSnapshot Order { get; init; }
-        public ClientSnapshot Client { get; init; }
+        public Guid OrderId { get; init; }
+        public string StorageUrl { get; init; }
         public DateTime CreatedAt { get; init; }
-        public string InvoiceNumber { get; init; }
-        public bool PdfGenerated { get; private set; }
-        public string? PdfUrl { get; private set; }
 
-        public Invoice(OrderSnapshot order, ClientSnapshot client)
+        public Invoice(Guid orderId, string storageUrl)
         {
             Id = Guid.NewGuid();
-            Order = order;
-            Client = client;
+            OrderId = orderId;
+            StorageUrl = storageUrl;
             CreatedAt = DateTime.UtcNow;
-            InvoiceNumber = GenerateInvoiceNumber();
         }
 
-        private string GenerateInvoiceNumber()
+        private Invoice(
+            Guid id,
+            Guid orderId,
+            string storageUrl,
+            DateTime createdAt)
         {
-            throw new NotImplementedException();
+            Id = id;
+            OrderId = orderId;
+            StorageUrl = storageUrl;
+            CreatedAt = createdAt;
         }
 
-        private void GeneratePdf()
+        public static Invoice Rehydrate(
+            Guid id,
+            Guid orderId,
+            string storageUrl,
+            DateTime createdAt)
         {
-            PdfGenerated = true;
-            PdfUrl = $"https://example.com/invoices/{Id}.pdf";
+            return new Invoice(id, orderId, storageUrl, createdAt);
         }
     }
 }
