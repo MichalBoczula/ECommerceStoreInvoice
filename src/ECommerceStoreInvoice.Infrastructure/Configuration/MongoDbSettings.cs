@@ -8,5 +8,6 @@
         public required string ShoppingCartsCollectionName { get; init; }
         public required string OrdersCollectionName { get; init; }
         public required string ProductVersionsCollectionName { get; init; }
+        public required string InvoicesCollectionName { get; init; }
     }
 }
