@@ -1,7 +1,6 @@
 ﻿using ECommerceStoreInvoice.API.Configuration.Common;
 using ECommerceStoreInvoice.Application.Common.ResponsesDto;
 using ECommerceStoreInvoice.Application.Services.Abstract;
-using ECommerceStoreInvoice.Domain.Validation.Common;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ECommerceStoreInvoice.API.Endpoints
@@ -22,14 +21,17 @@ namespace ECommerceStoreInvoice.API.Endpoints
         {
             group.MapPost("/{orderId:guid}", async (Guid orderId, IInvoiceService invoiceService) =>
             {
-                throw new ResourceNotFoundException("test", Guid.NewGuid(), "test");
+                var invoice = await invoiceService.CreateInvoiceForOrder(orderId);
+
+                return Results.Ok(invoice);
             })
-           .WithSummary("Create Invoice for order identify by Id.")
-           .WithDescription("Create a new invoice when the Id exists and i has not been created before; 404 otherwise.")
-           .WithName("CreateInvoiceFororder")
+           .WithSummary("Create invoice for order by Id.")
+           .WithDescription("Creates a new invoice when the order exists and does not already have an invoice.")
+           .WithName("CreateInvoiceForOrder")
            .Produces<InvoiceResponseDto>(StatusCodes.Status200OK)
            .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest)
            .Produces<NotFoundProblemDetails>(StatusCodes.Status404NotFound)
+           .Produces<ConflictProblemDetails>(StatusCodes.Status409Conflict)
            .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
         }
 
@@ -37,7 +39,9 @@ namespace ECommerceStoreInvoice.API.Endpoints
         {
             group.MapGet("/{invoiceId:guid}", async (Guid invoiceId, IInvoiceService invoiceService) =>
             {
-                throw new ResourceNotFoundException("test", Guid.NewGuid(), "test");
+                var invoice = await invoiceService.GetInvoiceById(invoiceId);
+
+                return Results.Ok(invoice);
             })
             .WithSummary("Get invoice by Id.")
             .WithDescription("Returns the invoice when the Id exists; 404 otherwise.")

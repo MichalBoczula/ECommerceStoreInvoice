@@ -3,6 +3,7 @@ using ECommerceStoreInvoice.Application.Common.ResponsesDto;
 using ECommerceStoreInvoice.Application.Common.ResponsesDto.Orders;
 using ECommerceStoreInvoice.Application.Common.ResponsesDto.ShoppingCarts;
 using ECommerceStoreInvoice.Domain.AggregatesModel.Common.ValueObjects;
+using ECommerceStoreInvoice.Domain.AggregatesModel.InvoiceAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate.ValueObjects;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate;
@@ -52,6 +53,18 @@ namespace ECommerceStoreInvoice.Application.Mapping
                 TotalAmount = order.Total.Amount,
                 TotalCurrency = order.Total.Currency,
                 Lines = order.Lines.Select(MapToResponse).ToList()
+            };
+        }
+
+
+        public static InvoiceResponseDto MapToResponse(Invoice invoice)
+        {
+            return new InvoiceResponseDto
+            {
+                Id = invoice.Id,
+                OrderId = invoice.OrderId,
+                StorageUrl = invoice.StorageUrl,
+                CreatedAt = invoice.CreatedAt
             };
         }
 
