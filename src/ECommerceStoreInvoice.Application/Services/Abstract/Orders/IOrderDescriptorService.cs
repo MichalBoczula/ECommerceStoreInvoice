@@ -6,6 +6,7 @@ namespace ECommerceStoreInvoice.Application.Services.Abstract.Orders
     {
         FlowDescriptor GetCreateOrderDescriptor();
         FlowDescriptor GetOrderByIdDescriptor();
+        FlowDescriptor GetOrdersByClientIdDescriptor();
         FlowDescriptor GetUpdateOrderStatusDescriptor();
     }
 }

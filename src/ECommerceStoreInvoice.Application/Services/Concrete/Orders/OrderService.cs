@@ -13,6 +13,7 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Orders
     internal sealed class OrderService(
         IOrderRepository orderRepository,
         IShoppingCartRepository shoppingCartRepository,
+        IValidationPolicy<Guid> guidValidationPolicy,
         IValidationPolicy<Order> orderValidationPolicy,
         IValidationPolicy<(Order order, OrderStatus newStatus)> updateOrderValidationPolicy)
         : IOrderService
@@ -33,6 +34,18 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Orders
             await descriptor.SaveShoppingCart(shoppingCart!, shoppingCartRepository);
 
             return descriptor.MapToResponse(createdOrder);
+        }
+
+        public async Task<IReadOnlyCollection<OrderResponseDto>> GetOrdersByClientId(Guid clientId)
+        {
+            var descriptor = new GetOrdersByClientIdDescriptor();
+
+            var validationResult = await descriptor.ValidateClientId(clientId, guidValidationPolicy);
+            descriptor.ThrowValidationExceptionIfClientIdInvalid(validationResult);
+
+            var orders = await descriptor.LoadOrders(clientId, orderRepository);
+
+            return descriptor.MapToResponse(orders);
         }
 
         public async Task<OrderResponseDto> GetOrderByOrderId(Guid orderId)

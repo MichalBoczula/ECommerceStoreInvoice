@@ -31,6 +31,17 @@ namespace ECommerceStoreInvoice.Infrastructure.Repositories
             return OrderMapping.MapToDomain(orderDocument);
         }
 
+        public async Task<IReadOnlyCollection<Order>> GetOrdersByClientId(Guid clientId)
+        {
+            var orderDocuments = await _context.Orders
+                .Find(x => x.ClientId == clientId)
+                .ToListAsync();
+
+            return orderDocuments
+                .Select(OrderMapping.MapToDomain)
+                .ToList();
+        }
+
         public async Task<Order> UpdateOrder(Order order)
         {
             var orderDocument = OrderMapping.MapToDocument(order);

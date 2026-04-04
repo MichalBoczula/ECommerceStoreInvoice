@@ -48,6 +48,10 @@ namespace ECommerceStoreInvoice.API.Endpoints
                         },
                         new Dictionary<string, FlowDescriptor>
                         {
+                            [nameof(orderDescriptor.GetOrdersByClientIdDescriptor)] = orderDescriptor.GetOrdersByClientIdDescriptor()
+                        },
+                        new Dictionary<string, FlowDescriptor>
+                        {
                             [nameof(orderDescriptor.GetCreateOrderDescriptor)] = orderDescriptor.GetCreateOrderDescriptor()
                         },
                         new Dictionary<string, FlowDescriptor>
