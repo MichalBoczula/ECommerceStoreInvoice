@@ -51,6 +51,11 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Invoices
             return Path.Combine(AppContext.BaseDirectory, "Templates", "InvoiceTemplate.html");
         }
 
+        internal string GetLineTemplatePath()
+        {
+            return Path.Combine(AppContext.BaseDirectory, "Templates", "InvoiceLineTemplate.html");
+        }
+
         internal IReadOnlyCollection<InvoiceLineDto> BuildInvoiceLines(Order order, ShoppingCart? shoppingCart)
         {
             if (shoppingCart?.Lines.Any() == true)
@@ -101,17 +106,16 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Invoices
 
         internal string BuildLineRow(InvoiceLineDto line)
         {
-            return $@"
-                    <tr>
-                        <td>
-                            <div><strong>{Escape(line.Name)}</strong></div>
-                            <div class=\"muted\">Product version: {Escape(line.ProductVersionId)}</div>
-                        </td>
-                        <td>{Escape(line.Brand)}</td>
-                        <td class=\"text-right\">{line.Quantity}</td>
-                        <td class=\"text-right\">{FormatMoney(line.UnitAmount)} {Escape(line.Currency)}</td>
-                        <td class=\"text-right\">{FormatMoney(line.TotalAmount)} {Escape(line.Currency)}</td>
-                    </tr>";
+            var lineTemplate = File.ReadAllText(GetLineTemplatePath());
+
+            return lineTemplate
+                .Replace("{{Line.Name}}", Escape(line.Name))
+                .Replace("{{Line.ProductVersionId}}", Escape(line.ProductVersionId))
+                .Replace("{{Line.Brand}}", Escape(line.Brand))
+                .Replace("{{Line.Quantity}}", line.Quantity.ToString(CultureInfo.InvariantCulture))
+                .Replace("{{Line.UnitAmount}}", FormatMoney(line.UnitAmount))
+                .Replace("{{Line.TotalAmount}}", FormatMoney(line.TotalAmount))
+                .Replace("{{Line.Currency}}", Escape(line.Currency));
         }
 
         internal string ApplyOrderTokens(string template, Order order)

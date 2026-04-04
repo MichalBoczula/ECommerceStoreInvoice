@@ -16,6 +16,10 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <TargetPath>Templates/InvoiceTemplate.html</TargetPath>
     </None>
+    <None Update="Templates/InvoiceLineTemplate.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>Templates/InvoiceLineTemplate.html</TargetPath>
+    </None>
   </ItemGroup>
 
   <ItemGroup>
