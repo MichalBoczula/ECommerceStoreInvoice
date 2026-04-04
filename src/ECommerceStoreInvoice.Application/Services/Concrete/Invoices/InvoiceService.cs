@@ -24,8 +24,8 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Invoices
             var existingInvoice = await descriptor.LoadInvoiceByOrderId(orderId, invoiceRepository);
             descriptor.ThrowAlreadyExistsExceptionIfInvoiceAlreadyExists(orderId, existingInvoice);
 
-            var shoppingCart = await shoppingCartRepository.GetShoppingCartByClientId(order!.ClientId);
-            var storageUrl = await invoicePdfService.GenerateInvoicePdf(order!, shoppingCart);
+            var shoppingCart = await descriptor.LoadShoppingCart(order!.ClientId, shoppingCartRepository);
+            var storageUrl = await descriptor.GenerateInvoicePdf(order, shoppingCart, invoicePdfService);
 
             var invoice = descriptor.CreateInvoice(orderId, storageUrl);
             var createdInvoice = await descriptor.SaveInvoice(invoice, invoiceRepository);
