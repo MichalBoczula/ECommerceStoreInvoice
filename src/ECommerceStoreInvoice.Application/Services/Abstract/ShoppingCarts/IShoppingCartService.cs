@@ -1,5 +1,4 @@
-﻿using ECommerceStoreInvoice.Application.Common.FlowDescriptors;
-using ECommerceStoreInvoice.Application.Common.RequestsDto.ShoppingCarts;
+﻿using ECommerceStoreInvoice.Application.Common.RequestsDto.ShoppingCarts;
 using ECommerceStoreInvoice.Application.Common.ResponsesDto.ShoppingCarts;
 
 namespace ECommerceStoreInvoice.Application.Services.Abstract.ShoppingCarts

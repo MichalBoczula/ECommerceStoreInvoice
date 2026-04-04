@@ -1,12 +1,10 @@
-﻿using ECommerceStoreInvoice.Application.Common.FlowDescriptors;
-using ECommerceStoreInvoice.Application.Common.RequestsDto.ShoppingCarts;
+﻿using ECommerceStoreInvoice.Application.Common.RequestsDto.ShoppingCarts;
 using ECommerceStoreInvoice.Application.Common.ResponsesDto.ShoppingCarts;
 using ECommerceStoreInvoice.Application.Descriptors.ShoppingCarts;
 using ECommerceStoreInvoice.Application.Services.Abstract.ShoppingCarts;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.Repositories;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.ValueObjects;
 using ECommerceStoreInvoice.Domain.Validation.Abstract;
-using ECommerceStoreInvoice.Domain.Validation.Common;
 
 namespace ECommerceStoreInvoice.Application.Services.Concrete.ShoppingCarts
 {

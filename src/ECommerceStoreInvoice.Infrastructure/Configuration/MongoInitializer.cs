@@ -20,7 +20,6 @@ namespace ECommerceStoreInvoice.Infrastructure.Configuration
             await CreateInvoiceIndexesAsync(cancellationToken);
         }
 
-
         private async Task CreateInvoiceIndexesAsync(CancellationToken cancellationToken)
         {
             var orderIdIndex = new CreateIndexModel<InvoiceDocument>(

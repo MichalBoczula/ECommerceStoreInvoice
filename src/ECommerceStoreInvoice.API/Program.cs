@@ -47,9 +47,6 @@ app.MapHealthChecks("/health");
 
 app.Run();
 
-
-
-
 static void FixGuidFormats(NJsonSchema.JsonSchema schema)
 {
     if (schema.Type.HasFlag(NJsonSchema.JsonObjectType.String) &&

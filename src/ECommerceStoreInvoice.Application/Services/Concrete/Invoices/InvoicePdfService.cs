@@ -1,10 +1,9 @@
-using System.Globalization;
-using System.Net;
 using ECommerceStoreInvoice.Application.Common.ResponsesDto.Invoices;
 using ECommerceStoreInvoice.Application.Services.Abstract.Invoices;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate;
-using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate;
 using Microsoft.Playwright;
+using System.Globalization;
+using System.Net;
 
 namespace ECommerceStoreInvoice.Application.Services.Concrete.Invoices
 {

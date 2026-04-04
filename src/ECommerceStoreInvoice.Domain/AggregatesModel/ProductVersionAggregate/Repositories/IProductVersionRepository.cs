@@ -1,6 +1,4 @@
-﻿using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate;
-
-namespace ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate.Repositories
+﻿namespace ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate.Repositories
 {
     public interface IProductVersionRepository
     {
