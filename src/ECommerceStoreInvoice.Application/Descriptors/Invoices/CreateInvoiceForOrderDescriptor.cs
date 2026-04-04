@@ -44,9 +44,9 @@ namespace ECommerceStoreInvoice.Application.Descriptors.Invoices
         }
 
         [FlowStep(order: 5, bpmnId: "CreateInvoiceDomain")]
-        public Invoice CreateInvoice(Guid orderId)
+        public Invoice CreateInvoice(Guid orderId, string storageUrl)
         {
-            return new Invoice(orderId, BuildStorageUrl(orderId));
+            return new Invoice(orderId, storageUrl);
         }
 
         [FlowStep(order: 6, bpmnId: "SaveInvoice")]
@@ -61,9 +61,5 @@ namespace ECommerceStoreInvoice.Application.Descriptors.Invoices
             return MappingConfig.MapToResponse(invoice);
         }
 
-        private static string BuildStorageUrl(Guid orderId)
-        {
-            return $"https://invoices.local/orders/{orderId}.pdf";
-        }
     }
 }
