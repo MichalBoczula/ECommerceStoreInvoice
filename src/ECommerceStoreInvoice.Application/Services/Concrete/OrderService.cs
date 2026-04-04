@@ -1,4 +1,5 @@
-﻿using ECommerceStoreInvoice.Application.Common.ResponsesDto.Orders;
+﻿using ECommerceStoreInvoice.Application.Common.RequestsDto.Orders;
+using ECommerceStoreInvoice.Application.Common.ResponsesDto.Orders;
 using ECommerceStoreInvoice.Application.Descriptors.Orders;
 using ECommerceStoreInvoice.Application.Services.Abstract;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate;
@@ -40,6 +41,22 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete
             descriptor.ThrowNotFoundExceptionIfOrderMissing(orderId, order);
 
             return descriptor.MapToResponse(order!);
+        }
+
+        public async Task<OrderResponseDto> UpdateOrderStatus(Guid orderId, UpdateOrderStatusRequestDto request)
+        {
+            var descriptor = new UpdateOrderStatusDescriptor();
+
+            var order = await descriptor.LoadOrder(orderId, orderRepository);
+            descriptor.ThrowNotFoundExceptionIfOrderMissing(orderId, order);
+
+            var newStatus = descriptor.ParseStatus(request.Status);
+            descriptor.EnsureStatusTransitionAllowed(order!, newStatus);
+            descriptor.ChangeOrderStatus(order!, newStatus);
+
+            var updatedOrder = await descriptor.SaveOrder(order!, orderRepository);
+
+            return descriptor.MapToResponse(updatedOrder);
         }
     }
 }
