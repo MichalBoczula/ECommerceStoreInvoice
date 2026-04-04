@@ -4,7 +4,10 @@ using ECommerceStoreInvoice.Application.Mapping;
 using ECommerceStoreInvoice.Domain.AggregatesModel.InvoiceAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.InvoiceAggregate.Repositories;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate;
+using ECommerceStoreInvoice.Application.Services.Abstract.Invoices;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate.Repositories;
+using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate;
+using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.Repositories;
 using ECommerceStoreInvoice.Domain.Validation.Common;
 
 namespace ECommerceStoreInvoice.Application.Descriptors.Invoices
@@ -43,19 +46,31 @@ namespace ECommerceStoreInvoice.Application.Descriptors.Invoices
             }
         }
 
-        [FlowStep(order: 5, bpmnId: "CreateInvoiceDomain")]
+        [FlowStep(order: 5, bpmnId: "LoadShoppingCart")]
+        public async Task<ShoppingCart?> LoadShoppingCart(Guid clientId, IShoppingCartRepository shoppingCartRepository)
+        {
+            return await shoppingCartRepository.GetShoppingCartByClientId(clientId);
+        }
+
+        [FlowStep(order: 6, bpmnId: "GenerateInvoicePdf")]
+        public async Task<string> GenerateInvoicePdf(Order order, ShoppingCart? shoppingCart, IInvoicePdfService invoicePdfService)
+        {
+            return await invoicePdfService.GenerateInvoicePdf(order, shoppingCart);
+        }
+
+        [FlowStep(order: 7, bpmnId: "CreateInvoiceDomain")]
         public Invoice CreateInvoice(Guid orderId, string storageUrl)
         {
             return new Invoice(orderId, storageUrl);
         }
 
-        [FlowStep(order: 6, bpmnId: "SaveInvoice")]
+        [FlowStep(order: 8, bpmnId: "SaveInvoice")]
         public async Task<Invoice> SaveInvoice(Invoice invoice, IInvoiceRepository invoiceRepository)
         {
             return await invoiceRepository.CreateInvoice(invoice);
         }
 
-        [FlowStep(order: 7, bpmnId: "MapInvoiceResponse")]
+        [FlowStep(order: 9, bpmnId: "MapInvoiceResponse")]
         public InvoiceResponseDto MapToResponse(Invoice invoice)
         {
             return MappingConfig.MapToResponse(invoice);
