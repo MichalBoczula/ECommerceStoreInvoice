@@ -1,6 +1,6 @@
 using ECommerceStoreInvoice.Application.Common.FlowDescriptors;
 
-namespace ECommerceStoreInvoice.Application.Services.Abstract
+namespace ECommerceStoreInvoice.Application.Services.Abstract.Orders
 {
     public interface IOrderDescriptorService
     {

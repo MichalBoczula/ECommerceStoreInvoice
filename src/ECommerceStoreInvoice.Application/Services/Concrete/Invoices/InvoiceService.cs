@@ -1,13 +1,13 @@
 ﻿using ECommerceStoreInvoice.Application.Common.ResponsesDto;
 using ECommerceStoreInvoice.Application.Mapping;
-using ECommerceStoreInvoice.Application.Services.Abstract;
+using ECommerceStoreInvoice.Application.Services.Abstract.Invoices;
 using ECommerceStoreInvoice.Domain.AggregatesModel.InvoiceAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.InvoiceAggregate.Repositories;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate.Repositories;
 using ECommerceStoreInvoice.Domain.Validation.Common;
 
-namespace ECommerceStoreInvoice.Application.Services.Concrete
+namespace ECommerceStoreInvoice.Application.Services.Concrete.Invoices
 {
     internal sealed class InvoiceService(
         IInvoiceRepository invoiceRepository,

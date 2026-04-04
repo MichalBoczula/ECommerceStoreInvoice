@@ -1,7 +1,7 @@
 ﻿using ECommerceStoreInvoice.API.Configuration.Common;
 using ECommerceStoreInvoice.Application.Common.RequestsDto.Orders;
 using ECommerceStoreInvoice.Application.Common.ResponsesDto.Orders;
-using ECommerceStoreInvoice.Application.Services.Abstract;
+using ECommerceStoreInvoice.Application.Services.Abstract.Orders;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ECommerceStoreInvoice.API.Endpoints

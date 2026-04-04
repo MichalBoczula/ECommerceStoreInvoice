@@ -1,7 +1,7 @@
 ﻿using ECommerceStoreInvoice.Application.Common.RequestsDto.Orders;
 using ECommerceStoreInvoice.Application.Common.ResponsesDto.Orders;
 
-namespace ECommerceStoreInvoice.Application.Services.Abstract
+namespace ECommerceStoreInvoice.Application.Services.Abstract.Orders
 {
     public interface IOrderService
     {

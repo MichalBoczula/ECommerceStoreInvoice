@@ -1,6 +1,7 @@
 using ECommerceStoreInvoice.Application.Common.FlowDescriptors;
 using ECommerceStoreInvoice.Application.Common.ResponsesDto;
-using ECommerceStoreInvoice.Application.Services.Abstract;
+using ECommerceStoreInvoice.Application.Services.Abstract.Orders;
+using ECommerceStoreInvoice.Application.Services.Abstract.ProductVersions;
 using ECommerceStoreInvoice.Application.Services.Abstract.ShoppingCarts;
 using ECommerceStoreInvoice.Domain.Validation.Abstract;
 using ECommerceStoreInvoice.Domain.Validation.Common;

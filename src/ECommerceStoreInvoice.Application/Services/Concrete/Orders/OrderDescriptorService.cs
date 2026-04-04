@@ -1,8 +1,8 @@
 using ECommerceStoreInvoice.Application.Common.FlowDescriptors;
 using ECommerceStoreInvoice.Application.Descriptors.Orders;
-using ECommerceStoreInvoice.Application.Services.Abstract;
+using ECommerceStoreInvoice.Application.Services.Abstract.Orders;
 
-namespace ECommerceStoreInvoice.Application.Services.Concrete
+namespace ECommerceStoreInvoice.Application.Services.Concrete.Orders
 {
     internal class OrderDescriptorService : IOrderDescriptorService
     {

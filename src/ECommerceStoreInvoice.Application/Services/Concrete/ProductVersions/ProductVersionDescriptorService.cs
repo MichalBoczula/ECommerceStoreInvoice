@@ -1,8 +1,8 @@
 using ECommerceStoreInvoice.Application.Common.FlowDescriptors;
 using ECommerceStoreInvoice.Application.Descriptors.ProductVersions;
-using ECommerceStoreInvoice.Application.Services.Abstract;
+using ECommerceStoreInvoice.Application.Services.Abstract.ProductVersions;
 
-namespace ECommerceStoreInvoice.Application.Services.Concrete
+namespace ECommerceStoreInvoice.Application.Services.Concrete.ProductVersions
 {
     internal class ProductVersionDescriptorService : IProductVersionDescriptorService
     {

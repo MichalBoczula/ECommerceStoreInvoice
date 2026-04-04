@@ -1,6 +1,6 @@
 ﻿using ECommerceStoreInvoice.Application.Common.ResponsesDto;
 
-namespace ECommerceStoreInvoice.Application.Services.Abstract
+namespace ECommerceStoreInvoice.Application.Services.Abstract.Invoices
 {
     public interface IInvoiceService
     {

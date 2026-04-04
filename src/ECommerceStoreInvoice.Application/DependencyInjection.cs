@@ -1,6 +1,10 @@
-﻿using ECommerceStoreInvoice.Application.Services.Abstract;
+﻿using ECommerceStoreInvoice.Application.Services.Abstract.Invoices;
+using ECommerceStoreInvoice.Application.Services.Abstract.Orders;
+using ECommerceStoreInvoice.Application.Services.Abstract.ProductVersions;
 using ECommerceStoreInvoice.Application.Services.Abstract.ShoppingCarts;
-using ECommerceStoreInvoice.Application.Services.Concrete;
+using ECommerceStoreInvoice.Application.Services.Concrete.Invoices;
+using ECommerceStoreInvoice.Application.Services.Concrete.Orders;
+using ECommerceStoreInvoice.Application.Services.Concrete.ProductVersions;
 using ECommerceStoreInvoice.Application.Services.Concrete.ShoppingCarts;
 using Microsoft.Extensions.DependencyInjection;
 

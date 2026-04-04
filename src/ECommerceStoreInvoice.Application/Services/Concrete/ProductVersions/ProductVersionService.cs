@@ -1,12 +1,12 @@
 ﻿using ECommerceStoreInvoice.Application.Common.RequestsDto.ProductVersions;
 using ECommerceStoreInvoice.Application.Common.ResponsesDto;
 using ECommerceStoreInvoice.Application.Descriptors.ProductVersions;
-using ECommerceStoreInvoice.Application.Services.Abstract;
+using ECommerceStoreInvoice.Application.Services.Abstract.ProductVersions;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate.Repositories;
 using ECommerceStoreInvoice.Domain.Validation.Abstract;
 
-namespace ECommerceStoreInvoice.Application.Services.Concrete
+namespace ECommerceStoreInvoice.Application.Services.Concrete.ProductVersions
 {
     internal sealed class ProductVersionService(
         IProductVersionRepository productVersionRepository,

@@ -1,7 +1,7 @@
 ﻿using ECommerceStoreInvoice.Application.Common.RequestsDto.ProductVersions;
 using ECommerceStoreInvoice.Application.Common.ResponsesDto;
 
-namespace ECommerceStoreInvoice.Application.Services.Abstract
+namespace ECommerceStoreInvoice.Application.Services.Abstract.ProductVersions
 {
     public interface IProductVersionService
     {
