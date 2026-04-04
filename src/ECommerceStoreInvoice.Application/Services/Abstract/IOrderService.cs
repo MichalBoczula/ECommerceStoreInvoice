@@ -1,4 +1,5 @@
-﻿using ECommerceStoreInvoice.Application.Common.ResponsesDto.Orders;
+﻿using ECommerceStoreInvoice.Application.Common.RequestsDto.Orders;
+using ECommerceStoreInvoice.Application.Common.ResponsesDto.Orders;
 
 namespace ECommerceStoreInvoice.Application.Services.Abstract
 {
@@ -6,5 +7,6 @@ namespace ECommerceStoreInvoice.Application.Services.Abstract
     {
         Task<OrderResponseDto> CreateOrder(Guid clientId);
         Task<OrderResponseDto> GetOrderByOrderId(Guid orderId);
+        Task<OrderResponseDto> UpdateOrderStatus(Guid orderId, UpdateOrderStatusRequestDto request);
     }
 }

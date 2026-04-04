@@ -1,4 +1,5 @@
 ﻿using ECommerceStoreInvoice.API.Configuration.Common;
+using ECommerceStoreInvoice.Application.Common.RequestsDto.Orders;
 using ECommerceStoreInvoice.Application.Common.ResponsesDto.Orders;
 using ECommerceStoreInvoice.Application.Services.Abstract;
 using Microsoft.AspNetCore.Mvc;
@@ -28,6 +29,23 @@ namespace ECommerceStoreInvoice.API.Endpoints
            .WithSummary("Create order.")
            .WithDescription("Creates a new order based on the current shopping cart for the provided client.")
            .WithName("CreateOrder")
+           .Produces<OrderResponseDto>(StatusCodes.Status200OK)
+           .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest)
+           .Produces<NotFoundProblemDetails>(StatusCodes.Status404NotFound)
+           .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
+
+            group.MapPatch("/{orderId:guid}/status", async (
+                Guid orderId,
+                UpdateOrderStatusRequestDto request,
+                IOrderService orderService) =>
+            {
+                var order = await orderService.UpdateOrderStatus(orderId, request);
+
+                return Results.Ok(order);
+            })
+           .WithSummary("Update order status.")
+           .WithDescription("Updates order status while enforcing allowed status transitions.")
+           .WithName("UpdateOrderStatus")
            .Produces<OrderResponseDto>(StatusCodes.Status200OK)
            .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest)
            .Produces<NotFoundProblemDetails>(StatusCodes.Status404NotFound)
