@@ -2,6 +2,7 @@
 using ECommerceStoreInvoice.Application.Common.ResponsesDto.Orders;
 using ECommerceStoreInvoice.Application.Descriptors.Orders;
 using ECommerceStoreInvoice.Application.Services.Abstract.Orders;
+using ECommerceStoreInvoice.Domain.AggregatesModel.Common.Enums;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate.Repositories;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.Repositories;
@@ -12,7 +13,8 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Orders
     internal sealed class OrderService(
         IOrderRepository orderRepository,
         IShoppingCartRepository shoppingCartRepository,
-        IValidationPolicy<Order> orderValidationPolicy)
+        IValidationPolicy<Order> orderValidationPolicy,
+        IValidationPolicy<(Order order, OrderStatus newStatus)> updateOrderValidationPolicy)
         : IOrderService
     {
         public async Task<OrderResponseDto> CreateOrder(Guid clientId)
@@ -51,7 +53,8 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Orders
             descriptor.ThrowNotFoundExceptionIfOrderMissing(orderId, order);
 
             var newStatus = descriptor.ParseStatus(request.Status);
-            descriptor.EnsureStatusTransitionAllowed(order!, newStatus);
+            var validationResult = await descriptor.ValidateStatusTransition(order!, newStatus, updateOrderValidationPolicy);
+            descriptor.ThrowValidationExceptionIfStatusTransitionInvalid(validationResult);
             descriptor.ChangeOrderStatus(order!, newStatus);
 
             var updatedOrder = await descriptor.SaveOrder(order!, orderRepository);
