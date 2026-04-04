@@ -1,11 +1,8 @@
 ﻿using ECommerceStoreInvoice.Application.Common.ResponsesDto;
-using ECommerceStoreInvoice.Application.Mapping;
+using ECommerceStoreInvoice.Application.Descriptors.Invoices;
 using ECommerceStoreInvoice.Application.Services.Abstract.Invoices;
-using ECommerceStoreInvoice.Domain.AggregatesModel.InvoiceAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.InvoiceAggregate.Repositories;
-using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate.Repositories;
-using ECommerceStoreInvoice.Domain.Validation.Common;
 
 namespace ECommerceStoreInvoice.Application.Services.Concrete.Invoices
 {
@@ -16,50 +13,28 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Invoices
     {
         public async Task<InvoiceResponseDto> CreateInvoiceForOrder(Guid orderId)
         {
-            var order = await orderRepository.GetOrderByOrderId(orderId);
+            var descriptor = new CreateInvoiceForOrderDescriptor();
 
-            if (order is null)
-            {
-                throw new ResourceNotFoundException(
-                    nameof(CreateInvoiceForOrder),
-                    orderId,
-                    nameof(Order));
-            }
+            var order = await descriptor.LoadOrder(orderId, orderRepository);
+            descriptor.ThrowNotFoundExceptionIfOrderMissing(orderId, order);
 
-            var existingInvoice = await invoiceRepository.GetInvoiceByOrderId(orderId);
+            var existingInvoice = await descriptor.LoadInvoiceByOrderId(orderId, invoiceRepository);
+            descriptor.ThrowAlreadyExistsExceptionIfInvoiceAlreadyExists(orderId, existingInvoice);
 
-            if (existingInvoice is not null)
-            {
-                throw new ResourceAlreadyExistsException(
-                    nameof(CreateInvoiceForOrder),
-                    orderId,
-                    nameof(Invoice));
-            }
+            var invoice = descriptor.CreateInvoice(orderId);
+            var createdInvoice = await descriptor.SaveInvoice(invoice, invoiceRepository);
 
-            var invoice = new Invoice(orderId, BuildStorageUrl(orderId));
-            var createdInvoice = await invoiceRepository.CreateInvoice(invoice);
-
-            return MappingConfig.MapToResponse(createdInvoice);
+            return descriptor.MapToResponse(createdInvoice);
         }
 
         public async Task<InvoiceResponseDto> GetInvoiceById(Guid invoiceId)
         {
-            var invoice = await invoiceRepository.GetInvoiceById(invoiceId);
+            var descriptor = new GetInvoiceByIdDescriptor();
 
-            if (invoice is null)
-            {
-                throw new ResourceNotFoundException(
-                    nameof(GetInvoiceById),
-                    invoiceId,
-                    nameof(Invoice));
-            }
+            var invoice = await descriptor.LoadInvoiceById(invoiceId, invoiceRepository);
+            descriptor.ThrowNotFoundExceptionIfInvoiceMissing(invoiceId, invoice);
 
-            return MappingConfig.MapToResponse(invoice);
-        }
-
-        private static string BuildStorageUrl(Guid orderId)
-        {
-            return $"https://invoices.local/orders/{orderId}.pdf";
+            return descriptor.MapToResponse(invoice!);
         }
     }
 }
