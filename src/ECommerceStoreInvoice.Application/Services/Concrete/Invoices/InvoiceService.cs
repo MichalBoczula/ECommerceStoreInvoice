@@ -3,12 +3,15 @@ using ECommerceStoreInvoice.Application.Descriptors.Invoices;
 using ECommerceStoreInvoice.Application.Services.Abstract.Invoices;
 using ECommerceStoreInvoice.Domain.AggregatesModel.InvoiceAggregate.Repositories;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate.Repositories;
+using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.Repositories;
 
 namespace ECommerceStoreInvoice.Application.Services.Concrete.Invoices
 {
     internal sealed class InvoiceService(
         IInvoiceRepository invoiceRepository,
-        IOrderRepository orderRepository)
+        IOrderRepository orderRepository,
+        IShoppingCartRepository shoppingCartRepository,
+        IInvoicePdfService invoicePdfService)
         : IInvoiceService
     {
         public async Task<InvoiceResponseDto> CreateInvoiceForOrder(Guid orderId)
@@ -21,7 +24,10 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Invoices
             var existingInvoice = await descriptor.LoadInvoiceByOrderId(orderId, invoiceRepository);
             descriptor.ThrowAlreadyExistsExceptionIfInvoiceAlreadyExists(orderId, existingInvoice);
 
-            var invoice = descriptor.CreateInvoice(orderId);
+            var shoppingCart = await shoppingCartRepository.GetShoppingCartByClientId(order!.ClientId);
+            var storageUrl = await invoicePdfService.GenerateInvoicePdf(order!, shoppingCart);
+
+            var invoice = descriptor.CreateInvoice(orderId, storageUrl);
             var createdInvoice = await descriptor.SaveInvoice(invoice, invoiceRepository);
 
             return descriptor.MapToResponse(createdInvoice);
