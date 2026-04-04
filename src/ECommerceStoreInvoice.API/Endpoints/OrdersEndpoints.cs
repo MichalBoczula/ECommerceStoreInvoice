@@ -54,6 +54,19 @@ namespace ECommerceStoreInvoice.API.Endpoints
 
         private static void MapOrdersQueries(IEndpointRouteBuilder group)
         {
+            group.MapGet("/client/{clientId:guid}", async (Guid clientId, IOrderService orderService) =>
+            {
+                var orders = await orderService.GetOrdersByClientId(clientId);
+
+                return Results.Ok(orders);
+            })
+            .WithSummary("Get orders by client Id.")
+            .WithDescription("Returns all orders assigned to the provided client identifier.")
+            .WithName("GetOrdersByClientId")
+            .Produces<IReadOnlyCollection<OrderResponseDto>>(StatusCodes.Status200OK)
+            .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest)
+            .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
+
             group.MapGet("/{orderId:guid}", async (Guid orderId, IOrderService orderService) =>
             {
                 var order = await orderService.GetOrderByOrderId(orderId);
