@@ -4,6 +4,7 @@ using ECommerceStoreInvoice.Application.Mapping;
 using ECommerceStoreInvoice.Domain.AggregatesModel.Common.Enums;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate.Repositories;
+using ECommerceStoreInvoice.Domain.Validation.Abstract;
 using ECommerceStoreInvoice.Domain.Validation.Common;
 
 namespace ECommerceStoreInvoice.Application.Descriptors.Orders
@@ -47,36 +48,36 @@ namespace ECommerceStoreInvoice.Application.Descriptors.Orders
         }
 
         [FlowStep(order: 4, bpmnId: "ValidateStatusTransition")]
-        public void EnsureStatusTransitionAllowed(Order order, OrderStatus newStatus)
+        public async Task<ValidationResult> ValidateStatusTransition(
+            Order order,
+            OrderStatus newStatus,
+            IValidationPolicy<(Order order, OrderStatus newStatus)> updateOrderValidationPolicy)
         {
-            if (order.Status == OrderStatus.Created &&
-                (newStatus == OrderStatus.Paid || newStatus == OrderStatus.Cancelled))
-            {
-                var validationResult = new ValidationResult();
-                validationResult.AddValidationError(new ValidationError
-                {
-                    Name = nameof(newStatus),
-                    Entity = nameof(Order),
-                    Message = "Transition from Created to Paid or Cancelled is not allowed."
-                });
+            return await updateOrderValidationPolicy.Validate((order, newStatus));
+        }
 
+        [FlowStep(order: 5, bpmnId: "IsStatusTransitionValid")]
+        public void ThrowValidationExceptionIfStatusTransitionInvalid(ValidationResult validationResult)
+        {
+            if (!validationResult.IsValid)
+            {
                 throw new ValidationException(validationResult);
             }
         }
 
-        [FlowStep(order: 5, bpmnId: "ChangeOrderStatus")]
+        [FlowStep(order: 6, bpmnId: "ChangeOrderStatus")]
         public void ChangeOrderStatus(Order order, OrderStatus newStatus)
         {
             order.ChangeOrderStatus(newStatus);
         }
 
-        [FlowStep(order: 6, bpmnId: "SaveOrder")]
+        [FlowStep(order: 7, bpmnId: "SaveOrder")]
         public async Task<Order> SaveOrder(Order order, IOrderRepository orderRepository)
         {
             return await orderRepository.UpdateOrder(order);
         }
 
-        [FlowStep(order: 7, bpmnId: "MapOrderResponse")]
+        [FlowStep(order: 8, bpmnId: "MapOrderResponse")]
         public OrderResponseDto MapToResponse(Order order)
         {
             return MappingConfig.MapToResponse(order);

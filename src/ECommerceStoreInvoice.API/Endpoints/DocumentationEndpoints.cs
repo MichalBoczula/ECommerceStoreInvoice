@@ -51,6 +51,10 @@ namespace ECommerceStoreInvoice.API.Endpoints
                         },
                         new Dictionary<string, FlowDescriptor>
                         {
+                            [nameof(orderDescriptor.GetUpdateOrderStatusDescriptor)] = orderDescriptor.GetUpdateOrderStatusDescriptor()
+                        },
+                        new Dictionary<string, FlowDescriptor>
+                        {
                             [nameof(productVersionDescriptor.GetProductVersionByIdDescriptor)] = productVersionDescriptor.GetProductVersionByIdDescriptor()
                         },
                         new Dictionary<string, FlowDescriptor>
