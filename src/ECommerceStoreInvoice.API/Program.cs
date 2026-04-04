@@ -1,5 +1,6 @@
 using ECommerceStoreInvoice.API.Configuration;
 using ECommerceStoreInvoice.API.Endpoints;
+using ECommerceStoreInvoice.API.Configuration.Extensions;
 using ECommerceStoreInvoice.Application;
 using ECommerceStoreInvoice.Domain;
 using ECommerceStoreInvoice.Infrastructure;
@@ -13,7 +14,7 @@ builder.Services.AddOpenApiDocument(options =>
     {
         foreach (var schema in document.Components.Schemas.Values)
         {
-            FixGuidFormats(schema);
+            schema.FixGuidFormats();
         }
     };
 });
@@ -46,37 +47,3 @@ app.MapDocumentationEndpoints();
 app.MapHealthChecks("/health");
 
 app.Run();
-
-static void FixGuidFormats(NJsonSchema.JsonSchema schema)
-{
-    if (schema.Type.HasFlag(NJsonSchema.JsonObjectType.String) &&
-        string.Equals(schema.Format, "guid", StringComparison.OrdinalIgnoreCase))
-    {
-        schema.Format = "uuid";
-    }
-
-    foreach (var property in schema.Properties.Values)
-    {
-        FixGuidFormats(property);
-    }
-
-    if (schema.Item is not null)
-    {
-        FixGuidFormats(schema.Item);
-    }
-
-    foreach (var allOf in schema.AllOf)
-    {
-        FixGuidFormats(allOf);
-    }
-
-    foreach (var anyOf in schema.AnyOf)
-    {
-        FixGuidFormats(anyOf);
-    }
-
-    foreach (var oneOf in schema.OneOf)
-    {
-        FixGuidFormats(oneOf);
-    }
-}
