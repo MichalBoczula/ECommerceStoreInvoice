@@ -56,7 +56,7 @@ namespace ECommerceStoreInvoice.Domain.UnitTests.Domain.OrderAggregate
             var originalUpdatedAt = order.UpdatedAt;
 
             // Act
-            Thread.Sleep(5);
+            Thread.Sleep(1);
             order.ChangeOrderStatus(OrderStatus.Cancelled);
 
             // Assert
