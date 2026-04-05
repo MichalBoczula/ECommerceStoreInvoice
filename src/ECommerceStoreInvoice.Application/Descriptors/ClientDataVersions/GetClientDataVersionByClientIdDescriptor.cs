@@ -33,7 +33,16 @@ namespace ECommerceStoreInvoice.Application.Descriptors.ClientDataVersions
             return await clientDataVersionRepository.GetByClientId(clientId);
         }
 
-        [FlowStep(order: 4, bpmnId: "MapClientDataVersionResponse")]
+        [FlowStep(order: 4, bpmnId: "IsClientDataVersionExists")]
+        public void ThrowNotFoundExceptionIfClientDataVersionMissing(Guid clientId, ClientDataVersion? clientDataVersion)
+        {
+            if (clientDataVersion is null)
+            {
+                throw new ResourceNotFoundException(nameof(Load), clientId, nameof(ClientDataVersion));
+            }
+        }
+
+        [FlowStep(order: 5, bpmnId: "MapClientDataVersionResponse")]
         public ClientDataVersionResponseDto MapToResponse(ClientDataVersion clientDataVersion)
         {
             return MappingConfig.MapToResponse(clientDataVersion);

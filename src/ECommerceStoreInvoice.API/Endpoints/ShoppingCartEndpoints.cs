@@ -2,7 +2,6 @@
 using ECommerceStoreInvoice.Application.Common.RequestsDto.ShoppingCarts;
 using ECommerceStoreInvoice.Application.Common.ResponsesDto.ShoppingCarts;
 using ECommerceStoreInvoice.Application.Services.Abstract.ShoppingCarts;
-using ECommerceStoreInvoice.Domain.Validation.Common;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ECommerceStoreInvoice.API.Endpoints
@@ -24,15 +23,6 @@ namespace ECommerceStoreInvoice.API.Endpoints
             group.MapGet("/client/{clientId:guid}", async (Guid clientId, IShoppingCartService shoppingCartService) =>
             {
                 var shoppingCart = await shoppingCartService.GetShoppingCartByClientId(clientId);
-
-                if (shoppingCart is null)
-                {
-                    throw new ResourceNotFoundException(
-                        "ShoppingCart",
-                        clientId,
-                        "ClientId");
-                }
-
                 return Results.Ok(shoppingCart);
             })
             .WithSummary("Get shopping cart by client Id.")

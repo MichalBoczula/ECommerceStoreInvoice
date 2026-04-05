@@ -25,7 +25,7 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.ClientDataVersions
             return descriptor.MapToResponse(createdClientDataVersion);
         }
 
-        public async Task<ClientDataVersionResponseDto?> GetByClientId(Guid clientId)
+        public async Task<ClientDataVersionResponseDto> GetByClientId(Guid clientId)
         {
             var descriptor = new GetClientDataVersionByClientIdDescriptor();
 
@@ -33,11 +33,9 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.ClientDataVersions
             descriptor.ThrowValidationExceptionIfClientIdInvalid(validationResult);
 
             var clientDataVersion = await descriptor.Load(clientId, clientDataVersionRepository);
+            descriptor.ThrowNotFoundExceptionIfClientDataVersionMissing(clientId, clientDataVersion);
 
-            if (clientDataVersion is null)
-                return null;
-
-            return descriptor.MapToResponse(clientDataVersion);
+            return descriptor.MapToResponse(clientDataVersion!);
         }
     }
 }

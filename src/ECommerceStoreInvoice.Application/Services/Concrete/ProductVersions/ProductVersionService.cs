@@ -26,7 +26,7 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.ProductVersions
             return descriptor.MapToResponse(createdProductVersion);
         }
 
-        public async Task<ProductVersionResponseDto?> GetProductVersionById(Guid id)
+        public async Task<ProductVersionResponseDto> GetProductVersionById(Guid id)
         {
             var descriptor = new GetProductVersionByIdDescriptor();
 
@@ -34,11 +34,9 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.ProductVersions
             descriptor.ThrowValidationExceptionIfProductVersionIdInvalid(validationResult);
 
             var productVersion = await descriptor.LoadProductVersion(id, productVersionRepository);
+            descriptor.ThrowNotFoundExceptionIfProductVersionMissing(id, productVersion);
 
-            if (productVersion is null)
-                return null;
-
-            return descriptor.MapToResponse(productVersion);
+            return descriptor.MapToResponse(productVersion!);
         }
     }
 }

@@ -2,7 +2,6 @@ using ECommerceStoreInvoice.API.Configuration.Common;
 using ECommerceStoreInvoice.Application.Common.RequestsDto.ClientDataVersions;
 using ECommerceStoreInvoice.Application.Common.ResponsesDto.ClientDataVersions;
 using ECommerceStoreInvoice.Application.Services.Abstract.ClientDataVersions;
-using ECommerceStoreInvoice.Domain.Validation.Common;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ECommerceStoreInvoice.API.Endpoints
@@ -24,21 +23,13 @@ namespace ECommerceStoreInvoice.API.Endpoints
             group.MapGet("/client/{clientId:guid}", async (Guid clientId, IClientDataVersionService clientDataVersionService) =>
             {
                 var clientDataVersion = await clientDataVersionService.GetByClientId(clientId);
-
-                if (clientDataVersion is null)
-                {
-                    throw new ResourceNotFoundException(
-                        "ClientDataVersion",
-                        clientId,
-                        "ClientId");
-                }
-
                 return Results.Ok(clientDataVersion);
             })
             .WithSummary("Get latest client data version by client Id.")
             .WithDescription("Returns the most recent client data version for the provided client id; 404 otherwise.")
             .WithName("GetClientDataVersionByClientId")
             .Produces<ClientDataVersionResponseDto>(StatusCodes.Status200OK)
+            .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest)
             .Produces<NotFoundProblemDetails>(StatusCodes.Status404NotFound)
             .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
         }
