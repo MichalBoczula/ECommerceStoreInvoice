@@ -1,6 +1,7 @@
 using ECommerceStoreInvoice.Application.Common.FlowDescriptors;
 using ECommerceStoreInvoice.Application.Common.ResponsesDto;
 using ECommerceStoreInvoice.Application.Mapping;
+using ECommerceStoreInvoice.Domain.AggregatesModel.ClientDataVersionAggregate;
 using ECommerceStoreInvoice.Application.Services.Abstract.Invoices;
 using ECommerceStoreInvoice.Domain.AggregatesModel.InvoiceAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.InvoiceAggregate.Repositories;
@@ -16,9 +17,9 @@ namespace ECommerceStoreInvoice.Application.Descriptors.Invoices
     internal sealed class CreateInvoiceForOrderDescriptor : FlowDescriberBase<CreateInvoiceForOrder>
     {
         [FlowStep(order: 1, bpmnId: "LoadOrder")]
-        public async Task<Order?> LoadOrder(Guid orderId, IOrderRepository orderRepository)
+        public async Task<(Order? Order, ClientDataVersion? ClientDataVersion)> LoadOrderWithLatestClientDataVersion(Guid clientId, Guid orderId, IOrderRepository orderRepository)
         {
-            return await orderRepository.GetOrderByOrderId(orderId);
+            return await orderRepository.GetOrderWithLatestClientDataVersion(clientId, orderId);
         }
 
         [FlowStep(order: 2, bpmnId: "IsOrderExists")]
@@ -26,7 +27,7 @@ namespace ECommerceStoreInvoice.Application.Descriptors.Invoices
         {
             if (order is null)
             {
-                throw new ResourceNotFoundException(nameof(LoadOrder), orderId, nameof(Order));
+                throw new ResourceNotFoundException(nameof(LoadOrderWithLatestClientDataVersion), orderId, nameof(Order));
             }
         }
 
@@ -52,9 +53,9 @@ namespace ECommerceStoreInvoice.Application.Descriptors.Invoices
         }
 
         [FlowStep(order: 6, bpmnId: "GenerateInvoicePdf")]
-        public async Task<string> GenerateInvoicePdf(Order order, ShoppingCart? shoppingCart, IInvoicePdfService invoicePdfService)
+        public async Task<string> GenerateInvoicePdf(Order order, ShoppingCart? shoppingCart, ClientDataVersion? clientDataVersion, IInvoicePdfService invoicePdfService)
         {
-            return await invoicePdfService.GenerateInvoicePdf(order, shoppingCart);
+            return await invoicePdfService.GenerateInvoicePdf(order, shoppingCart, clientDataVersion);
         }
 
         [FlowStep(order: 7, bpmnId: "CreateInvoiceDomain")]

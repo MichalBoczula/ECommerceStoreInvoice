@@ -14,18 +14,19 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Invoices
         IInvoicePdfService invoicePdfService)
         : IInvoiceService
     {
-        public async Task<InvoiceResponseDto> CreateInvoiceForOrder(Guid orderId)
+        public async Task<InvoiceResponseDto> CreateInvoiceForOrder(Guid clientId, Guid orderId)
         {
             var descriptor = new CreateInvoiceForOrderDescriptor();
 
-            var order = await descriptor.LoadOrder(orderId, orderRepository);
+            var readModel = await descriptor.LoadOrderWithLatestClientDataVersion(clientId, orderId, orderRepository);
+            var order = readModel.Order;
             descriptor.ThrowNotFoundExceptionIfOrderMissing(orderId, order);
 
             var existingInvoice = await descriptor.LoadInvoiceByOrderId(orderId, invoiceRepository);
             descriptor.ThrowAlreadyExistsExceptionIfInvoiceAlreadyExists(orderId, existingInvoice);
 
             var shoppingCart = await descriptor.LoadShoppingCart(order!.ClientId, shoppingCartRepository);
-            var storageUrl = await descriptor.GenerateInvoicePdf(order, shoppingCart, invoicePdfService);
+            var storageUrl = await descriptor.GenerateInvoicePdf(order, shoppingCart, readModel.ClientDataVersion, invoicePdfService);
 
             var invoice = descriptor.CreateInvoice(orderId, storageUrl);
             var createdInvoice = await descriptor.SaveInvoice(invoice, invoiceRepository);

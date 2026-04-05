@@ -1,9 +1,10 @@
+using ECommerceStoreInvoice.Domain.AggregatesModel.ClientDataVersionAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate;
 
 namespace ECommerceStoreInvoice.Application.Services.Abstract.Invoices
 {
     public interface IInvoicePdfService
     {
-        Task<string> GenerateInvoicePdf(Order order, ShoppingCart? shoppingCart);
+        Task<string> GenerateInvoicePdf(Order order, ShoppingCart? shoppingCart, ClientDataVersion? clientDataVersion);
     }
 }
