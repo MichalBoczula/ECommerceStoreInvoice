@@ -24,9 +24,15 @@ RUN dotnet build "./ECommerceStoreInvoice.API.csproj" -c $BUILD_CONFIGURATION -o
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "./ECommerceStoreInvoice.API.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+RUN mkdir -p /ms-playwright \
+    && chmod +x /app/publish/playwright.sh \
+    && /app/publish/playwright.sh install chromium
 
 # This stage is used in production or when running from VS in regular mode (Default when not using the Debug configuration)
 FROM base AS final
 WORKDIR /app
+ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
 COPY --from=publish /app/publish .
+COPY --from=publish /ms-playwright /ms-playwright
 ENTRYPOINT ["dotnet", "ECommerceStoreInvoice.API.dll"]
