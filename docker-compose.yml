@@ -1,0 +1,39 @@
+services:
+  mongodb:
+    image: mongo:8.0
+    container_name: ecommerce-store-invoice-mongodb-compose
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin123
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  ecommercestoreinvoice.api:
+    image: ${DOCKER_REGISTRY-}ecommercestoreinvoiceapi
+    build:
+      context: .
+      dockerfile: src/ECommerceStoreInvoice.API/Dockerfile
+      args:
+        BUILD_CONFIGURATION: Release
+    container_name: ecommerce-store-invoice-api-compose
+    restart: unless-stopped
+    depends_on:
+      - mongodb
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      ASPNETCORE_HTTP_PORTS: 8080
+      MongoDbSettings__ConnectionString: mongodb://admin:admin123@mongodb:27017/?authSource=admin
+      MongoDbSettings__DatabaseName: ecommerce-store-invoice-db
+      MongoDbSettings__ShoppingCartsCollectionName: shopping-carts
+      MongoDbSettings__OrdersCollectionName: orders
+      MongoDbSettings__ProductVersionsCollectionName: product-versions
+      MongoDbSettings__InvoicesCollectionName: invoices
+    ports:
+      - "8080:8080"
+
+volumes:
+  mongo_data:

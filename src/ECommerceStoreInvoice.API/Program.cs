@@ -8,6 +8,8 @@ using ECommerceStoreInvoice.Infrastructure.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddEndpointsApiExplorer();
+
 builder.Services.AddOpenApiDocument(options =>
 {
     options.PostProcess = document =>
