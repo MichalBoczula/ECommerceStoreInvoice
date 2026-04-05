@@ -1,4 +1,5 @@
 using ECommerceStoreInvoice.Application.Common.ResponsesDto.Invoices;
+using ECommerceStoreInvoice.Application.Common.ResponsesDto.ClientDataVersions;
 using ECommerceStoreInvoice.Application.Services.Abstract.Invoices;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate;
 using Microsoft.Playwright;
@@ -11,7 +12,7 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Invoices
     {
         private const decimal VatRate = 0.23m;
 
-        public async Task<string> GenerateInvoicePdf(Order order, ShoppingCart? shoppingCart)
+        public async Task<string> GenerateInvoicePdf(Order order, ShoppingCart? shoppingCart, ClientDataVersionResponseDto? clientDataVersion)
         {
             var templatePath = GetTemplatePath();
             var template = await File.ReadAllTextAsync(templatePath);
@@ -24,7 +25,7 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Invoices
 
             var withRows = ReplaceOrderLinesSection(template, lines);
             var withOrderData = ApplyOrderTokens(withRows, order);
-            var withClientData = ApplyClientTokens(withOrderData, order.ClientId);
+            var withClientData = ApplyClientTokens(withOrderData, order.ClientId, clientDataVersion);
             var withStoreData = ApplyStoreTokens(withClientData);
             var withTotals = ApplyTotalsTokens(withStoreData, subtotal, tax, grandTotal, currency);
 
@@ -127,12 +128,12 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Invoices
                 .Replace("{{Order.ClientId}}", order.ClientId.ToString());
         }
 
-        internal string ApplyClientTokens(string template, Guid clientId)
+        internal string ApplyClientTokens(string template, Guid clientId, ClientDataVersionResponseDto? clientDataVersion)
         {
             return template
-                .Replace("{{Client.Name}}", "Shopping cart client")
-                .Replace("{{Client.Email}}", "unknown@example.com")
-                .Replace("{{Client.Phone}}", "n/a")
+                .Replace("{{Client.Name}}", $"Client {clientId}")
+                .Replace("{{Client.Email}}", clientDataVersion?.AddressEmail ?? "unknown@example.com")
+                .Replace("{{Client.Phone}}", clientDataVersion is null ? "n/a" : $"{clientDataVersion.PhonePrefix}{clientDataVersion.PhoneNumber}")
                 .Replace("{{Order.ClientId}}", clientId.ToString());
         }
 

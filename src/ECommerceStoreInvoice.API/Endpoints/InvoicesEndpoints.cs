@@ -19,14 +19,14 @@ namespace ECommerceStoreInvoice.API.Endpoints
 
         private static void MapInvoicesCommands(IEndpointRouteBuilder group)
         {
-            group.MapPost("/{orderId:guid}", async (Guid orderId, IInvoiceService invoiceService) =>
+            group.MapPost("/{clientId:guid}/{orderId:guid}", async (Guid clientId, Guid orderId, IInvoiceService invoiceService) =>
             {
-                var invoice = await invoiceService.CreateInvoiceForOrder(orderId);
+                var invoice = await invoiceService.CreateInvoiceForOrder(clientId, orderId);
 
                 return Results.Ok(invoice);
             })
-           .WithSummary("Create invoice for order by Id.")
-           .WithDescription("Creates a new invoice when the order exists and does not already have an invoice.")
+           .WithSummary("Create invoice for client order by Id.")
+           .WithDescription("Creates a new invoice when the client order exists and does not already have an invoice.")
            .WithName("CreateInvoiceForOrder")
            .Produces<InvoiceResponseDto>(StatusCodes.Status200OK)
            .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest)

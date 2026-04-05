@@ -1,5 +1,6 @@
 using ECommerceStoreInvoice.Application.Common.FlowDescriptors;
 using ECommerceStoreInvoice.Application.Common.ResponsesDto;
+using ECommerceStoreInvoice.Application.Common.ResponsesDto.ClientDataVersions;
 using ECommerceStoreInvoice.Application.Mapping;
 using ECommerceStoreInvoice.Application.Services.Abstract.Invoices;
 using ECommerceStoreInvoice.Domain.AggregatesModel.InvoiceAggregate;
@@ -52,9 +53,9 @@ namespace ECommerceStoreInvoice.Application.Descriptors.Invoices
         }
 
         [FlowStep(order: 6, bpmnId: "GenerateInvoicePdf")]
-        public async Task<string> GenerateInvoicePdf(Order order, ShoppingCart? shoppingCart, IInvoicePdfService invoicePdfService)
+        public async Task<string> GenerateInvoicePdf(Order order, ShoppingCart? shoppingCart, ClientDataVersionResponseDto? clientDataVersion, IInvoicePdfService invoicePdfService)
         {
-            return await invoicePdfService.GenerateInvoicePdf(order, shoppingCart);
+            return await invoicePdfService.GenerateInvoicePdf(order, shoppingCart, clientDataVersion);
         }
 
         [FlowStep(order: 7, bpmnId: "CreateInvoiceDomain")]
