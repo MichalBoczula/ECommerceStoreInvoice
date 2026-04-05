@@ -1,4 +1,5 @@
-﻿using ECommerceStoreInvoice.Domain.AggregatesModel.Common.Enums;
+﻿using ECommerceStoreInvoice.Domain.AggregatesModel.ClientDataVersionAggregate;
+using ECommerceStoreInvoice.Domain.AggregatesModel.Common.Enums;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.ValueObjects;
@@ -17,6 +18,8 @@ namespace ECommerceStoreInvoice.Domain
             services.AddScoped<IValidationPolicyDescriptorProvider, ShoppingCartLineValidationPolicy>();
             services.AddScoped<IValidationPolicy<Guid>, ClientValidationPolicy>();
             services.AddScoped<IValidationPolicyDescriptorProvider, ClientValidationPolicy>();
+            services.AddScoped<IValidationPolicy<ClientDataVersion>, ClientDataVersionValidationPolicy>();
+            services.AddScoped<IValidationPolicyDescriptorProvider, ClientDataVersionValidationPolicy>();
             services.AddScoped<IValidationPolicy<Order>, OrderValidationPolicy>();
             services.AddScoped<IValidationPolicyDescriptorProvider, OrderValidationPolicy>();
             services.AddScoped<IValidationPolicy<(Order order, OrderStatus newStatus)>, UpdateOrderValidationPolicy>();

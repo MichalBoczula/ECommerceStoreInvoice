@@ -2,6 +2,7 @@ using ECommerceStoreInvoice.Application.Common.RequestsDto.ClientDataVersions;
 using ECommerceStoreInvoice.Application.Common.ResponsesDto.ClientDataVersions;
 using ECommerceStoreInvoice.Application.Descriptors.ClientDataVersions;
 using ECommerceStoreInvoice.Application.Services.Abstract.ClientDataVersions;
+using ECommerceStoreInvoice.Domain.AggregatesModel.ClientDataVersionAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ClientDataVersionAggregate.Repositories;
 using ECommerceStoreInvoice.Domain.Validation.Abstract;
 
@@ -9,7 +10,8 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.ClientDataVersions
 {
     internal sealed class ClientDataVersionService(
         IClientDataVersionRepository clientDataVersionRepository,
-        IValidationPolicy<Guid> guidValidationPolicy)
+        IValidationPolicy<Guid> guidValidationPolicy,
+        IValidationPolicy<ClientDataVersion> clientDataVersionValidationPolicy)
         : IClientDataVersionService
     {
         public async Task<ClientDataVersionResponseDto> Create(Guid clientId, CreateClientDataVersionRequestDto request)
@@ -20,6 +22,10 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.ClientDataVersions
             descriptor.ThrowValidationExceptionIfClientIdInvalid(validationResult);
 
             var clientDataVersion = descriptor.MapToDomain(clientId, request);
+
+            validationResult = await descriptor.ValidateClientDataVersion(clientDataVersion, clientDataVersionValidationPolicy);
+            descriptor.ThrowValidationExceptionIfClientDataVersionInvalid(validationResult);
+
             var createdClientDataVersion = await descriptor.Save(clientDataVersion, clientDataVersionRepository);
 
             return descriptor.MapToResponse(createdClientDataVersion);
