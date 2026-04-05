@@ -2,7 +2,7 @@ namespace ECommerceStoreInvoice.Domain.AggregatesModel.ClientDataVersionAggregat
 {
     public interface IClientDataVersionRepository
     {
-        Task<ClientDataVersion?> GetById(Guid id);
+        Task<ClientDataVersion?> GetByClientId(Guid clientId);
         Task Create(ClientDataVersion clientDataVersion);
     }
 }

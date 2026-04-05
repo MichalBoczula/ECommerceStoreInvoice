@@ -4,6 +4,7 @@ using ECommerceStoreInvoice.Application.Services.Abstract.Invoices;
 using ECommerceStoreInvoice.Application.Services.Abstract.Orders;
 using ECommerceStoreInvoice.Application.Services.Abstract.ProductVersions;
 using ECommerceStoreInvoice.Application.Services.Abstract.ShoppingCarts;
+using ECommerceStoreInvoice.Application.Services.Abstract.ClientDataVersions;
 using ECommerceStoreInvoice.Domain.Validation.Abstract;
 using ECommerceStoreInvoice.Domain.Validation.Common;
 using Microsoft.AspNetCore.Mvc;
@@ -24,7 +25,7 @@ namespace ECommerceStoreInvoice.API.Endpoints
 
         private static void MapFlowDocumentation(IEndpointRouteBuilder group)
         {
-            group.MapGet("/flows", (IShoppingCartDescriptorService shoppingCartDescriptor, IOrderDescriptorService orderDescriptor, IProductVersionDescriptorService productVersionDescriptor, IInvoiceDescriptorService invoiceDescriptor) =>
+            group.MapGet("/flows", (IShoppingCartDescriptorService shoppingCartDescriptor, IOrderDescriptorService orderDescriptor, IProductVersionDescriptorService productVersionDescriptor, IInvoiceDescriptorService invoiceDescriptor, IClientDataVersionDescriptorService clientDataVersionDescriptor) =>
             {
                 var response = new FlowDescriptorsResponseDto
                 {
@@ -73,6 +74,14 @@ namespace ECommerceStoreInvoice.API.Endpoints
                         new Dictionary<string, FlowDescriptor>
                         {
                             [nameof(invoiceDescriptor.GetCreateInvoiceForOrderDescriptor)] = invoiceDescriptor.GetCreateInvoiceForOrderDescriptor()
+                        },
+                        new Dictionary<string, FlowDescriptor>
+                        {
+                            [nameof(clientDataVersionDescriptor.GetClientDataVersionByClientIdDescriptor)] = clientDataVersionDescriptor.GetClientDataVersionByClientIdDescriptor()
+                        },
+                        new Dictionary<string, FlowDescriptor>
+                        {
+                            [nameof(clientDataVersionDescriptor.GetCreateClientDataVersionDescriptor)] = clientDataVersionDescriptor.GetCreateClientDataVersionDescriptor()
                         },
                     ]
                 };

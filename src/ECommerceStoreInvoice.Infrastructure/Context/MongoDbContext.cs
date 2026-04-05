@@ -1,4 +1,5 @@
-﻿using ECommerceStoreInvoice.Infrastructure.Configuration;
+using ECommerceStoreInvoice.Infrastructure.Configuration;
+using ECommerceStoreInvoice.Infrastructure.Persistence.ClientDataVersions;
 using ECommerceStoreInvoice.Infrastructure.Persistence.Invoices;
 using ECommerceStoreInvoice.Infrastructure.Persistence.Orders;
 using ECommerceStoreInvoice.Infrastructure.Persistence.ProductVersions;
@@ -35,6 +36,9 @@ namespace ECommerceStoreInvoice.Infrastructure.Context
             if (string.IsNullOrWhiteSpace(_settings.InvoicesCollectionName))
                 throw new InvalidOperationException("MongoDbSettings.InvoicesCollectionName is not configured.");
 
+            if (string.IsNullOrWhiteSpace(_settings.ClientDataVersionsCollectionName))
+                throw new InvalidOperationException("MongoDbSettings.ClientDataVersionsCollectionName is not configured.");
+
             var client = new MongoClient(_settings.ConnectionString);
             _database = client.GetDatabase(_settings.DatabaseName);
         }
@@ -50,5 +54,8 @@ namespace ECommerceStoreInvoice.Infrastructure.Context
 
         public IMongoCollection<InvoiceDocument> Invoices =>
             _database.GetCollection<InvoiceDocument>(_settings.InvoicesCollectionName);
+
+        public IMongoCollection<ClientDataVersionDocument> ClientDataVersions =>
+            _database.GetCollection<ClientDataVersionDocument>(_settings.ClientDataVersionsCollectionName);
     }
 }

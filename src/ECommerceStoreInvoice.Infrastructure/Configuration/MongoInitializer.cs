@@ -1,4 +1,5 @@
-﻿using ECommerceStoreInvoice.Infrastructure.Context;
+using ECommerceStoreInvoice.Infrastructure.Context;
+using ECommerceStoreInvoice.Infrastructure.Persistence.ClientDataVersions;
 using ECommerceStoreInvoice.Infrastructure.Persistence.Invoices;
 using ECommerceStoreInvoice.Infrastructure.Persistence.ShoppingCarts;
 using MongoDB.Driver;
@@ -18,6 +19,23 @@ namespace ECommerceStoreInvoice.Infrastructure.Configuration
         {
             await CreateShoppingCartIndexesAsync(cancellationToken);
             await CreateInvoiceIndexesAsync(cancellationToken);
+            await CreateClientDataVersionIndexesAsync(cancellationToken);
+        }
+
+        private async Task CreateClientDataVersionIndexesAsync(CancellationToken cancellationToken)
+        {
+            var index = new CreateIndexModel<ClientDataVersionDocument>(
+                Builders<ClientDataVersionDocument>.IndexKeys
+                    .Ascending(x => x.ClientId)
+                    .Descending(x => x.CreatedAt),
+                new CreateIndexOptions
+                {
+                    Name = "IX_ClientDataVersion_ClientId_CreatedAtDesc"
+                });
+
+            await _context.ClientDataVersions.Indexes.CreateOneAsync(
+                index,
+                cancellationToken: cancellationToken);
         }
 
         private async Task CreateInvoiceIndexesAsync(CancellationToken cancellationToken)
