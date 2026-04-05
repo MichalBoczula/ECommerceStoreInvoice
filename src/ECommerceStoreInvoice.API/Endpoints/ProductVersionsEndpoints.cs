@@ -2,7 +2,6 @@ using ECommerceStoreInvoice.API.Configuration.Common;
 using ECommerceStoreInvoice.Application.Common.RequestsDto.ProductVersions;
 using ECommerceStoreInvoice.Application.Common.ResponsesDto;
 using ECommerceStoreInvoice.Application.Services.Abstract.ProductVersions;
-using ECommerceStoreInvoice.Domain.Validation.Common;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ECommerceStoreInvoice.API.Endpoints
@@ -42,15 +41,6 @@ namespace ECommerceStoreInvoice.API.Endpoints
             group.MapGet("/{id:guid}", async (Guid id, IProductVersionService productVersionService) =>
             {
                 var productVersion = await productVersionService.GetProductVersionById(id);
-
-                if (productVersion is null)
-                {
-                    throw new ResourceNotFoundException(
-                        "ProductVersion",
-                        id,
-                        "Id");
-                }
-
                 return Results.Ok(productVersion);
             })
             .WithSummary("Get product version by Id.")

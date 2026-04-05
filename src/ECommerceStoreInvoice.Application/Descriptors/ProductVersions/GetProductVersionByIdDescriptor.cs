@@ -33,7 +33,16 @@ namespace ECommerceStoreInvoice.Application.Descriptors.ProductVersions
             return await productVersionRepository.GetProductVersionById(id);
         }
 
-        [FlowStep(order: 4, bpmnId: "MapProductVersionResponse")]
+        [FlowStep(order: 4, bpmnId: "IsProductVersionExists")]
+        public void ThrowNotFoundExceptionIfProductVersionMissing(Guid id, ProductVersion? productVersion)
+        {
+            if (productVersion is null)
+            {
+                throw new ResourceNotFoundException(nameof(LoadProductVersion), id, nameof(ProductVersion));
+            }
+        }
+
+        [FlowStep(order: 5, bpmnId: "MapProductVersionResponse")]
         public ProductVersionResponseDto MapToResponse(ProductVersion productVersion)
         {
             return MappingConfig.MapToResponse(productVersion);

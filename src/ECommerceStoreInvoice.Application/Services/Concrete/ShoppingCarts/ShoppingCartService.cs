@@ -14,7 +14,7 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.ShoppingCarts
         IValidationPolicy<Guid> _guidValidationPolicy)
         : IShoppingCartService
     {
-        public async Task<ShoppingCartResponseDto?> GetShoppingCartByClientId(Guid clientId)
+        public async Task<ShoppingCartResponseDto> GetShoppingCartByClientId(Guid clientId)
         {
             var descriptor = new GetShoppingCartByClientIdDescriptor();
 
