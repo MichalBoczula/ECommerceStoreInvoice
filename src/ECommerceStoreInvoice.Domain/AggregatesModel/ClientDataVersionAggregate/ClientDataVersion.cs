@@ -5,6 +5,7 @@ namespace ECommerceStoreInvoice.Domain.AggregatesModel.ClientDataVersionAggregat
     public sealed class ClientDataVersion
     {
         public Guid Id { get; init; }
+        public Guid ClientId { get; init; }
         public Address Address { get; init; }
         public string PhoneNumber { get; init; }
         public string PhonePrefix { get; init; }
@@ -12,12 +13,14 @@ namespace ECommerceStoreInvoice.Domain.AggregatesModel.ClientDataVersionAggregat
         public DateTime CreatedAt { get; init; }
 
         public ClientDataVersion(
+            Guid clientId,
             Address address,
             string phoneNumber,
             string phonePrefix,
             string addressEmail)
         {
             Id = Guid.NewGuid();
+            ClientId = clientId;
             Address = address;
             PhoneNumber = phoneNumber;
             PhonePrefix = phonePrefix;
@@ -27,6 +30,7 @@ namespace ECommerceStoreInvoice.Domain.AggregatesModel.ClientDataVersionAggregat
 
         private ClientDataVersion(
             Guid id,
+            Guid clientId,
             Address address,
             string phoneNumber,
             string phonePrefix,
@@ -34,6 +38,7 @@ namespace ECommerceStoreInvoice.Domain.AggregatesModel.ClientDataVersionAggregat
             DateTime createdAt)
         {
             Id = id;
+            ClientId = clientId;
             Address = address;
             PhoneNumber = phoneNumber;
             PhonePrefix = phonePrefix;
@@ -43,6 +48,7 @@ namespace ECommerceStoreInvoice.Domain.AggregatesModel.ClientDataVersionAggregat
 
         public static ClientDataVersion Rehydrate(
             Guid id,
+            Guid clientId,
             Address address,
             string phoneNumber,
             string phonePrefix,
@@ -51,6 +57,7 @@ namespace ECommerceStoreInvoice.Domain.AggregatesModel.ClientDataVersionAggregat
         {
             return new ClientDataVersion(
                 id,
+                clientId,
                 address,
                 phoneNumber,
                 phonePrefix,

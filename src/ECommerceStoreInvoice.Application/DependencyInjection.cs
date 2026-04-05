@@ -1,7 +1,9 @@
-﻿using ECommerceStoreInvoice.Application.Services.Abstract.Invoices;
+using ECommerceStoreInvoice.Application.Services.Abstract.ClientDataVersions;
+using ECommerceStoreInvoice.Application.Services.Abstract.Invoices;
 using ECommerceStoreInvoice.Application.Services.Abstract.Orders;
 using ECommerceStoreInvoice.Application.Services.Abstract.ProductVersions;
 using ECommerceStoreInvoice.Application.Services.Abstract.ShoppingCarts;
+using ECommerceStoreInvoice.Application.Services.Concrete.ClientDataVersions;
 using ECommerceStoreInvoice.Application.Services.Concrete.Invoices;
 using ECommerceStoreInvoice.Application.Services.Concrete.Orders;
 using ECommerceStoreInvoice.Application.Services.Concrete.ProductVersions;
@@ -24,6 +26,8 @@ namespace ECommerceStoreInvoice.Application
             services.AddScoped<IOrderDescriptorService, OrderDescriptorService>();
             services.AddScoped<IShoppingCartDescriptorService, ShoppingCartDescriptorService>();
             services.AddScoped<IProductVersionDescriptorService, ProductVersionDescriptorService>();
+            services.AddScoped<IClientDataVersionService, ClientDataVersionService>();
+            services.AddScoped<IClientDataVersionDescriptorService, ClientDataVersionDescriptorService>();
 
             return services;
         }

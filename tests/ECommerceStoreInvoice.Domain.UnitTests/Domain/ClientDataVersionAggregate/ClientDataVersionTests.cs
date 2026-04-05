@@ -10,13 +10,15 @@ namespace ECommerceStoreInvoice.Domain.UnitTests.Domain.ClientDataVersionAggrega
         public void Ctor_ShouldInitializeClientDataVersion()
         {
             // Arrange
+            var clientId = Guid.NewGuid();
             var address = new Address("00-001", "New York", "Main St", "20A", "15");
 
             // Act
-            var clientDataVersion = new ClientDataVersion(address, "123456789", "+1", "client@example.com");
+            var clientDataVersion = new ClientDataVersion(clientId, address, "123456789", "+1", "client@example.com");
 
             // Assert
             clientDataVersion.Id.ShouldNotBe(Guid.Empty);
+            clientDataVersion.ClientId.ShouldBe(clientId);
             clientDataVersion.Address.ShouldBe(address);
             clientDataVersion.PhoneNumber.ShouldBe("123456789");
             clientDataVersion.PhonePrefix.ShouldBe("+1");
@@ -29,12 +31,14 @@ namespace ECommerceStoreInvoice.Domain.UnitTests.Domain.ClientDataVersionAggrega
         {
             // Arrange
             var id = Guid.NewGuid();
+            var clientId = Guid.NewGuid();
             var createdAt = new DateTime(2026, 1, 5, 10, 0, 0, DateTimeKind.Utc);
             var address = new Address("00-001", "New York", "Main St", "20A", "15");
 
             // Act
             var clientDataVersion = ClientDataVersion.Rehydrate(
                 id,
+                clientId,
                 address,
                 "987654321",
                 "+1",
@@ -43,6 +47,7 @@ namespace ECommerceStoreInvoice.Domain.UnitTests.Domain.ClientDataVersionAggrega
 
             // Assert
             clientDataVersion.Id.ShouldBe(id);
+            clientDataVersion.ClientId.ShouldBe(clientId);
             clientDataVersion.Address.ShouldBe(address);
             clientDataVersion.PhoneNumber.ShouldBe("987654321");
             clientDataVersion.PhonePrefix.ShouldBe("+1");

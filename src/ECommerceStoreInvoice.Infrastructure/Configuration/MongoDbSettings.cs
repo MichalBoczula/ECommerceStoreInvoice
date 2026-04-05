@@ -9,5 +9,6 @@
         public required string OrdersCollectionName { get; init; }
         public required string ProductVersionsCollectionName { get; init; }
         public required string InvoicesCollectionName { get; init; }
+        public required string ClientDataVersionsCollectionName { get; init; }
     }
 }
