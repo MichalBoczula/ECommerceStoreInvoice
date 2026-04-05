@@ -10,3 +10,10 @@ docker compose -f mongo-compose.yml logs -f
 
 -check
 docker compose -f mongo-compose.yml ps
+
+--playwright (local machine, run once after build)
+-windows (powershell)
+pwsh .\src\ECommerceStoreInvoice.API\bin\Debug\net10.0\playwright.ps1 install chromium
+
+-linux/mac
+./src/ECommerceStoreInvoice.API/bin/Debug/net10.0/playwright.sh install chromium
