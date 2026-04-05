@@ -34,14 +34,29 @@ namespace ECommerceStoreInvoice.Application.Descriptors.ClientDataVersions
             return MappingConfig.MapToDomain(clientId, request);
         }
 
-        [FlowStep(order: 4, bpmnId: "SaveClientDataVersion")]
+        [FlowStep(order: 4, bpmnId: "ValidateClientDataVersion")]
+        public async Task<ValidationResult> ValidateClientDataVersion(ClientDataVersion clientDataVersion, IValidationPolicy<ClientDataVersion> clientDataVersionValidationPolicy)
+        {
+            return await clientDataVersionValidationPolicy.Validate(clientDataVersion);
+        }
+
+        [FlowStep(order: 5, bpmnId: "IsClientDataVersionValid")]
+        public void ThrowValidationExceptionIfClientDataVersionInvalid(ValidationResult validationResult)
+        {
+            if (!validationResult.IsValid)
+            {
+                throw new ValidationException(validationResult);
+            }
+        }
+
+        [FlowStep(order: 6, bpmnId: "SaveClientDataVersion")]
         public async Task<ClientDataVersion> Save(ClientDataVersion clientDataVersion, IClientDataVersionRepository clientDataVersionRepository)
         {
             await clientDataVersionRepository.Create(clientDataVersion);
             return clientDataVersion;
         }
 
-        [FlowStep(order: 5, bpmnId: "MapClientDataVersionResponse")]
+        [FlowStep(order: 7, bpmnId: "MapClientDataVersionResponse")]
         public ClientDataVersionResponseDto MapToResponse(ClientDataVersion clientDataVersion)
         {
             return MappingConfig.MapToResponse(clientDataVersion);
