@@ -13,6 +13,7 @@ namespace ECommerceStoreInvoice.Domain.Validation.Concrete.Policies
         {
             _rules.Add(new ClientDataVersionPhoneValidationRule());
             _rules.Add(new ClientDataVersionEmailValidationRule());
+            _rules.Add(new ClientDataVersionAddressValidationRule());
         }
 
         public async Task<ValidationResult> Validate(ClientDataVersion entity)
