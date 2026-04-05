@@ -14,12 +14,10 @@
   <ItemGroup>
     <None Update="Templates/InvoiceTemplate.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <TargetPath>Templates/InvoiceTemplate.html</TargetPath>
     </None>
     <None Update="Templates/InvoiceLineTemplate.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <TargetPath>Templates/InvoiceLineTemplate.html</TargetPath>
     </None>
   </ItemGroup>
