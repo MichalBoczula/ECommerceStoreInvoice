@@ -7,6 +7,13 @@ namespace ECommerceStoreInvoice.API.Configuration
 {
     public sealed class ExceptionHandler : IExceptionHandler
     {
+        private readonly ILogger<ExceptionHandler> _logger;
+
+        public ExceptionHandler(ILogger<ExceptionHandler> logger)
+        {
+            _logger = logger;
+        }
+
         public async ValueTask<bool> TryHandleAsync(
             HttpContext context,
             Exception exception,
@@ -34,7 +41,7 @@ namespace ECommerceStoreInvoice.API.Configuration
                     ResourceAlreadyExistsExceptionHandlerExtension.HandleResourceAlreadyExistsException(
                         context, resourceAlreadyExistsException, cancellationToken),
 
-                _ => DefaultExceptionHandlerExtension.HandleDefaultException(context, cancellationToken)
+                _ => DefaultExceptionHandlerExtension.HandleDefaultException(context, exception, _logger, cancellationToken)
             });
 
             return true;
