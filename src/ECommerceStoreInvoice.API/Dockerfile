@@ -1,23 +1,25 @@
 # See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
 
 # This stage is used when running from VS in fast mode (Default for Debug configuration)
-FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
-USER $APP_UID
+FROM mcr.microsoft.com/playwright/dotnet:v1.58.0-noble AS base
 WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
-
 
 # This stage is used to build the service project
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
+
 COPY ["src/ECommerceStoreInvoice.API/ECommerceStoreInvoice.API.csproj", "src/ECommerceStoreInvoice.API/"]
 COPY ["src/ECommerceStoreInvoice.Application/ECommerceStoreInvoice.Application.csproj", "src/ECommerceStoreInvoice.Application/"]
 COPY ["src/ECommerceStoreInvoice.Domain/ECommerceStoreInvoice.Domain.csproj", "src/ECommerceStoreInvoice.Domain/"]
 COPY ["src/ECommerceStoreInvoice.Infrastructure/ECommerceStoreInvoice.Infrastructure.csproj", "src/ECommerceStoreInvoice.Infrastructure/"]
+
 RUN dotnet restore "./src/ECommerceStoreInvoice.API/ECommerceStoreInvoice.API.csproj"
+
 COPY . .
+
 WORKDIR "/src/src/ECommerceStoreInvoice.API"
 RUN dotnet build "./ECommerceStoreInvoice.API.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
@@ -27,7 +29,14 @@ ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "./ECommerceStoreInvoice.API.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 # This stage is used in production or when running from VS in regular mode (Default when not using the Debug configuration)
-FROM base AS final
+FROM mcr.microsoft.com/playwright/dotnet:v1.58.0-noble AS final
 WORKDIR /app
+
+ENV ASPNETCORE_URLS=http://+:8080
+ENV ASPNETCORE_HTTP_PORTS=8080
+
 COPY --from=publish /app/publish .
+
+RUN chmod -R 755 /app/.playwright
+
 ENTRYPOINT ["dotnet", "ECommerceStoreInvoice.API.dll"]
