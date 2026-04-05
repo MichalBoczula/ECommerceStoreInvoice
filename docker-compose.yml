@@ -1,7 +1,6 @@
 services:
   mongodb:
     image: mongo:8.0
-    container_name: ecommerce-store-invoice-mongodb-compose
     restart: unless-stopped
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
@@ -10,6 +9,12 @@ services:
       - "27017:27017"
     volumes:
       - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--username", "admin", "--password", "admin123", "--authenticationDatabase", "admin", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
 
   ecommercestoreinvoice.api:
     image: ${DOCKER_REGISTRY-}ecommercestoreinvoiceapi
@@ -18,7 +23,6 @@ services:
       dockerfile: src/ECommerceStoreInvoice.API/Dockerfile
       args:
         BUILD_CONFIGURATION: Release
-    container_name: ecommerce-store-invoice-api-compose
     restart: unless-stopped
     depends_on:
       - mongodb
@@ -34,6 +38,7 @@ services:
       MongoDbSettings__InvoicesCollectionName: invoices
     ports:
       - "8080:8080"
+    shm_size: "2gb"
 
 volumes:
   mongo_data:
