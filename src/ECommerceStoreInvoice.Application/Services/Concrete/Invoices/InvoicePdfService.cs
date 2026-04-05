@@ -1,6 +1,6 @@
 using ECommerceStoreInvoice.Application.Common.ResponsesDto.Invoices;
+using ECommerceStoreInvoice.Application.Common.ResponsesDto.ClientDataVersions;
 using ECommerceStoreInvoice.Application.Services.Abstract.Invoices;
-using ECommerceStoreInvoice.Domain.AggregatesModel.ClientDataVersionAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate;
 using Microsoft.Playwright;
 using System.Globalization;
@@ -12,7 +12,7 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Invoices
     {
         private const decimal VatRate = 0.23m;
 
-        public async Task<string> GenerateInvoicePdf(Order order, ShoppingCart? shoppingCart, ClientDataVersion? clientDataVersion)
+        public async Task<string> GenerateInvoicePdf(Order order, ShoppingCart? shoppingCart, ClientDataVersionResponseDto? clientDataVersion)
         {
             var templatePath = GetTemplatePath();
             var template = await File.ReadAllTextAsync(templatePath);
@@ -128,7 +128,7 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Invoices
                 .Replace("{{Order.ClientId}}", order.ClientId.ToString());
         }
 
-        internal string ApplyClientTokens(string template, Guid clientId, ClientDataVersion? clientDataVersion)
+        internal string ApplyClientTokens(string template, Guid clientId, ClientDataVersionResponseDto? clientDataVersion)
         {
             return template
                 .Replace("{{Client.Name}}", $"Client {clientId}")
