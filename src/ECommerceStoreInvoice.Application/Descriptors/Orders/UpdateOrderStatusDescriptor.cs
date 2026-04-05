@@ -13,13 +13,28 @@ namespace ECommerceStoreInvoice.Application.Descriptors.Orders
 
     internal sealed class UpdateOrderStatusDescriptor : FlowDescriberBase<UpdateOrderStatus>
     {
-        [FlowStep(order: 1, bpmnId: "LoadOrder")]
+        [FlowStep(order: 1, bpmnId: "ValidateOrderId")]
+        public async Task<ValidationResult> ValidateOrderId(Guid orderId, IValidationPolicy<Guid> guidValidationPolicy)
+        {
+            return await guidValidationPolicy.Validate(orderId);
+        }
+
+        [FlowStep(order: 2, bpmnId: "IsOrderIdValid")]
+        public void ThrowValidationExceptionIfOrderIdInvalid(ValidationResult validationResult)
+        {
+            if (!validationResult.IsValid)
+            {
+                throw new ValidationException(validationResult);
+            }
+        }
+
+        [FlowStep(order: 3, bpmnId: "LoadOrder")]
         public async Task<Order?> LoadOrder(Guid orderId, IOrderRepository orderRepository)
         {
             return await orderRepository.GetOrderByOrderId(orderId);
         }
 
-        [FlowStep(order: 2, bpmnId: "IsOrderExists")]
+        [FlowStep(order: 4, bpmnId: "IsOrderExists")]
         public void ThrowNotFoundExceptionIfOrderMissing(Guid orderId, Order? order)
         {
             if (order is null)
@@ -28,7 +43,7 @@ namespace ECommerceStoreInvoice.Application.Descriptors.Orders
             }
         }
 
-        [FlowStep(order: 3, bpmnId: "ParseStatus")]
+        [FlowStep(order: 5, bpmnId: "ParseStatus")]
         public OrderStatus ParseStatus(string status)
         {
             if (Enum.TryParse<OrderStatus>(status, true, out var parsedStatus))
@@ -47,7 +62,7 @@ namespace ECommerceStoreInvoice.Application.Descriptors.Orders
             throw new ValidationException(validationResult);
         }
 
-        [FlowStep(order: 4, bpmnId: "ValidateStatusTransition")]
+        [FlowStep(order: 6, bpmnId: "ValidateStatusTransition")]
         public async Task<ValidationResult> ValidateStatusTransition(
             Order order,
             OrderStatus newStatus,
@@ -56,7 +71,7 @@ namespace ECommerceStoreInvoice.Application.Descriptors.Orders
             return await updateOrderValidationPolicy.Validate((order, newStatus));
         }
 
-        [FlowStep(order: 5, bpmnId: "IsStatusTransitionValid")]
+        [FlowStep(order: 7, bpmnId: "IsStatusTransitionValid")]
         public void ThrowValidationExceptionIfStatusTransitionInvalid(ValidationResult validationResult)
         {
             if (!validationResult.IsValid)
@@ -65,19 +80,19 @@ namespace ECommerceStoreInvoice.Application.Descriptors.Orders
             }
         }
 
-        [FlowStep(order: 6, bpmnId: "ChangeOrderStatus")]
+        [FlowStep(order: 8, bpmnId: "ChangeOrderStatus")]
         public void ChangeOrderStatus(Order order, OrderStatus newStatus)
         {
             order.ChangeOrderStatus(newStatus);
         }
 
-        [FlowStep(order: 7, bpmnId: "SaveOrder")]
+        [FlowStep(order: 9, bpmnId: "SaveOrder")]
         public async Task<Order> SaveOrder(Order order, IOrderRepository orderRepository)
         {
             return await orderRepository.UpdateOrder(order);
         }
 
-        [FlowStep(order: 8, bpmnId: "MapOrderResponse")]
+        [FlowStep(order: 10, bpmnId: "MapOrderResponse")]
         public OrderResponseDto MapToResponse(Order order)
         {
             return MappingConfig.MapToResponse(order);

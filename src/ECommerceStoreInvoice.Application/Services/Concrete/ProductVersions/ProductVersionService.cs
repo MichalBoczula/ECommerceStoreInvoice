@@ -10,7 +10,8 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.ProductVersions
 {
     internal sealed class ProductVersionService(
         IProductVersionRepository productVersionRepository,
-        IValidationPolicy<ProductVersion> productVersionValidationPolicy)
+        IValidationPolicy<ProductVersion> productVersionValidationPolicy,
+        IValidationPolicy<Guid> guidValidationPolicy)
         : IProductVersionService
     {
         public async Task<ProductVersionResponseDto> CreateProductVersion(CreateProductVersionRequestDto request)
@@ -28,6 +29,9 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.ProductVersions
         public async Task<ProductVersionResponseDto?> GetProductVersionById(Guid id)
         {
             var descriptor = new GetProductVersionByIdDescriptor();
+
+            var validationResult = await descriptor.ValidateProductVersionId(id, guidValidationPolicy);
+            descriptor.ThrowValidationExceptionIfProductVersionIdInvalid(validationResult);
 
             var productVersion = await descriptor.LoadProductVersion(id, productVersionRepository);
 
