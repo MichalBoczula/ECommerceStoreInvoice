@@ -22,11 +22,14 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Orders
         {
             var descriptor = new CreateOrderDescriptor();
 
+            var validationResult = await descriptor.ValidateClientId(clientId, guidValidationPolicy);
+            descriptor.ThrowValidationExceptionIfClientIdInvalid(validationResult);
+
             var shoppingCart = await descriptor.LoadShoppingCart(clientId, shoppingCartRepository);
             descriptor.ThrowNotFoundExceptionIfShoppingCartMissing(clientId, shoppingCart);
 
             var order = descriptor.MapToDomain(shoppingCart!);
-            var validationResult = await descriptor.ValidateOrder(order, orderValidationPolicy);
+            validationResult = await descriptor.ValidateOrder(order, orderValidationPolicy);
             descriptor.ThrowValidationExceptionIfOrderInvalid(validationResult);
 
             var createdOrder = await descriptor.SaveOrder(order, orderRepository);
@@ -52,6 +55,9 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Orders
         {
             var descriptor = new GetOrderByIdDescriptor();
 
+            var validationResult = await descriptor.ValidateOrderId(orderId, guidValidationPolicy);
+            descriptor.ThrowValidationExceptionIfOrderIdInvalid(validationResult);
+
             var order = await descriptor.LoadOrder(orderId, orderRepository);
             descriptor.ThrowNotFoundExceptionIfOrderMissing(orderId, order);
 
@@ -62,11 +68,14 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Orders
         {
             var descriptor = new UpdateOrderStatusDescriptor();
 
+            var validationResult = await descriptor.ValidateOrderId(orderId, guidValidationPolicy);
+            descriptor.ThrowValidationExceptionIfOrderIdInvalid(validationResult);
+
             var order = await descriptor.LoadOrder(orderId, orderRepository);
             descriptor.ThrowNotFoundExceptionIfOrderMissing(orderId, order);
 
             var newStatus = descriptor.ParseStatus(request.Status);
-            var validationResult = await descriptor.ValidateStatusTransition(order!, newStatus, updateOrderValidationPolicy);
+            validationResult = await descriptor.ValidateStatusTransition(order!, newStatus, updateOrderValidationPolicy);
             descriptor.ThrowValidationExceptionIfStatusTransitionInvalid(validationResult);
             descriptor.ChangeOrderStatus(order!, newStatus);
 
