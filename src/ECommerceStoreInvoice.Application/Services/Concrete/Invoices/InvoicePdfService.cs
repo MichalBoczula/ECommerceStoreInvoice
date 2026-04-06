@@ -130,8 +130,15 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Invoices
 
         internal string ApplyClientTokens(string template, Guid clientId, ClientDataVersionResponseDto? clientDataVersion)
         {
+            var clientAddress = clientDataVersion is null
+                ? "n/a"
+                : string.IsNullOrWhiteSpace(clientDataVersion.ApartmentNumber)
+                    ? $"{clientDataVersion.Street} {clientDataVersion.BuildingNumber}, {clientDataVersion.PostalCode} {clientDataVersion.City}"
+                    : $"{clientDataVersion.Street} {clientDataVersion.BuildingNumber}/{clientDataVersion.ApartmentNumber}, {clientDataVersion.PostalCode} {clientDataVersion.City}";
+
             return template
                 .Replace("{{Client.Name}}", $"Client {clientId}")
+                .Replace("{{Client.Address}}", clientAddress)
                 .Replace("{{Client.Email}}", clientDataVersion?.AddressEmail ?? "unknown@example.com")
                 .Replace("{{Client.Phone}}", clientDataVersion is null ? "n/a" : $"{clientDataVersion.PhonePrefix}{clientDataVersion.PhoneNumber}")
                 .Replace("{{Order.ClientId}}", clientId.ToString());
@@ -139,12 +146,21 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Invoices
 
         internal string ApplyStoreTokens(string template)
         {
+            const string storeStreet = "Invoice Street";
+            const string storeBuildingNumber = "10";
+            const string storeApartmentNumber = "2";
+            const string storePostalCode = "00-000";
+            const string storeCity = "Store";
+
+            var storeAddress = string.IsNullOrWhiteSpace(storeApartmentNumber)
+                ? $"{storeStreet} {storeBuildingNumber}, {storePostalCode} {storeCity}"
+                : $"{storeStreet} {storeBuildingNumber}/{storeApartmentNumber}, {storePostalCode} {storeCity}";
+
             return template
                 .Replace("{{Store.Name}}", "ECommerce Store")
-                .Replace("{{Store.AddressLine}}", "Online")
-                .Replace("{{Store.City}}", "N/A")
-                .Replace("{{Store.Country}}", "N/A")
-                .Replace("{{Store.Email}}", "support@ecommerce.local");
+                .Replace("{{Store.Address}}", storeAddress)
+                .Replace("{{Store.Email}}", "support@ecommerce.local")
+                .Replace("{{Store.Phone}}", "n/a");
         }
 
         internal string ApplyTotalsTokens(string template, decimal subtotal, decimal tax, decimal grandTotal, string currency)
