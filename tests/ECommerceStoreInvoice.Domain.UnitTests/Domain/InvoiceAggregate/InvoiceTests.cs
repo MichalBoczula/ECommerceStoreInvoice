@@ -6,20 +6,22 @@ namespace ECommerceStoreInvoice.Domain.UnitTests.Domain.InvoiceAggregate
     public class InvoiceTests
     {
         [Fact]
-        public void Ctor_ShouldInitializeInvoiceWithOrderIdStorageUrlAndCreatedAt()
+        public void Ctor_ShouldInitializeInvoiceWithOrderIdClientDataVersionIdStorageUrlAndCreatedAt()
         {
             // Arrange
             var orderId = Guid.NewGuid();
+            var clientDataVersionId = Guid.NewGuid();
             const string storageUrl = "https://storage.example.com/invoices/invoice-123.pdf";
 
             // Act
             var beforeCreation = DateTime.UtcNow;
-            var invoice = new Invoice(orderId, storageUrl);
+            var invoice = new Invoice(orderId, clientDataVersionId, storageUrl);
             var afterCreation = DateTime.UtcNow;
 
             // Assert
             invoice.Id.ShouldNotBe(Guid.Empty);
             invoice.OrderId.ShouldBe(orderId);
+            invoice.ClientDataVersionId.ShouldBe(clientDataVersionId);
             invoice.StorageUrl.ShouldBe(storageUrl);
             invoice.CreatedAt.ShouldBeGreaterThanOrEqualTo(beforeCreation);
             invoice.CreatedAt.ShouldBeLessThanOrEqualTo(afterCreation);
@@ -31,15 +33,17 @@ namespace ECommerceStoreInvoice.Domain.UnitTests.Domain.InvoiceAggregate
             // Arrange
             var id = Guid.NewGuid();
             var orderId = Guid.NewGuid();
+            var clientDataVersionId = Guid.NewGuid();
             const string storageUrl = "s3://invoices/2026/04/invoice-456.pdf";
             var createdAt = new DateTime(2026, 1, 15, 9, 30, 0, DateTimeKind.Utc);
 
             // Act
-            var invoice = Invoice.Rehydrate(id, orderId, storageUrl, createdAt);
+            var invoice = Invoice.Rehydrate(id, orderId, clientDataVersionId, storageUrl, createdAt);
 
             // Assert
             invoice.Id.ShouldBe(id);
             invoice.OrderId.ShouldBe(orderId);
+            invoice.ClientDataVersionId.ShouldBe(clientDataVersionId);
             invoice.StorageUrl.ShouldBe(storageUrl);
             invoice.CreatedAt.ShouldBe(createdAt);
         }
