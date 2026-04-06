@@ -150,7 +150,7 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Invoices
             const string storeBuildingNumber = "10";
             const string storeApartmentNumber = "2";
             const string storePostalCode = "00-000";
-            const string storeCity = "N/A";
+            const string storeCity = "Store";
 
             var storeAddress = string.IsNullOrWhiteSpace(storeApartmentNumber)
                 ? $"{storeStreet} {storeBuildingNumber}, {storePostalCode} {storeCity}"
