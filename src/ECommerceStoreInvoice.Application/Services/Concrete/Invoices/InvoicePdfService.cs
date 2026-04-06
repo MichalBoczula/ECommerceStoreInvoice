@@ -160,7 +160,7 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Invoices
                 .Replace("{{Store.Name}}", "ECommerce Store")
                 .Replace("{{Store.Address}}", storeAddress)
                 .Replace("{{Store.Email}}", "support@ecommerce.local")
-                .Replace("{{Store.Phone}}", "n/a");
+                .Replace("{{Store.Phone}}", "123123123");
         }
 
         internal string ApplyTotalsTokens(string template, decimal subtotal, decimal tax, decimal grandTotal, string currency)
