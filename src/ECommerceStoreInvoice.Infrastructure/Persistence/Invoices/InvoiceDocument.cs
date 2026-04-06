@@ -12,6 +12,9 @@ namespace ECommerceStoreInvoice.Infrastructure.Persistence.Invoices
         [BsonGuidRepresentation(GuidRepresentation.Standard)]
         public required Guid OrderId { get; init; }
 
+        [BsonGuidRepresentation(GuidRepresentation.Standard)]
+        public required Guid ClientDataVersionId { get; init; }
+
         public required string StorageUrl { get; init; }
         public required DateTime CreatedAt { get; init; }
     }

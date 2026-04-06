@@ -11,6 +11,7 @@ namespace ECommerceStoreInvoice.Infrastructure.Mapping
             {
                 Id = invoice.Id,
                 OrderId = invoice.OrderId,
+                ClientDataVersionId = invoice.ClientDataVersionId,
                 StorageUrl = invoice.StorageUrl,
                 CreatedAt = invoice.CreatedAt
             };
@@ -21,6 +22,7 @@ namespace ECommerceStoreInvoice.Infrastructure.Mapping
             return Invoice.Rehydrate(
                 document.Id,
                 document.OrderId,
+                document.ClientDataVersionId,
                 document.StorageUrl,
                 document.CreatedAt);
         }

@@ -82,6 +82,7 @@ namespace ECommerceStoreInvoice.Application.Mapping
             {
                 Id = invoice.Id,
                 OrderId = invoice.OrderId,
+                ClietDataVersionId = invoice.ClientDataVersionId,
                 StorageUrl = invoice.StorageUrl,
                 CreatedAt = invoice.CreatedAt
             };

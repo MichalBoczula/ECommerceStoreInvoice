@@ -35,7 +35,7 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Invoices
             var clientDataVersion = await clientDataVersionService.GetByClientId(clientId);
             var storageUrl = await descriptor.GenerateInvoicePdf(order, shoppingCart, clientDataVersion, invoicePdfService);
 
-            var invoice = descriptor.CreateInvoice(orderId, storageUrl);
+            var invoice = descriptor.CreateInvoice(orderId, clientDataVersion!.Id, storageUrl);
             var createdInvoice = await descriptor.SaveInvoice(invoice, invoiceRepository);
 
             return descriptor.MapToResponse(createdInvoice);

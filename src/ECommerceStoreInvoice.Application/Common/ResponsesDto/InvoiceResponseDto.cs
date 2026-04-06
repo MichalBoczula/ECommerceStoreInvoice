@@ -4,6 +4,7 @@
     {
         public Guid Id { get; init; }
         public Guid OrderId { get; init; }
+        public Guid ClietDataVersionId { get; init; }
         public string StorageUrl { get; init; } = string.Empty;
         public DateTime CreatedAt { get; init; }
     }

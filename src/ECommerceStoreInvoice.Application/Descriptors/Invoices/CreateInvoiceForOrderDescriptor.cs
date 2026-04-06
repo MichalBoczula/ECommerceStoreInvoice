@@ -59,9 +59,9 @@ namespace ECommerceStoreInvoice.Application.Descriptors.Invoices
         }
 
         [FlowStep(order: 7, bpmnId: "CreateInvoiceDomain")]
-        public Invoice CreateInvoice(Guid orderId, string storageUrl)
+        public Invoice CreateInvoice(Guid orderId, Guid clientDataVersionId, string storageUrl)
         {
-            return new Invoice(orderId, storageUrl);
+            return new Invoice(orderId, clientDataVersionId, storageUrl);
         }
 
         [FlowStep(order: 8, bpmnId: "SaveInvoice")]
