@@ -1,8 +1,15 @@
+﻿using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
+
 namespace ECommerceStoreInvoice.Infrastructure.Persistence.ClientDataVersions
 {
     internal sealed record ClientDataVersionDocument
     {
+        [BsonId]
+        [BsonGuidRepresentation(GuidRepresentation.Standard)]
         public required Guid Id { get; init; }
+
+        [BsonGuidRepresentation(GuidRepresentation.Standard)]
         public required Guid ClientId { get; init; }
         public required string ClientName { get; init; }
         public required string PostalCode { get; init; }
