@@ -4,6 +4,7 @@ namespace ECommerceStoreInvoice.Application.Common.ResponsesDto.ClientDataVersio
     {
         public required Guid Id { get; init; }
         public required Guid ClientId { get; init; }
+        public required string ClientName { get; init; }
         public required string PostalCode { get; init; }
         public required string City { get; init; }
         public required string Street { get; init; }

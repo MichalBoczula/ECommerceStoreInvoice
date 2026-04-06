@@ -6,6 +6,7 @@ namespace ECommerceStoreInvoice.Domain.AggregatesModel.ClientDataVersionAggregat
     {
         public Guid Id { get; init; }
         public Guid ClientId { get; init; }
+        public string ClientName { get; init; }
         public Address Address { get; init; }
         public string PhoneNumber { get; init; }
         public string PhonePrefix { get; init; }
@@ -14,6 +15,7 @@ namespace ECommerceStoreInvoice.Domain.AggregatesModel.ClientDataVersionAggregat
 
         public ClientDataVersion(
             Guid clientId,
+            string clientName,
             Address address,
             string phoneNumber,
             string phonePrefix,
@@ -21,6 +23,7 @@ namespace ECommerceStoreInvoice.Domain.AggregatesModel.ClientDataVersionAggregat
         {
             Id = Guid.NewGuid();
             ClientId = clientId;
+            ClientName = clientName;
             Address = address;
             PhoneNumber = phoneNumber;
             PhonePrefix = phonePrefix;
@@ -31,6 +34,7 @@ namespace ECommerceStoreInvoice.Domain.AggregatesModel.ClientDataVersionAggregat
         private ClientDataVersion(
             Guid id,
             Guid clientId,
+            string clientName,
             Address address,
             string phoneNumber,
             string phonePrefix,
@@ -39,6 +43,7 @@ namespace ECommerceStoreInvoice.Domain.AggregatesModel.ClientDataVersionAggregat
         {
             Id = id;
             ClientId = clientId;
+            ClientName = clientName;
             Address = address;
             PhoneNumber = phoneNumber;
             PhonePrefix = phonePrefix;
@@ -49,6 +54,7 @@ namespace ECommerceStoreInvoice.Domain.AggregatesModel.ClientDataVersionAggregat
         public static ClientDataVersion Rehydrate(
             Guid id,
             Guid clientId,
+            string clientName,
             Address address,
             string phoneNumber,
             string phonePrefix,
@@ -58,6 +64,7 @@ namespace ECommerceStoreInvoice.Domain.AggregatesModel.ClientDataVersionAggregat
             return new ClientDataVersion(
                 id,
                 clientId,
+                clientName,
                 address,
                 phoneNumber,
                 phonePrefix,

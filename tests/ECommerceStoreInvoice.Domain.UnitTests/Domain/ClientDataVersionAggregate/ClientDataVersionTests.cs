@@ -14,11 +14,12 @@ namespace ECommerceStoreInvoice.Domain.UnitTests.Domain.ClientDataVersionAggrega
             var address = new Address("00-001", "New York", "Main St", "20A", "15");
 
             // Act
-            var clientDataVersion = new ClientDataVersion(clientId, address, "123456789", "+1", "client@example.com");
+            var clientDataVersion = new ClientDataVersion(clientId, "John Doe", address, "123456789", "+1", "client@example.com");
 
             // Assert
             clientDataVersion.Id.ShouldNotBe(Guid.Empty);
             clientDataVersion.ClientId.ShouldBe(clientId);
+            clientDataVersion.ClientName.ShouldBe("John Doe");
             clientDataVersion.Address.ShouldBe(address);
             clientDataVersion.PhoneNumber.ShouldBe("123456789");
             clientDataVersion.PhonePrefix.ShouldBe("+1");
@@ -39,6 +40,7 @@ namespace ECommerceStoreInvoice.Domain.UnitTests.Domain.ClientDataVersionAggrega
             var clientDataVersion = ClientDataVersion.Rehydrate(
                 id,
                 clientId,
+                "John Doe",
                 address,
                 "987654321",
                 "+1",
@@ -48,6 +50,7 @@ namespace ECommerceStoreInvoice.Domain.UnitTests.Domain.ClientDataVersionAggrega
             // Assert
             clientDataVersion.Id.ShouldBe(id);
             clientDataVersion.ClientId.ShouldBe(clientId);
+            clientDataVersion.ClientName.ShouldBe("John Doe");
             clientDataVersion.Address.ShouldBe(address);
             clientDataVersion.PhoneNumber.ShouldBe("987654321");
             clientDataVersion.PhonePrefix.ShouldBe("+1");

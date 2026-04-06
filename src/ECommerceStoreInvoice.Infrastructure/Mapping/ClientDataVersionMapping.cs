@@ -12,6 +12,7 @@ namespace ECommerceStoreInvoice.Infrastructure.Mapping
             {
                 Id = clientDataVersion.Id,
                 ClientId = clientDataVersion.ClientId,
+                ClientName = clientDataVersion.ClientName,
                 PostalCode = clientDataVersion.Address.PostalCode,
                 City = clientDataVersion.Address.City,
                 Street = clientDataVersion.Address.Street,
@@ -29,6 +30,7 @@ namespace ECommerceStoreInvoice.Infrastructure.Mapping
             return ClientDataVersion.Rehydrate(
                 clientDataVersionDocument.Id,
                 clientDataVersionDocument.ClientId,
+                clientDataVersionDocument.ClientName,
                 new Address(
                     clientDataVersionDocument.PostalCode,
                     clientDataVersionDocument.City,
