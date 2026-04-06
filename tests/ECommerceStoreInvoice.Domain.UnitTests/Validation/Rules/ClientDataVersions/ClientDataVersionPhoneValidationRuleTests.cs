@@ -91,7 +91,7 @@ namespace ECommerceStoreInvoice.Domain.UnitTests.Validation.Rules.ClientDataVers
         private static ClientDataVersion CreateClientDataVersion(string phoneNumber, string phonePrefix)
         {
             var address = new Address("00-001", "New York", "Main St", "10A", "2");
-            return new ClientDataVersion(Guid.NewGuid(), address, phoneNumber, phonePrefix, "client@example.com");
+            return new ClientDataVersion(Guid.NewGuid(), "John Doe", address, phoneNumber, phonePrefix, "client@example.com");
         }
     }
 }

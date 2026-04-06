@@ -27,6 +27,7 @@ namespace ECommerceStoreInvoice.Application.Mapping
         {
             return new ClientDataVersion(
                 clientId,
+                request.ClientName,
                 new Address(
                     request.PostalCode,
                     request.City,
@@ -108,6 +109,7 @@ namespace ECommerceStoreInvoice.Application.Mapping
             {
                 Id = clientDataVersion.Id,
                 ClientId = clientDataVersion.ClientId,
+                ClientName = clientDataVersion.ClientName,
                 PostalCode = clientDataVersion.Address.PostalCode,
                 City = clientDataVersion.Address.City,
                 Street = clientDataVersion.Address.Street,

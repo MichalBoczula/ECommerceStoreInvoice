@@ -137,7 +137,7 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Invoices
                     : $"{clientDataVersion.Street} {clientDataVersion.BuildingNumber}/{clientDataVersion.ApartmentNumber}, {clientDataVersion.PostalCode} {clientDataVersion.City}";
 
             return template
-                .Replace("{{Client.Name}}", $"Client {clientId}")
+                .Replace("{{Client.Name}}", clientDataVersion?.ClientName ?? $"Client {clientId}")
                 .Replace("{{Client.Address}}", clientAddress)
                 .Replace("{{Client.Email}}", clientDataVersion?.AddressEmail ?? "unknown@example.com")
                 .Replace("{{Client.Phone}}", clientDataVersion is null ? "n/a" : $"{clientDataVersion.PhonePrefix}{clientDataVersion.PhoneNumber}")
