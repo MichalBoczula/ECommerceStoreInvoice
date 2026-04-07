@@ -14,7 +14,7 @@ namespace ECommerceStoreInvoice.Domain.UnitTests.Validation.Policies.ShoppingCar
             var policy = new ShoppingCartLineValidationPolicy();
             var lines = new List<ShoppingCartLine>
             {
-                new("", "", new Money(-10, "EUR"), 0)
+                new(Guid.NewGuid(), "", "", new Money(-10, "EUR"), 0)
             };
 
             // Act
@@ -37,8 +37,8 @@ namespace ECommerceStoreInvoice.Domain.UnitTests.Validation.Policies.ShoppingCar
             var policy = new ShoppingCartLineValidationPolicy();
             var lines = new List<ShoppingCartLine>
             {
-                new("Keyboard", "Logi", new Money(99, "USD"), 1),
-                new("Mouse", "Logi", new Money(49, "USD"), 2)
+                new(Guid.NewGuid(), "Keyboard", "Logi", new Money(99, "USD"), 1),
+                new(Guid.NewGuid(), "Mouse", "Logi", new Money(49, "USD"), 2)
             };
 
             // Act
