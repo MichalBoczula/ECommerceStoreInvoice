@@ -3,6 +3,8 @@ using ECommerceStoreInvoice.Application.Common.ResponsesDto.Orders;
 using ECommerceStoreInvoice.Application.Mapping;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate.Repositories;
+using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate;
+using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate.Repositories;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.Repositories;
 using ECommerceStoreInvoice.Domain.Validation.Abstract;
 using ECommerceStoreInvoice.Domain.Validation.Common;
@@ -43,19 +45,37 @@ namespace ECommerceStoreInvoice.Application.Descriptors.Orders
             }
         }
 
-        [FlowStep(order: 5, bpmnId: "MapOrderDomain")]
-        public Order MapToDomain(ShoppingCart shoppingCart)
+        [FlowStep(order: 5, bpmnId: "CreateProductVersions")]
+        public async Task<IReadOnlyCollection<ProductVersion>> CreateProductVersions(
+            ShoppingCart shoppingCart,
+            IProductVersionRepository productVersionRepository)
         {
-            return MappingConfig.MapToDomain(shoppingCart);
+            var tasks = shoppingCart.Lines
+                .Select(line =>
+                    productVersionRepository.CreateProductVersion(
+                        new ProductVersion(
+                            line.ProductId,
+                            line.UnitPrice,
+                            line.Name,
+                            line.Brand)))
+                .ToArray();
+
+            return await Task.WhenAll(tasks);
         }
 
-        [FlowStep(order: 6, bpmnId: "ValidateOrder")]
+        [FlowStep(order: 6, bpmnId: "MapOrderDomain")]
+        public Order MapToDomain(ShoppingCart shoppingCart, IReadOnlyCollection<ProductVersion> productVersions)
+        {
+            return MappingConfig.MapToDomain(shoppingCart, productVersions);
+        }
+
+        [FlowStep(order: 7, bpmnId: "ValidateOrder")]
         public async Task<ValidationResult> ValidateOrder(Order order, IValidationPolicy<Order> orderValidationPolicy)
         {
             return await orderValidationPolicy.Validate(order);
         }
 
-        [FlowStep(order: 7, bpmnId: "IsOrderValid")]
+        [FlowStep(order: 8, bpmnId: "IsOrderValid")]
         public void ThrowValidationExceptionIfOrderInvalid(ValidationResult validationResult)
         {
             if (!validationResult.IsValid)
@@ -64,25 +84,25 @@ namespace ECommerceStoreInvoice.Application.Descriptors.Orders
             }
         }
 
-        [FlowStep(order: 8, bpmnId: "SaveOrder")]
+        [FlowStep(order: 9, bpmnId: "SaveOrder")]
         public async Task<Order> SaveOrder(Order order, IOrderRepository orderRepository)
         {
             return await orderRepository.CreateOrder(order);
         }
 
-        [FlowStep(order: 9, bpmnId: "ClearShoppingCart")]
+        [FlowStep(order: 10, bpmnId: "ClearShoppingCart")]
         public void ClearShoppingCart(ShoppingCart shoppingCart)
         {
             shoppingCart.Clear();
         }
 
-        [FlowStep(order: 10, bpmnId: "SaveShoppingCart")]
+        [FlowStep(order: 11, bpmnId: "SaveShoppingCart")]
         public async Task SaveShoppingCart(ShoppingCart shoppingCart, IShoppingCartRepository shoppingCartRepository)
         {
             await shoppingCartRepository.UpdateShoppingCart(shoppingCart);
         }
 
-        [FlowStep(order: 11, bpmnId: "MapOrderResponse")]
+        [FlowStep(order: 12, bpmnId: "MapOrderResponse")]
         public OrderResponseDto MapToResponse(Order order)
         {
             return MappingConfig.MapToResponse(order);
