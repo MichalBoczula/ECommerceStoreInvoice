@@ -22,6 +22,7 @@ namespace ECommerceStoreInvoice.Infrastructure.Mapping
         {
             var lines = shoppingCartDocument.Lines.Select(x =>
                 new ShoppingCartLine(
+                    x.ProductId,
                     x.Name,
                     x.Brand,
                     new Money(x.UnitPriceAmount, x.UnitPriceCurrency),
@@ -40,6 +41,7 @@ namespace ECommerceStoreInvoice.Infrastructure.Mapping
             return new ShoppingCartLineDocument
             {
                 Name = shoppingCartLine.Name,
+                ProductId = shoppingCartLine.ProductId,
                 Brand = shoppingCartLine.Brand,
                 UnitPriceAmount = shoppingCartLine.UnitPrice.Amount,
                 UnitPriceCurrency = shoppingCartLine.UnitPrice.Currency,

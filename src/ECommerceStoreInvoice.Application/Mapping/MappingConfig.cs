@@ -126,6 +126,7 @@ namespace ECommerceStoreInvoice.Application.Mapping
         private static ShoppingCartLine MapToDomain(ShoppingCartLineRequestDto request)
         {
             return new ShoppingCartLine(
+                request.ProductId,
                 request.Name,
                 request.Brand,
                 new Money(request.UnitPriceAmount, request.UnitPriceCurrency),
@@ -135,7 +136,7 @@ namespace ECommerceStoreInvoice.Application.Mapping
         private static OrderLine MapToDomain(ShoppingCartLine shoppingCartLine)
         {
             return new OrderLine(
-                Guid.Empty,
+                shoppingCartLine.ProductId,
                 shoppingCartLine.Name,
                 shoppingCartLine.Brand,
                 shoppingCartLine.UnitPrice,
@@ -147,6 +148,7 @@ namespace ECommerceStoreInvoice.Application.Mapping
             return new ShoppingCartLineResponseDto
             {
                 Name = shoppingCartLine.Name,
+                ProductId = shoppingCartLine.ProductId,
                 Brand = shoppingCartLine.Brand,
                 UnitPriceAmount = shoppingCartLine.UnitPrice.Amount,
                 UnitPriceCurrency = shoppingCartLine.UnitPrice.Currency,

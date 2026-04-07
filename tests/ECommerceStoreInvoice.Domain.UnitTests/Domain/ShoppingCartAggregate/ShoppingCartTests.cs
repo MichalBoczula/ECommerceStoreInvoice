@@ -30,8 +30,8 @@ namespace ECommerceStoreInvoice.Domain.UnitTests.Domain.ShoppingCartAggregate
             var cart = new ShoppingCart(Guid.NewGuid());
             var lines = new[]
             {
-                new ShoppingCartLine("Mouse", "BrandA", new Money(100, "USD"), 2),
-                new ShoppingCartLine("Keyboard", "BrandB", new Money(50, "USD"), 3)
+                new ShoppingCartLine(Guid.NewGuid(), "Mouse", "BrandA", new Money(100, "USD"), 2),
+                new ShoppingCartLine(Guid.NewGuid(), "Keyboard", "BrandB", new Money(50, "USD"), 3)
             };
 
             // Act
@@ -49,7 +49,7 @@ namespace ECommerceStoreInvoice.Domain.UnitTests.Domain.ShoppingCartAggregate
             // Arrange
             var cart = new ShoppingCart(Guid.NewGuid());
             cart.ReplaceLines([
-                new ShoppingCartLine("Mouse", "BrandA", new Money(100, "USD"), 1)
+                new ShoppingCartLine(Guid.NewGuid(), "Mouse", "BrandA", new Money(100, "USD"), 1)
             ]);
 
             // Act
@@ -71,7 +71,7 @@ namespace ECommerceStoreInvoice.Domain.UnitTests.Domain.ShoppingCartAggregate
             var updatedAt = new DateTime(2026, 1, 1, 11, 0, 0, DateTimeKind.Utc);
             var lines = new[]
             {
-                new ShoppingCartLine("Headphones", "BrandC", new Money(75, "eur"), 2)
+                new ShoppingCartLine(Guid.NewGuid(), "Headphones", "BrandC", new Money(75, "eur"), 2)
             };
 
             // Act

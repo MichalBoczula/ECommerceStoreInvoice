@@ -14,7 +14,7 @@ namespace ECommerceStoreInvoice.Domain.UnitTests.Validation.Rules.ShoppingCartLi
             // Arrange
             var rule = new ShoppingCartLineStringsValidationRule();
             var validationResult = new ValidationResult();
-            var line = new ShoppingCartLine(" ", "", new Money(10, ""), 1);
+            var line = new ShoppingCartLine(Guid.NewGuid(), " ", "", new Money(10, ""), 1);
 
             // Act
             await rule.IsValid(line, validationResult);
@@ -33,7 +33,7 @@ namespace ECommerceStoreInvoice.Domain.UnitTests.Validation.Rules.ShoppingCartLi
             // Arrange
             var rule = new ShoppingCartLineStringsValidationRule();
             var validationResult = new ValidationResult();
-            var line = new ShoppingCartLine("Keyboard", "Brand", new Money(10, "uSd"), 1);
+            var line = new ShoppingCartLine(Guid.NewGuid(), "Keyboard", "Brand", new Money(10, "uSd"), 1);
 
             // Act
             await rule.IsValid(line, validationResult);
