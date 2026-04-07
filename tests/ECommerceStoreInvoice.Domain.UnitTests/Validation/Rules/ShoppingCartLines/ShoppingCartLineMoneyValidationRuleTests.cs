@@ -14,7 +14,7 @@ namespace ECommerceStoreInvoice.Domain.UnitTests.Validation.Rules.ShoppingCartLi
             // Arrange
             var rule = new ShoppingCartLineMoneyValidationRule();
             var validationResult = new ValidationResult();
-            var line = new ShoppingCartLine("Mouse", "Brand", new Money(-1, "USD"), 1);
+            var line = new ShoppingCartLine(Guid.NewGuid(), "Mouse", "Brand", new Money(-1, "USD"), 1);
 
             // Act
             await rule.IsValid(line, validationResult);
@@ -30,7 +30,7 @@ namespace ECommerceStoreInvoice.Domain.UnitTests.Validation.Rules.ShoppingCartLi
             // Arrange
             var rule = new ShoppingCartLineMoneyValidationRule();
             var validationResult = new ValidationResult();
-            var line = new ShoppingCartLine("Mouse", "Brand", new Money(0, "USD"), 1);
+            var line = new ShoppingCartLine(Guid.NewGuid(), "Mouse", "Brand", new Money(0, "USD"), 1);
 
             // Act
             await rule.IsValid(line, validationResult);

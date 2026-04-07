@@ -4,6 +4,7 @@ namespace ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.Val
 {
     public record ShoppingCartLine
     {
+        public Guid ProductId { get; init; }
         public string Name { get; init; }
         public string Brand { get; init; }
         public Money UnitPrice { get; init; }
@@ -11,11 +12,13 @@ namespace ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.Val
         public Money Total { get; private set; }
 
         public ShoppingCartLine(
+            Guid productId,
             string name,
             string brand,
             Money unitPrice,
             int quantity)
         {
+            ProductId = productId;
             Name = name;
             Brand = brand;
             UnitPrice = unitPrice;
