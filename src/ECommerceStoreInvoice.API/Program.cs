@@ -41,7 +41,6 @@ app.UseSwaggerUi();
 app.UseHttpsRedirection();
 
 app.MapInvoicesEndpoints();
-app.MapProductVersionsEndpoints();
 app.MapOrdersEndpoints();
 app.MapShoppingCartEndpoints();
 app.MapClientDataVersionsEndpoints();
