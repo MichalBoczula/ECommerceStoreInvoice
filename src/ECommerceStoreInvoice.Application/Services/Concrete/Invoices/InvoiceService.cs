@@ -5,6 +5,8 @@ using ECommerceStoreInvoice.Application.Services.Abstract.Invoices;
 using ECommerceStoreInvoice.Domain.AggregatesModel.InvoiceAggregate.Repositories;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate.Repositories;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.Repositories;
+using ECommerceStoreInvoice.Domain.Validation.Abstract;
+using ECommerceStoreInvoice.Domain.Validation.Common;
 
 namespace ECommerceStoreInvoice.Application.Services.Concrete.Invoices
 {
@@ -13,7 +15,8 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Invoices
         IOrderRepository orderRepository,
         IShoppingCartRepository shoppingCartRepository,
         IClientDataVersionService clientDataVersionService,
-        IInvoicePdfService invoicePdfService)
+        IInvoicePdfService invoicePdfService,
+        IValidationPolicy<InvoiceOrderStatusValidationContext> createInvoiceValidationPolicy)
         : IInvoiceService
     {
         public async Task<InvoiceResponseDto> CreateInvoiceForOrder(Guid clientId, Guid orderId)
@@ -30,6 +33,8 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Invoices
 
             var existingInvoice = await descriptor.LoadInvoiceByOrderId(orderId, invoiceRepository);
             descriptor.ThrowAlreadyExistsExceptionIfInvoiceAlreadyExists(orderId, existingInvoice);
+            var validationResult = await descriptor.ValidateOrderStatus(order!, createInvoiceValidationPolicy);
+            descriptor.ThrowValidationExceptionIfOrderStatusInvalid(validationResult);
 
             var shoppingCart = await descriptor.LoadShoppingCart(order!.ClientId, shoppingCartRepository);
             var clientDataVersion = await clientDataVersionService.GetByClientId(clientId);

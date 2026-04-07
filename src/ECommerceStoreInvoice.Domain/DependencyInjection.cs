@@ -4,6 +4,7 @@ using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.ValueObjects;
 using ECommerceStoreInvoice.Domain.Validation.Abstract;
+using ECommerceStoreInvoice.Domain.Validation.Common;
 using ECommerceStoreInvoice.Domain.Validation.Concrete.Policies;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -24,6 +25,8 @@ namespace ECommerceStoreInvoice.Domain
             services.AddScoped<IValidationPolicyDescriptorProvider, OrderValidationPolicy>();
             services.AddScoped<IValidationPolicy<(Order order, OrderStatus newStatus)>, UpdateOrderValidationPolicy>();
             services.AddScoped<IValidationPolicyDescriptorProvider, UpdateOrderValidationPolicy>();
+            services.AddScoped<IValidationPolicy<InvoiceOrderStatusValidationContext>, InvoiceValidationPolicy>();
+            services.AddScoped<IValidationPolicyDescriptorProvider, InvoiceValidationPolicy>();
             services.AddScoped<IValidationPolicy<ProductVersion>, ProductVersionValidationPolicy>();
             services.AddScoped<IValidationPolicyDescriptorProvider, ProductVersionValidationPolicy>();
             return services;
