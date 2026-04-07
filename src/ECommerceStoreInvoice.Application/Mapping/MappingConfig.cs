@@ -39,11 +39,17 @@ namespace ECommerceStoreInvoice.Application.Mapping
                 request.AddressEmail);
         }
 
-        public static Order MapToDomain(ShoppingCart shoppingCart)
+        public static Order MapToDomain(
+            ShoppingCart shoppingCart,
+            IReadOnlyCollection<ProductVersion> productVersions)
         {
+            var orderLines = shoppingCart.Lines
+                .Zip(productVersions, (shoppingCartLine, productVersion) => MapToDomain(shoppingCartLine, productVersion))
+                .ToList();
+
             return new Order(
                 shoppingCart.ClientId,
-                shoppingCart.Lines.Select(MapToDomain).ToList());
+                orderLines);
         }
 
         public static ShoppingCartResponseDto MapToResponse(ShoppingCart shoppingCart)
@@ -133,10 +139,10 @@ namespace ECommerceStoreInvoice.Application.Mapping
                 request.Quantity);
         }
 
-        private static OrderLine MapToDomain(ShoppingCartLine shoppingCartLine)
+        private static OrderLine MapToDomain(ShoppingCartLine shoppingCartLine, ProductVersion productVersion)
         {
             return new OrderLine(
-                shoppingCartLine.ProductId,
+                productVersion.Id,
                 shoppingCartLine.Name,
                 shoppingCartLine.Brand,
                 shoppingCartLine.UnitPrice,

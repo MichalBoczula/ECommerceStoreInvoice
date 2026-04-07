@@ -5,6 +5,7 @@ using ECommerceStoreInvoice.Application.Services.Abstract.Orders;
 using ECommerceStoreInvoice.Domain.AggregatesModel.Common.Enums;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate.Repositories;
+using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate.Repositories;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.Repositories;
 using ECommerceStoreInvoice.Domain.Validation.Abstract;
 
@@ -12,6 +13,7 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Orders
 {
     internal sealed class OrderService(
         IOrderRepository orderRepository,
+        IProductVersionRepository productVersionRepository,
         IShoppingCartRepository shoppingCartRepository,
         IValidationPolicy<Guid> guidValidationPolicy,
         IValidationPolicy<Order> orderValidationPolicy,
@@ -28,7 +30,9 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Orders
             var shoppingCart = await descriptor.LoadShoppingCart(clientId, shoppingCartRepository);
             descriptor.ThrowNotFoundExceptionIfShoppingCartMissing(clientId, shoppingCart);
 
-            var order = descriptor.MapToDomain(shoppingCart!);
+            var productVersions = await descriptor.CreateProductVersions(shoppingCart!, productVersionRepository);
+
+            var order = descriptor.MapToDomain(shoppingCart!, productVersions);
             validationResult = await descriptor.ValidateOrder(order, orderValidationPolicy);
             descriptor.ThrowValidationExceptionIfOrderInvalid(validationResult);
 
