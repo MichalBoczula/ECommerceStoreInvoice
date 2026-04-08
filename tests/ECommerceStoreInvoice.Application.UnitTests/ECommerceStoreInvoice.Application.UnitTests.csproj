@@ -23,6 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\ECommerceStoreInvoice.Application\ECommerceStoreInvoice.Application.csproj" />
     <ProjectReference Include="..\..\src\ECommerceStoreInvoice.Domain\ECommerceStoreInvoice.Domain.csproj" />
   </ItemGroup>
 
