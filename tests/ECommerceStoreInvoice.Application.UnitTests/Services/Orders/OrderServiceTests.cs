@@ -560,7 +560,9 @@ public sealed class OrderServiceTests
 
         updateOrderValidationPolicyMock
             .InSequence(sequence)
-            .Setup(policy => policy.Validate((existingOrder, OrderStatus.Cancelled)))
+            .Setup(policy => policy.Validate(It.Is<(Order order, OrderStatus newStatus)>(ctx =>
+                ctx.order == existingOrder &&
+                ctx.newStatus == OrderStatus.Cancelled)))
             .ReturnsAsync(invalidTransitionResult);
 
         var sut = new OrderService(
