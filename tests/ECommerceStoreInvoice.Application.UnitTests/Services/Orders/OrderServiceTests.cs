@@ -76,7 +76,6 @@ public sealed class OrderServiceTests
         {
             var productVersion = createdProductVersions.Single(p => p.ProductId == line.ProductId);
             productVersionRepositoryMock
-                .InSequence(sequence)
                 .Setup(repo => repo.CreateProductVersion(It.Is<ProductVersion>(pv =>
                     pv.ProductId == line.ProductId &&
                     pv.Name == line.Name &&
@@ -260,7 +259,6 @@ public sealed class OrderServiceTests
         foreach (var line in shoppingCart.Lines)
         {
             productVersionRepositoryMock
-                .InSequence(sequence)
                 .Setup(repo => repo.CreateProductVersion(It.Is<ProductVersion>(pv => pv.ProductId == line.ProductId)))
                 .ReturnsAsync(new ProductVersion(line.ProductId, line.UnitPrice, line.Name, line.Brand));
         }
