@@ -24,6 +24,7 @@ public sealed class OrderServiceTests
         // Arrange
         var clientId = Guid.NewGuid();
         var shoppingCart = BuildShoppingCart(clientId);
+        var expectedCreatedProductVersions = shoppingCart.Lines.Count;
         var guidValidationResult = new ValidationResult();
         var orderValidationResult = new ValidationResult();
 
@@ -122,7 +123,7 @@ public sealed class OrderServiceTests
         // Assert
         guidValidationPolicyMock.Verify(policy => policy.Validate(clientId), Times.Once);
         shoppingCartRepositoryMock.Verify(repo => repo.GetShoppingCartByClientId(clientId), Times.Once);
-        productVersionRepositoryMock.Verify(repo => repo.CreateProductVersion(It.IsAny<ProductVersion>()), Times.Exactly(shoppingCart.Lines.Count));
+        productVersionRepositoryMock.Verify(repo => repo.CreateProductVersion(It.IsAny<ProductVersion>()), Times.Exactly(expectedCreatedProductVersions));
         orderValidationPolicyMock.Verify(policy => policy.Validate(It.IsAny<Order>()), Times.Once);
         orderRepositoryMock.Verify(repo => repo.CreateOrder(It.IsAny<Order>()), Times.Once);
         shoppingCartRepositoryMock.Verify(repo => repo.UpdateShoppingCart(It.IsAny<ShoppingCart>()), Times.Once);
