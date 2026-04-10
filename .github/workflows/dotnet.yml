@@ -1,4 +1,4 @@
-name: .NET
+name: CI
 
 on:
   push:
@@ -11,9 +11,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout source
+        uses: actions/checkout@v4
 
-      - name: Setup .NET 10
+      - name: Setup .NET
         uses: actions/setup-dotnet@v5
         with:
           dotnet-version: 10.0.100
@@ -21,8 +22,275 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore ECommerceStoreInvoice.slnx
 
-      - name: Build
+      - name: Build solution
         run: dotnet build ECommerceStoreInvoice.slnx --configuration Release --no-restore
 
-      - name: Test
-        run: dotnet test ECommerceStoreInvoice.slnx --configuration Release --no-build --verbosity normal
+  domain-unit-tests:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.100
+
+      - name: Restore dependencies
+        run: dotnet restore ECommerceStoreInvoice.slnx
+
+      - name: Run domain unit tests
+        continue-on-error: true
+        run: >
+          dotnet test ./tests/ECommerceStoreInvoice.Domain.UnitTests/ECommerceStoreInvoice.Domain.UnitTests.csproj
+          --configuration Release
+          --no-restore
+          --verbosity normal
+          --logger "trx;LogFileName=domain-unit-tests.trx"
+          --results-directory ./TestResults/Domain
+
+      - name: Add domain unit tests summary
+        if: always()
+        shell: pwsh
+        run: |
+          $trx = Get-ChildItem ./TestResults/Domain -Filter *.trx -Recurse | Select-Object -First 1
+
+          Add-Content $env:GITHUB_STEP_SUMMARY "## Domain unit tests"
+          Add-Content $env:GITHUB_STEP_SUMMARY ""
+
+          if (-not $trx) {
+            Add-Content $env:GITHUB_STEP_SUMMARY "No TRX file found."
+            exit 0
+          }
+
+          [xml]$xml = Get-Content $trx.FullName
+          $counters = $xml.TestRun.ResultSummary.Counters
+          $failedResults = @($xml.TestRun.Results.UnitTestResult | Where-Object { $_.outcome -eq "Failed" })
+
+          Add-Content $env:GITHUB_STEP_SUMMARY "| Total | Passed | Failed | Skipped |"
+          Add-Content $env:GITHUB_STEP_SUMMARY "|-------|--------|--------|---------|"
+          Add-Content $env:GITHUB_STEP_SUMMARY "| $($counters.total) | $($counters.passed) | $($counters.failed) | $($counters.notExecuted) |"
+          Add-Content $env:GITHUB_STEP_SUMMARY ""
+
+          if ($failedResults.Count -eq 0) {
+            Add-Content $env:GITHUB_STEP_SUMMARY "All domain unit tests passed."
+            exit 0
+          }
+
+          Add-Content $env:GITHUB_STEP_SUMMARY "### Failed tests"
+          Add-Content $env:GITHUB_STEP_SUMMARY ""
+          Add-Content $env:GITHUB_STEP_SUMMARY "| Test | Error |"
+          Add-Content $env:GITHUB_STEP_SUMMARY "|------|-------|"
+
+          foreach ($result in $failedResults) {
+            $testName = $result.testName
+            $errorMessage = ""
+
+            if ($result.Output -and $result.Output.ErrorInfo -and $result.Output.ErrorInfo.Message) {
+              $errorMessage = $result.Output.ErrorInfo.Message
+            }
+
+            $testName = $testName -replace '\|', '/' -replace "`r", ' ' -replace "`n", ' '
+            $errorMessage = $errorMessage -replace '\|', '/' -replace "`r", ' ' -replace "`n", ' '
+
+            Add-Content $env:GITHUB_STEP_SUMMARY "| $testName | $errorMessage |"
+          }
+
+      - name: Fail job if domain unit tests failed
+        if: always()
+        shell: pwsh
+        run: |
+          $trx = Get-ChildItem ./TestResults/Domain -Filter *.trx -Recurse | Select-Object -First 1
+
+          if (-not $trx) {
+            throw "Domain unit tests TRX file not found."
+          }
+
+          [xml]$xml = Get-Content $trx.FullName
+          $failed = [int]$xml.TestRun.ResultSummary.Counters.failed
+
+          if ($failed -gt 0) {
+            throw "$failed domain unit test(s) failed."
+          }
+
+  application-unit-tests:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.100
+
+      - name: Restore dependencies
+        run: dotnet restore ECommerceStoreInvoice.slnx
+
+      - name: Run application unit tests
+        continue-on-error: true
+        run: >
+          dotnet test ./tests/ECommerceStoreInvoice.Application.UnitTests/ECommerceStoreInvoice.Application.UnitTests.csproj
+          --configuration Release
+          --no-restore
+          --verbosity normal
+          --logger "trx;LogFileName=application-unit-tests.trx"
+          --results-directory ./TestResults/Application
+
+      - name: Add application unit tests summary
+        if: always()
+        shell: pwsh
+        run: |
+          $trx = Get-ChildItem ./TestResults/Application -Filter *.trx -Recurse | Select-Object -First 1
+
+          Add-Content $env:GITHUB_STEP_SUMMARY "## Application unit tests"
+          Add-Content $env:GITHUB_STEP_SUMMARY ""
+
+          if (-not $trx) {
+            Add-Content $env:GITHUB_STEP_SUMMARY "No TRX file found."
+            exit 0
+          }
+
+          [xml]$xml = Get-Content $trx.FullName
+          $counters = $xml.TestRun.ResultSummary.Counters
+          $failedResults = @($xml.TestRun.Results.UnitTestResult | Where-Object { $_.outcome -eq "Failed" })
+
+          Add-Content $env:GITHUB_STEP_SUMMARY "| Total | Passed | Failed | Skipped |"
+          Add-Content $env:GITHUB_STEP_SUMMARY "|-------|--------|--------|---------|"
+          Add-Content $env:GITHUB_STEP_SUMMARY "| $($counters.total) | $($counters.passed) | $($counters.failed) | $($counters.notExecuted) |"
+          Add-Content $env:GITHUB_STEP_SUMMARY ""
+
+          if ($failedResults.Count -eq 0) {
+            Add-Content $env:GITHUB_STEP_SUMMARY "All application unit tests passed."
+            exit 0
+          }
+
+          Add-Content $env:GITHUB_STEP_SUMMARY "### Failed tests"
+          Add-Content $env:GITHUB_STEP_SUMMARY ""
+          Add-Content $env:GITHUB_STEP_SUMMARY "| Test | Error |"
+          Add-Content $env:GITHUB_STEP_SUMMARY "|------|-------|"
+
+          foreach ($result in $failedResults) {
+            $testName = $result.testName
+            $errorMessage = ""
+
+            if ($result.Output -and $result.Output.ErrorInfo -and $result.Output.ErrorInfo.Message) {
+              $errorMessage = $result.Output.ErrorInfo.Message
+            }
+
+            $testName = $testName -replace '\|', '/' -replace "`r", ' ' -replace "`n", ' '
+            $errorMessage = $errorMessage -replace '\|', '/' -replace "`r", ' ' -replace "`n", ' '
+
+            Add-Content $env:GITHUB_STEP_SUMMARY "| $testName | $errorMessage |"
+          }
+
+      - name: Fail job if application unit tests failed
+        if: always()
+        shell: pwsh
+        run: |
+          $trx = Get-ChildItem ./TestResults/Application -Filter *.trx -Recurse | Select-Object -First 1
+
+          if (-not $trx) {
+            throw "Application unit tests TRX file not found."
+          }
+
+          [xml]$xml = Get-Content $trx.FullName
+          $failed = [int]$xml.TestRun.ResultSummary.Counters.failed
+
+          if ($failed -gt 0) {
+            throw "$failed application unit test(s) failed."
+          }
+
+  acceptance-tests:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.100
+
+      - name: Restore dependencies
+        run: dotnet restore ECommerceStoreInvoice.slnx
+
+      - name: Run acceptance tests
+        continue-on-error: true
+        run: >
+          dotnet test ./tests/ECommerceStoreInvoice.Acceptance.Tests/ECommerceStoreInvoice.Acceptance.Tests.csproj
+          --configuration Release
+          --no-restore
+          --verbosity normal
+          --logger "trx;LogFileName=acceptance-tests.trx"
+          --results-directory ./TestResults/Acceptance
+
+      - name: Add acceptance tests summary
+        if: always()
+        shell: pwsh
+        run: |
+          $trx = Get-ChildItem ./TestResults/Acceptance -Filter *.trx -Recurse | Select-Object -First 1
+
+          Add-Content $env:GITHUB_STEP_SUMMARY "## Acceptance tests"
+          Add-Content $env:GITHUB_STEP_SUMMARY ""
+
+          if (-not $trx) {
+            Add-Content $env:GITHUB_STEP_SUMMARY "No TRX file found."
+            exit 0
+          }
+
+          [xml]$xml = Get-Content $trx.FullName
+          $counters = $xml.TestRun.ResultSummary.Counters
+          $failedResults = @($xml.TestRun.Results.UnitTestResult | Where-Object { $_.outcome -eq "Failed" })
+
+          Add-Content $env:GITHUB_STEP_SUMMARY "| Total | Passed | Failed | Skipped |"
+          Add-Content $env:GITHUB_STEP_SUMMARY "|-------|--------|--------|---------|"
+          Add-Content $env:GITHUB_STEP_SUMMARY "| $($counters.total) | $($counters.passed) | $($counters.failed) | $($counters.notExecuted) |"
+          Add-Content $env:GITHUB_STEP_SUMMARY ""
+
+          if ($failedResults.Count -eq 0) {
+            Add-Content $env:GITHUB_STEP_SUMMARY "All acceptance tests passed."
+            exit 0
+          }
+
+          Add-Content $env:GITHUB_STEP_SUMMARY "### Failed tests"
+          Add-Content $env:GITHUB_STEP_SUMMARY ""
+          Add-Content $env:GITHUB_STEP_SUMMARY "| Test | Error |"
+          Add-Content $env:GITHUB_STEP_SUMMARY "|------|-------|"
+
+          foreach ($result in $failedResults) {
+            $testName = $result.testName
+            $errorMessage = ""
+
+            if ($result.Output -and $result.Output.ErrorInfo -and $result.Output.ErrorInfo.Message) {
+              $errorMessage = $result.Output.ErrorInfo.Message
+            }
+
+            $testName = $testName -replace '\|', '/' -replace "`r", ' ' -replace "`n", ' '
+            $errorMessage = $errorMessage -replace '\|', '/' -replace "`r", ' ' -replace "`n", ' '
+
+            Add-Content $env:GITHUB_STEP_SUMMARY "| $testName | $errorMessage |"
+          }
+
+      - name: Fail job if acceptance tests failed
+        if: always()
+        shell: pwsh
+        run: |
+          $trx = Get-ChildItem ./TestResults/Acceptance -Filter *.trx -Recurse | Select-Object -First 1
+
+          if (-not $trx) {
+            throw "Acceptance tests TRX file not found."
+          }
+
+          [xml]$xml = Get-Content $trx.FullName
+          $failed = [int]$xml.TestRun.ResultSummary.Counters.failed
+
+          if ($failed -gt 0) {
+            throw "$failed acceptance test(s) failed."
+          }
