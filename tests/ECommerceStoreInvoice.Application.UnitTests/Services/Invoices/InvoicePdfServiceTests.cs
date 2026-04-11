@@ -334,6 +334,81 @@ public sealed class InvoicePdfServiceTests
     }
 
     [Fact]
+    public void FindDirectoryContainingSolutionFile_WhenSolutionExistsInAncestor_ShouldReturnAncestorDirectory()
+    {
+        // Arrange
+        var sut = new InvoicePdfService();
+        var tempRoot = Path.Combine(Path.GetTempPath(), $"invoicepdf-{Guid.NewGuid():N}");
+        var nestedDirectory = Path.Combine(tempRoot, "a", "b", "c");
+        Directory.CreateDirectory(nestedDirectory);
+        File.WriteAllText(Path.Combine(tempRoot, "ECommerceStoreInvoice.slnx"), string.Empty);
+
+        try
+        {
+            // Act
+            var result = sut.FindDirectoryContainingSolutionFile(nestedDirectory);
+
+            // Assert
+            result.ShouldBe(tempRoot);
+        }
+        finally
+        {
+            if (Directory.Exists(tempRoot))
+            {
+                Directory.Delete(tempRoot, recursive: true);
+            }
+        }
+    }
+
+    [Fact]
+    public void ResolveSolutionRoot_WhenCalled_ShouldReturnDirectoryContainingSolutionFileOrCurrentDirectory()
+    {
+        // Arrange
+        var sut = new InvoicePdfService();
+
+        // Act
+        var result = sut.ResolveSolutionRoot();
+
+        // Assert
+        var expectedFromBase = sut.FindDirectoryContainingSolutionFile(AppContext.BaseDirectory);
+        var expectedFromCurrent = sut.FindDirectoryContainingSolutionFile(Directory.GetCurrentDirectory());
+        var expected = expectedFromBase ?? expectedFromCurrent ?? Directory.GetCurrentDirectory();
+
+        result.ShouldBe(expected);
+    }
+
+    [Theory]
+    [InlineData(0, "0.00")]
+    [InlineData(12.5, "12.50")]
+    [InlineData(1234.567, "1234.57")]
+    [InlineData(-7.1, "-7.10")]
+    public void FormatMoney_WhenCalled_ShouldReturnInvariantStringWithTwoDecimals(decimal input, string expected)
+    {
+        // Arrange
+        var sut = new InvoicePdfService();
+
+        // Act
+        var result = sut.FormatMoney(input);
+
+        // Assert
+        result.ShouldBe(expected);
+    }
+
+    [Fact]
+    public void Escape_WhenValueContainsHtmlSensitiveCharacters_ShouldReturnHtmlEncodedValue()
+    {
+        // Arrange
+        var sut = new InvoicePdfService();
+        var value = "\"Special\" <tag> & 'quote'";
+
+        // Act
+        var result = sut.Escape(value);
+
+        // Assert
+        result.ShouldBe("&quot;Special&quot; &lt;tag&gt; &amp; &#39;quote&#39;");
+    }
+
+    [Fact]
     public void GetInvoicePdfPath_WhenCalled_ShouldCreateInvoicesDirectoryAndReturnPdfFilePath()
     {
         // Arrange
