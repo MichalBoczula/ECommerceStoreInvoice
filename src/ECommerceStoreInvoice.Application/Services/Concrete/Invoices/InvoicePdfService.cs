@@ -12,12 +12,12 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Invoices
     {
         private const decimal VatRate = 0.23m;
 
-        public async Task<string> GenerateInvoicePdf(Order order, ShoppingCart? shoppingCart, ClientDataVersionResponseDto? clientDataVersion)
+        public async Task<string> GenerateInvoicePdf(Order order, ClientDataVersionResponseDto? clientDataVersion)
         {
             var templatePath = GetTemplatePath();
             var template = await File.ReadAllTextAsync(templatePath);
 
-            var lines = BuildInvoiceLines(order, shoppingCart);
+            var lines = BuildInvoiceLines(order);
             var subtotal = lines.Sum(x => x.TotalAmount);
             var currency = lines.FirstOrDefault()?.Currency ?? order.Total.Currency;
             var tax = Math.Round(subtotal * VatRate, 2);
@@ -56,24 +56,8 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Invoices
             return Path.Combine(AppContext.BaseDirectory, "Templates", "InvoiceLineTemplate.html");
         }
 
-        internal IReadOnlyCollection<InvoiceLineDto> BuildInvoiceLines(Order order, ShoppingCart? shoppingCart)
+        internal IReadOnlyCollection<InvoiceLineDto> BuildInvoiceLines(Order order)
         {
-            if (shoppingCart?.Lines.Any() == true)
-            {
-                return shoppingCart.Lines
-                    .Select((line, index) => new InvoiceLineDto
-                    {
-                        ProductVersionId = (index + 1).ToString(CultureInfo.InvariantCulture),
-                        Name = line.Name,
-                        Brand = line.Brand,
-                        Quantity = line.Quantity,
-                        UnitAmount = line.UnitPrice.Amount,
-                        TotalAmount = line.Total.Amount,
-                        Currency = line.UnitPrice.Currency
-                    })
-                    .ToList();
-            }
-
             return order.Lines.Select(line => new InvoiceLineDto
             {
                 ProductVersionId = line.ProductVersionId.ToString(),

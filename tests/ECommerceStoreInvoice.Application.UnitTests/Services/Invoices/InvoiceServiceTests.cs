@@ -3,7 +3,6 @@ using ECommerceStoreInvoice.Application.Services.Abstract.Invoices;
 using ECommerceStoreInvoice.Application.Services.Concrete.Invoices;
 using ECommerceStoreInvoice.Domain.AggregatesModel.InvoiceAggregate.Repositories;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate.Repositories;
-using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.Repositories;
 using ECommerceStoreInvoice.Domain.Validation.Abstract;
 using ECommerceStoreInvoice.Domain.Validation.Common;
 using Moq;
@@ -29,7 +28,6 @@ public sealed class InvoiceServiceTests
 
         var invoiceRepositoryMock = new Mock<IInvoiceRepository>(MockBehavior.Strict);
         var orderRepositoryMock = new Mock<IOrderRepository>(MockBehavior.Strict);
-        var shoppingCartRepositoryMock = new Mock<IShoppingCartRepository>(MockBehavior.Strict);
         var clientDataVersionServiceMock = new Mock<IClientDataVersionService>(MockBehavior.Strict);
         var invoicePdfServiceMock = new Mock<IInvoicePdfService>(MockBehavior.Strict);
         var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
@@ -42,7 +40,6 @@ public sealed class InvoiceServiceTests
         var sut = new InvoiceService(
             invoiceRepositoryMock.Object,
             orderRepositoryMock.Object,
-            shoppingCartRepositoryMock.Object,
             clientDataVersionServiceMock.Object,
             invoicePdfServiceMock.Object,
             guidValidationPolicyMock.Object,
@@ -72,7 +69,6 @@ public sealed class InvoiceServiceTests
 
         var invoiceRepositoryMock = new Mock<IInvoiceRepository>(MockBehavior.Strict);
         var orderRepositoryMock = new Mock<IOrderRepository>(MockBehavior.Strict);
-        var shoppingCartRepositoryMock = new Mock<IShoppingCartRepository>(MockBehavior.Strict);
         var clientDataVersionServiceMock = new Mock<IClientDataVersionService>(MockBehavior.Strict);
         var invoicePdfServiceMock = new Mock<IInvoicePdfService>(MockBehavior.Strict);
         var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
@@ -92,7 +88,6 @@ public sealed class InvoiceServiceTests
         var sut = new InvoiceService(
             invoiceRepositoryMock.Object,
             orderRepositoryMock.Object,
-            shoppingCartRepositoryMock.Object,
             clientDataVersionServiceMock.Object,
             invoicePdfServiceMock.Object,
             guidValidationPolicyMock.Object,
@@ -120,7 +115,6 @@ public sealed class InvoiceServiceTests
 
         var invoiceRepositoryMock = new Mock<IInvoiceRepository>(MockBehavior.Strict);
         var orderRepositoryMock = new Mock<IOrderRepository>(MockBehavior.Strict);
-        var shoppingCartRepositoryMock = new Mock<IShoppingCartRepository>(MockBehavior.Strict);
         var clientDataVersionServiceMock = new Mock<IClientDataVersionService>(MockBehavior.Strict);
         var invoicePdfServiceMock = new Mock<IInvoicePdfService>(MockBehavior.Strict);
         var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
@@ -133,7 +127,6 @@ public sealed class InvoiceServiceTests
         var sut = new InvoiceService(
             invoiceRepositoryMock.Object,
             orderRepositoryMock.Object,
-            shoppingCartRepositoryMock.Object,
             clientDataVersionServiceMock.Object,
             invoicePdfServiceMock.Object,
             guidValidationPolicyMock.Object,

@@ -4,7 +4,6 @@ using ECommerceStoreInvoice.Application.Descriptors.Invoices;
 using ECommerceStoreInvoice.Application.Services.Abstract.Invoices;
 using ECommerceStoreInvoice.Domain.AggregatesModel.InvoiceAggregate.Repositories;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate.Repositories;
-using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.Repositories;
 using ECommerceStoreInvoice.Domain.Validation.Abstract;
 using ECommerceStoreInvoice.Domain.Validation.Common;
 
@@ -13,7 +12,6 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Invoices
     internal sealed class InvoiceService(
         IInvoiceRepository invoiceRepository,
         IOrderRepository orderRepository,
-        IShoppingCartRepository shoppingCartRepository,
         IClientDataVersionService clientDataVersionService,
         IInvoicePdfService invoicePdfService,
         IValidationPolicy<Guid> guidValidationPolicy,
@@ -43,9 +41,8 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Invoices
             validationResult = await descriptor.ValidateOrderStatus(order!, createInvoiceValidationPolicy);
             descriptor.ThrowValidationExceptionIfOrderStatusInvalid(validationResult);
 
-            var shoppingCart = await descriptor.LoadShoppingCart(order!.ClientId, shoppingCartRepository);
             var clientDataVersion = await clientDataVersionService.GetByClientId(clientId);
-            var storageUrl = await descriptor.GenerateInvoicePdf(order, shoppingCart, clientDataVersion, invoicePdfService);
+            var storageUrl = await descriptor.GenerateInvoicePdf(order, clientDataVersion, invoicePdfService);
 
             var invoice = descriptor.CreateInvoice(orderId, clientDataVersion!.Id, storageUrl);
             var createdInvoice = await descriptor.SaveInvoice(invoice, invoiceRepository);

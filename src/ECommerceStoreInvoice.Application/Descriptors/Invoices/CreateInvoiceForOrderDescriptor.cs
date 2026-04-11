@@ -7,7 +7,6 @@ using ECommerceStoreInvoice.Domain.AggregatesModel.InvoiceAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.InvoiceAggregate.Repositories;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate.Repositories;
-using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.Repositories;
 using ECommerceStoreInvoice.Domain.Validation.Abstract;
 using ECommerceStoreInvoice.Domain.Validation.Common;
 
@@ -94,31 +93,25 @@ namespace ECommerceStoreInvoice.Application.Descriptors.Invoices
             }
         }
 
-        [FlowStep(order: 11, bpmnId: "LoadShoppingCart")]
-        public async Task<ShoppingCart?> LoadShoppingCart(Guid clientId, IShoppingCartRepository shoppingCartRepository)
+        [FlowStep(order: 11, bpmnId: "GenerateInvoicePdf")]
+        public async Task<string> GenerateInvoicePdf(Order order, ClientDataVersionResponseDto? clientDataVersion, IInvoicePdfService invoicePdfService)
         {
-            return await shoppingCartRepository.GetShoppingCartByClientId(clientId);
+            return await invoicePdfService.GenerateInvoicePdf(order, clientDataVersion);
         }
 
-        [FlowStep(order: 12, bpmnId: "GenerateInvoicePdf")]
-        public async Task<string> GenerateInvoicePdf(Order order, ShoppingCart? shoppingCart, ClientDataVersionResponseDto? clientDataVersion, IInvoicePdfService invoicePdfService)
-        {
-            return await invoicePdfService.GenerateInvoicePdf(order, shoppingCart, clientDataVersion);
-        }
-
-        [FlowStep(order: 13, bpmnId: "CreateInvoiceDomain")]
+        [FlowStep(order: 12, bpmnId: "CreateInvoiceDomain")]
         public Invoice CreateInvoice(Guid orderId, Guid clientDataVersionId, string storageUrl)
         {
             return new Invoice(orderId, clientDataVersionId, storageUrl);
         }
 
-        [FlowStep(order: 14, bpmnId: "SaveInvoice")]
+        [FlowStep(order: 13, bpmnId: "SaveInvoice")]
         public async Task<Invoice> SaveInvoice(Invoice invoice, IInvoiceRepository invoiceRepository)
         {
             return await invoiceRepository.CreateInvoice(invoice);
         }
 
-        [FlowStep(order: 15, bpmnId: "MapInvoiceResponse")]
+        [FlowStep(order: 14, bpmnId: "MapInvoiceResponse")]
         public InvoiceResponseDto MapToResponse(Invoice invoice)
         {
             return MappingConfig.MapToResponse(invoice);
