@@ -211,4 +211,63 @@ public sealed class InvoicePdfServiceTests
         result.ShouldNotContain("{{Order.Status}}");
         result.ShouldNotContain("{{Order.ClientId}}");
     }
+
+    [Fact]
+    public void ApplyTotalsTokens_WhenTemplateContainsTotalsTokens_ShouldReplaceAllTotalsPlaceholders()
+    {
+        // Arrange
+        const decimal subtotal = 123.4m;
+        const decimal tax = 28.382m;
+        const decimal grandTotal = 151.782m;
+        const string currency = "USD";
+
+        var sut = new InvoicePdfService();
+        var template = """
+            Subtotal: {{Order.Total.Amount}} {{Order.Total.Currency}}
+            Tax: {{Invoice.Tax.Amount}} {{Invoice.Tax.Currency}}
+            Grand Total: {{Invoice.GrandTotal.Amount}} {{Invoice.GrandTotal.Currency}}
+            """;
+
+        // Act
+        var result = sut.ApplyTotalsTokens(template, subtotal, tax, grandTotal, currency);
+
+        // Assert
+        result.ShouldContain("Subtotal: 123.40 USD");
+        result.ShouldContain("Tax: 28.38 USD");
+        result.ShouldContain("Grand Total: 151.78 USD");
+        result.ShouldNotContain("{{Order.Total.Amount}}");
+        result.ShouldNotContain("{{Order.Total.Currency}}");
+        result.ShouldNotContain("{{Invoice.Tax.Amount}}");
+        result.ShouldNotContain("{{Invoice.Tax.Currency}}");
+        result.ShouldNotContain("{{Invoice.GrandTotal.Amount}}");
+        result.ShouldNotContain("{{Invoice.GrandTotal.Currency}}");
+    }
+
+    [Fact]
+    public void ApplyFinalTokens_WhenTemplateContainsFinalTokens_ShouldReplaceInvoiceAndSectionPlaceholders()
+    {
+        // Arrange
+        var orderId = Guid.Parse("cccccccc-cccc-cccc-cccc-cccccccccccc");
+        var sut = new InvoicePdfService();
+        var template = """
+            Invoice: {{Invoice.Id}}
+            Issue: {{Invoice.IssueDateUtc}}
+            Generated: {{Invoice.GeneratedAtUtc}}
+            {{#Order.Lines}}line{{/Order.Lines}}
+            """;
+
+        // Act
+        var result = sut.ApplyFinalTokens(template, orderId);
+
+        // Assert
+        result.ShouldContain(orderId.ToString());
+        result.ShouldMatch(@".*Issue: \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}Z.*");
+        result.ShouldMatch(@".*Generated: \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}Z.*");
+        result.ShouldContain("line");
+        result.ShouldNotContain("{{Invoice.Id}}");
+        result.ShouldNotContain("{{Invoice.IssueDateUtc}}");
+        result.ShouldNotContain("{{Invoice.GeneratedAtUtc}}");
+        result.ShouldNotContain("{{#Order.Lines}}");
+        result.ShouldNotContain("{{/Order.Lines}}");
+    }
 }
