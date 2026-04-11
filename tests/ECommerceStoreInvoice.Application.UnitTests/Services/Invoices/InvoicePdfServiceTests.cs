@@ -1,4 +1,5 @@
 using ECommerceStoreInvoice.Application.Services.Concrete.Invoices;
+using ECommerceStoreInvoice.Application.Common.ResponsesDto.Invoices;
 using ECommerceStoreInvoice.Domain.AggregatesModel.Common.Enums;
 using ECommerceStoreInvoice.Domain.AggregatesModel.Common.ValueObjects;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate;
@@ -111,5 +112,103 @@ public sealed class InvoicePdfServiceTests
 
         // Assert
         result.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public void ReplaceOrderLinesSection_WhenTemplateContainsTbody_ShouldReplaceBodyWithBuiltRows()
+    {
+        // Arrange
+        var sut = new InvoicePdfService();
+        var lines = new List<InvoiceLineDto>
+        {
+            new()
+            {
+                ProductVersionId = "11111111-1111-1111-1111-111111111111",
+                Name = "Gaming Mouse",
+                Brand = "Logifast",
+                Quantity = 2,
+                UnitAmount = 99.99m,
+                TotalAmount = 199.98m,
+                Currency = "USD"
+            }
+        };
+
+        var expectedRow = sut.BuildLineRow(lines[0]);
+        var template = """
+            <table>
+                <tbody>
+                    old row
+                </tbody>
+            </table>
+            """;
+
+        // Act
+        var result = sut.ReplaceOrderLinesSection(template, lines);
+
+        // Assert
+        result.ShouldContain("<tbody>");
+        result.ShouldContain(expectedRow);
+        result.ShouldNotContain("old row");
+    }
+
+    [Fact]
+    public void BuildLineRow_WhenLineContainsHtmlSensitiveCharacters_ShouldEscapeAndFormatValues()
+    {
+        // Arrange
+        var sut = new InvoicePdfService();
+        var line = new InvoiceLineDto
+        {
+            ProductVersionId = "11111111-1111-1111-1111-111111111111",
+            Name = "<Mouse & Keyboard>",
+            Brand = "\"Brand\" & Co",
+            Quantity = 3,
+            UnitAmount = 12.5m,
+            TotalAmount = 37.5m,
+            Currency = "USD"
+        };
+
+        // Act
+        var result = sut.BuildLineRow(line);
+
+        // Assert
+        result.ShouldContain("&lt;Mouse &amp; Keyboard&gt;");
+        result.ShouldContain("&quot;Brand&quot; &amp; Co");
+        result.ShouldContain("12.50 USD");
+        result.ShouldContain("37.50 USD");
+        result.ShouldContain(">3<");
+        result.ShouldNotContain("{{Line.Name}}");
+        result.ShouldNotContain("{{Line.Brand}}");
+    }
+
+    [Fact]
+    public void ApplyOrderTokens_WhenTemplateContainsOrderTokens_ShouldReplaceAllOrderPlaceholders()
+    {
+        // Arrange
+        var createdAt = new DateTime(2025, 1, 2, 3, 4, 5, DateTimeKind.Utc);
+        var order = Order.Rehydrate(
+            Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
+            Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
+            [],
+            createdAt,
+            createdAt,
+            OrderStatus.Created,
+            new Money(0m, "USD"));
+
+        var sut = new InvoicePdfService();
+        var template = "Invoice {{InvoiceNumber}} {{Order.Id}} {{Order.CreatedAtUtc}} {{Order.Status}} {{Order.ClientId}}";
+
+        // Act
+        var result = sut.ApplyOrderTokens(template, order);
+
+        // Assert
+        result.ShouldContain("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
+        result.ShouldContain("2025-01-02 03:04:05Z");
+        result.ShouldContain(OrderStatus.Created.ToString());
+        result.ShouldContain("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb");
+        result.ShouldNotContain("{{InvoiceNumber}}");
+        result.ShouldNotContain("{{Order.Id}}");
+        result.ShouldNotContain("{{Order.CreatedAtUtc}}");
+        result.ShouldNotContain("{{Order.Status}}");
+        result.ShouldNotContain("{{Order.ClientId}}");
     }
 }
