@@ -5,6 +5,6 @@ namespace ECommerceStoreInvoice.Application.Services.Abstract.Invoices
 {
     public interface IInvoicePdfService
     {
-        Task<string> GenerateInvoicePdf(Order order, ShoppingCart? shoppingCart, ClientDataVersionResponseDto? clientDataVersion);
+        Task<string> GenerateInvoicePdf(Order order, ClientDataVersionResponseDto? clientDataVersion);
     }
 }
