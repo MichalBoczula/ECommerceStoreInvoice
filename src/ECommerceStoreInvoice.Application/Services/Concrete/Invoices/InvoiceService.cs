@@ -16,12 +16,19 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Invoices
         IShoppingCartRepository shoppingCartRepository,
         IClientDataVersionService clientDataVersionService,
         IInvoicePdfService invoicePdfService,
+        IValidationPolicy<Guid> guidValidationPolicy,
         IValidationPolicy<InvoiceOrderStatusValidationContext> createInvoiceValidationPolicy)
         : IInvoiceService
     {
         public async Task<InvoiceResponseDto> CreateInvoiceForOrder(Guid clientId, Guid orderId)
         {
             var descriptor = new CreateInvoiceForOrderDescriptor();
+
+            var validationResult = await descriptor.ValidateClientId(clientId, guidValidationPolicy);
+            descriptor.ThrowValidationExceptionIfClientIdInvalid(validationResult);
+
+            validationResult = await descriptor.ValidateOrderId(orderId, guidValidationPolicy);
+            descriptor.ThrowValidationExceptionIfOrderIdInvalid(validationResult);
 
             var order = await descriptor.LoadOrder(orderId, orderRepository);
             if (order is not null && order.ClientId != clientId)
@@ -33,7 +40,7 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Invoices
 
             var existingInvoice = await descriptor.LoadInvoiceByOrderId(orderId, invoiceRepository);
             descriptor.ThrowAlreadyExistsExceptionIfInvoiceAlreadyExists(orderId, existingInvoice);
-            var validationResult = await descriptor.ValidateOrderStatus(order!, createInvoiceValidationPolicy);
+            validationResult = await descriptor.ValidateOrderStatus(order!, createInvoiceValidationPolicy);
             descriptor.ThrowValidationExceptionIfOrderStatusInvalid(validationResult);
 
             var shoppingCart = await descriptor.LoadShoppingCart(order!.ClientId, shoppingCartRepository);
@@ -49,6 +56,9 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Invoices
         public async Task<InvoiceResponseDto> GetInvoiceById(Guid invoiceId)
         {
             var descriptor = new GetInvoiceByIdDescriptor();
+
+            var validationResult = await descriptor.ValidateInvoiceId(invoiceId, guidValidationPolicy);
+            descriptor.ThrowValidationExceptionIfInvoiceIdInvalid(validationResult);
 
             var invoice = await descriptor.LoadInvoiceById(invoiceId, invoiceRepository);
             descriptor.ThrowNotFoundExceptionIfInvoiceMissing(invoiceId, invoice);
