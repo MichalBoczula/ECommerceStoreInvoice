@@ -1,4 +1,5 @@
 using ECommerceStoreInvoice.Application.Services.Concrete.Invoices;
+using ECommerceStoreInvoice.Application.Common.ResponsesDto.ClientDataVersions;
 using ECommerceStoreInvoice.Application.Common.ResponsesDto.Invoices;
 using ECommerceStoreInvoice.Domain.AggregatesModel.Common.Enums;
 using ECommerceStoreInvoice.Domain.AggregatesModel.Common.ValueObjects;
@@ -213,6 +214,67 @@ public sealed class InvoicePdfServiceTests
     }
 
     [Fact]
+    public void ApplyClientTokens_WhenClientDataVersionProvided_ShouldReplaceClientPlaceholdersWithClientValues()
+    {
+        // Arrange
+        var clientId = Guid.Parse("dddddddd-dddd-dddd-dddd-dddddddddddd");
+        var clientDataVersion = new ClientDataVersionResponseDto
+        {
+            Id = Guid.Parse("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"),
+            ClientId = clientId,
+            ClientName = "John Doe",
+            PostalCode = "12-345",
+            City = "Warsaw",
+            Street = "Main",
+            BuildingNumber = "10",
+            ApartmentNumber = "4",
+            PhoneNumber = "123456789",
+            PhonePrefix = "+48",
+            AddressEmail = "john@example.com",
+            CreatedAt = DateTime.UtcNow
+        };
+
+        var sut = new InvoicePdfService();
+        var template = "Name: {{Client.Name}}, Address: {{Client.Address}}, Email: {{Client.Email}}, Phone: {{Client.Phone}}, ClientId: {{Order.ClientId}}";
+
+        // Act
+        var result = sut.ApplyClientTokens(template, clientId, clientDataVersion);
+
+        // Assert
+        result.ShouldContain("Name: John Doe");
+        result.ShouldContain("Address: Main 10/4, 12-345 Warsaw");
+        result.ShouldContain("Email: john@example.com");
+        result.ShouldContain("Phone: +48123456789");
+        result.ShouldContain($"ClientId: {clientId}");
+        result.ShouldNotContain("{{Client.Name}}");
+        result.ShouldNotContain("{{Client.Address}}");
+        result.ShouldNotContain("{{Client.Email}}");
+        result.ShouldNotContain("{{Client.Phone}}");
+        result.ShouldNotContain("{{Order.ClientId}}");
+    }
+
+    [Fact]
+    public void ApplyStoreTokens_WhenTemplateContainsStoreTokens_ShouldReplaceStorePlaceholders()
+    {
+        // Arrange
+        var sut = new InvoicePdfService();
+        var template = "Store: {{Store.Name}}, {{Store.Address}}, {{Store.Email}}, {{Store.Phone}}";
+
+        // Act
+        var result = sut.ApplyStoreTokens(template);
+
+        // Assert
+        result.ShouldContain("Store: ECommerce Store");
+        result.ShouldContain("Invoice Street 10/2, 00-000 Store");
+        result.ShouldContain("support@ecommerce.local");
+        result.ShouldContain("123123123");
+        result.ShouldNotContain("{{Store.Name}}");
+        result.ShouldNotContain("{{Store.Address}}");
+        result.ShouldNotContain("{{Store.Email}}");
+        result.ShouldNotContain("{{Store.Phone}}");
+    }
+
+    [Fact]
     public void ApplyTotalsTokens_WhenTemplateContainsTotalsTokens_ShouldReplaceAllTotalsPlaceholders()
     {
         // Arrange
@@ -269,5 +331,24 @@ public sealed class InvoicePdfServiceTests
         result.ShouldNotContain("{{Invoice.GeneratedAtUtc}}");
         result.ShouldNotContain("{{#Order.Lines}}");
         result.ShouldNotContain("{{/Order.Lines}}");
+    }
+
+    [Fact]
+    public void GetInvoicePdfPath_WhenCalled_ShouldCreateInvoicesDirectoryAndReturnPdfFilePath()
+    {
+        // Arrange
+        var orderId = Guid.Parse("ffffffff-ffff-ffff-ffff-ffffffffffff");
+        var sut = new InvoicePdfService();
+
+        // Act
+        var result = sut.GetInvoicePdfPath(orderId);
+
+        // Assert
+        var expectedDirectory = sut.GetInvoicesDirectoryPath();
+        var expectedPath = Path.Combine(expectedDirectory, $"{orderId}.pdf");
+
+        result.ShouldBe(expectedPath);
+        Path.GetFileName(result).ShouldBe($"{orderId}.pdf");
+        Directory.Exists(expectedDirectory).ShouldBeTrue();
     }
 }
