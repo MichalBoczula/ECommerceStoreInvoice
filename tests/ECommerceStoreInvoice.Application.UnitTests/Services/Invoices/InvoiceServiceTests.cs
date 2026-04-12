@@ -156,7 +156,7 @@ public sealed class InvoiceServiceTests
             [],
             DateTime.UtcNow.AddMinutes(-10),
             DateTime.UtcNow,
-            OrderStatus.Completed,
+            OrderStatus.Paid,
             new Money(0m, "USD"));
         var existingInvoice = Invoice.Rehydrate(
             Guid.NewGuid(),
@@ -229,7 +229,7 @@ public sealed class InvoiceServiceTests
             [],
             DateTime.UtcNow.AddHours(-1),
             DateTime.UtcNow,
-            OrderStatus.Completed,
+            OrderStatus.Paid,
             new Money(0m, "USD"));
         var clientDataVersion = new ClientDataVersionResponseDto
         {
