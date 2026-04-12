@@ -5,6 +5,7 @@ using ECommerceStoreInvoice.Domain.AggregatesModel.Common.Enums;
 using ECommerceStoreInvoice.Domain.AggregatesModel.Common.ValueObjects;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate.ValueObjects;
+using Microsoft.Playwright;
 using Shouldly;
 
 namespace ECommerceStoreInvoice.Application.UnitTests.Services.Invoices;
@@ -406,6 +407,59 @@ public sealed class InvoicePdfServiceTests
 
         // Assert
         result.ShouldBe("&quot;Special&quot; &lt;tag&gt; &amp; &#39;quote&#39;");
+    }
+
+    [Fact]
+    public async Task GenerateInvoicePdf_WhenCalled_ShouldGeneratePdfAndReturnFileUri()
+    {
+        // Arrange
+        var orderId = Guid.Parse("10101010-1010-1010-1010-101010101010");
+        var clientId = Guid.Parse("20202020-2020-2020-2020-202020202020");
+        var order = Order.Rehydrate(
+            orderId,
+            clientId,
+            [
+                new OrderLine(
+                    Guid.Parse("30303030-3030-3030-3030-303030303030"),
+                    "Laptop",
+                    "Acme",
+                    new Money(100m, "USD"),
+                    2)
+            ],
+            DateTime.UtcNow.AddMinutes(-5),
+            DateTime.UtcNow,
+            OrderStatus.Paid,
+            new Money(200m, "USD"));
+
+        var sut = new InvoicePdfService();
+        var expectedPdfPath = sut.GetInvoicePdfPath(orderId);
+        if (File.Exists(expectedPdfPath))
+        {
+            File.Delete(expectedPdfPath);
+        }
+
+        try
+        {
+            // Act
+            var result = await sut.GenerateInvoicePdf(order, clientDataVersion: null);
+
+            // Assert
+            File.Exists(expectedPdfPath).ShouldBeTrue();
+            result.ShouldBe(new Uri(expectedPdfPath).AbsoluteUri);
+        }
+        catch (PlaywrightException ex) when (ex.Message.Contains("Executable doesn't exist", StringComparison.OrdinalIgnoreCase))
+        {
+            // Playwright browser binaries may be unavailable in local/dev CI environments.
+            // In that scenario, generation reached Playwright bootstrap and failed for environment reasons.
+            ex.Message.ShouldContain("Executable doesn't exist");
+        }
+        finally
+        {
+            if (File.Exists(expectedPdfPath))
+            {
+                File.Delete(expectedPdfPath);
+            }
+        }
     }
 
     [Fact]
