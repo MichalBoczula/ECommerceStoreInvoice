@@ -413,7 +413,7 @@ public sealed class InvoicePdfServiceTests
     public void GetInvoicePdfPath_WhenCalled_ShouldCreateInvoicesDirectoryAndReturnPdfFilePath()
     {
         // Arrange
-        var orderId = Guid.Parse("ffffffff-ffff-ffff-ffff-ffffffffffff");
+        var orderId = Guid.Parse("ffffffff-0000-ffff-ffff-ffffffffffff");
         var sut = new InvoicePdfService();
 
         // Act
