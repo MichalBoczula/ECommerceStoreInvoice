@@ -30,21 +30,13 @@ public class ApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
     {
         builder.UseEnvironment("Testing");
 
-        builder.ConfigureAppConfiguration((_, configBuilder) =>
-        {
-            var mongoConfiguration = new Dictionary<string, string?>
-            {
-                ["MongoDbSettings:ConnectionString"] = _connectionString,
-                ["MongoDbSettings:DatabaseName"] = Database,
-                ["MongoDbSettings:ShoppingCartsCollectionName"] = "shoppingCarts",
-                ["MongoDbSettings:OrdersCollectionName"] = "orders",
-                ["MongoDbSettings:ProductVersionsCollectionName"] = "productVersions",
-                ["MongoDbSettings:InvoicesCollectionName"] = "invoices",
-                ["MongoDbSettings:ClientDataVersionsCollectionName"] = "clientDataVersions"
-            };
-
-            configBuilder.AddInMemoryCollection(mongoConfiguration);
-        });
+        builder.UseSetting("MongoDbSettings:ConnectionString", _connectionString);
+        builder.UseSetting("MongoDbSettings:DatabaseName", Database);
+        builder.UseSetting("MongoDbSettings:ShoppingCartsCollectionName", "shoppingCarts");
+        builder.UseSetting("MongoDbSettings:OrdersCollectionName", "orders");
+        builder.UseSetting("MongoDbSettings:ProductVersionsCollectionName", "productVersions");
+        builder.UseSetting("MongoDbSettings:InvoicesCollectionName", "invoices");
+        builder.UseSetting("MongoDbSettings:ClientDataVersionsCollectionName", "clientDataVersions");
 
         builder.ConfigureServices(services =>
         {
