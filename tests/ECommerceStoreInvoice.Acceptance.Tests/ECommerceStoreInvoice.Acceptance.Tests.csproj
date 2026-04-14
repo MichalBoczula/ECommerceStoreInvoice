@@ -31,4 +31,9 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\ECommerceStoreInvoice.API\ECommerceStoreInvoice.API.csproj" />
+    <ProjectReference Include="..\..\src\ECommerceStoreInvoice.Infrastructure\ECommerceStoreInvoice.Infrastructure.csproj" />
+  </ItemGroup>
+
 </Project>
