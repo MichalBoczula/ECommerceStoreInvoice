@@ -9,5 +9,5 @@ Feature: Create shopping cart
       | HasId         | true  |
       | HasClientId   | true  |
       | TotalAmount   | 0     |
-      | TotalCurrency | EUR   |
+      | TotalCurrency | USD   |
       | LinesCount    | 0     |
