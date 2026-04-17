@@ -1,7 +1,11 @@
-﻿namespace ECommerceStoreInvoice.Infrastructure.Persistence.ShoppingCarts
+﻿using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
+
+namespace ECommerceStoreInvoice.Infrastructure.Persistence.ShoppingCarts
 {
     internal sealed record ShoppingCartLineDocument
     {
+        [BsonGuidRepresentation(GuidRepresentation.Standard)]
         public required Guid ProductId { get; init; }
         public required string Name { get; init; }
         public required string Brand { get; init; }
