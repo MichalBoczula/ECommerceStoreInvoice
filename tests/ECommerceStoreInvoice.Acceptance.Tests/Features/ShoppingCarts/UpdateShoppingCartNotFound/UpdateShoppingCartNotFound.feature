@@ -1,4 +1,4 @@
-@allure.description:Ensures updating a non-existing shopping cart returns RFC7231 not-found problem details with request context.
+@allure.description:Ensures_updating_a_non_existing_shopping_cart_returns_RFC7231_not_found_problem_details_with_request_context.
 Feature: Update shopping cart not found
 
   Scenario: Update shopping cart returns problem details when shopping cart does not exist
