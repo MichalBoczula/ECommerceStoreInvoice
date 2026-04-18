@@ -6,17 +6,17 @@ Feature: Create client data version
     And I have a valid create client data version request
     When I submit the create client data version request
     Then the client data version is created successfully
-      | Field            | Value              |
-      | StatusCode       | 200                |
-      | HasId            | true               |
-      | HasClientId      | true               |
-      | ClientName       | John Doe           |
-      | PostalCode       | 00-001             |
-      | City             | New York           |
-      | Street           | Main Street        |
-      | BuildingNumber   | 10A                |
-      | ApartmentNumber  | 5                  |
-      | PhoneNumber      | 123456789          |
-      | PhonePrefix      | 48                 |
-      | AddressEmail     | john.doe@test.com  |
-      | HasCreatedAt     | true               |
+      | Field            | Value             |
+      | StatusCode       | 200               |
+      | HasId            | true              |
+      | HasClientId      | true              |
+      | ClientName       | John Doe          |
+      | PostalCode       | 00-001            |
+      | City             | NewYork           |
+      | Street           | Main.St           |
+      | BuildingNumber   | 10A               |
+      | ApartmentNumber  | 5                 |
+      | PhoneNumber      | 123456789         |
+      | PhonePrefix      | 48                |
+      | AddressEmail     | john.doe@test.com |
+      | HasCreatedAt     | true              |

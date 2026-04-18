@@ -40,8 +40,8 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ClientDataVersions.Cre
             {
                 ClientName = "John Doe",
                 PostalCode = "00-001",
-                City = "New York",
-                Street = "Main Street",
+                City = "NewYork",
+                Street = "Main.St",
                 BuildingNumber = "10A",
                 ApartmentNumber = "5",
                 PhoneNumber = "123456789",
