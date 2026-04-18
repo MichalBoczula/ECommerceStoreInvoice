@@ -22,19 +22,19 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ClientDataVersions.Cre
             _apiContext = apiContext;
         }
 
-        [Given("I have an invalid client id for client data version creation")]
-        public void GivenIHaveAnInvalidClientIdForClientDataVersionCreation()
+        [Given("I have a valid client id for client data version validation error")]
+        public void GivenIHaveAValidClientIdForClientDataVersionValidationError()
         {
-            _clientId = Guid.Empty;
+            _clientId = Guid.NewGuid();
 
             AllureJson.AttachObject(
-                "Create client data version invalid setup",
+                "Create client data version validation setup",
                 new { ClientId = _clientId },
                 _apiContext.JsonOptions);
         }
 
-        [Given("I have a create client data version request for validation error")]
-        public void GivenIHaveACreateClientDataVersionRequestForValidationError()
+        [Given("I have an invalid create client data version request with phone number validation error")]
+        public void GivenIHaveAnInvalidCreateClientDataVersionRequestWithPhoneNumberValidationError()
         {
             _request = new CreateClientDataVersionRequestDto
             {
@@ -44,7 +44,7 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ClientDataVersions.Cre
                 Street = "Main.St",
                 BuildingNumber = "10A",
                 ApartmentNumber = "5",
-                PhoneNumber = "123456789",
+                PhoneNumber = "abc",
                 PhonePrefix = "48",
                 AddressEmail = "john.doe@test.com"
             };
@@ -85,7 +85,9 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ClientDataVersions.Cre
             problemDetails!.Title.ShouldBe(GetRequiredValue(expected, "Title"));
             problemDetails.Detail.ShouldBe(GetRequiredValue(expected, "Detail"));
             problemDetails.Type.ShouldBe(GetRequiredValue(expected, "Type"));
-            problemDetails.Instance.ShouldBe(GetRequiredValue(expected, "Instance"));
+
+            var expectedInstance = GetRequiredValue(expected, "Instance").Replace("{clientId}", _clientId.ToString(), StringComparison.OrdinalIgnoreCase);
+            problemDetails.Instance.ShouldBe(expectedInstance);
 
             var errors = problemDetails.Errors.ToList();
             errors.Count.ShouldBe(ParseInt(expected, "ErrorsCount"));
