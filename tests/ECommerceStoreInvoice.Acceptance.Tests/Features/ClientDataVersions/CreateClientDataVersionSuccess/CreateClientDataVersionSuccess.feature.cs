@@ -11,31 +11,31 @@
 #region Designer generated code
 #pragma warning disable
 using Reqnroll;
-namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.UpdateShoppingCartValidationError
+namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ClientDataVersions.CreateClientDataVersionSuccess
 {
     
     
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Reqnroll", "3.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::Xunit.TraitAttribute("Category", "allure.description:Ensures_updating_an_existing_shopping_cart_with_invalid_payloa" +
-        "d_returns_RFC7231_bad_request_problem_details_with_validation_errors.")]
-    public partial class UpdateShoppingCartValidationErrorFeature : object, global::Xunit.IClassFixture<UpdateShoppingCartValidationErrorFeature.FixtureData>, global::Xunit.IAsyncLifetime
+    [global::Xunit.TraitAttribute("Category", "allure.description:Ensures_creating_client_data_version_returns_a_success_respons" +
+        "e_with_the_created_payload_fields.")]
+    public partial class CreateClientDataVersionFeature : object, global::Xunit.IClassFixture<CreateClientDataVersionFeature.FixtureData>, global::Xunit.IAsyncLifetime
     {
         
         private global::Reqnroll.ITestRunner testRunner;
         
         private static string[] featureTags = new string[] {
-                "allure.description:Ensures_updating_an_existing_shopping_cart_with_invalid_payloa" +
-                    "d_returns_RFC7231_bad_request_problem_details_with_validation_errors."};
+                "allure.description:Ensures_creating_client_data_version_returns_a_success_respons" +
+                    "e_with_the_created_payload_fields."};
         
-        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en-US"), "Features/ShoppingCarts/UpdateShoppingCartValidationError", "Update shopping cart validation error", null, global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
+        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en-US"), "Features/ClientDataVersions/CreateClientDataVersionSuccess", "Create client data version", null, global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
         
         private global::Xunit.Abstractions.ITestOutputHelper _testOutputHelper;
         
-#line 1 "UpdateShoppingCartValidationError.feature"
+#line 1 "CreateClientDataVersionSuccess.feature"
 #line hidden
         
-        public UpdateShoppingCartValidationErrorFeature(UpdateShoppingCartValidationErrorFeature.FixtureData fixtureData, global::Xunit.Abstractions.ITestOutputHelper testOutputHelper)
+        public CreateClientDataVersionFeature(CreateClientDataVersionFeature.FixtureData fixtureData, global::Xunit.Abstractions.ITestOutputHelper testOutputHelper)
         {
             this._testOutputHelper = testOutputHelper;
         }
@@ -109,8 +109,8 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.UpdateSh
         
         private static global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages InitializeCucumberMessages()
         {
-            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/ShoppingCarts/UpdateShoppingCartValidationError/UpdateShoppingCartValida" +
-                    "tionError.feature.ndjson", 3);
+            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/ClientDataVersions/CreateClientDataVersionSuccess/CreateClientDataVersio" +
+                    "nSuccess.feature.ndjson", 3);
         }
         
         async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.InitializeAsync()
@@ -138,15 +138,15 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.UpdateSh
             await this.TestTearDownAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Update shopping cart returns problem details when validation fails")]
-        [global::Xunit.TraitAttribute("FeatureTitle", "Update shopping cart validation error")]
-        [global::Xunit.TraitAttribute("Description", "Update shopping cart returns problem details when validation fails")]
-        public async global::System.Threading.Tasks.Task UpdateShoppingCartReturnsProblemDetailsWhenValidationFails()
+        [global::Xunit.SkippableFactAttribute(DisplayName="Create client data version returns created client data version")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Create client data version")]
+        [global::Xunit.TraitAttribute("Description", "Create client data version returns created client data version")]
+        public async global::System.Threading.Tasks.Task CreateClientDataVersionReturnsCreatedClientDataVersion()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "0";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Update shopping cart returns problem details when validation fails", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Create client data version returns created client data version", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
 #line 4
@@ -160,54 +160,58 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.UpdateSh
             {
                 await this.ScenarioStartAsync();
 #line 5
-    await testRunner.GivenAsync("I have an existing shopping cart for invalid update", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+    await testRunner.GivenAsync("I have a valid client id for client data version creation", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
-                global::Reqnroll.Table table13 = new global::Reqnroll.Table(new string[] {
-                            "ProductId",
-                            "Name",
-                            "Brand",
-                            "UnitPriceAmount",
-                            "UnitPriceCurrency",
-                            "Quantity"});
-                table13.AddRow(new string[] {
-                            "33333333-3333-3333-3333-333333333333",
-                            "Phone",
-                            "Apple",
-                            "999.99",
-                            "usd",
-                            "0"});
 #line 6
-    await testRunner.AndAsync("I have an invalid update shopping cart request", ((string)(null)), table13, "And ");
+    await testRunner.AndAsync("I have a valid create client data version request", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
-#line 9
-    await testRunner.WhenAsync("I submit the invalid update shopping cart request", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line 7
+    await testRunner.WhenAsync("I submit the create client data version request", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-                global::Reqnroll.Table table14 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table1 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table14.AddRow(new string[] {
+                table1.AddRow(new string[] {
                             "StatusCode",
-                            "400"});
-                table14.AddRow(new string[] {
-                            "Title",
-                            "Validation failed."});
-                table14.AddRow(new string[] {
-                            "Detail",
-                            "One or more validation errors occurred."});
-                table14.AddRow(new string[] {
-                            "Type",
-                            "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.1"});
-                table14.AddRow(new string[] {
-                            "Instance",
-                            "/shopping-carts/{clientId}"});
-                table14.AddRow(new string[] {
-                            "ErrorsCount",
-                            "1"});
-                table14.AddRow(new string[] {
-                            "FirstErrorMessage",
-                            "Quantity must be greater than zero."});
-#line 10
-    await testRunner.ThenAsync("problem details are returned for update shopping cart validation error", ((string)(null)), table14, "Then ");
+                            "200"});
+                table1.AddRow(new string[] {
+                            "HasId",
+                            "true"});
+                table1.AddRow(new string[] {
+                            "HasClientId",
+                            "true"});
+                table1.AddRow(new string[] {
+                            "ClientName",
+                            "John Doe"});
+                table1.AddRow(new string[] {
+                            "PostalCode",
+                            "00-001"});
+                table1.AddRow(new string[] {
+                            "City",
+                            "NewYork"});
+                table1.AddRow(new string[] {
+                            "Street",
+                            "Main.St"});
+                table1.AddRow(new string[] {
+                            "BuildingNumber",
+                            "10A"});
+                table1.AddRow(new string[] {
+                            "ApartmentNumber",
+                            "5"});
+                table1.AddRow(new string[] {
+                            "PhoneNumber",
+                            "123456789"});
+                table1.AddRow(new string[] {
+                            "PhonePrefix",
+                            "48"});
+                table1.AddRow(new string[] {
+                            "AddressEmail",
+                            "john.doe@test.com"});
+                table1.AddRow(new string[] {
+                            "HasCreatedAt",
+                            "true"});
+#line 8
+    await testRunner.ThenAsync("the client data version is created successfully", ((string)(null)), table1, "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
@@ -220,12 +224,12 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.UpdateSh
             
             async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.InitializeAsync()
             {
-                await UpdateShoppingCartValidationErrorFeature.FeatureSetupAsync();
+                await CreateClientDataVersionFeature.FeatureSetupAsync();
             }
             
             async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.DisposeAsync()
             {
-                await UpdateShoppingCartValidationErrorFeature.FeatureTearDownAsync();
+                await CreateClientDataVersionFeature.FeatureTearDownAsync();
             }
         }
     }

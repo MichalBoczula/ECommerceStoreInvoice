@@ -161,29 +161,29 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.GetShopp
 #line 5
     await testRunner.WhenAsync("I request the shopping cart by client id", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-                global::Reqnroll.Table table4 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table9 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table4.AddRow(new string[] {
+                table9.AddRow(new string[] {
                             "StatusCode",
                             "200"});
-                table4.AddRow(new string[] {
+                table9.AddRow(new string[] {
                             "HasId",
                             "true"});
-                table4.AddRow(new string[] {
+                table9.AddRow(new string[] {
                             "HasClientId",
                             "true"});
-                table4.AddRow(new string[] {
+                table9.AddRow(new string[] {
                             "TotalAmount",
                             "0"});
-                table4.AddRow(new string[] {
+                table9.AddRow(new string[] {
                             "TotalCurrency",
                             "USD"});
-                table4.AddRow(new string[] {
+                table9.AddRow(new string[] {
                             "LinesCount",
                             "0"});
 #line 6
-    await testRunner.ThenAsync("the shopping cart is returned successfully", ((string)(null)), table4, "Then ");
+    await testRunner.ThenAsync("the shopping cart is returned successfully", ((string)(null)), table9, "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
