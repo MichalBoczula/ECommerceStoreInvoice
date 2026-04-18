@@ -35,7 +35,7 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ClientDataVersions.Get
                 BuildingNumber = "10",
                 ApartmentNumber = "5",
                 PhoneNumber = "123456789",
-                PhonePrefix = "+48",
+                PhonePrefix = "48",
                 AddressEmail = "john@example.com"
             };
 

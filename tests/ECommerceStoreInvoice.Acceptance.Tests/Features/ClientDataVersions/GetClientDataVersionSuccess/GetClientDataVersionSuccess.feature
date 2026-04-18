@@ -15,6 +15,6 @@ Feature: Get client data version
       | BuildingNumber  | 10               |
       | ApartmentNumber | 5                |
       | PhoneNumber     | 123456789        |
-      | PhonePrefix     | +48              |
+      | PhonePrefix     | 48               |
       | AddressEmail    | john@example.com |
       | HasCreatedAt    | true             |
