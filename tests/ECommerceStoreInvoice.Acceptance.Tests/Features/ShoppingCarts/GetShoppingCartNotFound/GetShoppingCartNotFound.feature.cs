@@ -164,29 +164,29 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.GetShopp
 #line 5
     await testRunner.WhenAsync("I request the shopping cart by client id for non-existing client", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-                global::Reqnroll.Table table8 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table10 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table8.AddRow(new string[] {
+                table10.AddRow(new string[] {
                             "StatusCode",
                             "404"});
-                table8.AddRow(new string[] {
+                table10.AddRow(new string[] {
                             "Title",
                             "Resource not found."});
-                table8.AddRow(new string[] {
+                table10.AddRow(new string[] {
                             "Type",
                             "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.4"});
-                table8.AddRow(new string[] {
+                table10.AddRow(new string[] {
                             "HasDetail",
                             "true"});
-                table8.AddRow(new string[] {
+                table10.AddRow(new string[] {
                             "Instance",
                             "/shopping-carts/client/{clientId}"});
-                table8.AddRow(new string[] {
+                table10.AddRow(new string[] {
                             "HasTraceId",
                             "true"});
 #line 6
-    await testRunner.ThenAsync("problem details are returned for get shopping cart not found", ((string)(null)), table8, "Then ");
+    await testRunner.ThenAsync("problem details are returned for get shopping cart not found", ((string)(null)), table10, "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

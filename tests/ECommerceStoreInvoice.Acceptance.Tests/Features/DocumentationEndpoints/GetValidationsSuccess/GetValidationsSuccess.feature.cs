@@ -11,27 +11,27 @@
 #region Designer generated code
 #pragma warning disable
 using Reqnroll;
-namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.GetShoppingCartSuccess
+namespace ECommerceStoreInvoice.Acceptance.Tests.Features.DocumentationEndpoints.GetValidationsSuccess
 {
     
     
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Reqnroll", "3.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    public partial class GetShoppingCartFeature : object, global::Xunit.IClassFixture<GetShoppingCartFeature.FixtureData>, global::Xunit.IAsyncLifetime
+    public partial class GetValidationDocumentationFeature : object, global::Xunit.IClassFixture<GetValidationDocumentationFeature.FixtureData>, global::Xunit.IAsyncLifetime
     {
         
         private global::Reqnroll.ITestRunner testRunner;
         
         private static string[] featureTags = ((string[])(null));
         
-        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en-US"), "Features/ShoppingCarts/GetShoppingCartSuccess", "Get shopping cart", null, global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
+        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en-US"), "Features/DocumentationEndpoints/GetValidationsSuccess", "Get validation documentation", null, global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
         
         private global::Xunit.Abstractions.ITestOutputHelper _testOutputHelper;
         
-#line 1 "GetShoppingCartSuccess.feature"
+#line 1 "GetValidationsSuccess.feature"
 #line hidden
         
-        public GetShoppingCartFeature(GetShoppingCartFeature.FixtureData fixtureData, global::Xunit.Abstractions.ITestOutputHelper testOutputHelper)
+        public GetValidationDocumentationFeature(GetValidationDocumentationFeature.FixtureData fixtureData, global::Xunit.Abstractions.ITestOutputHelper testOutputHelper)
         {
             this._testOutputHelper = testOutputHelper;
         }
@@ -105,8 +105,8 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.GetShopp
         
         private static global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages InitializeCucumberMessages()
         {
-            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/ShoppingCarts/GetShoppingCartSuccess/GetShoppingCartSuccess.feature.ndjs" +
-                    "on", 3);
+            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/DocumentationEndpoints/GetValidationsSuccess/GetValidationsSuccess.featu" +
+                    "re.ndjson", 3);
         }
         
         async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.InitializeAsync()
@@ -134,15 +134,15 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.GetShopp
             await this.TestTearDownAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Get shopping cart by client id returns shopping cart")]
-        [global::Xunit.TraitAttribute("FeatureTitle", "Get shopping cart")]
-        [global::Xunit.TraitAttribute("Description", "Get shopping cart by client id returns shopping cart")]
-        public async global::System.Threading.Tasks.Task GetShoppingCartByClientIdReturnsShoppingCart()
+        [global::Xunit.SkippableFactAttribute(DisplayName="Get validation documentation returns validation descriptors")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Get validation documentation")]
+        [global::Xunit.TraitAttribute("Description", "Get validation documentation returns validation descriptors")]
+        public async global::System.Threading.Tasks.Task GetValidationDocumentationReturnsValidationDescriptors()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "0";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Get shopping cart by client id returns shopping cart", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Get validation documentation returns validation descriptors", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
 #line 3
@@ -156,34 +156,43 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.GetShopp
             {
                 await this.ScenarioStartAsync();
 #line 4
-    await testRunner.GivenAsync("I have an existing shopping cart for retrieval", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+    await testRunner.GivenAsync("I am ready to retrieve validation documentation", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
 #line 5
-    await testRunner.WhenAsync("I request the shopping cart by client id", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+    await testRunner.WhenAsync("I request validation documentation", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-                global::Reqnroll.Table table11 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table6 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table11.AddRow(new string[] {
+                table6.AddRow(new string[] {
                             "StatusCode",
                             "200"});
-                table11.AddRow(new string[] {
-                            "HasId",
+                table6.AddRow(new string[] {
+                            "ValidationsCount",
+                            "7"});
+                table6.AddRow(new string[] {
+                            "HasPolicy_ClientValidationPolicy",
                             "true"});
-                table11.AddRow(new string[] {
-                            "HasClientId",
+                table6.AddRow(new string[] {
+                            "HasPolicy_ShoppingCartLineValidationPolicy",
                             "true"});
-                table11.AddRow(new string[] {
-                            "TotalAmount",
-                            "0"});
-                table11.AddRow(new string[] {
-                            "TotalCurrency",
-                            "USD"});
-                table11.AddRow(new string[] {
-                            "LinesCount",
-                            "0"});
+                table6.AddRow(new string[] {
+                            "HasPolicy_ClientDataVersionValidationPolicy",
+                            "true"});
+                table6.AddRow(new string[] {
+                            "HasPolicy_OrderValidationPolicy",
+                            "true"});
+                table6.AddRow(new string[] {
+                            "HasPolicy_UpdateOrderValidationPolicy",
+                            "true"});
+                table6.AddRow(new string[] {
+                            "HasPolicy_InvoiceValidationPolicy",
+                            "true"});
+                table6.AddRow(new string[] {
+                            "HasPolicy_ProductVersionValidationPolicy",
+                            "true"});
 #line 6
-    await testRunner.ThenAsync("the shopping cart is returned successfully", ((string)(null)), table11, "Then ");
+    await testRunner.ThenAsync("the validation documentation is returned successfully", ((string)(null)), table6, "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
@@ -196,12 +205,12 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.GetShopp
             
             async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.InitializeAsync()
             {
-                await GetShoppingCartFeature.FeatureSetupAsync();
+                await GetValidationDocumentationFeature.FeatureSetupAsync();
             }
             
             async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.DisposeAsync()
             {
-                await GetShoppingCartFeature.FeatureTearDownAsync();
+                await GetValidationDocumentationFeature.FeatureTearDownAsync();
             }
         }
     }
