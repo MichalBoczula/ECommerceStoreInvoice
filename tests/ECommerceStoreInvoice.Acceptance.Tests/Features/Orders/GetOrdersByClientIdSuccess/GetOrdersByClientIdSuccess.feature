@@ -9,7 +9,7 @@ Feature: Get orders by client id
       | OrdersCount              | 2         |
       | FirstOrderHasId          | true      |
       | FirstOrderHasClientId    | true      |
-      | FirstOrderStatus         | Pending   |
+      | FirstOrderStatus         | Created   |
       | FirstOrderTotalAmount    | 1999.98   |
       | FirstOrderTotalCurrency  | USD       |
       | FirstOrderLinesCount     | 1         |

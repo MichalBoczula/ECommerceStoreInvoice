@@ -78,10 +78,9 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Orders.GetOrdersByClie
             AllureJson.AttachRawJson($"Update shopping cart response JSON ({(int)updateShoppingCartResponse.StatusCode})", updateShoppingCartBody);
 
             var createOrderResponse = await _apiContext.HttpClient.PostAsync($"/orders/{_clientId}", content: null);
-            createOrderResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
-
             var createOrderBody = await createOrderResponse.Content.ReadAsStringAsync();
             AllureJson.AttachRawJson($"Create order response JSON ({(int)createOrderResponse.StatusCode})", createOrderBody);
+            createOrderResponse.StatusCode.ShouldBe(HttpStatusCode.OK, createOrderBody);
 
             var refillShoppingCartResponse = await _apiContext.HttpClient.PutAsJsonAsync($"/shopping-carts/{_clientId}", updateRequest, _apiContext.JsonOptions);
             refillShoppingCartResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
@@ -90,10 +89,9 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Orders.GetOrdersByClie
             AllureJson.AttachRawJson($"Refill shopping cart response JSON ({(int)refillShoppingCartResponse.StatusCode})", refillShoppingCartBody);
 
             var createSecondOrderResponse = await _apiContext.HttpClient.PostAsync($"/orders/{_clientId}", content: null);
-            createSecondOrderResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
-
             var createSecondOrderBody = await createSecondOrderResponse.Content.ReadAsStringAsync();
             AllureJson.AttachRawJson($"Create second order response JSON ({(int)createSecondOrderResponse.StatusCode})", createSecondOrderBody);
+            createSecondOrderResponse.StatusCode.ShouldBe(HttpStatusCode.OK, createSecondOrderBody);
         }
 
         [When("I request orders by client id")]
