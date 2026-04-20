@@ -118,6 +118,7 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Orders.GetOrdersByClie
 
             var ordersList = orders!.ToList();
             ordersList.Count.ShouldBe(ParseInt(expected, "OrdersCount", ordersList.Count));
+            ordersList.Count(o => o.ClientId == _clientId).ShouldBe(ordersList.Count);
 
             var firstOrder = ordersList.First();
 
@@ -160,6 +161,14 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Orders.GetOrdersByClie
             firstLine.UnitPriceCurrency.ShouldBe(GetExpectedValue(expected, "FirstLineUnitPriceCurrency", firstLine.UnitPriceCurrency));
             firstLine.TotalAmount.ShouldBe(ParseDecimal(expected, "FirstLineTotalAmount", firstLine.TotalAmount));
             firstLine.TotalCurrency.ShouldBe(GetExpectedValue(expected, "FirstLineTotalCurrency", firstLine.TotalCurrency));
+
+            var expectedLinesCount = ParseInt(expected, "FirstOrderLinesCount", firstOrder.Lines.Count);
+            var expectedLineQuantity = ParseInt(expected, "FirstLineQuantity", firstLine.Quantity);
+            foreach (var order in ordersList)
+            {
+                order.Lines.Count.ShouldBe(expectedLinesCount);
+                order.Lines.Sum(l => l.Quantity).ShouldBe(expectedLineQuantity);
+            }
         }
 
         private async Task<T?> DeserializeResponse<T>(HttpResponseMessage response)
