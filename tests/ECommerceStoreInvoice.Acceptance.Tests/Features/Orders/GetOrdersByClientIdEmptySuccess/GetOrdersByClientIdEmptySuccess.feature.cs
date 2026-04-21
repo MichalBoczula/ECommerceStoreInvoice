@@ -11,27 +11,27 @@
 #region Designer generated code
 #pragma warning disable
 using Reqnroll;
-namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.UpdateShoppingCartSuccess
+namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Orders.GetOrdersByClientIdEmptySuccess
 {
     
     
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Reqnroll", "3.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    public partial class UpdateShoppingCartFeature : object, global::Xunit.IClassFixture<UpdateShoppingCartFeature.FixtureData>, global::Xunit.IAsyncLifetime
+    public partial class GetOrdersByClientIdFeature : object, global::Xunit.IClassFixture<GetOrdersByClientIdFeature.FixtureData>, global::Xunit.IAsyncLifetime
     {
         
         private global::Reqnroll.ITestRunner testRunner;
         
         private static string[] featureTags = ((string[])(null));
         
-        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en-US"), "Features/ShoppingCarts/UpdateShoppingCartSuccess", "Update shopping cart", null, global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
+        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en-US"), "Features/Orders/GetOrdersByClientIdEmptySuccess", "Get orders by client id", null, global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
         
         private global::Xunit.Abstractions.ITestOutputHelper _testOutputHelper;
         
-#line 1 "UpdateShoppingCartSuccess.feature"
+#line 1 "GetOrdersByClientIdEmptySuccess.feature"
 #line hidden
         
-        public UpdateShoppingCartFeature(UpdateShoppingCartFeature.FixtureData fixtureData, global::Xunit.Abstractions.ITestOutputHelper testOutputHelper)
+        public GetOrdersByClientIdFeature(GetOrdersByClientIdFeature.FixtureData fixtureData, global::Xunit.Abstractions.ITestOutputHelper testOutputHelper)
         {
             this._testOutputHelper = testOutputHelper;
         }
@@ -105,8 +105,8 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.UpdateSh
         
         private static global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages InitializeCucumberMessages()
         {
-            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/ShoppingCarts/UpdateShoppingCartSuccess/UpdateShoppingCartSuccess.featur" +
-                    "e.ndjson", 3);
+            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/Orders/GetOrdersByClientIdEmptySuccess/GetOrdersByClientIdEmptySuccess.f" +
+                    "eature.ndjson", 3);
         }
         
         async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.InitializeAsync()
@@ -134,15 +134,15 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.UpdateSh
             await this.TestTearDownAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Update shopping cart returns updated shopping cart")]
-        [global::Xunit.TraitAttribute("FeatureTitle", "Update shopping cart")]
-        [global::Xunit.TraitAttribute("Description", "Update shopping cart returns updated shopping cart")]
-        public async global::System.Threading.Tasks.Task UpdateShoppingCartReturnsUpdatedShoppingCart()
+        [global::Xunit.SkippableFactAttribute(DisplayName="Get orders by client id returns empty list when client has no orders")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Get orders by client id")]
+        [global::Xunit.TraitAttribute("Description", "Get orders by client id returns empty list when client has no orders")]
+        public async global::System.Threading.Tasks.Task GetOrdersByClientIdReturnsEmptyListWhenClientHasNoOrders()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "0";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Update shopping cart returns updated shopping cart", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Get orders by client id returns empty list when client has no orders", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
 #line 3
@@ -156,52 +156,25 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.UpdateSh
             {
                 await this.ScenarioStartAsync();
 #line 4
-    await testRunner.GivenAsync("I have an existing shopping cart for update", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+    await testRunner.GivenAsync("I have a client without orders", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
 #line 5
-    await testRunner.AndAsync("I have a valid update shopping cart request", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+    await testRunner.WhenAsync("I request orders by client id for the client without orders", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-#line 6
-    await testRunner.WhenAsync("I submit the update shopping cart request", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
-#line hidden
-                global::Reqnroll.Table table17 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table8 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table17.AddRow(new string[] {
+                table8.AddRow(new string[] {
                             "StatusCode",
                             "200"});
-                table17.AddRow(new string[] {
-                            "HasId",
+                table8.AddRow(new string[] {
+                            "OrdersCount",
+                            "0"});
+                table8.AddRow(new string[] {
+                            "IsEmpty",
                             "true"});
-                table17.AddRow(new string[] {
-                            "HasClientId",
-                            "true"});
-                table17.AddRow(new string[] {
-                            "TotalAmount",
-                            "2399.97"});
-                table17.AddRow(new string[] {
-                            "TotalCurrency",
-                            "USD"});
-                table17.AddRow(new string[] {
-                            "LinesCount",
-                            "2"});
-                table17.AddRow(new string[] {
-                            "FirstLineName",
-                            "Phone"});
-                table17.AddRow(new string[] {
-                            "FirstLineBrand",
-                            "Apple"});
-                table17.AddRow(new string[] {
-                            "FirstLineQuantity",
-                            "2"});
-                table17.AddRow(new string[] {
-                            "FirstLineTotalAmount",
-                            "1999.98"});
-                table17.AddRow(new string[] {
-                            "FirstLineTotalCurrency",
-                            "USD"});
-#line 7
-    await testRunner.ThenAsync("the shopping cart is updated successfully", ((string)(null)), table17, "Then ");
+#line 6
+    await testRunner.ThenAsync("an empty list of orders is returned successfully", ((string)(null)), table8, "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
@@ -214,12 +187,12 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.UpdateSh
             
             async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.InitializeAsync()
             {
-                await UpdateShoppingCartFeature.FeatureSetupAsync();
+                await GetOrdersByClientIdFeature.FeatureSetupAsync();
             }
             
             async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.DisposeAsync()
             {
-                await UpdateShoppingCartFeature.FeatureTearDownAsync();
+                await GetOrdersByClientIdFeature.FeatureTearDownAsync();
             }
         }
     }
