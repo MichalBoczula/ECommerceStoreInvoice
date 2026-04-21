@@ -77,6 +77,7 @@ namespace ECommerceStoreInvoice.API.Endpoints
             .WithDescription("Returns the order when the Id exists; 404 otherwise.")
             .WithName("GetOrderById")
             .Produces<OrderResponseDto>(StatusCodes.Status200OK)
+            .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest)
             .Produces<NotFoundProblemDetails>(StatusCodes.Status404NotFound)
             .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
         }
