@@ -11,31 +11,31 @@
 #region Designer generated code
 #pragma warning disable
 using Reqnroll;
-namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.UpdateShoppingCartValidationError
+namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Orders.GetOrdersByIdNotFound
 {
     
     
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Reqnroll", "3.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::Xunit.TraitAttribute("Category", "allure.description:Ensures_updating_an_existing_shopping_cart_with_invalid_payloa" +
-        "d_returns_RFC7231_bad_request_problem_details_with_validation_errors.")]
-    public partial class UpdateShoppingCartValidationErrorFeature : object, global::Xunit.IClassFixture<UpdateShoppingCartValidationErrorFeature.FixtureData>, global::Xunit.IAsyncLifetime
+    [global::Xunit.TraitAttribute("Category", "allure.description:Ensures_getting_a_non_existing_order_by_id_returns_RFC7231_not" +
+        "_found_problem_details_with_request_context.")]
+    public partial class GetOrderByIdNotFoundFeature : object, global::Xunit.IClassFixture<GetOrderByIdNotFoundFeature.FixtureData>, global::Xunit.IAsyncLifetime
     {
         
         private global::Reqnroll.ITestRunner testRunner;
         
         private static string[] featureTags = new string[] {
-                "allure.description:Ensures_updating_an_existing_shopping_cart_with_invalid_payloa" +
-                    "d_returns_RFC7231_bad_request_problem_details_with_validation_errors."};
+                "allure.description:Ensures_getting_a_non_existing_order_by_id_returns_RFC7231_not" +
+                    "_found_problem_details_with_request_context."};
         
-        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en-US"), "Features/ShoppingCarts/UpdateShoppingCartValidationError", "Update shopping cart validation error", null, global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
+        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en-US"), "Features/Orders/GetOrdersByIdNotFound", "Get order by id not found", null, global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
         
         private global::Xunit.Abstractions.ITestOutputHelper _testOutputHelper;
         
-#line 1 "UpdateShoppingCartValidationError.feature"
+#line 1 "GetOrdersByIdNotFound.feature"
 #line hidden
         
-        public UpdateShoppingCartValidationErrorFeature(UpdateShoppingCartValidationErrorFeature.FixtureData fixtureData, global::Xunit.Abstractions.ITestOutputHelper testOutputHelper)
+        public GetOrderByIdNotFoundFeature(GetOrderByIdNotFoundFeature.FixtureData fixtureData, global::Xunit.Abstractions.ITestOutputHelper testOutputHelper)
         {
             this._testOutputHelper = testOutputHelper;
         }
@@ -109,8 +109,7 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.UpdateSh
         
         private static global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages InitializeCucumberMessages()
         {
-            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/ShoppingCarts/UpdateShoppingCartValidationError/UpdateShoppingCartValida" +
-                    "tionError.feature.ndjson", 3);
+            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/Orders/GetOrdersByIdNotFound/GetOrdersByIdNotFound.feature.ndjson", 3);
         }
         
         async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.InitializeAsync()
@@ -138,15 +137,15 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.UpdateSh
             await this.TestTearDownAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Update shopping cart returns problem details when validation fails")]
-        [global::Xunit.TraitAttribute("FeatureTitle", "Update shopping cart validation error")]
-        [global::Xunit.TraitAttribute("Description", "Update shopping cart returns problem details when validation fails")]
-        public async global::System.Threading.Tasks.Task UpdateShoppingCartReturnsProblemDetailsWhenValidationFails()
+        [global::Xunit.SkippableFactAttribute(DisplayName="Get order by id returns problem details when order does not exist")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Get order by id not found")]
+        [global::Xunit.TraitAttribute("Description", "Get order by id returns problem details when order does not exist")]
+        public async global::System.Threading.Tasks.Task GetOrderByIdReturnsProblemDetailsWhenOrderDoesNotExist()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "0";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Update shopping cart returns problem details when validation fails", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Get order by id returns problem details when order does not exist", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
 #line 4
@@ -160,54 +159,34 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.UpdateSh
             {
                 await this.ScenarioStartAsync();
 #line 5
-    await testRunner.GivenAsync("I have an existing shopping cart for invalid update", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+    await testRunner.GivenAsync("I have a non-existing order id for orders retrieval", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
-                global::Reqnroll.Table table21 = new global::Reqnroll.Table(new string[] {
-                            "ProductId",
-                            "Name",
-                            "Brand",
-                            "UnitPriceAmount",
-                            "UnitPriceCurrency",
-                            "Quantity"});
-                table21.AddRow(new string[] {
-                            "33333333-3333-3333-3333-333333333333",
-                            "Phone",
-                            "Apple",
-                            "999.99",
-                            "usd",
-                            "0"});
 #line 6
-    await testRunner.AndAsync("I have an invalid update shopping cart request", ((string)(null)), table21, "And ");
+    await testRunner.WhenAsync("I request order by id for non-existing order", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-#line 9
-    await testRunner.WhenAsync("I submit the invalid update shopping cart request", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
-#line hidden
-                global::Reqnroll.Table table22 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table11 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table22.AddRow(new string[] {
+                table11.AddRow(new string[] {
                             "StatusCode",
-                            "400"});
-                table22.AddRow(new string[] {
+                            "404"});
+                table11.AddRow(new string[] {
                             "Title",
-                            "Validation failed."});
-                table22.AddRow(new string[] {
-                            "Detail",
-                            "One or more validation errors occurred."});
-                table22.AddRow(new string[] {
+                            "Resource not found."});
+                table11.AddRow(new string[] {
                             "Type",
-                            "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.1"});
-                table22.AddRow(new string[] {
+                            "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.4"});
+                table11.AddRow(new string[] {
+                            "HasDetail",
+                            "true"});
+                table11.AddRow(new string[] {
                             "Instance",
-                            "/shopping-carts/{clientId}"});
-                table22.AddRow(new string[] {
-                            "ErrorsCount",
-                            "1"});
-                table22.AddRow(new string[] {
-                            "FirstErrorMessage",
-                            "Quantity must be greater than zero."});
-#line 10
-    await testRunner.ThenAsync("problem details are returned for update shopping cart validation error", ((string)(null)), table22, "Then ");
+                            "/orders/{orderId}"});
+                table11.AddRow(new string[] {
+                            "HasTraceId",
+                            "true"});
+#line 7
+    await testRunner.ThenAsync("problem details are returned for get order by id not found", ((string)(null)), table11, "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
@@ -220,12 +199,12 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.UpdateSh
             
             async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.InitializeAsync()
             {
-                await UpdateShoppingCartValidationErrorFeature.FeatureSetupAsync();
+                await GetOrderByIdNotFoundFeature.FeatureSetupAsync();
             }
             
             async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.DisposeAsync()
             {
-                await UpdateShoppingCartValidationErrorFeature.FeatureTearDownAsync();
+                await GetOrderByIdNotFoundFeature.FeatureTearDownAsync();
             }
         }
     }
