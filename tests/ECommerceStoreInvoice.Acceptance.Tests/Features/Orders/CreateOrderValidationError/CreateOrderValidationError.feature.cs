@@ -11,27 +11,31 @@
 #region Designer generated code
 #pragma warning disable
 using Reqnroll;
-namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.UpdateShoppingCartSuccess
+namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Orders.CreateOrderValidationError
 {
     
     
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Reqnroll", "3.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    public partial class UpdateShoppingCartFeature : object, global::Xunit.IClassFixture<UpdateShoppingCartFeature.FixtureData>, global::Xunit.IAsyncLifetime
+    [global::Xunit.TraitAttribute("Category", "allure.description:Ensures_creating_order_with_empty_shopping_cart_returns_RFC723" +
+        "1_bad_request_problem_details_with_validation_errors.")]
+    public partial class CreateOrderValidationErrorFeature : object, global::Xunit.IClassFixture<CreateOrderValidationErrorFeature.FixtureData>, global::Xunit.IAsyncLifetime
     {
         
         private global::Reqnroll.ITestRunner testRunner;
         
-        private static string[] featureTags = ((string[])(null));
+        private static string[] featureTags = new string[] {
+                "allure.description:Ensures_creating_order_with_empty_shopping_cart_returns_RFC723" +
+                    "1_bad_request_problem_details_with_validation_errors."};
         
-        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en-US"), "Features/ShoppingCarts/UpdateShoppingCartSuccess", "Update shopping cart", null, global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
+        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en-US"), "Features/Orders/CreateOrderValidationError", "Create order validation error", null, global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
         
         private global::Xunit.Abstractions.ITestOutputHelper _testOutputHelper;
         
-#line 1 "UpdateShoppingCartSuccess.feature"
+#line 1 "CreateOrderValidationError.feature"
 #line hidden
         
-        public UpdateShoppingCartFeature(UpdateShoppingCartFeature.FixtureData fixtureData, global::Xunit.Abstractions.ITestOutputHelper testOutputHelper)
+        public CreateOrderValidationErrorFeature(CreateOrderValidationErrorFeature.FixtureData fixtureData, global::Xunit.Abstractions.ITestOutputHelper testOutputHelper)
         {
             this._testOutputHelper = testOutputHelper;
         }
@@ -105,8 +109,8 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.UpdateSh
         
         private static global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages InitializeCucumberMessages()
         {
-            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/ShoppingCarts/UpdateShoppingCartSuccess/UpdateShoppingCartSuccess.featur" +
-                    "e.ndjson", 3);
+            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/Orders/CreateOrderValidationError/CreateOrderValidationError.feature.ndj" +
+                    "son", 3);
         }
         
         async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.InitializeAsync()
@@ -134,18 +138,18 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.UpdateSh
             await this.TestTearDownAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Update shopping cart returns updated shopping cart")]
-        [global::Xunit.TraitAttribute("FeatureTitle", "Update shopping cart")]
-        [global::Xunit.TraitAttribute("Description", "Update shopping cart returns updated shopping cart")]
-        public async global::System.Threading.Tasks.Task UpdateShoppingCartReturnsUpdatedShoppingCart()
+        [global::Xunit.SkippableFactAttribute(DisplayName="Create order returns problem details when validation fails")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Create order validation error")]
+        [global::Xunit.TraitAttribute("Description", "Create order returns problem details when validation fails")]
+        public async global::System.Threading.Tasks.Task CreateOrderReturnsProblemDetailsWhenValidationFails()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "0";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Update shopping cart returns updated shopping cart", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Create order returns problem details when validation fails", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 3
+#line 4
   this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -155,53 +159,38 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.UpdateSh
             else
             {
                 await this.ScenarioStartAsync();
-#line 4
-    await testRunner.GivenAsync("I have an existing shopping cart for update", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
-#line hidden
 #line 5
-    await testRunner.AndAsync("I have a valid update shopping cart request", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+    await testRunner.GivenAsync("I have a client with an empty shopping cart for order creation", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
 #line 6
-    await testRunner.WhenAsync("I submit the update shopping cart request", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+    await testRunner.WhenAsync("I submit the create order request for the empty shopping cart", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-                global::Reqnroll.Table table22 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table9 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table22.AddRow(new string[] {
+                table9.AddRow(new string[] {
                             "StatusCode",
-                            "200"});
-                table22.AddRow(new string[] {
-                            "HasId",
-                            "true"});
-                table22.AddRow(new string[] {
-                            "HasClientId",
-                            "true"});
-                table22.AddRow(new string[] {
-                            "TotalAmount",
-                            "2399.97"});
-                table22.AddRow(new string[] {
-                            "TotalCurrency",
-                            "USD"});
-                table22.AddRow(new string[] {
-                            "LinesCount",
-                            "2"});
-                table22.AddRow(new string[] {
-                            "FirstLineName",
-                            "Phone"});
-                table22.AddRow(new string[] {
-                            "FirstLineBrand",
-                            "Apple"});
-                table22.AddRow(new string[] {
-                            "FirstLineQuantity",
-                            "2"});
-                table22.AddRow(new string[] {
-                            "FirstLineTotalAmount",
-                            "1999.98"});
-                table22.AddRow(new string[] {
-                            "FirstLineTotalCurrency",
-                            "USD"});
+                            "400"});
+                table9.AddRow(new string[] {
+                            "Title",
+                            "Validation failed."});
+                table9.AddRow(new string[] {
+                            "Detail",
+                            "One or more validation errors occurred."});
+                table9.AddRow(new string[] {
+                            "Type",
+                            "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.1"});
+                table9.AddRow(new string[] {
+                            "Instance",
+                            "/orders/{clientId}"});
+                table9.AddRow(new string[] {
+                            "ErrorsCount",
+                            "1"});
+                table9.AddRow(new string[] {
+                            "FirstErrorMessage",
+                            "Order lines cannot be empty."});
 #line 7
-    await testRunner.ThenAsync("the shopping cart is updated successfully", ((string)(null)), table22, "Then ");
+    await testRunner.ThenAsync("problem details are returned for create order validation error", ((string)(null)), table9, "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
@@ -214,12 +203,12 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.UpdateSh
             
             async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.InitializeAsync()
             {
-                await UpdateShoppingCartFeature.FeatureSetupAsync();
+                await CreateOrderValidationErrorFeature.FeatureSetupAsync();
             }
             
             async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.DisposeAsync()
             {
-                await UpdateShoppingCartFeature.FeatureTearDownAsync();
+                await CreateOrderValidationErrorFeature.FeatureTearDownAsync();
             }
         }
     }

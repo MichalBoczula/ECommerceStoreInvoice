@@ -160,56 +160,56 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Orders.GetOrdersByIdSu
 #line 5
     await testRunner.WhenAsync("I request order by id", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-                global::Reqnroll.Table table12 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table14 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table12.AddRow(new string[] {
+                table14.AddRow(new string[] {
                             "StatusCode",
                             "200"});
-                table12.AddRow(new string[] {
+                table14.AddRow(new string[] {
                             "HasId",
                             "true"});
-                table12.AddRow(new string[] {
+                table14.AddRow(new string[] {
                             "HasClientId",
                             "true"});
-                table12.AddRow(new string[] {
+                table14.AddRow(new string[] {
                             "Status",
                             "Created"});
-                table12.AddRow(new string[] {
+                table14.AddRow(new string[] {
                             "TotalAmount",
                             "1999.98"});
-                table12.AddRow(new string[] {
+                table14.AddRow(new string[] {
                             "TotalCurrency",
                             "USD"});
-                table12.AddRow(new string[] {
+                table14.AddRow(new string[] {
                             "LinesCount",
                             "1"});
-                table12.AddRow(new string[] {
+                table14.AddRow(new string[] {
                             "FirstLineHasProductVersionId",
                             "true"});
-                table12.AddRow(new string[] {
+                table14.AddRow(new string[] {
                             "FirstLineName",
                             "Laptop"});
-                table12.AddRow(new string[] {
+                table14.AddRow(new string[] {
                             "FirstLineBrand",
                             "Lenovo"});
-                table12.AddRow(new string[] {
+                table14.AddRow(new string[] {
                             "FirstLineQuantity",
                             "2"});
-                table12.AddRow(new string[] {
+                table14.AddRow(new string[] {
                             "FirstLineUnitPriceAmount",
                             "999.99"});
-                table12.AddRow(new string[] {
+                table14.AddRow(new string[] {
                             "FirstLineUnitPriceCurrency",
                             "USD"});
-                table12.AddRow(new string[] {
+                table14.AddRow(new string[] {
                             "FirstLineTotalAmount",
                             "1999.98"});
-                table12.AddRow(new string[] {
+                table14.AddRow(new string[] {
                             "FirstLineTotalCurrency",
                             "USD"});
 #line 6
-    await testRunner.ThenAsync("the order is returned successfully by id", ((string)(null)), table12, "Then ");
+    await testRunner.ThenAsync("the order is returned successfully by id", ((string)(null)), table14, "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
