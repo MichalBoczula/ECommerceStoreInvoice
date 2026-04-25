@@ -19,8 +19,7 @@ public class ApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
 
     public ApplicationFactory()
     {
-        _mongoContainer = new MongoDbBuilder()
-            .WithImage("mongo:8.0")
+        _mongoContainer = new MongoDbBuilder("mongo:8.0")
             .WithUsername(Username)
             .WithPassword(Password)
             .Build();
