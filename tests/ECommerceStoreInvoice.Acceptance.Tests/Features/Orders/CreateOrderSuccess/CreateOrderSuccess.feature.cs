@@ -11,31 +11,27 @@
 #region Designer generated code
 #pragma warning disable
 using Reqnroll;
-namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Orders.CreateOrderValidationError
+namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Orders.CreateOrderSuccess
 {
     
     
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Reqnroll", "3.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::Xunit.TraitAttribute("Category", "allure.description:Ensures_creating_order_with_empty_shopping_cart_returns_RFC723" +
-        "1_bad_request_problem_details_with_validation_errors.")]
-    public partial class CreateOrderValidationErrorFeature : object, global::Xunit.IClassFixture<CreateOrderValidationErrorFeature.FixtureData>, global::Xunit.IAsyncLifetime
+    public partial class CreateOrderFeature : object, global::Xunit.IClassFixture<CreateOrderFeature.FixtureData>, global::Xunit.IAsyncLifetime
     {
         
         private global::Reqnroll.ITestRunner testRunner;
         
-        private static string[] featureTags = new string[] {
-                "allure.description:Ensures_creating_order_with_empty_shopping_cart_returns_RFC723" +
-                    "1_bad_request_problem_details_with_validation_errors."};
+        private static string[] featureTags = ((string[])(null));
         
-        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en-US"), "Features/Orders/CreateOrderValidationError", "Create order validation error", null, global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
+        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en-US"), "Features/Orders/CreateOrderSuccess", "Create order", null, global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
         
         private global::Xunit.Abstractions.ITestOutputHelper _testOutputHelper;
         
-#line 1 "CreateOrderValidationError.feature"
+#line 1 "CreateOrderSuccess.feature"
 #line hidden
         
-        public CreateOrderValidationErrorFeature(CreateOrderValidationErrorFeature.FixtureData fixtureData, global::Xunit.Abstractions.ITestOutputHelper testOutputHelper)
+        public CreateOrderFeature(CreateOrderFeature.FixtureData fixtureData, global::Xunit.Abstractions.ITestOutputHelper testOutputHelper)
         {
             this._testOutputHelper = testOutputHelper;
         }
@@ -109,8 +105,7 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Orders.CreateOrderVali
         
         private static global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages InitializeCucumberMessages()
         {
-            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/Orders/CreateOrderValidationError/CreateOrderValidationError.feature.ndj" +
-                    "son", 3);
+            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/Orders/CreateOrderSuccess/CreateOrderSuccess.feature.ndjson", 3);
         }
         
         async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.InitializeAsync()
@@ -138,18 +133,18 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Orders.CreateOrderVali
             await this.TestTearDownAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Create order returns problem details when validation fails")]
-        [global::Xunit.TraitAttribute("FeatureTitle", "Create order validation error")]
-        [global::Xunit.TraitAttribute("Description", "Create order returns problem details when validation fails")]
-        public async global::System.Threading.Tasks.Task CreateOrderReturnsProblemDetailsWhenValidationFails()
+        [global::Xunit.SkippableFactAttribute(DisplayName="Create order returns created order")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Create order")]
+        [global::Xunit.TraitAttribute("Description", "Create order returns created order")]
+        public async global::System.Threading.Tasks.Task CreateOrderReturnsCreatedOrder()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "0";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Create order returns problem details when validation fails", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Create order returns created order", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 4
+#line 3
   this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -159,38 +154,62 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Orders.CreateOrderVali
             else
             {
                 await this.ScenarioStartAsync();
+#line 4
+    await testRunner.GivenAsync("I have a valid shopping cart for order creation", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
 #line 5
-    await testRunner.GivenAsync("I have a client with an empty shopping cart for order creation", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+    await testRunner.WhenAsync("I submit the create order request", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-#line 6
-    await testRunner.WhenAsync("I submit the create order request for the empty shopping cart", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
-#line hidden
-                global::Reqnroll.Table table10 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table9 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table10.AddRow(new string[] {
+                table9.AddRow(new string[] {
                             "StatusCode",
-                            "400"});
-                table10.AddRow(new string[] {
-                            "Title",
-                            "Validation failed."});
-                table10.AddRow(new string[] {
-                            "Detail",
-                            "One or more validation errors occurred."});
-                table10.AddRow(new string[] {
-                            "Type",
-                            "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.1"});
-                table10.AddRow(new string[] {
-                            "Instance",
-                            "/orders/{clientId}"});
-                table10.AddRow(new string[] {
-                            "ErrorsCount",
+                            "200"});
+                table9.AddRow(new string[] {
+                            "HasId",
+                            "true"});
+                table9.AddRow(new string[] {
+                            "HasClientId",
+                            "true"});
+                table9.AddRow(new string[] {
+                            "Status",
+                            "Created"});
+                table9.AddRow(new string[] {
+                            "TotalAmount",
+                            "1999.98"});
+                table9.AddRow(new string[] {
+                            "TotalCurrency",
+                            "USD"});
+                table9.AddRow(new string[] {
+                            "LinesCount",
                             "1"});
-                table10.AddRow(new string[] {
-                            "FirstErrorMessage",
-                            "Order lines cannot be empty."});
-#line 7
-    await testRunner.ThenAsync("problem details are returned for create order validation error", ((string)(null)), table10, "Then ");
+                table9.AddRow(new string[] {
+                            "FirstLineHasProductVersionId",
+                            "true"});
+                table9.AddRow(new string[] {
+                            "FirstLineName",
+                            "Laptop"});
+                table9.AddRow(new string[] {
+                            "FirstLineBrand",
+                            "Lenovo"});
+                table9.AddRow(new string[] {
+                            "FirstLineQuantity",
+                            "2"});
+                table9.AddRow(new string[] {
+                            "FirstLineUnitPriceAmount",
+                            "999.99"});
+                table9.AddRow(new string[] {
+                            "FirstLineUnitPriceCurrency",
+                            "USD"});
+                table9.AddRow(new string[] {
+                            "FirstLineTotalAmount",
+                            "1999.98"});
+                table9.AddRow(new string[] {
+                            "FirstLineTotalCurrency",
+                            "USD"});
+#line 6
+    await testRunner.ThenAsync("the order is created successfully", ((string)(null)), table9, "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
@@ -203,12 +222,12 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Orders.CreateOrderVali
             
             async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.InitializeAsync()
             {
-                await CreateOrderValidationErrorFeature.FeatureSetupAsync();
+                await CreateOrderFeature.FeatureSetupAsync();
             }
             
             async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.DisposeAsync()
             {
-                await CreateOrderValidationErrorFeature.FeatureTearDownAsync();
+                await CreateOrderFeature.FeatureTearDownAsync();
             }
         }
     }

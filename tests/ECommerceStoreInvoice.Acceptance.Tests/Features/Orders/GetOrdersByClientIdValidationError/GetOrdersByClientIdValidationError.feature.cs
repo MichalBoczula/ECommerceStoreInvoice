@@ -165,32 +165,32 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Orders.GetOrdersByClie
 #line 6
     await testRunner.WhenAsync("I request orders by invalid client id", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-                global::Reqnroll.Table table12 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table13 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table12.AddRow(new string[] {
+                table13.AddRow(new string[] {
                             "StatusCode",
                             "400"});
-                table12.AddRow(new string[] {
+                table13.AddRow(new string[] {
                             "Title",
                             "Validation failed."});
-                table12.AddRow(new string[] {
+                table13.AddRow(new string[] {
                             "Detail",
                             "One or more validation errors occurred."});
-                table12.AddRow(new string[] {
+                table13.AddRow(new string[] {
                             "Type",
                             "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.1"});
-                table12.AddRow(new string[] {
+                table13.AddRow(new string[] {
                             "Instance",
                             "/orders/client/00000000-0000-0000-0000-000000000000"});
-                table12.AddRow(new string[] {
+                table13.AddRow(new string[] {
                             "ErrorsCount",
                             "1"});
-                table12.AddRow(new string[] {
+                table13.AddRow(new string[] {
                             "FirstErrorMessage",
                             "ClientId cannot be empty Guid."});
 #line 7
-    await testRunner.ThenAsync("problem details are returned for get orders by client id validation error", ((string)(null)), table12, "Then ");
+    await testRunner.ThenAsync("problem details are returned for get orders by client id validation error", ((string)(null)), table13, "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

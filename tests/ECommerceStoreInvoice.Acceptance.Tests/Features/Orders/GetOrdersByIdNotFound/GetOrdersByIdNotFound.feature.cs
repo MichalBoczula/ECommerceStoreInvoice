@@ -164,29 +164,29 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Orders.GetOrdersByIdNo
 #line 6
     await testRunner.WhenAsync("I request order by id for non-existing order", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-                global::Reqnroll.Table table13 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table14 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table13.AddRow(new string[] {
+                table14.AddRow(new string[] {
                             "StatusCode",
                             "404"});
-                table13.AddRow(new string[] {
+                table14.AddRow(new string[] {
                             "Title",
                             "Resource not found."});
-                table13.AddRow(new string[] {
+                table14.AddRow(new string[] {
                             "Type",
                             "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.4"});
-                table13.AddRow(new string[] {
+                table14.AddRow(new string[] {
                             "HasDetail",
                             "true"});
-                table13.AddRow(new string[] {
+                table14.AddRow(new string[] {
                             "Instance",
                             "/orders/{orderId}"});
-                table13.AddRow(new string[] {
+                table14.AddRow(new string[] {
                             "HasTraceId",
                             "true"});
 #line 7
-    await testRunner.ThenAsync("problem details are returned for get order by id not found", ((string)(null)), table13, "Then ");
+    await testRunner.ThenAsync("problem details are returned for get order by id not found", ((string)(null)), table14, "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

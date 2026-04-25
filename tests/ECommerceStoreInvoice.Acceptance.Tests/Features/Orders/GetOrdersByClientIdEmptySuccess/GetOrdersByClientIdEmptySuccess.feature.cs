@@ -161,20 +161,20 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Orders.GetOrdersByClie
 #line 5
     await testRunner.WhenAsync("I request orders by client id for the client without orders", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-                global::Reqnroll.Table table10 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table11 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table10.AddRow(new string[] {
+                table11.AddRow(new string[] {
                             "StatusCode",
                             "200"});
-                table10.AddRow(new string[] {
+                table11.AddRow(new string[] {
                             "OrdersCount",
                             "0"});
-                table10.AddRow(new string[] {
+                table11.AddRow(new string[] {
                             "IsEmpty",
                             "true"});
 #line 6
-    await testRunner.ThenAsync("an empty list of orders is returned successfully", ((string)(null)), table10, "Then ");
+    await testRunner.ThenAsync("an empty list of orders is returned successfully", ((string)(null)), table11, "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
