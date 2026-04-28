@@ -1,4 +1,5 @@
-﻿using BenchmarkDotNet.Running;
+﻿using BenchmarkDotNet.Configs;
+using BenchmarkDotNet.Running;
 using ECommerceStoreInvoice.Performance.Benchmarks.ShoppingCarts.Infrastructures;
 
 namespace ECommerceStoreInvoice.Performance.Benchmarks
@@ -7,7 +8,9 @@ namespace ECommerceStoreInvoice.Performance.Benchmarks
     {
         private static void Main(string[] args)
         {
-            BenchmarkRunner.Run<ShoppingCartMappingBenchmarks>();
+            BenchmarkSwitcher
+                .FromTypes([typeof(ShoppingCartMappingBenchmarks)])
+                .Run(args, DefaultConfig.Instance);
         }
     }
 }
