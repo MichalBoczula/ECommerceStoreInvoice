@@ -1,5 +1,5 @@
 ﻿using BenchmarkDotNet.Running;
-using ECommerceStoreInvoice.Performance.Benchmarks.Benchmarks;
+using ECommerceStoreInvoice.Performance.Benchmarks.ShoppingCarts.Infrastructures;
 
 namespace ECommerceStoreInvoice.Performance.Benchmarks
 {

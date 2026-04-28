@@ -1,6 +1,6 @@
 ﻿using ECommerceStoreInvoice.Infrastructure.Persistence.ShoppingCarts;
 
-namespace ECommerceStoreInvoice.Performance.Benchmarks.TestData;
+namespace ECommerceStoreInvoice.Performance.Benchmarks.ShoppingCarts.Infrastructures.Common;
 
 internal static class ShoppingCartDocumentBenchmarkDataFactory
 {

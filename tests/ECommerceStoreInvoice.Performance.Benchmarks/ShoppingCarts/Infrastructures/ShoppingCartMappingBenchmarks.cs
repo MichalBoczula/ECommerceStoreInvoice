@@ -1,9 +1,9 @@
 ﻿using BenchmarkDotNet.Attributes;
 using ECommerceStoreInvoice.Infrastructure.Mapping;
 using ECommerceStoreInvoice.Infrastructure.Persistence.ShoppingCarts;
-using ECommerceStoreInvoice.Performance.Benchmarks.TestData;
+using ECommerceStoreInvoice.Performance.Benchmarks.ShoppingCarts.Infrastructures.Common;
 
-namespace ECommerceStoreInvoice.Performance.Benchmarks.Benchmarks;
+namespace ECommerceStoreInvoice.Performance.Benchmarks.ShoppingCarts.Infrastructures;
 
 [MemoryDiagnoser]
 public class ShoppingCartMappingBenchmarks
