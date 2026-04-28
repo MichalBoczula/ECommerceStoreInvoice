@@ -15,6 +15,7 @@
     <Project Path="tests/ECommerceStoreInvoice.Application.UnitTests/ECommerceStoreInvoice.Application.UnitTests.csproj" />
     <Project Path="tests/ECommerceStoreInvoice.Domain.UnitTests/ECommerceStoreInvoice.Domain.UnitTests.csproj" />
     <Project Path="tests/ECommerceStoreInvoice.Infrastructure.UnitTests/ECommerceStoreInvoice.Infrastructure.UnitTests.csproj" />
+    <Project Path="tests/ECommerceStoreInvoice.Performance.Benchmarks/ECommerceStoreInvoice.Performance.Benchmarks.csproj" Id="4afe6af5-12f0-4a5a-84a5-597df2a81eb2" />
   </Folder>
   <Project Path="docker-compose.dcproj">
     <Build />

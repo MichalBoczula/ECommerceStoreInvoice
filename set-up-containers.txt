@@ -17,3 +17,5 @@ pwsh .\src\ECommerceStoreInvoice.API\bin\Debug\net10.0\playwright.ps1 install ch
 
 -linux/mac
 ./src/ECommerceStoreInvoice.API/bin/Debug/net10.0/playwright.sh install chromium
+
+dotnet run -c Release --project tests/ECommerceStoreInvoice.Performance.Benchmarks
