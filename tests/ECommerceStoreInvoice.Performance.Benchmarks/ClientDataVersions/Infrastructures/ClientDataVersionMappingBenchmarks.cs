@@ -26,7 +26,7 @@ public class ClientDataVersionMappingBenchmarks
     }
 
     [Benchmark]
-    public ClientDataVersionDocument MapDomainToDocument()
+    public object MapDomainToDocument()
     {
         return ClientDataVersionMapping.MapToDocument(_domain);
     }
