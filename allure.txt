@@ -1,0 +1,11 @@
+### Install Allure 2 CLI (global)
+npm i -g allure-commandline@2
+
+### Check version:
+allure --version
+
+### Generate live dock:
+allure generate .\artifacts\allure-results -o .\artifacts\allure-report --clean
+
+### Publish report (serve another service):
+allure open .\artifacts\allure-report

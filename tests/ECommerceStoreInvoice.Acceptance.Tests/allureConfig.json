@@ -1,5 +1,5 @@
 {
   "allure": {
-    "directory": "../../../../../artifacts/allure-results/acceptance"
+    "directory": "../../../../../artifacts/allure-results"
   }
 }
