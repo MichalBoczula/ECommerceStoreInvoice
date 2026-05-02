@@ -1,7 +1,7 @@
 using BenchmarkDotNet.Attributes;
 using ECommerceStoreInvoice.Application.Common.RequestsDto.ClientDataVersions;
 using ECommerceStoreInvoice.Application.Mapping;
-using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.ValueObjects;
+using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate;
 using ECommerceStoreInvoice.Performance.Benchmarks.Application.Mapping.Common;
 
 namespace ECommerceStoreInvoice.Performance.Benchmarks.Application.Mapping;
@@ -14,6 +14,7 @@ public class MappingConfigBenchmarks
 
     private Guid _clientId;
     private CreateClientDataVersionRequestDto _clientDataVersionRequest = null!;
+    private ProductVersion _productVersion = null!;
     private ShoppingCart _shoppingCart = null!;
 
     [GlobalSetup]
@@ -21,6 +22,7 @@ public class MappingConfigBenchmarks
     {
         _clientId = Guid.NewGuid();
         _clientDataVersionRequest = MappingConfigBenchmarkDataFactory.CreateClientDataVersionRequest();
+        _productVersion = MappingConfigBenchmarkDataFactory.CreateProductVersion();
         _shoppingCart = MappingConfigBenchmarkDataFactory.CreateShoppingCartWithLines(LinesCount);
     }
 
@@ -34,5 +36,11 @@ public class MappingConfigBenchmarks
     public object MapShoppingCartToResponse()
     {
         return MappingConfig.MapToResponse(_shoppingCart);
+    }
+
+    [Benchmark]
+    public object MapProductVersionToResponse()
+    {
+        return MappingConfig.MapToResponse(_productVersion);
     }
 }

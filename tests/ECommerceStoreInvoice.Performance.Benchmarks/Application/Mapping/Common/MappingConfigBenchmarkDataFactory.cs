@@ -1,5 +1,6 @@
 using ECommerceStoreInvoice.Application.Common.RequestsDto.ClientDataVersions;
 using ECommerceStoreInvoice.Domain.AggregatesModel.Common.ValueObjects;
+using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.ValueObjects;
 
 namespace ECommerceStoreInvoice.Performance.Benchmarks.Application.Mapping.Common;
@@ -41,5 +42,18 @@ internal static class MappingConfigBenchmarkDataFactory
             BenchmarkDate,
             BenchmarkDate,
             lines);
+    }
+
+    public static ProductVersion CreateProductVersion()
+    {
+        return ProductVersion.Rehydrate(
+            Guid.NewGuid(),
+            true,
+            BenchmarkDate,
+            null,
+            Guid.NewGuid(),
+            new Money(199.99m, "USD"),
+            "Product Name",
+            "Contoso");
     }
 }
