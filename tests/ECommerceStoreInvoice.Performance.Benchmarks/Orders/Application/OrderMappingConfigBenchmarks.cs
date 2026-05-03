@@ -1,6 +1,5 @@
 using System.Reflection;
 using BenchmarkDotNet.Attributes;
-using ECommerceStoreInvoice.Application.Common.ResponsesDto.Orders;
 using ECommerceStoreInvoice.Application.Mapping;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate.ValueObjects;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate;
@@ -52,13 +51,13 @@ public class OrderMappingConfigBenchmarks
     }
 
     [Benchmark]
-    public OrderResponseDto MapOrderToResponse()
+    public object MapOrderToResponse()
     {
         return MappingConfig.MapToResponse(_order);
     }
 
     [Benchmark]
-    public Order MapCartAndProductVersionsToDomain()
+    public object MapCartAndProductVersionsToDomain()
     {
         return MappingConfig.MapToDomain(_shoppingCart, _productVersions);
     }
