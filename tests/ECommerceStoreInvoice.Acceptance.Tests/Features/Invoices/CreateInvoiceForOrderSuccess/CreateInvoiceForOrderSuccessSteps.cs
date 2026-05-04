@@ -33,14 +33,15 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Invoices.CreateInvoice
 
             var clientDataVersionRequest = new CreateClientDataVersionRequestDto
             {
-                FirstName = "John",
-                LastName = "Doe",
-                Email = "john.doe@example.com",
-                PhoneNumber = "+1-202-555-0132",
-                Country = "USA",
-                City = "New York",
-                Street = "5th Avenue",
-                PostalCode = "10001"
+                ClientName = "John Doe",
+                PostalCode = "00-001",
+                City = "NewYork",
+                Street = "Main.St",
+                BuildingNumber = "10A",
+                ApartmentNumber = "5",
+                PhoneNumber = "123456789",
+                PhonePrefix = "48",
+                AddressEmail = "john.doe@test.com"
             };
 
             AllureJson.AttachObject("Create client data version setup request", clientDataVersionRequest, _apiContext.JsonOptions);
