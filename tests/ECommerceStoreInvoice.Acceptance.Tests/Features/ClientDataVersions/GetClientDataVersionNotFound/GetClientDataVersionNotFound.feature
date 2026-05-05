@@ -3,12 +3,18 @@ Feature: Get client data version not found
 
   Scenario: Get client data version by client id returns problem details when client data version does not exist
     Given I have a non-existing client id for client data version retrieval
+      | Field          | Value                                    |
+      | Method         | GET                                      |
+      | Endpoint       | /client-data-versions/client/{clientId} |
+      | ClientIdSource | GenerateNewGuid                          |
     When I request the client data version by client id for non-existing client
     Then problem details are returned for get client data version not found
-      | Field      | Value                                                        |
-      | StatusCode | 404                                                          |
-      | Title      | Resource not found.                                          |
-      | Type       | https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.4 |
-      | HasDetail  | true                                                         |
-      | Instance   | /client-data-versions/client/{clientId}                      |
-      | HasTraceId | true                                                         |
+      | Field              | Value                                                        |
+      | StatusCode         | 404                                                          |
+      | Title              | Resource not found.                                          |
+      | Type               | https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.4 |
+      | HasDetail          | true                                                         |
+      | DetailContains     | ClientDataVersion                                            |
+      | DetailContainsGuid | true                                                         |
+      | Instance           | /client-data-versions/client/{clientId}                      |
+      | HasTraceId         | true                                                         |
