@@ -6,7 +6,7 @@ using System.Globalization;
 using System.Net;
 using System.Text.Json;
 
-namespace ECommerceStoreInvoice.Acceptance.Tests.Features.DocumentationEndpoints.GetValidationsSuccess
+namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Documentation.GetValidationsSuccess
 {
     [Binding]
     public sealed class GetValidationsSuccessSteps

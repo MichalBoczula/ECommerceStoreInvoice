@@ -11,7 +11,7 @@
 #region Designer generated code
 #pragma warning disable
 using Reqnroll;
-namespace ECommerceStoreInvoice.Acceptance.Tests.Features.DocumentationEndpoints.GetValidationsSuccess
+namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Documentation.GetValidationsSuccess
 {
     
     
@@ -24,7 +24,7 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.DocumentationEndpoints
         
         private static string[] featureTags = ((string[])(null));
         
-        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en-US"), "Features/DocumentationEndpoints/GetValidationsSuccess", "Get validation documentation", null, global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
+        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en-US"), "Features/Documentation/GetValidationsSuccess", "Get validation documentation", null, global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
         
         private global::Xunit.Abstractions.ITestOutputHelper _testOutputHelper;
         
@@ -105,8 +105,8 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.DocumentationEndpoints
         
         private static global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages InitializeCucumberMessages()
         {
-            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/DocumentationEndpoints/GetValidationsSuccess/GetValidationsSuccess.featu" +
-                    "re.ndjson", 3);
+            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/Documentation/GetValidationsSuccess/GetValidationsSuccess.feature.ndjson" +
+                    "", 3);
         }
         
         async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.InitializeAsync()
@@ -161,38 +161,38 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.DocumentationEndpoints
 #line 5
     await testRunner.WhenAsync("I request validation documentation", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-                global::Reqnroll.Table table11 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table12 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table11.AddRow(new string[] {
+                table12.AddRow(new string[] {
                             "StatusCode",
                             "200"});
-                table11.AddRow(new string[] {
+                table12.AddRow(new string[] {
                             "ValidationsCount",
                             "7"});
-                table11.AddRow(new string[] {
+                table12.AddRow(new string[] {
                             "HasPolicy_ClientValidationPolicy",
                             "true"});
-                table11.AddRow(new string[] {
+                table12.AddRow(new string[] {
                             "HasPolicy_ShoppingCartLineValidationPolicy",
                             "true"});
-                table11.AddRow(new string[] {
+                table12.AddRow(new string[] {
                             "HasPolicy_ClientDataVersionValidationPolicy",
                             "true"});
-                table11.AddRow(new string[] {
+                table12.AddRow(new string[] {
                             "HasPolicy_OrderValidationPolicy",
                             "true"});
-                table11.AddRow(new string[] {
+                table12.AddRow(new string[] {
                             "HasPolicy_UpdateOrderValidationPolicy",
                             "true"});
-                table11.AddRow(new string[] {
+                table12.AddRow(new string[] {
                             "HasPolicy_InvoiceValidationPolicy",
                             "true"});
-                table11.AddRow(new string[] {
+                table12.AddRow(new string[] {
                             "HasPolicy_ProductVersionValidationPolicy",
                             "true"});
 #line 6
-    await testRunner.ThenAsync("the validation documentation is returned successfully", ((string)(null)), table11, "Then ");
+    await testRunner.ThenAsync("the validation documentation is returned successfully", ((string)(null)), table12, "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
