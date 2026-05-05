@@ -5,6 +5,7 @@ using Shouldly;
 using System.Globalization;
 using System.Net;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Invoices.CreateInvoiceForOrderValidationError
 {
@@ -20,15 +21,34 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Invoices.CreateInvoice
             _apiContext = apiContext;
         }
 
-        [Given("I have a client id and an invalid order id for invoice creation")]
-        public void GivenIHaveAClientIdAndAnInvalidOrderIdForInvoiceCreation()
+        [Given("I have invoice creation identifiers")]
+        public void GivenIHaveInvoiceCreationIdentifiers(Table table)
         {
-            _clientId = Guid.Parse("11111111-1111-1111-1111-111111111111");
-            _orderId = Guid.Empty;
+            var values = ParseExpectedTable(table);
+            _clientId = Guid.Parse(GetRequiredValue(values, "ClientId"));
+            _orderId = Guid.Parse(GetRequiredValue(values, "OrderId"));
+
+            var requestObject = new
+            {
+                ClientId = _clientId,
+                OrderId = _orderId
+            };
 
             AllureJson.AttachObject(
                 "Create invoice validation request",
-                new { ClientId = _clientId, OrderId = _orderId },
+                requestObject,
+                _apiContext.JsonOptions);
+        }
+
+        [Given("I document create invoice request json")]
+        public void GivenIDocumentCreateInvoiceRequestJson(string json)
+        {
+            var requestJsonObject = JsonNode.Parse(json);
+            requestJsonObject.ShouldNotBeNull();
+
+            AllureJson.AttachObject(
+                "Create invoice validation request (doc json)",
+                requestJsonObject,
                 _apiContext.JsonOptions);
         }
 
@@ -66,6 +86,18 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Invoices.CreateInvoice
             errors.Count.ShouldBe(ParseInt(expected, "ErrorsCount"));
             errors.ShouldNotBeEmpty();
             errors[0].Message.ShouldBe(GetRequiredValue(expected, "FirstErrorMessage"));
+        }
+
+        [Then("I document create invoice validation response json")]
+        public void ThenIDocumentCreateInvoiceValidationResponseJson(string json)
+        {
+            var responseJsonObject = JsonNode.Parse(json);
+            responseJsonObject.ShouldNotBeNull();
+
+            AllureJson.AttachObject(
+                "Create invoice validation response (doc json)",
+                responseJsonObject,
+                _apiContext.JsonOptions);
         }
 
         private async Task<T?> DeserializeResponse<T>(HttpResponseMessage response)
