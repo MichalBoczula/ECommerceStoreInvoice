@@ -157,32 +157,32 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Documentation.GetFlowS
 #line 4
     await testRunner.WhenAsync("I request flow documentation", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-                global::Reqnroll.Table table7 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table12 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table7.AddRow(new string[] {
+                table12.AddRow(new string[] {
                             "StatusCode",
                             "200"});
-                table7.AddRow(new string[] {
+                table12.AddRow(new string[] {
                             "FlowsCount",
                             "13"});
-                table7.AddRow(new string[] {
+                table12.AddRow(new string[] {
                             "ContainsGetShoppingCartByClientIdDescriptor",
                             "true"});
-                table7.AddRow(new string[] {
+                table12.AddRow(new string[] {
                             "ContainsGetCreateShoppingCartDescriptor",
                             "true"});
-                table7.AddRow(new string[] {
+                table12.AddRow(new string[] {
                             "ContainsGetCreateOrderDescriptor",
                             "true"});
-                table7.AddRow(new string[] {
+                table12.AddRow(new string[] {
                             "ContainsGetCreateInvoiceForOrderDescriptor",
                             "true"});
-                table7.AddRow(new string[] {
+                table12.AddRow(new string[] {
                             "ContainsGetCreateClientDataVersionDescriptor",
                             "true"});
 #line 5
-    await testRunner.ThenAsync("the flow documentation is returned successfully", ((string)(null)), table7, "Then ");
+    await testRunner.ThenAsync("the flow documentation is returned successfully", ((string)(null)), table12, "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

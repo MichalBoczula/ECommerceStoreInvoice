@@ -162,39 +162,69 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ClientDataVersions.Cre
 #line 5
     await testRunner.GivenAsync("I have a valid client id for client data version validation error", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
-#line 6
-    await testRunner.AndAsync("I have an invalid create client data version request with phone number validation" +
-                        " error", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
-#line hidden
-#line 7
-    await testRunner.WhenAsync("I submit the create client data version request with invalid data", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
-#line hidden
-                global::Reqnroll.Table table2 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table3 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table2.AddRow(new string[] {
+                table3.AddRow(new string[] {
+                            "ClientName",
+                            "John Doe"});
+                table3.AddRow(new string[] {
+                            "PostalCode",
+                            "00-001"});
+                table3.AddRow(new string[] {
+                            "City",
+                            "NewYork"});
+                table3.AddRow(new string[] {
+                            "Street",
+                            "Main.St"});
+                table3.AddRow(new string[] {
+                            "BuildingNumber",
+                            "10A"});
+                table3.AddRow(new string[] {
+                            "ApartmentNumber",
+                            "5"});
+                table3.AddRow(new string[] {
+                            "PhoneNumber",
+                            "abc"});
+                table3.AddRow(new string[] {
+                            "PhonePrefix",
+                            "48"});
+                table3.AddRow(new string[] {
+                            "AddressEmail",
+                            "john.doe@test.com"});
+#line 6
+    await testRunner.AndAsync("I have an invalid create client data version request with phone number validation" +
+                        " error", ((string)(null)), table3, "And ");
+#line hidden
+#line 17
+    await testRunner.WhenAsync("I submit the create client data version request with invalid data", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+                global::Reqnroll.Table table4 = new global::Reqnroll.Table(new string[] {
+                            "Field",
+                            "Value"});
+                table4.AddRow(new string[] {
                             "StatusCode",
                             "400"});
-                table2.AddRow(new string[] {
+                table4.AddRow(new string[] {
                             "Title",
                             "Validation failed."});
-                table2.AddRow(new string[] {
+                table4.AddRow(new string[] {
                             "Detail",
                             "One or more validation errors occurred."});
-                table2.AddRow(new string[] {
+                table4.AddRow(new string[] {
                             "Type",
                             "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.1"});
-                table2.AddRow(new string[] {
+                table4.AddRow(new string[] {
                             "Instance",
                             "/client-data-versions/{clientId}"});
-                table2.AddRow(new string[] {
+                table4.AddRow(new string[] {
                             "ErrorsCount",
                             "1"});
-                table2.AddRow(new string[] {
+                table4.AddRow(new string[] {
                             "FirstErrorMessage",
                             "Phone number must contain digits only."});
-#line 8
-    await testRunner.ThenAsync("problem details are returned for create client data version validation error", ((string)(null)), table2, "Then ");
+#line 18
+    await testRunner.ThenAsync("problem details are returned for create client data version validation error", ((string)(null)), table4, "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

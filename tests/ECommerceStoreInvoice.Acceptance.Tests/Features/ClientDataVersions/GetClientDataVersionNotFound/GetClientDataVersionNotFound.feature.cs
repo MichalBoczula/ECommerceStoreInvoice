@@ -162,35 +162,53 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ClientDataVersions.Get
             else
             {
                 await this.ScenarioStartAsync();
-#line 5
-    await testRunner.GivenAsync("I have a non-existing client id for client data version retrieval", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
-#line hidden
-#line 6
-    await testRunner.WhenAsync("I request the client data version by client id for non-existing client", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
-#line hidden
-                global::Reqnroll.Table table3 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table5 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table3.AddRow(new string[] {
+                table5.AddRow(new string[] {
+                            "Method",
+                            "GET"});
+                table5.AddRow(new string[] {
+                            "Endpoint",
+                            "/client-data-versions/client/{clientId}"});
+                table5.AddRow(new string[] {
+                            "ClientIdSource",
+                            "GenerateNewGuid"});
+#line 5
+    await testRunner.GivenAsync("I have a non-existing client id for client data version retrieval", ((string)(null)), table5, "Given ");
+#line hidden
+#line 10
+    await testRunner.WhenAsync("I request the client data version by client id for non-existing client", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+                global::Reqnroll.Table table6 = new global::Reqnroll.Table(new string[] {
+                            "Field",
+                            "Value"});
+                table6.AddRow(new string[] {
                             "StatusCode",
                             "404"});
-                table3.AddRow(new string[] {
+                table6.AddRow(new string[] {
                             "Title",
                             "Resource not found."});
-                table3.AddRow(new string[] {
+                table6.AddRow(new string[] {
                             "Type",
                             "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.4"});
-                table3.AddRow(new string[] {
+                table6.AddRow(new string[] {
                             "HasDetail",
                             "true"});
-                table3.AddRow(new string[] {
+                table6.AddRow(new string[] {
+                            "DetailContains",
+                            "ClientDataVersion"});
+                table6.AddRow(new string[] {
+                            "DetailContainsGuid",
+                            "true"});
+                table6.AddRow(new string[] {
                             "Instance",
                             "/client-data-versions/client/{clientId}"});
-                table3.AddRow(new string[] {
+                table6.AddRow(new string[] {
                             "HasTraceId",
                             "true"});
-#line 7
-    await testRunner.ThenAsync("problem details are returned for get client data version not found", ((string)(null)), table3, "Then ");
+#line 11
+    await testRunner.ThenAsync("problem details are returned for get client data version not found", ((string)(null)), table6, "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

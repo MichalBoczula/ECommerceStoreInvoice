@@ -161,38 +161,38 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.DocumentationEndpoints
 #line 5
     await testRunner.WhenAsync("I request validation documentation", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-                global::Reqnroll.Table table6 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table11 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table6.AddRow(new string[] {
+                table11.AddRow(new string[] {
                             "StatusCode",
                             "200"});
-                table6.AddRow(new string[] {
+                table11.AddRow(new string[] {
                             "ValidationsCount",
                             "7"});
-                table6.AddRow(new string[] {
+                table11.AddRow(new string[] {
                             "HasPolicy_ClientValidationPolicy",
                             "true"});
-                table6.AddRow(new string[] {
+                table11.AddRow(new string[] {
                             "HasPolicy_ShoppingCartLineValidationPolicy",
                             "true"});
-                table6.AddRow(new string[] {
+                table11.AddRow(new string[] {
                             "HasPolicy_ClientDataVersionValidationPolicy",
                             "true"});
-                table6.AddRow(new string[] {
+                table11.AddRow(new string[] {
                             "HasPolicy_OrderValidationPolicy",
                             "true"});
-                table6.AddRow(new string[] {
+                table11.AddRow(new string[] {
                             "HasPolicy_UpdateOrderValidationPolicy",
                             "true"});
-                table6.AddRow(new string[] {
+                table11.AddRow(new string[] {
                             "HasPolicy_InvoiceValidationPolicy",
                             "true"});
-                table6.AddRow(new string[] {
+                table11.AddRow(new string[] {
                             "HasPolicy_ProductVersionValidationPolicy",
                             "true"});
 #line 6
-    await testRunner.ThenAsync("the validation documentation is returned successfully", ((string)(null)), table6, "Then ");
+    await testRunner.ThenAsync("the validation documentation is returned successfully", ((string)(null)), table11, "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

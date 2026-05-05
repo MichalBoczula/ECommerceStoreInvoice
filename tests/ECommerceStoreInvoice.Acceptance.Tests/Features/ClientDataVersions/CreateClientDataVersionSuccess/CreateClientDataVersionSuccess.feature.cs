@@ -162,24 +162,9 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ClientDataVersions.Cre
 #line 5
     await testRunner.GivenAsync("I have a valid client id for client data version creation", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
-#line 6
-    await testRunner.AndAsync("I have a valid create client data version request", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
-#line hidden
-#line 7
-    await testRunner.WhenAsync("I submit the create client data version request", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
-#line hidden
                 global::Reqnroll.Table table1 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table1.AddRow(new string[] {
-                            "StatusCode",
-                            "200"});
-                table1.AddRow(new string[] {
-                            "HasId",
-                            "true"});
-                table1.AddRow(new string[] {
-                            "HasClientId",
-                            "true"});
                 table1.AddRow(new string[] {
                             "ClientName",
                             "John Doe"});
@@ -207,11 +192,56 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ClientDataVersions.Cre
                 table1.AddRow(new string[] {
                             "AddressEmail",
                             "john.doe@test.com"});
-                table1.AddRow(new string[] {
+#line 6
+    await testRunner.AndAsync("I have a valid create client data version request", ((string)(null)), table1, "And ");
+#line hidden
+#line 17
+    await testRunner.WhenAsync("I submit the create client data version request", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+                global::Reqnroll.Table table2 = new global::Reqnroll.Table(new string[] {
+                            "Field",
+                            "Value"});
+                table2.AddRow(new string[] {
+                            "StatusCode",
+                            "200"});
+                table2.AddRow(new string[] {
+                            "HasId",
+                            "true"});
+                table2.AddRow(new string[] {
+                            "HasClientId",
+                            "true"});
+                table2.AddRow(new string[] {
+                            "ClientName",
+                            "John Doe"});
+                table2.AddRow(new string[] {
+                            "PostalCode",
+                            "00-001"});
+                table2.AddRow(new string[] {
+                            "City",
+                            "NewYork"});
+                table2.AddRow(new string[] {
+                            "Street",
+                            "Main.St"});
+                table2.AddRow(new string[] {
+                            "BuildingNumber",
+                            "10A"});
+                table2.AddRow(new string[] {
+                            "ApartmentNumber",
+                            "5"});
+                table2.AddRow(new string[] {
+                            "PhoneNumber",
+                            "123456789"});
+                table2.AddRow(new string[] {
+                            "PhonePrefix",
+                            "48"});
+                table2.AddRow(new string[] {
+                            "AddressEmail",
+                            "john.doe@test.com"});
+                table2.AddRow(new string[] {
                             "HasCreatedAt",
                             "true"});
-#line 8
-    await testRunner.ThenAsync("the client data version is created successfully", ((string)(null)), table1, "Then ");
+#line 18
+    await testRunner.ThenAsync("the client data version is created successfully", ((string)(null)), table2, "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

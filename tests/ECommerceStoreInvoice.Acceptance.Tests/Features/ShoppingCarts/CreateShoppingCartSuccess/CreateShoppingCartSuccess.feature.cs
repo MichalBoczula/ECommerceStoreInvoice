@@ -161,29 +161,29 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.CreateSh
 #line 5
     await testRunner.WhenAsync("I submit the create shopping cart request", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-                global::Reqnroll.Table table17 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table29 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table17.AddRow(new string[] {
+                table29.AddRow(new string[] {
                             "StatusCode",
                             "200"});
-                table17.AddRow(new string[] {
+                table29.AddRow(new string[] {
                             "HasId",
                             "true"});
-                table17.AddRow(new string[] {
+                table29.AddRow(new string[] {
                             "HasClientId",
                             "true"});
-                table17.AddRow(new string[] {
+                table29.AddRow(new string[] {
                             "TotalAmount",
                             "0"});
-                table17.AddRow(new string[] {
+                table29.AddRow(new string[] {
                             "TotalCurrency",
                             "USD"});
-                table17.AddRow(new string[] {
+                table29.AddRow(new string[] {
                             "LinesCount",
                             "0"});
 #line 6
-    await testRunner.ThenAsync("the shopping cart is created successfully", ((string)(null)), table17, "Then ");
+    await testRunner.ThenAsync("the shopping cart is created successfully", ((string)(null)), table29, "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

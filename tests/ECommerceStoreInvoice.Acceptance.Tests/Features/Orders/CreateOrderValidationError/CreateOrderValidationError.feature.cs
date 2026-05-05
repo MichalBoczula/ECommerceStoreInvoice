@@ -165,32 +165,32 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Orders.CreateOrderVali
 #line 6
     await testRunner.WhenAsync("I submit the create order request for the empty shopping cart", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-                global::Reqnroll.Table table10 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table22 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table10.AddRow(new string[] {
+                table22.AddRow(new string[] {
                             "StatusCode",
                             "400"});
-                table10.AddRow(new string[] {
+                table22.AddRow(new string[] {
                             "Title",
                             "Validation failed."});
-                table10.AddRow(new string[] {
+                table22.AddRow(new string[] {
                             "Detail",
                             "One or more validation errors occurred."});
-                table10.AddRow(new string[] {
+                table22.AddRow(new string[] {
                             "Type",
                             "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.1"});
-                table10.AddRow(new string[] {
+                table22.AddRow(new string[] {
                             "Instance",
                             "/orders/{clientId}"});
-                table10.AddRow(new string[] {
+                table22.AddRow(new string[] {
                             "ErrorsCount",
                             "1"});
-                table10.AddRow(new string[] {
+                table22.AddRow(new string[] {
                             "FirstErrorMessage",
                             "Order lines cannot be empty."});
 #line 7
-    await testRunner.ThenAsync("problem details are returned for create order validation error", ((string)(null)), table10, "Then ");
+    await testRunner.ThenAsync("problem details are returned for create order validation error", ((string)(null)), table22, "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

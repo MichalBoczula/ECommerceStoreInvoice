@@ -11,27 +11,31 @@
 #region Designer generated code
 #pragma warning disable
 using Reqnroll;
-namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Orders.CreateOrderSuccess
+namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Invoices.GetInvoiceByIdSuccess
 {
     
     
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Reqnroll", "3.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    public partial class CreateOrderFeature : object, global::Xunit.IClassFixture<CreateOrderFeature.FixtureData>, global::Xunit.IAsyncLifetime
+    [global::Xunit.TraitAttribute("Category", "allure.description:Ensures_getting_invoice_by_id_returns_the_existing_invoice_pay" +
+        "load.")]
+    public partial class GetInvoiceByIdFeature : object, global::Xunit.IClassFixture<GetInvoiceByIdFeature.FixtureData>, global::Xunit.IAsyncLifetime
     {
         
         private global::Reqnroll.ITestRunner testRunner;
         
-        private static string[] featureTags = ((string[])(null));
+        private static string[] featureTags = new string[] {
+                "allure.description:Ensures_getting_invoice_by_id_returns_the_existing_invoice_pay" +
+                    "load."};
         
-        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en-US"), "Features/Orders/CreateOrderSuccess", "Create order", null, global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
+        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en-US"), "Features/Invoices/GetInvoiceByIdSuccess", "Get invoice by id", null, global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
         
         private global::Xunit.Abstractions.ITestOutputHelper _testOutputHelper;
         
-#line 1 "CreateOrderSuccess.feature"
+#line 1 "GetInvoiceByIdSuccess.feature"
 #line hidden
         
-        public CreateOrderFeature(CreateOrderFeature.FixtureData fixtureData, global::Xunit.Abstractions.ITestOutputHelper testOutputHelper)
+        public GetInvoiceByIdFeature(GetInvoiceByIdFeature.FixtureData fixtureData, global::Xunit.Abstractions.ITestOutputHelper testOutputHelper)
         {
             this._testOutputHelper = testOutputHelper;
         }
@@ -105,7 +109,7 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Orders.CreateOrderSucc
         
         private static global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages InitializeCucumberMessages()
         {
-            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/Orders/CreateOrderSuccess/CreateOrderSuccess.feature.ndjson", 3);
+            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/Invoices/GetInvoiceByIdSuccess/GetInvoiceByIdSuccess.feature.ndjson", 3);
         }
         
         async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.InitializeAsync()
@@ -133,18 +137,18 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Orders.CreateOrderSucc
             await this.TestTearDownAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Create order returns created order")]
-        [global::Xunit.TraitAttribute("FeatureTitle", "Create order")]
-        [global::Xunit.TraitAttribute("Description", "Create order returns created order")]
-        public async global::System.Threading.Tasks.Task CreateOrderReturnsCreatedOrder()
+        [global::Xunit.SkippableFactAttribute(DisplayName="Get invoice by id returns an existing invoice")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Get invoice by id")]
+        [global::Xunit.TraitAttribute("Description", "Get invoice by id returns an existing invoice")]
+        public async global::System.Threading.Tasks.Task GetInvoiceByIdReturnsAnExistingInvoice()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "0";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Create order returns created order", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Get invoice by id returns an existing invoice", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 3
+#line 4
   this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -154,62 +158,35 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Orders.CreateOrderSucc
             else
             {
                 await this.ScenarioStartAsync();
-#line 4
-    await testRunner.GivenAsync("I have a valid shopping cart for order creation", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
-#line hidden
 #line 5
-    await testRunner.WhenAsync("I submit the create order request", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+    await testRunner.GivenAsync("I have an existing invoice id", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
-                global::Reqnroll.Table table21 = new global::Reqnroll.Table(new string[] {
+#line 6
+    await testRunner.WhenAsync("I request invoice by id", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+                global::Reqnroll.Table table18 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table21.AddRow(new string[] {
+                table18.AddRow(new string[] {
                             "StatusCode",
                             "200"});
-                table21.AddRow(new string[] {
+                table18.AddRow(new string[] {
                             "HasId",
                             "true"});
-                table21.AddRow(new string[] {
-                            "HasClientId",
+                table18.AddRow(new string[] {
+                            "HasOrderId",
                             "true"});
-                table21.AddRow(new string[] {
-                            "Status",
-                            "Created"});
-                table21.AddRow(new string[] {
-                            "TotalAmount",
-                            "1999.98"});
-                table21.AddRow(new string[] {
-                            "TotalCurrency",
-                            "USD"});
-                table21.AddRow(new string[] {
-                            "LinesCount",
-                            "1"});
-                table21.AddRow(new string[] {
-                            "FirstLineHasProductVersionId",
+                table18.AddRow(new string[] {
+                            "HasClientDataVersionId",
                             "true"});
-                table21.AddRow(new string[] {
-                            "FirstLineName",
-                            "Laptop"});
-                table21.AddRow(new string[] {
-                            "FirstLineBrand",
-                            "Lenovo"});
-                table21.AddRow(new string[] {
-                            "FirstLineQuantity",
-                            "2"});
-                table21.AddRow(new string[] {
-                            "FirstLineUnitPriceAmount",
-                            "999.99"});
-                table21.AddRow(new string[] {
-                            "FirstLineUnitPriceCurrency",
-                            "USD"});
-                table21.AddRow(new string[] {
-                            "FirstLineTotalAmount",
-                            "1999.98"});
-                table21.AddRow(new string[] {
-                            "FirstLineTotalCurrency",
-                            "USD"});
-#line 6
-    await testRunner.ThenAsync("the order is created successfully", ((string)(null)), table21, "Then ");
+                table18.AddRow(new string[] {
+                            "HasStorageUrl",
+                            "true"});
+                table18.AddRow(new string[] {
+                            "HasCreatedAt",
+                            "true"});
+#line 7
+    await testRunner.ThenAsync("the invoice is returned successfully by id", ((string)(null)), table18, "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
@@ -222,12 +199,12 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Orders.CreateOrderSucc
             
             async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.InitializeAsync()
             {
-                await CreateOrderFeature.FeatureSetupAsync();
+                await GetInvoiceByIdFeature.FeatureSetupAsync();
             }
             
             async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.DisposeAsync()
             {
-                await CreateOrderFeature.FeatureTearDownAsync();
+                await GetInvoiceByIdFeature.FeatureTearDownAsync();
             }
         }
     }

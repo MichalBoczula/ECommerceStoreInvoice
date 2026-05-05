@@ -162,14 +162,14 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.UpdateSh
 #line 5
     await testRunner.GivenAsync("I have an existing shopping cart for invalid update", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
-                global::Reqnroll.Table table24 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table36 = new global::Reqnroll.Table(new string[] {
                             "ProductId",
                             "Name",
                             "Brand",
                             "UnitPriceAmount",
                             "UnitPriceCurrency",
                             "Quantity"});
-                table24.AddRow(new string[] {
+                table36.AddRow(new string[] {
                             "33333333-3333-3333-3333-333333333333",
                             "Phone",
                             "Apple",
@@ -177,37 +177,37 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.UpdateSh
                             "usd",
                             "0"});
 #line 6
-    await testRunner.AndAsync("I have an invalid update shopping cart request", ((string)(null)), table24, "And ");
+    await testRunner.AndAsync("I have an invalid update shopping cart request", ((string)(null)), table36, "And ");
 #line hidden
 #line 9
     await testRunner.WhenAsync("I submit the invalid update shopping cart request", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-                global::Reqnroll.Table table25 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table37 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table25.AddRow(new string[] {
+                table37.AddRow(new string[] {
                             "StatusCode",
                             "400"});
-                table25.AddRow(new string[] {
+                table37.AddRow(new string[] {
                             "Title",
                             "Validation failed."});
-                table25.AddRow(new string[] {
+                table37.AddRow(new string[] {
                             "Detail",
                             "One or more validation errors occurred."});
-                table25.AddRow(new string[] {
+                table37.AddRow(new string[] {
                             "Type",
                             "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.1"});
-                table25.AddRow(new string[] {
+                table37.AddRow(new string[] {
                             "Instance",
                             "/shopping-carts/{clientId}"});
-                table25.AddRow(new string[] {
+                table37.AddRow(new string[] {
                             "ErrorsCount",
                             "1"});
-                table25.AddRow(new string[] {
+                table37.AddRow(new string[] {
                             "FirstErrorMessage",
                             "Quantity must be greater than zero."});
 #line 10
-    await testRunner.ThenAsync("problem details are returned for update shopping cart validation error", ((string)(null)), table25, "Then ");
+    await testRunner.ThenAsync("problem details are returned for update shopping cart validation error", ((string)(null)), table37, "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

@@ -162,38 +162,44 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ClientDataVersions.Get
             else
             {
                 await this.ScenarioStartAsync();
-#line 5
-    await testRunner.GivenAsync("I have an invalid client id for client data version retrieval", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
-#line hidden
-#line 6
-    await testRunner.WhenAsync("I request the client data version by invalid client id", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
-#line hidden
-                global::Reqnroll.Table table5 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table9 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table5.AddRow(new string[] {
+                table9.AddRow(new string[] {
+                            "ClientId",
+                            "00000000-0000-0000-0000-000000000000"});
+#line 5
+    await testRunner.GivenAsync("I have an invalid client data version request", ((string)(null)), table9, "Given ");
+#line hidden
+#line 8
+    await testRunner.WhenAsync("I request the client data version by invalid client id", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+                global::Reqnroll.Table table10 = new global::Reqnroll.Table(new string[] {
+                            "Field",
+                            "Value"});
+                table10.AddRow(new string[] {
                             "StatusCode",
                             "400"});
-                table5.AddRow(new string[] {
+                table10.AddRow(new string[] {
                             "Title",
                             "Validation failed."});
-                table5.AddRow(new string[] {
+                table10.AddRow(new string[] {
                             "Detail",
                             "One or more validation errors occurred."});
-                table5.AddRow(new string[] {
+                table10.AddRow(new string[] {
                             "Type",
                             "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.1"});
-                table5.AddRow(new string[] {
+                table10.AddRow(new string[] {
                             "Instance",
                             "/client-data-versions/client/00000000-0000-0000-0000-000000000000"});
-                table5.AddRow(new string[] {
+                table10.AddRow(new string[] {
                             "ErrorsCount",
                             "1"});
-                table5.AddRow(new string[] {
+                table10.AddRow(new string[] {
                             "FirstErrorMessage",
                             "ClientId cannot be empty Guid."});
-#line 7
-    await testRunner.ThenAsync("problem details are returned for get client data version validation error", ((string)(null)), table5, "Then ");
+#line 9
+    await testRunner.ThenAsync("problem details are returned for get client data version validation error", ((string)(null)), table10, "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

@@ -155,56 +155,86 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ClientDataVersions.Get
             else
             {
                 await this.ScenarioStartAsync();
-#line 4
-    await testRunner.GivenAsync("I have an existing client data version for retrieval", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
-#line hidden
-#line 5
-    await testRunner.WhenAsync("I request the client data version by client id", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
-#line hidden
-                global::Reqnroll.Table table4 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table7 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table4.AddRow(new string[] {
-                            "StatusCode",
-                            "200"});
-                table4.AddRow(new string[] {
-                            "HasId",
-                            "true"});
-                table4.AddRow(new string[] {
-                            "HasClientId",
-                            "true"});
-                table4.AddRow(new string[] {
+                table7.AddRow(new string[] {
                             "ClientName",
                             "John Doe"});
-                table4.AddRow(new string[] {
+                table7.AddRow(new string[] {
                             "PostalCode",
                             "00-001"});
-                table4.AddRow(new string[] {
+                table7.AddRow(new string[] {
                             "City",
                             "Warsaw"});
-                table4.AddRow(new string[] {
+                table7.AddRow(new string[] {
                             "Street",
                             "Main"});
-                table4.AddRow(new string[] {
+                table7.AddRow(new string[] {
                             "BuildingNumber",
                             "10"});
-                table4.AddRow(new string[] {
+                table7.AddRow(new string[] {
                             "ApartmentNumber",
                             "5"});
-                table4.AddRow(new string[] {
+                table7.AddRow(new string[] {
                             "PhoneNumber",
                             "123456789"});
-                table4.AddRow(new string[] {
+                table7.AddRow(new string[] {
                             "PhonePrefix",
                             "48"});
-                table4.AddRow(new string[] {
+                table7.AddRow(new string[] {
                             "AddressEmail",
                             "john@example.com"});
-                table4.AddRow(new string[] {
+#line 4
+    await testRunner.GivenAsync("I have an existing client data version for retrieval", ((string)(null)), table7, "Given ");
+#line hidden
+#line 15
+    await testRunner.WhenAsync("I request the client data version by client id", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+                global::Reqnroll.Table table8 = new global::Reqnroll.Table(new string[] {
+                            "Field",
+                            "Value"});
+                table8.AddRow(new string[] {
+                            "StatusCode",
+                            "200"});
+                table8.AddRow(new string[] {
+                            "HasId",
+                            "true"});
+                table8.AddRow(new string[] {
+                            "HasClientId",
+                            "true"});
+                table8.AddRow(new string[] {
+                            "ClientName",
+                            "John Doe"});
+                table8.AddRow(new string[] {
+                            "PostalCode",
+                            "00-001"});
+                table8.AddRow(new string[] {
+                            "City",
+                            "Warsaw"});
+                table8.AddRow(new string[] {
+                            "Street",
+                            "Main"});
+                table8.AddRow(new string[] {
+                            "BuildingNumber",
+                            "10"});
+                table8.AddRow(new string[] {
+                            "ApartmentNumber",
+                            "5"});
+                table8.AddRow(new string[] {
+                            "PhoneNumber",
+                            "123456789"});
+                table8.AddRow(new string[] {
+                            "PhonePrefix",
+                            "48"});
+                table8.AddRow(new string[] {
+                            "AddressEmail",
+                            "john@example.com"});
+                table8.AddRow(new string[] {
                             "HasCreatedAt",
                             "true"});
-#line 6
-    await testRunner.ThenAsync("the client data version is returned successfully", ((string)(null)), table4, "Then ");
+#line 16
+    await testRunner.ThenAsync("the client data version is returned successfully", ((string)(null)), table8, "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

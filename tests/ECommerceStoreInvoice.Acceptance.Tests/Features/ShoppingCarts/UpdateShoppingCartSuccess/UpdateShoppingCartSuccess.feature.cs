@@ -164,44 +164,44 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.UpdateSh
 #line 6
     await testRunner.WhenAsync("I submit the update shopping cart request", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-                global::Reqnroll.Table table23 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table35 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table23.AddRow(new string[] {
+                table35.AddRow(new string[] {
                             "StatusCode",
                             "200"});
-                table23.AddRow(new string[] {
+                table35.AddRow(new string[] {
                             "HasId",
                             "true"});
-                table23.AddRow(new string[] {
+                table35.AddRow(new string[] {
                             "HasClientId",
                             "true"});
-                table23.AddRow(new string[] {
+                table35.AddRow(new string[] {
                             "TotalAmount",
                             "2399.97"});
-                table23.AddRow(new string[] {
+                table35.AddRow(new string[] {
                             "TotalCurrency",
                             "USD"});
-                table23.AddRow(new string[] {
+                table35.AddRow(new string[] {
                             "LinesCount",
                             "2"});
-                table23.AddRow(new string[] {
+                table35.AddRow(new string[] {
                             "FirstLineName",
                             "Phone"});
-                table23.AddRow(new string[] {
+                table35.AddRow(new string[] {
                             "FirstLineBrand",
                             "Apple"});
-                table23.AddRow(new string[] {
+                table35.AddRow(new string[] {
                             "FirstLineQuantity",
                             "2"});
-                table23.AddRow(new string[] {
+                table35.AddRow(new string[] {
                             "FirstLineTotalAmount",
                             "1999.98"});
-                table23.AddRow(new string[] {
+                table35.AddRow(new string[] {
                             "FirstLineTotalCurrency",
                             "USD"});
 #line 7
-    await testRunner.ThenAsync("the shopping cart is updated successfully", ((string)(null)), table23, "Then ");
+    await testRunner.ThenAsync("the shopping cart is updated successfully", ((string)(null)), table35, "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
