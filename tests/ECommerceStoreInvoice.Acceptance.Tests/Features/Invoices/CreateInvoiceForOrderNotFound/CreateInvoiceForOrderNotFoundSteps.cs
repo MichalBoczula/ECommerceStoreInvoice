@@ -23,23 +23,13 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Invoices.CreateInvoice
         }
 
         [Given("I have an existing client and a non-existing order id for invoice creation")]
-        public async Task GivenIHaveAnExistingClientAndANonExistingOrderIdForInvoiceCreation()
+        public async Task GivenIHaveAnExistingClientAndANonExistingOrderIdForInvoiceCreation(Table table)
         {
             _clientId = Guid.NewGuid();
             _orderId = Guid.NewGuid();
 
-            var clientDataVersionRequest = new CreateClientDataVersionRequestDto
-            {
-                ClientName = "John Doe",
-                PostalCode = "00-001",
-                City = "NewYork",
-                Street = "Main.St",
-                BuildingNumber = "10A",
-                ApartmentNumber = "5",
-                PhoneNumber = "123456789",
-                PhonePrefix = "48",
-                AddressEmail = "john.doe@test.com"
-            };
+            var requestValues = ParseExpectedTable(table);
+            var clientDataVersionRequest = BuildClientDataVersionRequest(requestValues);
 
             AllureJson.AttachObject(
                 "Create client data version setup request",
@@ -54,9 +44,23 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Invoices.CreateInvoice
         }
 
         [When("I submit create invoice for a non-existing order request")]
-        public async Task WhenISubmitCreateInvoiceForANonExistingOrderRequest()
+        public async Task WhenISubmitCreateInvoiceForANonExistingOrderRequest(Table table)
         {
-            _apiContext.Response = await _apiContext.HttpClient.PostAsync($"/invoices/{_clientId}/{_orderId}", content: null);
+            var requestValues = ParseExpectedTable(table);
+            var endpointTemplate = GetRequiredValue(requestValues, "Endpoint");
+            var endpoint = endpointTemplate
+                .Replace("{clientId}", _clientId.ToString(), StringComparison.OrdinalIgnoreCase)
+                .Replace("{orderId}", _orderId.ToString(), StringComparison.OrdinalIgnoreCase);
+
+            var method = GetRequiredValue(requestValues, "Method");
+            method.ShouldBe("POST", StringCompareShould.IgnoreCase);
+
+            var bodyJson = GetRequiredValue(requestValues, "BodyJson");
+            bodyJson.ShouldBe("null", StringCompareShould.IgnoreCase);
+
+            AllureJson.AttachObject("Create invoice request", new { Method = method.ToUpperInvariant(), Endpoint = endpoint, Body = (object?)null }, _apiContext.JsonOptions);
+
+            _apiContext.Response = await _apiContext.HttpClient.PostAsync(endpoint, content: null);
 
             var body = await _apiContext.Response.Content.ReadAsStringAsync();
             AllureJson.AttachRawJson($"Response JSON ({(int)_apiContext.Response.StatusCode})", body);
@@ -117,6 +121,22 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Invoices.CreateInvoice
             return JsonSerializer.Deserialize<T>(content, _apiContext.JsonOptions);
         }
 
+
+        private static CreateClientDataVersionRequestDto BuildClientDataVersionRequest(IReadOnlyDictionary<string, string> values)
+        {
+            return new CreateClientDataVersionRequestDto
+            {
+                ClientName = GetRequiredValue(values, "ClientName"),
+                PostalCode = GetRequiredValue(values, "PostalCode"),
+                City = GetRequiredValue(values, "City"),
+                Street = GetRequiredValue(values, "Street"),
+                BuildingNumber = GetRequiredValue(values, "BuildingNumber"),
+                ApartmentNumber = GetRequiredValue(values, "ApartmentNumber"),
+                PhoneNumber = GetRequiredValue(values, "PhoneNumber"),
+                PhonePrefix = GetRequiredValue(values, "PhonePrefix"),
+                AddressEmail = GetRequiredValue(values, "AddressEmail")
+            };
+        }
         private static Dictionary<string, string> ParseExpectedTable(Table table)
         {
             var values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
