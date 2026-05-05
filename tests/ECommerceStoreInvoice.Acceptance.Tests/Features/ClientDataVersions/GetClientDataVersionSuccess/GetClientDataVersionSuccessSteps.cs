@@ -23,21 +23,11 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ClientDataVersions.Get
         }
 
         [Given("I have an existing client data version for retrieval")]
-        public async Task GivenIHaveAnExistingClientDataVersionForRetrieval()
+        public async Task GivenIHaveAnExistingClientDataVersionForRetrieval(Table table)
         {
+            var requestData = ParseExpectedTable(table);
             _clientId = Guid.NewGuid();
-            _request = new CreateClientDataVersionRequestDto
-            {
-                ClientName = "John Doe",
-                PostalCode = "00-001",
-                City = "Warsaw",
-                Street = "Main",
-                BuildingNumber = "10",
-                ApartmentNumber = "5",
-                PhoneNumber = "123456789",
-                PhonePrefix = "48",
-                AddressEmail = "john@example.com"
-            };
+            _request = BuildCreateClientDataVersionRequest(requestData);
 
             AllureJson.AttachObject(
                 "Create client data version setup request",
@@ -68,6 +58,9 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ClientDataVersions.Get
         public async Task ThenTheClientDataVersionIsReturnedSuccessfully(Table table)
         {
             var expected = ParseExpectedTable(table);
+            var expectedResponseObject = BuildExpectedClientDataVersionResponse(expected);
+
+            AllureJson.AttachObject("Expected response object", expectedResponseObject, _apiContext.JsonOptions);
 
             _apiContext.Response.ShouldNotBeNull();
             _apiContext.Response!.StatusCode.ShouldBe(ParseStatusCode(expected, "StatusCode"));
@@ -170,6 +163,42 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ClientDataVersions.Get
 
             result = bool.Parse(value);
             return true;
+        }
+
+        private static CreateClientDataVersionRequestDto BuildCreateClientDataVersionRequest(IReadOnlyDictionary<string, string> values)
+        {
+            return new CreateClientDataVersionRequestDto
+            {
+                ClientName = GetRequiredValue(values, "ClientName"),
+                PostalCode = GetRequiredValue(values, "PostalCode"),
+                City = GetRequiredValue(values, "City"),
+                Street = GetRequiredValue(values, "Street"),
+                BuildingNumber = GetRequiredValue(values, "BuildingNumber"),
+                ApartmentNumber = GetRequiredValue(values, "ApartmentNumber"),
+                PhoneNumber = GetRequiredValue(values, "PhoneNumber"),
+                PhonePrefix = GetRequiredValue(values, "PhonePrefix"),
+                AddressEmail = GetRequiredValue(values, "AddressEmail")
+            };
+        }
+
+        private static object BuildExpectedClientDataVersionResponse(IReadOnlyDictionary<string, string> values)
+        {
+            return new
+            {
+                StatusCode = ParseStatusCode(values, "StatusCode"),
+                HasId = TryGetBool(values, "HasId", out var hasId) && hasId,
+                HasClientId = TryGetBool(values, "HasClientId", out var hasClientId) && hasClientId,
+                ClientName = GetExpectedValue(values, "ClientName", string.Empty),
+                PostalCode = GetExpectedValue(values, "PostalCode", string.Empty),
+                City = GetExpectedValue(values, "City", string.Empty),
+                Street = GetExpectedValue(values, "Street", string.Empty),
+                BuildingNumber = GetExpectedValue(values, "BuildingNumber", string.Empty),
+                ApartmentNumber = GetExpectedValue(values, "ApartmentNumber", string.Empty),
+                PhoneNumber = GetExpectedValue(values, "PhoneNumber", string.Empty),
+                PhonePrefix = GetExpectedValue(values, "PhonePrefix", string.Empty),
+                AddressEmail = GetExpectedValue(values, "AddressEmail", string.Empty),
+                HasCreatedAt = TryGetBool(values, "HasCreatedAt", out var hasCreatedAt) && hasCreatedAt
+            };
         }
     }
 }
