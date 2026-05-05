@@ -25,22 +25,24 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Invoices.CreateInvoice
         }
 
         [Given("I have an existing invoice for a paid order")]
-        public async Task GivenIHaveAnExistingInvoiceForAPaidOrder()
+        public async Task GivenIHaveAnExistingInvoiceForAPaidOrder(Table table)
         {
             _clientId = Guid.NewGuid();
             var productId = Guid.NewGuid();
 
+            var setupData = ParseExpectedTable(table);
+
             var clientDataVersionRequest = new CreateClientDataVersionRequestDto
             {
-                ClientName = "John Doe",
-                PostalCode = "00-001",
-                City = "NewYork",
-                Street = "Main.St",
-                BuildingNumber = "10A",
-                ApartmentNumber = "5",
-                PhoneNumber = "123456789",
-                PhonePrefix = "48",
-                AddressEmail = "john.doe@test.com"
+                ClientName = GetRequiredValue(setupData, "ClientName"),
+                PostalCode = GetRequiredValue(setupData, "PostalCode"),
+                City = GetRequiredValue(setupData, "City"),
+                Street = GetRequiredValue(setupData, "Street"),
+                BuildingNumber = GetRequiredValue(setupData, "BuildingNumber"),
+                ApartmentNumber = GetRequiredValue(setupData, "ApartmentNumber"),
+                PhoneNumber = GetRequiredValue(setupData, "PhoneNumber"),
+                PhonePrefix = GetRequiredValue(setupData, "PhonePrefix"),
+                AddressEmail = GetRequiredValue(setupData, "AddressEmail")
             };
 
             AllureJson.AttachObject("Create client data version setup request", clientDataVersionRequest, _apiContext.JsonOptions);
@@ -58,11 +60,11 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Invoices.CreateInvoice
                     new ShoppingCartLineRequestDto
                     {
                         ProductId = productId,
-                        Name = "Laptop",
-                        Brand = "Lenovo",
-                        UnitPriceAmount = 999.99m,
-                        UnitPriceCurrency = "usd",
-                        Quantity = 2
+                        Name = GetRequiredValue(setupData, "ProductName"),
+                        Brand = GetRequiredValue(setupData, "ProductBrand"),
+                        UnitPriceAmount = decimal.Parse(GetRequiredValue(setupData, "UnitPriceAmount"), CultureInfo.InvariantCulture),
+                        UnitPriceCurrency = GetRequiredValue(setupData, "UnitPriceCurrency"),
+                        Quantity = int.Parse(GetRequiredValue(setupData, "Quantity"), CultureInfo.InvariantCulture)
                     }
                 ]
             };
@@ -81,7 +83,7 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Invoices.CreateInvoice
             _orderId = createdOrder!.Id;
             _orderId.ShouldNotBe(Guid.Empty);
 
-            var payOrderRequest = new UpdateOrderStatusRequestDto { Status = "Paid" };
+            var payOrderRequest = new UpdateOrderStatusRequestDto { Status = GetRequiredValue(setupData, "OrderStatus") };
             AllureJson.AttachObject("Pay order setup request", payOrderRequest, _apiContext.JsonOptions);
 
             var payOrderResponse = await _apiContext.HttpClient.PatchAsJsonAsync($"/orders/{_orderId}/status", payOrderRequest, _apiContext.JsonOptions);
@@ -95,9 +97,13 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Invoices.CreateInvoice
         }
 
         [When("I submit the duplicate create invoice for order request")]
-        public async Task WhenISubmitTheDuplicateCreateInvoiceForOrderRequest()
+        public async Task WhenISubmitTheDuplicateCreateInvoiceForOrderRequest(Table table)
         {
-            _apiContext.Response = await _apiContext.HttpClient.PostAsync($"/invoices/{_clientId}/{_orderId}", content: null);
+            var requestData = ParseExpectedTable(table);
+            AllureJson.AttachObject("Duplicate create invoice request table", requestData, _apiContext.JsonOptions);
+
+            var hasBody = TryGetBool(requestData, "HasBody", out var bodyFlag) && bodyFlag;
+            _apiContext.Response = await _apiContext.HttpClient.PostAsync($"/invoices/{_clientId}/{_orderId}", content: hasBody ? JsonContent.Create(requestData, options: _apiContext.JsonOptions) : null);
 
             var body = await _apiContext.Response.Content.ReadAsStringAsync();
             AllureJson.AttachRawJson($"Response JSON ({(int)_apiContext.Response.StatusCode})", body);
