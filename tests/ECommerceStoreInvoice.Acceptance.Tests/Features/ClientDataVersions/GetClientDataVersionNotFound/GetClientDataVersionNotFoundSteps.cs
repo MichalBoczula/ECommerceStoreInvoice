@@ -20,13 +20,22 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ClientDataVersions.Get
         }
 
         [Given("I have a non-existing client id for client data version retrieval")]
-        public void GivenIHaveANonExistingClientIdForClientDataVersionRetrieval()
+        public void GivenIHaveANonExistingClientIdForClientDataVersionRetrieval(Table table)
         {
             _clientId = Guid.NewGuid();
 
+            var requestTemplate = ParseExpectedTable(table);
+            var request = new
+            {
+                Method = GetRequiredValue(requestTemplate, "Method"),
+                Endpoint = GetRequiredValue(requestTemplate, "Endpoint").Replace("{clientId}", _clientId.ToString(), StringComparison.OrdinalIgnoreCase),
+                ClientId = _clientId,
+                ClientIdSource = GetRequiredValue(requestTemplate, "ClientIdSource")
+            };
+
             AllureJson.AttachObject(
                 "Get client data version not found request",
-                new { ClientId = _clientId },
+                request,
                 _apiContext.JsonOptions);
         }
 
@@ -70,8 +79,18 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ClientDataVersions.Get
             var expectedInstance = GetRequiredValue(expected, "Instance").Replace("{clientId}", _clientId.ToString(), StringComparison.OrdinalIgnoreCase);
             problemDetails.Instance.ShouldBe(expectedInstance);
 
+            var detailContains = GetRequiredValue(expected, "DetailContains");
+            problemDetails.Detail.ShouldContain(detailContains, Case.Insensitive);
+
+            if (TryGetBool(expected, "DetailContainsGuid", out var detailContainsGuid) && detailContainsGuid)
+            {
+                problemDetails.Detail.ShouldContain(_clientId.ToString(), Case.Insensitive);
+            }
+
+            bool? hasTraceIdValue = null;
             if (TryGetBool(expected, "HasTraceId", out var hasTraceId))
             {
+                hasTraceIdValue = hasTraceId;
                 if (hasTraceId)
                 {
                     problemDetails.TraceId.ShouldNotBeNullOrWhiteSpace();
@@ -81,6 +100,21 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ClientDataVersions.Get
                     problemDetails.TraceId.ShouldBeNullOrWhiteSpace();
                 }
             }
+
+            var expectedResponse = new
+            {
+                StatusCode = (int)ParseStatusCode(expected, "StatusCode"),
+                Title = GetRequiredValue(expected, "Title"),
+                Type = GetRequiredValue(expected, "Type"),
+                DetailContains = detailContains,
+                Instance = expectedInstance,
+                HasTraceId = hasTraceIdValue
+            };
+
+            AllureJson.AttachObject(
+                "Get client data version not found expected response",
+                expectedResponse,
+                _apiContext.JsonOptions);
         }
 
         private async Task<T?> DeserializeResponse<T>(HttpResponseMessage response)
