@@ -2,7 +2,9 @@
 Feature: Get client data version validation error
 
   Scenario: Get client data version by client id returns problem details when validation fails
-    Given I have an invalid client id for client data version retrieval
+    Given I have an invalid client data version request
+      | Field    | Value                                |
+      | ClientId | 00000000-0000-0000-0000-000000000000 |
     When I request the client data version by invalid client id
     Then problem details are returned for get client data version validation error
       | Field             | Value                                                        |

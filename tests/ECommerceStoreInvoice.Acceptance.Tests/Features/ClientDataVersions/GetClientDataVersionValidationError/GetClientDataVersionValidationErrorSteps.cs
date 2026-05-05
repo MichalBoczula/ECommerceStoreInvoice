@@ -13,20 +13,27 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ClientDataVersions.Get
     {
         private readonly ScenarioApiContext _apiContext;
         private Guid _clientId;
+        private GetClientDataVersionValidationErrorRequest? _request;
 
         public GetClientDataVersionValidationErrorSteps(ScenarioApiContext apiContext)
         {
             _apiContext = apiContext;
         }
 
-        [Given("I have an invalid client id for client data version retrieval")]
-        public void GivenIHaveAnInvalidClientIdForClientDataVersionRetrieval()
+        [Given("I have an invalid client data version request")]
+        public void GivenIHaveAnInvalidClientDataVersionRequest(Table table)
         {
-            _clientId = Guid.Empty;
+            var requestTable = ParseExpectedTable(table);
+            _request = new GetClientDataVersionValidationErrorRequest
+            {
+                ClientId = Guid.Parse(GetRequiredValue(requestTable, "ClientId"))
+            };
+
+            _clientId = _request.ClientId;
 
             AllureJson.AttachObject(
                 "Get client data version validation request",
-                new { ClientId = _clientId },
+                _request,
                 _apiContext.JsonOptions);
         }
 
@@ -43,10 +50,11 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ClientDataVersions.Get
         public async Task ThenProblemDetailsAreReturnedForGetClientDataVersionValidationError(Table table)
         {
             var expected = ParseExpectedTable(table);
+            var expectedResponse = BuildExpectedResponse(expected);
 
             AllureJson.AttachObject(
                 "Expected get client data version validation error",
-                expected,
+                expectedResponse,
                 _apiContext.JsonOptions);
 
             _apiContext.Response.ShouldNotBeNull();
@@ -64,6 +72,25 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ClientDataVersions.Get
             errors.Count.ShouldBe(ParseInt(expected, "ErrorsCount"));
             errors.ShouldNotBeEmpty();
             errors[0].Message.ShouldBe(GetRequiredValue(expected, "FirstErrorMessage"));
+        }
+
+        private static object BuildExpectedResponse(IReadOnlyDictionary<string, string> expected)
+        {
+            return new
+            {
+                StatusCode = int.Parse(GetRequiredValue(expected, "StatusCode"), CultureInfo.InvariantCulture),
+                Title = GetRequiredValue(expected, "Title"),
+                Detail = GetRequiredValue(expected, "Detail"),
+                Type = GetRequiredValue(expected, "Type"),
+                Instance = GetRequiredValue(expected, "Instance"),
+                Errors = new[]
+                {
+                    new
+                    {
+                        Message = GetRequiredValue(expected, "FirstErrorMessage")
+                    }
+                }
+            };
         }
 
         private async Task<T?> DeserializeResponse<T>(HttpResponseMessage response)
@@ -103,6 +130,11 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ClientDataVersions.Get
         {
             var value = GetRequiredValue(values, key);
             return int.Parse(value, CultureInfo.InvariantCulture);
+        }
+
+        private sealed class GetClientDataVersionValidationErrorRequest
+        {
+            public Guid ClientId { get; set; }
         }
     }
 }
