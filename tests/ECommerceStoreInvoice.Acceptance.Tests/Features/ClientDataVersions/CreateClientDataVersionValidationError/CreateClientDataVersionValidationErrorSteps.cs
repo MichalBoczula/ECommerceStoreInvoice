@@ -34,19 +34,22 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ClientDataVersions.Cre
         }
 
         [Given("I have an invalid create client data version request with phone number validation error")]
-        public void GivenIHaveAnInvalidCreateClientDataVersionRequestWithPhoneNumberValidationError()
+        public void GivenIHaveAnInvalidCreateClientDataVersionRequestWithPhoneNumberValidationError(Table table)
         {
+            var requestValues = ParseExpectedTable(table);
+            AllureJson.AttachObject("Create client data version validation request table", requestValues, _apiContext.JsonOptions);
+
             _request = new CreateClientDataVersionRequestDto
             {
-                ClientName = "John Doe",
-                PostalCode = "00-001",
-                City = "NewYork",
-                Street = "Main.St",
-                BuildingNumber = "10A",
-                ApartmentNumber = "5",
-                PhoneNumber = "abc",
-                PhonePrefix = "48",
-                AddressEmail = "john.doe@test.com"
+                ClientName = GetRequiredValue(requestValues, "ClientName"),
+                PostalCode = GetRequiredValue(requestValues, "PostalCode"),
+                City = GetRequiredValue(requestValues, "City"),
+                Street = GetRequiredValue(requestValues, "Street"),
+                BuildingNumber = GetRequiredValue(requestValues, "BuildingNumber"),
+                ApartmentNumber = GetRequiredValue(requestValues, "ApartmentNumber"),
+                PhoneNumber = GetRequiredValue(requestValues, "PhoneNumber"),
+                PhonePrefix = GetRequiredValue(requestValues, "PhonePrefix"),
+                AddressEmail = GetRequiredValue(requestValues, "AddressEmail")
             };
 
             AllureJson.AttachObject(
