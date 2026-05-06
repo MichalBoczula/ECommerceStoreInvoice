@@ -17,6 +17,7 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Invoices.GetInvoiceByI
     public sealed class GetInvoiceByIdSuccessSteps
     {
         private readonly ScenarioApiContext _apiContext;
+        private GetInvoiceByIdRequestDoc? _requestDoc;
         private Guid _clientId;
         private Guid _orderId;
         private Guid _invoiceId;
@@ -129,6 +130,23 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Invoices.GetInvoiceByI
             AllureJson.AttachRawJson($"Response JSON ({(int)_apiContext.Response.StatusCode})", body);
         }
 
+        [Given("the get invoice by id request is documented as")]
+        public void GivenTheGetInvoiceByIdRequestIsDocumentedAs(Table table)
+        {
+            var values = ParseExpectedTable(table);
+            _requestDoc = new GetInvoiceByIdRequestDoc
+            {
+                Method = GetRequiredValue(values, "Method"),
+                EndpointTemplate = GetRequiredValue(values, "EndpointTemplate"),
+                HasInvoiceId = bool.Parse(GetRequiredValue(values, "HasInvoiceId")),
+                InvoiceId = _invoiceId,
+                InvoiceIdSource = GetRequiredValue(values, "InvoiceIdSource"),
+                Accept = GetRequiredValue(values, "Accept")
+            };
+
+            AllureJson.AttachObject("Get invoice by id request (from gherkin table)", _requestDoc, _apiContext.JsonOptions);
+        }
+
         [Then("the invoice is returned successfully by id")]
         public async Task ThenTheInvoiceIsReturnedSuccessfullyById(Table table)
         {
@@ -140,6 +158,17 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Invoices.GetInvoiceByI
 
             var invoice = await DeserializeResponse<InvoiceResponseDto>(_apiContext.Response);
             invoice.ShouldNotBeNull();
+
+            var responseDoc = new GetInvoiceByIdResponseDoc
+            {
+                StatusCode = (int)_apiContext.Response.StatusCode,
+                Id = invoice!.Id,
+                OrderId = invoice.OrderId,
+                ClietDataVersionId = invoice.ClietDataVersionId,
+                StorageUrl = invoice.StorageUrl,
+                CreatedAt = invoice.CreatedAt
+            };
+            AllureJson.AttachObject("Get invoice by id response (actual object)", responseDoc, _apiContext.JsonOptions);
 
             if (TryGetBool(expected, "HasId", out var hasId) && hasId)
             {
@@ -212,6 +241,26 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Invoices.GetInvoiceByI
 
             result = bool.Parse(value);
             return true;
+        }
+
+        private sealed class GetInvoiceByIdRequestDoc
+        {
+            public string Method { get; init; } = string.Empty;
+            public string EndpointTemplate { get; init; } = string.Empty;
+            public bool HasInvoiceId { get; init; }
+            public Guid InvoiceId { get; init; }
+            public string InvoiceIdSource { get; init; } = string.Empty;
+            public string Accept { get; init; } = string.Empty;
+        }
+
+        private sealed class GetInvoiceByIdResponseDoc
+        {
+            public int StatusCode { get; init; }
+            public Guid Id { get; init; }
+            public Guid OrderId { get; init; }
+            public Guid ClietDataVersionId { get; init; }
+            public string StorageUrl { get; init; } = string.Empty;
+            public DateTime CreatedAt { get; init; }
         }
     }
 }

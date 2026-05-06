@@ -3,6 +3,13 @@ Feature: Get invoice by id
 
   Scenario: Get invoice by id returns an existing invoice
     Given I have an existing invoice id
+    And the get invoice by id request is documented as
+      | Field              | Value                 |
+      | Method             | GET                   |
+      | EndpointTemplate   | /invoices/{invoiceId} |
+      | HasInvoiceId       | true                  |
+      | InvoiceIdSource    | setup-created-invoice |
+      | Accept             | application/json      |
     When I request invoice by id
     Then the invoice is returned successfully by id
       | Field                  | Value |
@@ -12,3 +19,5 @@ Feature: Get invoice by id
       | HasClientDataVersionId | true  |
       | HasStorageUrl          | true  |
       | HasCreatedAt           | true  |
+      | OrderIdSource          | setup-created-order |
+      | IdSource               | setup-created-invoice |
