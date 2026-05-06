@@ -159,38 +159,51 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Orders.GetOrdersByClie
             else
             {
                 await this.ScenarioStartAsync();
+                global::Reqnroll.Table table12 = new global::Reqnroll.Table(new string[] {
+                            "ClientId"});
+                table12.AddRow(new string[] {
+                            "00000000-0000-0000-0000-000000000000"});
 #line 5
-    await testRunner.GivenAsync("I have an invalid client id for orders retrieval", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+    await testRunner.GivenAsync("I have an invalid client id for orders retrieval", ((string)(null)), table12, "Given ");
 #line hidden
-#line 6
+#line 8
     await testRunner.WhenAsync("I request orders by invalid client id", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-                global::Reqnroll.Table table25 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table13 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table25.AddRow(new string[] {
+                table13.AddRow(new string[] {
                             "StatusCode",
                             "400"});
-                table25.AddRow(new string[] {
+                table13.AddRow(new string[] {
                             "Title",
                             "Validation failed."});
-                table25.AddRow(new string[] {
+                table13.AddRow(new string[] {
                             "Detail",
                             "One or more validation errors occurred."});
-                table25.AddRow(new string[] {
+                table13.AddRow(new string[] {
                             "Type",
                             "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.1"});
-                table25.AddRow(new string[] {
+                table13.AddRow(new string[] {
                             "Instance",
                             "/orders/client/00000000-0000-0000-0000-000000000000"});
-                table25.AddRow(new string[] {
+                table13.AddRow(new string[] {
                             "ErrorsCount",
                             "1"});
-                table25.AddRow(new string[] {
+                table13.AddRow(new string[] {
                             "FirstErrorMessage",
                             "ClientId cannot be empty Guid."});
-#line 7
-    await testRunner.ThenAsync("problem details are returned for get orders by client id validation error", ((string)(null)), table25, "Then ");
+#line 9
+    await testRunner.ThenAsync("problem details are returned for get orders by client id validation error", ((string)(null)), table13, "Then ");
+#line hidden
+                global::Reqnroll.Table table14 = new global::Reqnroll.Table(new string[] {
+                            "Field",
+                            "Message"});
+                table14.AddRow(new string[] {
+                            "clientId",
+                            "ClientId cannot be empty Guid."});
+#line 18
+    await testRunner.AndAsync("the validation error response JSON contains", ((string)(null)), table14, "And ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

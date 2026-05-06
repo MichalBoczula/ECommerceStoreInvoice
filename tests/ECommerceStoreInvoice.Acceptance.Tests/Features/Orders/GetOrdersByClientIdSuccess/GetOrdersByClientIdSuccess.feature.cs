@@ -155,62 +155,86 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Orders.GetOrdersByClie
             else
             {
                 await this.ScenarioStartAsync();
-#line 4
-    await testRunner.GivenAsync("I have existing orders for a client", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
-#line hidden
-#line 5
-    await testRunner.WhenAsync("I request orders by client id", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
-#line hidden
-                global::Reqnroll.Table table24 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table10 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table24.AddRow(new string[] {
+                table10.AddRow(new string[] {
+                            "ProductName",
+                            "Laptop"});
+                table10.AddRow(new string[] {
+                            "ProductBrand",
+                            "Lenovo"});
+                table10.AddRow(new string[] {
+                            "UnitPriceAmount",
+                            "999.99"});
+                table10.AddRow(new string[] {
+                            "UnitPriceCurrency",
+                            "usd"});
+                table10.AddRow(new string[] {
+                            "Quantity",
+                            "2"});
+                table10.AddRow(new string[] {
+                            "OrdersToCreate",
+                            "2"});
+#line 4
+    await testRunner.GivenAsync("I have existing orders for a client", ((string)(null)), table10, "Given ");
+#line hidden
+#line 12
+    await testRunner.WhenAsync("I request orders by client id", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+                global::Reqnroll.Table table11 = new global::Reqnroll.Table(new string[] {
+                            "Field",
+                            "Value"});
+                table11.AddRow(new string[] {
                             "StatusCode",
                             "200"});
-                table24.AddRow(new string[] {
+                table11.AddRow(new string[] {
                             "OrdersCount",
                             "2"});
-                table24.AddRow(new string[] {
+                table11.AddRow(new string[] {
                             "FirstOrderHasId",
                             "true"});
-                table24.AddRow(new string[] {
+                table11.AddRow(new string[] {
                             "FirstOrderHasClientId",
                             "true"});
-                table24.AddRow(new string[] {
+                table11.AddRow(new string[] {
                             "FirstOrderStatus",
                             "Created"});
-                table24.AddRow(new string[] {
+                table11.AddRow(new string[] {
                             "FirstOrderTotalAmount",
                             "1999.98"});
-                table24.AddRow(new string[] {
+                table11.AddRow(new string[] {
                             "FirstOrderTotalCurrency",
                             "USD"});
-                table24.AddRow(new string[] {
+                table11.AddRow(new string[] {
                             "FirstOrderLinesCount",
                             "1"});
-                table24.AddRow(new string[] {
+                table11.AddRow(new string[] {
                             "FirstLineName",
                             "Laptop"});
-                table24.AddRow(new string[] {
+                table11.AddRow(new string[] {
                             "FirstLineBrand",
                             "Lenovo"});
-                table24.AddRow(new string[] {
+                table11.AddRow(new string[] {
                             "FirstLineQuantity",
                             "2"});
-                table24.AddRow(new string[] {
+                table11.AddRow(new string[] {
                             "FirstLineUnitPriceAmount",
                             "999.99"});
-                table24.AddRow(new string[] {
+                table11.AddRow(new string[] {
                             "FirstLineUnitPriceCurrency",
                             "USD"});
-                table24.AddRow(new string[] {
+                table11.AddRow(new string[] {
                             "FirstLineTotalAmount",
                             "1999.98"});
-                table24.AddRow(new string[] {
+                table11.AddRow(new string[] {
                             "FirstLineTotalCurrency",
                             "USD"});
-#line 6
-    await testRunner.ThenAsync("the orders are returned successfully", ((string)(null)), table24, "Then ");
+                table11.AddRow(new string[] {
+                            "ResponseJson",
+                            @"[{""id"":""<generated-guid>"",""clientId"":""<scenario-client-id>"",""status"":""Created"",""totalAmount"":1999.98,""totalCurrency"":""USD"",""lines"":[{""name"":""Laptop"",""brand"":""Lenovo"",""quantity"":2,""unitPriceAmount"":999.99,""unitPriceCurrency"":""USD"",""totalAmount"":1999.98,""totalCurrency"":""USD""}]},{""id"":""<generated-guid>"",""clientId"":""<scenario-client-id>"",""status"":""Created"",""totalAmount"":1999.98,""totalCurrency"":""USD"",""lines"":[{""name"":""Laptop"",""brand"":""Lenovo"",""quantity"":2,""unitPriceAmount"":999.99,""unitPriceCurrency"":""USD"",""totalAmount"":1999.98,""totalCurrency"":""USD""}]}]"});
+#line 13
+    await testRunner.ThenAsync("the orders are returned successfully", ((string)(null)), table11, "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

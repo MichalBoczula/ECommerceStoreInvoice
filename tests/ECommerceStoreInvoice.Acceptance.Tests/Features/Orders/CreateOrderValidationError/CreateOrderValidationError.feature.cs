@@ -162,35 +162,50 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Orders.CreateOrderVali
 #line 5
     await testRunner.GivenAsync("I have a client with an empty shopping cart for order creation", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
-#line 6
-    await testRunner.WhenAsync("I submit the create order request for the empty shopping cart", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
-#line hidden
-                global::Reqnroll.Table table22 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table6 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table22.AddRow(new string[] {
+                table6.AddRow(new string[] {
+                            "Method",
+                            "POST"});
+                table6.AddRow(new string[] {
+                            "PathTemplate",
+                            "/orders/{clientId}"});
+                table6.AddRow(new string[] {
+                            "ContentType",
+                            "application/json"});
+                table6.AddRow(new string[] {
+                            "Body",
+                            "null"});
+#line 6
+    await testRunner.WhenAsync("I submit the create order request for the empty shopping cart", ((string)(null)), table6, "When ");
+#line hidden
+                global::Reqnroll.Table table7 = new global::Reqnroll.Table(new string[] {
+                            "Field",
+                            "Value"});
+                table7.AddRow(new string[] {
                             "StatusCode",
                             "400"});
-                table22.AddRow(new string[] {
+                table7.AddRow(new string[] {
                             "Title",
                             "Validation failed."});
-                table22.AddRow(new string[] {
+                table7.AddRow(new string[] {
                             "Detail",
                             "One or more validation errors occurred."});
-                table22.AddRow(new string[] {
+                table7.AddRow(new string[] {
                             "Type",
                             "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.1"});
-                table22.AddRow(new string[] {
+                table7.AddRow(new string[] {
                             "Instance",
                             "/orders/{clientId}"});
-                table22.AddRow(new string[] {
+                table7.AddRow(new string[] {
                             "ErrorsCount",
                             "1"});
-                table22.AddRow(new string[] {
+                table7.AddRow(new string[] {
                             "FirstErrorMessage",
                             "Order lines cannot be empty."});
-#line 7
-    await testRunner.ThenAsync("problem details are returned for create order validation error", ((string)(null)), table22, "Then ");
+#line 12
+    await testRunner.ThenAsync("problem details are returned for create order validation error", ((string)(null)), table7, "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
