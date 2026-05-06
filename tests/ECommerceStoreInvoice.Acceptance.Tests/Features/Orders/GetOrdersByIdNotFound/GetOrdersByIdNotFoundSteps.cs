@@ -20,13 +20,16 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Orders.GetOrdersByIdNo
         }
 
         [Given("I have a non-existing order id for orders retrieval")]
-        public void GivenIHaveANonExistingOrderIdForOrdersRetrieval()
+        public void GivenIHaveANonExistingOrderIdForOrdersRetrieval(Table table)
         {
             _orderId = Guid.NewGuid();
 
+            var request = ParseExpectedTable(table);
+            request["OrderId"] = _orderId.ToString();
+
             AllureJson.AttachObject(
                 "Get order by id not found request",
-                new { OrderId = _orderId },
+                request,
                 _apiContext.JsonOptions);
         }
 
@@ -43,6 +46,11 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Orders.GetOrdersByIdNo
         public async Task ThenProblemDetailsAreReturnedForGetOrderByIdNotFound(Table table)
         {
             var expected = ParseExpectedTable(table);
+
+            AllureJson.AttachObject(
+                "Expected get order by id not found response",
+                expected,
+                _apiContext.JsonOptions);
 
             _apiContext.Response.ShouldNotBeNull();
             _apiContext.Response!.StatusCode.ShouldBe(ParseStatusCode(expected, "StatusCode"));
