@@ -3,7 +3,13 @@ Feature: Create order not found
 
   Scenario: Create order returns problem details when client does not exist
     Given I have a non-existing client id for order creation
+      | Field    | Value        |
+      | ClientId | <generatedId> |
     When I submit create order request for a non-existing client
+      | Field    | Value              |
+      | Method   | POST               |
+      | Endpoint | /orders/{clientId} |
+      | Body     | null               |
     Then problem details are returned for create order not found
       | Field      | Value                                                        |
       | StatusCode | 404                                                          |
