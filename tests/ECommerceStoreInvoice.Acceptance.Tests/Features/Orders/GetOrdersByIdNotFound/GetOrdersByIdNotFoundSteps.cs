@@ -20,13 +20,27 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Orders.GetOrdersByIdNo
         }
 
         [Given("I have a non-existing order id for orders retrieval")]
-        public void GivenIHaveANonExistingOrderIdForOrdersRetrieval()
+        public void GivenIHaveANonExistingOrderIdForOrdersRetrieval(Table table)
         {
-            _orderId = Guid.NewGuid();
+            var requestData = ParseExpectedTable(table);
+            _orderId = ParseOrderId(requestData, "OrderId");
+
+            var requestObject = new
+            {
+                OrderId = _orderId,
+                Method = GetRequiredValue(requestData, "Method"),
+                Route = GetRequiredValue(requestData, "Route").Replace("{orderId}", _orderId.ToString(), StringComparison.OrdinalIgnoreCase),
+                Accept = GetRequiredValue(requestData, "Accept")
+            };
 
             AllureJson.AttachObject(
-                "Get order by id not found request",
-                new { OrderId = _orderId },
+                "Get order by id not found request (table)",
+                requestData,
+                _apiContext.JsonOptions);
+
+            AllureJson.AttachObject(
+                "Get order by id not found request (json)",
+                requestObject,
                 _apiContext.JsonOptions);
         }
 
@@ -81,6 +95,26 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Orders.GetOrdersByIdNo
                     problemDetails.TraceId.ShouldBeNullOrWhiteSpace();
                 }
             }
+
+            var responseObject = new
+            {
+                StatusCode = (int)_apiContext.Response.StatusCode,
+                problemDetails.Title,
+                problemDetails.Type,
+                problemDetails.Detail,
+                problemDetails.Instance,
+                problemDetails.TraceId
+            };
+
+            AllureJson.AttachObject(
+                "Get order by id not found expected response (table)",
+                expected,
+                _apiContext.JsonOptions);
+
+            AllureJson.AttachObject(
+                "Get order by id not found actual response (json)",
+                responseObject,
+                _apiContext.JsonOptions);
         }
 
         private async Task<T?> DeserializeResponse<T>(HttpResponseMessage response)
@@ -114,6 +148,17 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Orders.GetOrdersByIdNo
         {
             var value = GetRequiredValue(values, key);
             return (HttpStatusCode)int.Parse(value, CultureInfo.InvariantCulture);
+        }
+
+        private static Guid ParseOrderId(IReadOnlyDictionary<string, string> values, string key)
+        {
+            var value = GetRequiredValue(values, key);
+            if (string.Equals(value, "{new-guid}", StringComparison.OrdinalIgnoreCase))
+            {
+                return Guid.NewGuid();
+            }
+
+            return Guid.Parse(value);
         }
 
         private static bool TryGetBool(IReadOnlyDictionary<string, string> values, string key, out bool result)

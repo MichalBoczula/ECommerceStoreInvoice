@@ -3,6 +3,11 @@ Feature: Get order by id not found
 
   Scenario: Get order by id returns problem details when order does not exist
     Given I have a non-existing order id for orders retrieval
+      | Field   | Value                                  |
+      | OrderId | {new-guid}                             |
+      | Method  | GET                                    |
+      | Route   | /orders/{orderId}                      |
+      | Accept  | application/json                       |
     When I request order by id for non-existing order
     Then problem details are returned for get order by id not found
       | Field      | Value                                                        |
