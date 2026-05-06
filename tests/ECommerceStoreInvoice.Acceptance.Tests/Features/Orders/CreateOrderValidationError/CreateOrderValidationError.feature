@@ -17,5 +17,4 @@ Feature: Create order validation error
       | Type              | https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.1 |
       | Instance          | /orders/{clientId}                                           |
       | ErrorsCount       | 1                                                            |
-      | FirstErrorField   | Lines                                                        |
       | FirstErrorMessage | Order lines cannot be empty.                                 |

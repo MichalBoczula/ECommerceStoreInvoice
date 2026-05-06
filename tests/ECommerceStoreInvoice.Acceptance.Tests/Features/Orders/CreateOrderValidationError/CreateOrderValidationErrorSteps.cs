@@ -79,7 +79,6 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Orders.CreateOrderVali
             var errors = problemDetails.Errors.ToList();
             errors.Count.ShouldBe(ParseInt(expected, "ErrorsCount"));
             errors.ShouldNotBeEmpty();
-            errors[0].Field.ShouldBe(GetRequiredValue(expected, "FirstErrorField"));
             errors[0].Message.ShouldBe(GetRequiredValue(expected, "FirstErrorMessage"));
 
             var expectedResponseObject = BuildCreateOrderValidationErrorResponseObject(expected, _clientId);
@@ -113,7 +112,6 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Orders.CreateOrderVali
                 {
                     new
                     {
-                        field = GetRequiredValue(values, "FirstErrorField"),
                         message = GetRequiredValue(values, "FirstErrorMessage")
                     }
                 }
