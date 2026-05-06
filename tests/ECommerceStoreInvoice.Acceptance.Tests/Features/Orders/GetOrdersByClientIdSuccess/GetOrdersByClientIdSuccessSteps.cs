@@ -22,29 +22,33 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Orders.GetOrdersByClie
         }
 
         [Given("I have existing orders for a client")]
-        public async Task GivenIHaveExistingOrdersForAClient()
+        public async Task GivenIHaveExistingOrdersForAClient(Table table)
         {
             _clientId = Guid.NewGuid();
             var productId = Guid.NewGuid();
+            var setup = ParseSetupTable(table);
+
+            var setupRequest = new
+            {
+                ClientId = _clientId,
+                ShoppingCartLines = new[]
+                {
+                    new
+                    {
+                        ProductId = productId,
+                        Name = setup.ProductName,
+                        Brand = setup.ProductBrand,
+                        UnitPriceAmount = setup.UnitPriceAmount,
+                        UnitPriceCurrency = setup.UnitPriceCurrency,
+                        Quantity = setup.Quantity
+                    }
+                },
+                OrdersToCreate = setup.OrdersToCreate
+            };
 
             AllureJson.AttachObject(
                 "Get orders setup request",
-                new
-                {
-                    ClientId = _clientId,
-                    ShoppingCartLines = new[]
-                    {
-                        new
-                        {
-                            ProductId = productId,
-                            Name = "Laptop",
-                            Brand = "Lenovo",
-                            UnitPriceAmount = 999.99m,
-                            UnitPriceCurrency = "usd",
-                            Quantity = 2
-                        }
-                    }
-                },
+                setupRequest,
                 _apiContext.JsonOptions);
 
             var createShoppingCartResponse = await _apiContext.HttpClient.PostAsync($"/shopping-carts/{_clientId}", content: null);
@@ -60,11 +64,11 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Orders.GetOrdersByClie
                     new ShoppingCartLineRequestDto
                     {
                         ProductId = productId,
-                        Name = "Laptop",
-                        Brand = "Lenovo",
-                        UnitPriceAmount = 999.99m,
-                        UnitPriceCurrency = "usd",
-                        Quantity = 2
+                        Name = setup.ProductName,
+                        Brand = setup.ProductBrand,
+                        UnitPriceAmount = setup.UnitPriceAmount,
+                        UnitPriceCurrency = setup.UnitPriceCurrency,
+                        Quantity = setup.Quantity
                     }
                 ]
             };
@@ -77,21 +81,22 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Orders.GetOrdersByClie
             var updateShoppingCartBody = await updateShoppingCartResponse.Content.ReadAsStringAsync();
             AllureJson.AttachRawJson($"Update shopping cart response JSON ({(int)updateShoppingCartResponse.StatusCode})", updateShoppingCartBody);
 
-            var createOrderResponse = await _apiContext.HttpClient.PostAsync($"/orders/{_clientId}", content: null);
-            var createOrderBody = await createOrderResponse.Content.ReadAsStringAsync();
-            AllureJson.AttachRawJson($"Create order response JSON ({(int)createOrderResponse.StatusCode})", createOrderBody);
-            createOrderResponse.StatusCode.ShouldBe(HttpStatusCode.OK, createOrderBody);
+            for (var orderNumber = 1; orderNumber <= setup.OrdersToCreate; orderNumber++)
+            {
+                var createOrderResponse = await _apiContext.HttpClient.PostAsync($"/orders/{_clientId}", content: null);
+                var createOrderBody = await createOrderResponse.Content.ReadAsStringAsync();
+                AllureJson.AttachRawJson($"Create order #{orderNumber} response JSON ({(int)createOrderResponse.StatusCode})", createOrderBody);
+                createOrderResponse.StatusCode.ShouldBe(HttpStatusCode.OK, createOrderBody);
 
-            var refillShoppingCartResponse = await _apiContext.HttpClient.PutAsJsonAsync($"/shopping-carts/{_clientId}", updateRequest, _apiContext.JsonOptions);
-            refillShoppingCartResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
+                if (orderNumber < setup.OrdersToCreate)
+                {
+                    var refillShoppingCartResponse = await _apiContext.HttpClient.PutAsJsonAsync($"/shopping-carts/{_clientId}", updateRequest, _apiContext.JsonOptions);
+                    refillShoppingCartResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-            var refillShoppingCartBody = await refillShoppingCartResponse.Content.ReadAsStringAsync();
-            AllureJson.AttachRawJson($"Refill shopping cart response JSON ({(int)refillShoppingCartResponse.StatusCode})", refillShoppingCartBody);
-
-            var createSecondOrderResponse = await _apiContext.HttpClient.PostAsync($"/orders/{_clientId}", content: null);
-            var createSecondOrderBody = await createSecondOrderResponse.Content.ReadAsStringAsync();
-            AllureJson.AttachRawJson($"Create second order response JSON ({(int)createSecondOrderResponse.StatusCode})", createSecondOrderBody);
-            createSecondOrderResponse.StatusCode.ShouldBe(HttpStatusCode.OK, createSecondOrderBody);
+                    var refillShoppingCartBody = await refillShoppingCartResponse.Content.ReadAsStringAsync();
+                    AllureJson.AttachRawJson($"Refill shopping cart before order #{orderNumber + 1} response JSON ({(int)refillShoppingCartResponse.StatusCode})", refillShoppingCartBody);
+                }
+            }
         }
 
         [When("I request orders by client id")]
@@ -238,5 +243,25 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Orders.GetOrdersByClie
             result = bool.Parse(value);
             return true;
         }
+
+        private static SetupRequest ParseSetupTable(Table table)
+        {
+            var values = ParseExpectedTable(table);
+            return new SetupRequest(
+                ProductName: GetRequiredValue(values, "ProductName"),
+                ProductBrand: GetRequiredValue(values, "ProductBrand"),
+                UnitPriceAmount: decimal.Parse(GetRequiredValue(values, "UnitPriceAmount"), CultureInfo.InvariantCulture),
+                UnitPriceCurrency: GetRequiredValue(values, "UnitPriceCurrency"),
+                Quantity: int.Parse(GetRequiredValue(values, "Quantity"), CultureInfo.InvariantCulture),
+                OrdersToCreate: int.Parse(GetRequiredValue(values, "OrdersToCreate"), CultureInfo.InvariantCulture));
+        }
+
+        private sealed record SetupRequest(
+            string ProductName,
+            string ProductBrand,
+            decimal UnitPriceAmount,
+            string UnitPriceCurrency,
+            int Quantity,
+            int OrdersToCreate);
     }
 }
