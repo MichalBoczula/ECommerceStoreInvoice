@@ -22,30 +22,13 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Orders.CreateOrderSucc
         }
 
         [Given("I have a valid shopping cart for order creation")]
-        public async Task GivenIHaveAValidShoppingCartForOrderCreation()
+        public async Task GivenIHaveAValidShoppingCartForOrderCreation(Table table)
         {
             _clientId = Guid.NewGuid();
             var productId = Guid.NewGuid();
+            var setupRequest = ParseSetupTable(table, productId);
 
-            AllureJson.AttachObject(
-                "Create order setup request",
-                new
-                {
-                    ClientId = _clientId,
-                    ShoppingCartLines = new[]
-                    {
-                        new
-                        {
-                            ProductId = productId,
-                            Name = "Laptop",
-                            Brand = "Lenovo",
-                            UnitPriceAmount = 999.99m,
-                            UnitPriceCurrency = "usd",
-                            Quantity = 2
-                        }
-                    }
-                },
-                _apiContext.JsonOptions);
+            AllureJson.AttachObject("Create order setup request", setupRequest, _apiContext.JsonOptions);
 
             var createShoppingCartResponse = await _apiContext.HttpClient.PostAsync($"/shopping-carts/{_clientId}", content: null);
             createShoppingCartResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
@@ -60,11 +43,11 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Orders.CreateOrderSucc
                     new ShoppingCartLineRequestDto
                     {
                         ProductId = productId,
-                        Name = "Laptop",
-                        Brand = "Lenovo",
-                        UnitPriceAmount = 999.99m,
-                        UnitPriceCurrency = "usd",
-                        Quantity = 2
+                        Name = setupRequest.ShoppingCartLine.Name,
+                        Brand = setupRequest.ShoppingCartLine.Brand,
+                        UnitPriceAmount = setupRequest.ShoppingCartLine.UnitPriceAmount,
+                        UnitPriceCurrency = setupRequest.ShoppingCartLine.UnitPriceCurrency,
+                        Quantity = setupRequest.ShoppingCartLine.Quantity
                     }
                 ]
             };
@@ -173,6 +156,25 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Orders.CreateOrderSucc
             return JsonSerializer.Deserialize<T>(content, _apiContext.JsonOptions);
         }
 
+        private static CreateOrderSetupRequest ParseSetupTable(Table table, Guid productId)
+        {
+            var values = ParseExpectedTable(table);
+            var name = GetRequiredValue(values, "Name");
+            var brand = GetRequiredValue(values, "Brand");
+            var unitPriceAmount = decimal.Parse(GetRequiredValue(values, "UnitPriceAmount"), CultureInfo.InvariantCulture);
+            var unitPriceCurrency = GetRequiredValue(values, "UnitPriceCurrency");
+            var quantity = int.Parse(GetRequiredValue(values, "Quantity"), CultureInfo.InvariantCulture);
+
+            return new CreateOrderSetupRequest(
+                new ShoppingCartLineSetupRequest(
+                    productId,
+                    name,
+                    brand,
+                    unitPriceAmount,
+                    unitPriceCurrency,
+                    quantity));
+        }
+
         private static Dictionary<string, string> ParseExpectedTable(Table table)
         {
             var values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -236,5 +238,15 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Orders.CreateOrderSucc
             result = bool.Parse(value);
             return true;
         }
+
+        private sealed record CreateOrderSetupRequest(ShoppingCartLineSetupRequest ShoppingCartLine);
+
+        private sealed record ShoppingCartLineSetupRequest(
+            Guid ProductId,
+            string Name,
+            string Brand,
+            decimal UnitPriceAmount,
+            string UnitPriceCurrency,
+            int Quantity);
     }
 }
