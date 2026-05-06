@@ -19,14 +19,20 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Orders.GetOrdersByIdVa
             _apiContext = apiContext;
         }
 
-        [Given("I have an invalid order id for order retrieval")]
-        public void GivenIHaveAnInvalidOrderIdForOrderRetrieval()
+        [Given("I have an invalid get order by id request")]
+        public void GivenIHaveAnInvalidGetOrderByIdRequest(Table table)
         {
-            _orderId = Guid.Empty;
+            var requestTable = ParseExpectedTable(table);
+            var request = new GetOrdersByIdValidationErrorRequest
+            {
+                OrderId = Guid.Parse(GetRequiredValue(requestTable, "OrderId"))
+            };
+
+            _orderId = request.OrderId;
 
             AllureJson.AttachObject(
                 "Get order validation request",
-                new { OrderId = _orderId },
+                request,
                 _apiContext.JsonOptions);
         }
 
@@ -43,10 +49,11 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Orders.GetOrdersByIdVa
         public async Task ThenProblemDetailsAreReturnedForGetOrderByIdValidationError(Table table)
         {
             var expected = ParseExpectedTable(table);
+            var expectedResponse = BuildExpectedResponse(expected);
 
             AllureJson.AttachObject(
                 "Expected get order by id validation error",
-                expected,
+                expectedResponse,
                 _apiContext.JsonOptions);
 
             _apiContext.Response.ShouldNotBeNull();
@@ -64,6 +71,26 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Orders.GetOrdersByIdVa
             errors.Count.ShouldBe(ParseInt(expected, "ErrorsCount"));
             errors.ShouldNotBeEmpty();
             errors[0].Message.ShouldBe(GetRequiredValue(expected, "FirstErrorMessage"));
+        }
+
+
+        private static object BuildExpectedResponse(IReadOnlyDictionary<string, string> expected)
+        {
+            return new
+            {
+                StatusCode = int.Parse(GetRequiredValue(expected, "StatusCode"), CultureInfo.InvariantCulture),
+                Title = GetRequiredValue(expected, "Title"),
+                Detail = GetRequiredValue(expected, "Detail"),
+                Type = GetRequiredValue(expected, "Type"),
+                Instance = GetRequiredValue(expected, "Instance"),
+                Errors = new[]
+                {
+                    new
+                    {
+                        Message = GetRequiredValue(expected, "FirstErrorMessage")
+                    }
+                }
+            };
         }
 
         private async Task<T?> DeserializeResponse<T>(HttpResponseMessage response)
@@ -103,6 +130,11 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Orders.GetOrdersByIdVa
         {
             var value = GetRequiredValue(values, key);
             return int.Parse(value, CultureInfo.InvariantCulture);
+        }
+
+        private sealed class GetOrdersByIdValidationErrorRequest
+        {
+            public Guid OrderId { get; set; }
         }
     }
 }

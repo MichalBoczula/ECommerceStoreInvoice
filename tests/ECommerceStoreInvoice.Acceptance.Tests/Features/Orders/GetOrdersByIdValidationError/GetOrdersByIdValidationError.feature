@@ -2,7 +2,9 @@
 Feature: Get orders by id validation error
 
   Scenario: Get order by id returns problem details when validation fails
-    Given I have an invalid order id for order retrieval
+    Given I have an invalid get order by id request
+      | Field   | Value                                |
+      | OrderId | 00000000-0000-0000-0000-000000000000 |
     When I request order by invalid order id
     Then problem details are returned for get order by id validation error
       | Field             | Value                                                        |
