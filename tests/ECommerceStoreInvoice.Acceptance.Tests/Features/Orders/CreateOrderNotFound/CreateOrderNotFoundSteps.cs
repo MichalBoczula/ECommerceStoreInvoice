@@ -20,23 +20,38 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Orders.CreateOrderNotF
         }
 
         [Given("I have a non-existing client id for order creation")]
-        public void GivenIHaveANonExistingClientIdForOrderCreation()
+        public void GivenIHaveANonExistingClientIdForOrderCreation(Table table)
         {
             _clientId = Guid.NewGuid();
 
+            var requestContext = ParseExpectedTable(table);
+            var requestObject = new CreateOrderNotFoundRequestContext(
+                requestContext.TryGetValue("ClientId", out var clientIdTemplate) ? clientIdTemplate : "<generatedId>",
+                _clientId.ToString());
+
             AllureJson.AttachObject(
                 "Create order not found request",
-                new { ClientId = _clientId },
+                requestObject,
                 _apiContext.JsonOptions);
         }
 
         [When("I submit create order request for a non-existing client")]
-        public async Task WhenISubmitCreateOrderRequestForANonExistingClient()
+        public async Task WhenISubmitCreateOrderRequestForANonExistingClient(Table table)
         {
-            _apiContext.Response = await _apiContext.HttpClient.PostAsync($"/orders/{_clientId}", content: null);
+            var requestData = ParseExpectedTable(table);
+            var requestObject = new CreateOrderNotFoundHttpRequest(
+                Method: requestData.TryGetValue("Method", out var method) ? method : "POST",
+                Endpoint: requestData.TryGetValue("Endpoint", out var endpointTemplate)
+                    ? endpointTemplate.Replace("{clientId}", _clientId.ToString(), StringComparison.OrdinalIgnoreCase)
+                    : $"/orders/{_clientId}",
+                Body: requestData.TryGetValue("Body", out var requestBodyValue) ? requestBodyValue : "null");
 
-            var body = await _apiContext.Response.Content.ReadAsStringAsync();
-            AllureJson.AttachRawJson($"Response JSON ({(int)_apiContext.Response.StatusCode})", body);
+            AllureJson.AttachObject("Create order HTTP request", requestObject, _apiContext.JsonOptions);
+
+            _apiContext.Response = await _apiContext.HttpClient.PostAsync(requestObject.Endpoint, content: null);
+
+            var responseBody = await _apiContext.Response.Content.ReadAsStringAsync();
+            AllureJson.AttachRawJson($"Response JSON ({(int)_apiContext.Response.StatusCode})", responseBody);
         }
 
         [Then("problem details are returned for create order not found")]
@@ -127,5 +142,9 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Orders.CreateOrderNotF
             result = bool.Parse(value);
             return true;
         }
+
+        private sealed record CreateOrderNotFoundRequestContext(string ClientId, string ResolvedClientId);
+
+        private sealed record CreateOrderNotFoundHttpRequest(string Method, string Endpoint, string Body);
     }
 }
