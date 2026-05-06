@@ -72,7 +72,10 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Orders.GetOrdersByClie
                 errors.Count.ShouldBe(_expectedErrors.Count);
                 foreach (var expectedError in _expectedErrors)
                 {
-                    errors.Any(e => e.Field == expectedError.Field && e.Message == expectedError.Message).ShouldBeTrue();
+                    errors.Any(e =>
+                            string.Equals(e.Name, expectedError.Field, StringComparison.OrdinalIgnoreCase)
+                            && e.Message == expectedError.Message)
+                        .ShouldBeTrue();
                 }
             }
         }
