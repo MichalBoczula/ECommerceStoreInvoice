@@ -159,39 +159,66 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Invoices.CreateInvoice
             else
             {
                 await this.ScenarioStartAsync();
-#line 5
-    await testRunner.GivenAsync("I have a client id and an invalid order id for invoice creation", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
-#line hidden
-#line 6
-    await testRunner.WhenAsync("I submit the create invoice request with invalid order id", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
-#line hidden
-                global::Reqnroll.Table table16 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table10 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table16.AddRow(new string[] {
+                table10.AddRow(new string[] {
+                            "ClientId",
+                            "11111111-1111-1111-1111-111111111111"});
+                table10.AddRow(new string[] {
+                            "OrderId",
+                            "00000000-0000-0000-0000-000000000000"});
+#line 5
+    await testRunner.GivenAsync("I have invoice creation identifiers", ((string)(null)), table10, "Given ");
+#line hidden
+#line 9
+    await testRunner.AndAsync("I document create invoice request json", "{\r\n  \"clientId\": \"11111111-1111-1111-1111-111111111111\",\r\n  \"orderId\": \"00000000-" +
+                        "0000-0000-0000-000000000000\"\r\n}", ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 16
+    await testRunner.WhenAsync("I submit the create invoice request with invalid order id", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+                global::Reqnroll.Table table11 = new global::Reqnroll.Table(new string[] {
+                            "Field",
+                            "Value"});
+                table11.AddRow(new string[] {
                             "StatusCode",
                             "400"});
-                table16.AddRow(new string[] {
+                table11.AddRow(new string[] {
                             "Title",
                             "Validation failed."});
-                table16.AddRow(new string[] {
+                table11.AddRow(new string[] {
                             "Detail",
                             "One or more validation errors occurred."});
-                table16.AddRow(new string[] {
+                table11.AddRow(new string[] {
                             "Type",
                             "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.1"});
-                table16.AddRow(new string[] {
+                table11.AddRow(new string[] {
                             "Instance",
                             "/invoices/11111111-1111-1111-1111-111111111111/00000000-0000-0000-0000-0000000000" +
                                 "00"});
-                table16.AddRow(new string[] {
+                table11.AddRow(new string[] {
                             "ErrorsCount",
                             "1"});
-                table16.AddRow(new string[] {
+                table11.AddRow(new string[] {
                             "FirstErrorMessage",
                             "ClientId cannot be empty Guid."});
-#line 7
-    await testRunner.ThenAsync("problem details are returned for create invoice for order validation error", ((string)(null)), table16, "Then ");
+#line 17
+    await testRunner.ThenAsync("problem details are returned for create invoice for order validation error", ((string)(null)), table11, "Then ");
+#line hidden
+#line 26
+    await testRunner.AndAsync("I document create invoice validation response json", @"{
+  ""type"": ""https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.1"",
+  ""title"": ""Validation failed."",
+  ""status"": 400,
+  ""detail"": ""One or more validation errors occurred."",
+  ""instance"": ""/invoices/11111111-1111-1111-1111-111111111111/00000000-0000-0000-0000-000000000000"",
+  ""errors"": [
+    {
+      ""message"": ""ClientId cannot be empty Guid.""
+    }
+  ]
+}", ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

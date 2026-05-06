@@ -159,38 +159,50 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Invoices.GetInvoiceByI
             else
             {
                 await this.ScenarioStartAsync();
-#line 5
-    await testRunner.GivenAsync("I have an invalid invoice id for invoice retrieval", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
-#line hidden
-#line 6
-    await testRunner.WhenAsync("I request invoice by invalid invoice id", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
-#line hidden
-                global::Reqnroll.Table table19 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table16 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table19.AddRow(new string[] {
+                table16.AddRow(new string[] {
+                            "InvoiceId",
+                            "00000000-0000-0000-0000-000000000000"});
+#line 5
+    await testRunner.GivenAsync("I have an invalid invoice id for invoice retrieval", ((string)(null)), table16, "Given ");
+#line hidden
+#line 8
+    await testRunner.WhenAsync("I request invoice by invalid invoice id", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+                global::Reqnroll.Table table17 = new global::Reqnroll.Table(new string[] {
+                            "Field",
+                            "Value"});
+                table17.AddRow(new string[] {
                             "StatusCode",
                             "400"});
-                table19.AddRow(new string[] {
+                table17.AddRow(new string[] {
                             "Title",
                             "Validation failed."});
-                table19.AddRow(new string[] {
+                table17.AddRow(new string[] {
                             "Detail",
                             "One or more validation errors occurred."});
-                table19.AddRow(new string[] {
+                table17.AddRow(new string[] {
                             "Type",
                             "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.1"});
-                table19.AddRow(new string[] {
+                table17.AddRow(new string[] {
                             "Instance",
                             "/invoices/00000000-0000-0000-0000-000000000000"});
-                table19.AddRow(new string[] {
+                table17.AddRow(new string[] {
                             "ErrorsCount",
                             "1"});
-                table19.AddRow(new string[] {
+                table17.AddRow(new string[] {
+                            "FirstErrorName",
+                            "ClientIdIsEmptyValidationRule"});
+                table17.AddRow(new string[] {
+                            "FirstErrorEntity",
+                            "ShoppingCart"});
+                table17.AddRow(new string[] {
                             "FirstErrorMessage",
                             "ClientId cannot be empty Guid."});
-#line 7
-    await testRunner.ThenAsync("problem details are returned for get invoice by id validation error", ((string)(null)), table19, "Then ");
+#line 9
+    await testRunner.ThenAsync("problem details are returned for get invoice by id validation error", ((string)(null)), table17, "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
