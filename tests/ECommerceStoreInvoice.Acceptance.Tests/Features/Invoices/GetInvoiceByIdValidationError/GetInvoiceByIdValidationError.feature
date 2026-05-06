@@ -14,6 +14,6 @@ Feature: Get invoice by id validation error
       | Type              | https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.1 |
       | Instance          | /invoices/00000000-0000-0000-0000-000000000000              |
       | ErrorsCount       | 1                                                            |
-      | FirstErrorName    | ClientId                                                     |
+      | FirstErrorName    | ClientIdIsEmptyValidationRule                                 |
       | FirstErrorEntity  | Invoice                                                      |
       | FirstErrorMessage | ClientId cannot be empty Guid.                               |
