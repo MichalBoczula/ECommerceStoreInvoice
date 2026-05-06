@@ -20,13 +20,21 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Invoices.GetInvoiceByI
         }
 
         [Given("I have an invalid invoice id for invoice retrieval")]
-        public void GivenIHaveAnInvalidInvoiceIdForInvoiceRetrieval()
+        public void GivenIHaveAnInvalidInvoiceIdForInvoiceRetrieval(Table table)
         {
-            _invoiceId = Guid.Empty;
+            var requestValues = ParseExpectedTable(table);
+            _invoiceId = Guid.Parse(GetRequiredValue(requestValues, "InvoiceId"));
+
+            var request = new
+            {
+                InvoiceId = _invoiceId,
+                Method = "GET",
+                Endpoint = $"/invoices/{_invoiceId}"
+            };
 
             AllureJson.AttachObject(
                 "Get invoice validation request",
-                new { InvoiceId = _invoiceId },
+                request,
                 _apiContext.JsonOptions);
         }
 
@@ -49,6 +57,29 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Invoices.GetInvoiceByI
                 expected,
                 _apiContext.JsonOptions);
 
+            var expectedResponseJson = new
+            {
+                status = ParseInt(expected, "StatusCode"),
+                title = GetRequiredValue(expected, "Title"),
+                detail = GetRequiredValue(expected, "Detail"),
+                type = GetRequiredValue(expected, "Type"),
+                instance = GetRequiredValue(expected, "Instance"),
+                errors = new[]
+                {
+                    new
+                    {
+                        name = GetRequiredValue(expected, "FirstErrorName"),
+                        entity = GetRequiredValue(expected, "FirstErrorEntity"),
+                        message = GetRequiredValue(expected, "FirstErrorMessage")
+                    }
+                }
+            };
+
+            AllureJson.AttachObject(
+                "Expected problem details response JSON",
+                expectedResponseJson,
+                _apiContext.JsonOptions);
+
             _apiContext.Response.ShouldNotBeNull();
             _apiContext.Response!.StatusCode.ShouldBe(ParseStatusCode(expected, "StatusCode"));
 
@@ -63,6 +94,8 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Invoices.GetInvoiceByI
             var errors = problemDetails.Errors.ToList();
             errors.Count.ShouldBe(ParseInt(expected, "ErrorsCount"));
             errors.ShouldNotBeEmpty();
+            errors[0].Name.ShouldBe(GetRequiredValue(expected, "FirstErrorName"));
+            errors[0].Entity.ShouldBe(GetRequiredValue(expected, "FirstErrorEntity"));
             errors[0].Message.ShouldBe(GetRequiredValue(expected, "FirstErrorMessage"));
         }
 
