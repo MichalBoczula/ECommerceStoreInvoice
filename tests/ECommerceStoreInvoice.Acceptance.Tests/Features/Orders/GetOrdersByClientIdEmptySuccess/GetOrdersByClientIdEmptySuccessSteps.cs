@@ -20,19 +20,22 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Orders.GetOrdersByClie
         }
 
         [Given("I have a client without orders")]
-        public void GivenIHaveAClientWithoutOrders()
+        public void GivenIHaveAClientWithoutOrders(Table table)
         {
-            _clientId = Guid.NewGuid();
+            var request = BuildRequestFromTable(table);
+            _clientId = request.ClientId == "AUTO" ? Guid.NewGuid() : Guid.Parse(request.ClientId);
+
+            var resolvedRequest = new
+            {
+                ClientId = _clientId,
+                Method = request.Method,
+                Endpoint = request.Endpoint.Replace("{id}", _clientId.ToString()),
+                Description = request.Description
+            };
 
             AllureJson.AttachObject(
                 "Get orders by client id request (empty result setup)",
-                new
-                {
-                    ClientId = _clientId,
-                    Endpoint = $"/orders/client/{_clientId}",
-                    Method = "GET",
-                    Expectation = "No orders for this client"
-                },
+                resolvedRequest,
                 _apiContext.JsonOptions);
         }
 
@@ -48,23 +51,22 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Orders.GetOrdersByClie
         [Then("an empty list of orders is returned successfully")]
         public async Task ThenAnEmptyListOfOrdersIsReturnedSuccessfully(Table table)
         {
-            var expected = ParseExpectedTable(table);
+            var expected = BuildExpectedResponseFromTable(table);
 
             AllureJson.AttachObject("Expected empty orders result", expected, _apiContext.JsonOptions);
 
             _apiContext.Response.ShouldNotBeNull();
-            _apiContext.Response!.StatusCode.ShouldBe(ParseStatusCode(expected, "StatusCode"));
+            _apiContext.Response!.StatusCode.ShouldBe((HttpStatusCode)expected.StatusCode);
 
             var orders = await DeserializeResponse<IReadOnlyCollection<OrderResponseDto>>(_apiContext.Response);
             orders.ShouldNotBeNull();
 
             var ordersList = orders!.ToList();
-            ordersList.Count.ShouldBe(ParseInt(expected, "OrdersCount", ordersList.Count));
+            ordersList.Count.ShouldBe(expected.OrdersCount);
+            ordersList.Any().ShouldBe(!expected.IsEmpty);
 
-            if (TryGetBool(expected, "IsEmpty", out var isEmpty))
-            {
-                ordersList.Any().ShouldBe(!isEmpty);
-            }
+            var expectedOrders = JsonSerializer.Deserialize<List<OrderResponseDto>>(expected.OrdersJson, _apiContext.JsonOptions) ?? [];
+            ordersList.ShouldBe(expectedOrders);
 
             AllureJson.AttachObject(
                 "Actual empty orders result",
@@ -83,7 +85,27 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Orders.GetOrdersByClie
             return JsonSerializer.Deserialize<T>(content, _apiContext.JsonOptions);
         }
 
-        private static Dictionary<string, string> ParseExpectedTable(Table table)
+        private static RequestTableData BuildRequestFromTable(Table table)
+        {
+            var values = ParseTable(table);
+            return new RequestTableData(
+                GetRequiredValue(values, "ClientId"),
+                GetRequiredValue(values, "Method"),
+                GetRequiredValue(values, "Endpoint"),
+                GetRequiredValue(values, "Description"));
+        }
+
+        private static ExpectedResponseTableData BuildExpectedResponseFromTable(Table table)
+        {
+            var values = ParseTable(table);
+            return new ExpectedResponseTableData(
+                int.Parse(GetRequiredValue(values, "StatusCode"), CultureInfo.InvariantCulture),
+                int.Parse(GetRequiredValue(values, "OrdersCount"), CultureInfo.InvariantCulture),
+                bool.Parse(GetRequiredValue(values, "IsEmpty")),
+                GetRequiredValue(values, "OrdersJson"));
+        }
+
+        private static Dictionary<string, string> ParseTable(Table table)
         {
             var values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             foreach (var row in table.Rows)
@@ -104,32 +126,9 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Orders.GetOrdersByClie
             return value;
         }
 
-        private static HttpStatusCode ParseStatusCode(IReadOnlyDictionary<string, string> values, string key)
-        {
-            var value = GetRequiredValue(values, key);
-            return (HttpStatusCode)int.Parse(value, CultureInfo.InvariantCulture);
-        }
+        private sealed record RequestTableData(string ClientId, string Method, string Endpoint, string Description);
 
-        private static int ParseInt(IReadOnlyDictionary<string, string> values, string key, int fallback)
-        {
-            if (!values.TryGetValue(key, out var value))
-            {
-                return fallback;
-            }
+        private sealed record ExpectedResponseTableData(int StatusCode, int OrdersCount, bool IsEmpty, string OrdersJson);
 
-            return int.Parse(value, CultureInfo.InvariantCulture);
-        }
-
-        private static bool TryGetBool(IReadOnlyDictionary<string, string> values, string key, out bool result)
-        {
-            if (!values.TryGetValue(key, out var value))
-            {
-                result = false;
-                return false;
-            }
-
-            result = bool.Parse(value);
-            return true;
-        }
     }
 }
