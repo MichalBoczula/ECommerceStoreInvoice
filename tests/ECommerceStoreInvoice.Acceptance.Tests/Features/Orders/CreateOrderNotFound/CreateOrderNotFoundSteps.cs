@@ -44,14 +44,14 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Orders.CreateOrderNotF
                 Endpoint: requestData.TryGetValue("Endpoint", out var endpointTemplate)
                     ? endpointTemplate.Replace("{clientId}", _clientId.ToString(), StringComparison.OrdinalIgnoreCase)
                     : $"/orders/{_clientId}",
-                Body: requestData.TryGetValue("Body", out var body) ? body : "null");
+                Body: requestData.TryGetValue("Body", out var requestBodyValue) ? requestBodyValue : "null");
 
             AllureJson.AttachObject("Create order HTTP request", requestObject, _apiContext.JsonOptions);
 
             _apiContext.Response = await _apiContext.HttpClient.PostAsync(requestObject.Endpoint, content: null);
 
-            var body = await _apiContext.Response.Content.ReadAsStringAsync();
-            AllureJson.AttachRawJson($"Response JSON ({(int)_apiContext.Response.StatusCode})", body);
+            var responseBody = await _apiContext.Response.Content.ReadAsStringAsync();
+            AllureJson.AttachRawJson($"Response JSON ({(int)_apiContext.Response.StatusCode})", responseBody);
         }
 
         [Then("problem details are returned for create order not found")]
