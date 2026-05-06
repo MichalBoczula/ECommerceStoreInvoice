@@ -20,13 +20,22 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Invoices.GetInvoiceByI
         }
 
         [Given("I have a non-existing invoice id for invoices retrieval")]
-        public void GivenIHaveANonExistingInvoiceIdForInvoicesRetrieval()
+        public void GivenIHaveANonExistingInvoiceIdForInvoicesRetrieval(Table table)
         {
             _invoiceId = Guid.NewGuid();
 
+            var requestTemplate = ParseExpectedTable(table);
+            var request = new
+            {
+                Method = GetRequiredValue(requestTemplate, "Method"),
+                Endpoint = GetRequiredValue(requestTemplate, "Endpoint").Replace("{invoiceId}", _invoiceId.ToString(), StringComparison.OrdinalIgnoreCase),
+                InvoiceId = _invoiceId,
+                InvoiceIdSource = GetRequiredValue(requestTemplate, "InvoiceIdSource")
+            };
+
             AllureJson.AttachObject(
                 "Get invoice by id not found request",
-                new { InvoiceId = _invoiceId },
+                request,
                 _apiContext.JsonOptions);
         }
 
@@ -70,8 +79,18 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Invoices.GetInvoiceByI
             var expectedInstance = GetRequiredValue(expected, "Instance").Replace("{invoiceId}", _invoiceId.ToString(), StringComparison.OrdinalIgnoreCase);
             problemDetails.Instance.ShouldBe(expectedInstance);
 
+            var detailContains = GetRequiredValue(expected, "DetailContains");
+            problemDetails.Detail.ShouldContain(detailContains, Case.Insensitive);
+
+            if (TryGetBool(expected, "DetailContainsGuid", out var detailContainsGuid) && detailContainsGuid)
+            {
+                problemDetails.Detail.ShouldContain(_invoiceId.ToString(), Case.Insensitive);
+            }
+
+            bool? hasTraceIdValue = null;
             if (TryGetBool(expected, "HasTraceId", out var hasTraceId))
             {
+                hasTraceIdValue = hasTraceId;
                 if (hasTraceId)
                 {
                     problemDetails.TraceId.ShouldNotBeNullOrWhiteSpace();
@@ -81,6 +100,21 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Invoices.GetInvoiceByI
                     problemDetails.TraceId.ShouldBeNullOrWhiteSpace();
                 }
             }
+
+            var expectedResponse = new
+            {
+                StatusCode = (int)ParseStatusCode(expected, "StatusCode"),
+                Title = GetRequiredValue(expected, "Title"),
+                Type = GetRequiredValue(expected, "Type"),
+                DetailContains = detailContains,
+                Instance = expectedInstance,
+                HasTraceId = hasTraceIdValue
+            };
+
+            AllureJson.AttachObject(
+                "Get invoice by id not found expected response",
+                expectedResponse,
+                _apiContext.JsonOptions);
         }
 
         private async Task<T?> DeserializeResponse<T>(HttpResponseMessage response)
