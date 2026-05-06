@@ -2,6 +2,12 @@ Feature: Create order
 
   Scenario: Create order returns created order
     Given I have a valid shopping cart for order creation
+      | Field                | Value  |
+      | Name                 | Laptop |
+      | Brand                | Lenovo |
+      | UnitPriceAmount      | 999.99 |
+      | UnitPriceCurrency    | usd    |
+      | Quantity             | 2      |
     When I submit the create order request
     Then the order is created successfully
       | Field                      | Value   |
