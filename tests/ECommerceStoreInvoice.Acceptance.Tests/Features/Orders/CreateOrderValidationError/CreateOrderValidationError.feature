@@ -4,6 +4,11 @@ Feature: Create order validation error
   Scenario: Create order returns problem details when validation fails
     Given I have a client with an empty shopping cart for order creation
     When I submit the create order request for the empty shopping cart
+      | Field         | Value              |
+      | Method        | POST               |
+      | PathTemplate  | /orders/{clientId} |
+      | ContentType   | application/json   |
+      | Body          | null               |
     Then problem details are returned for create order validation error
       | Field             | Value                                                        |
       | StatusCode        | 400                                                          |
