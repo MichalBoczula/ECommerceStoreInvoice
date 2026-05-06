@@ -13,6 +13,7 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Orders.GetOrdersByClie
     {
         private readonly ScenarioApiContext _apiContext;
         private Guid _clientId;
+        private IReadOnlyCollection<ValidationErrorExpectation> _expectedErrors = [];
 
         public GetOrdersByClientIdValidationErrorSteps(ScenarioApiContext apiContext)
         {
@@ -20,13 +21,14 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Orders.GetOrdersByClie
         }
 
         [Given("I have an invalid client id for orders retrieval")]
-        public void GivenIHaveAnInvalidClientIdForOrdersRetrieval()
+        public void GivenIHaveAnInvalidClientIdForOrdersRetrieval(Table table)
         {
-            _clientId = Guid.Empty;
+            var request = ParseRequestTable(table);
+            _clientId = request.ClientId;
 
             AllureJson.AttachObject(
                 "Get orders validation request",
-                new { ClientId = _clientId },
+                request,
                 _apiContext.JsonOptions);
         }
 
@@ -64,6 +66,31 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Orders.GetOrdersByClie
             errors.Count.ShouldBe(ParseInt(expected, "ErrorsCount"));
             errors.ShouldNotBeEmpty();
             errors[0].Message.ShouldBe(GetRequiredValue(expected, "FirstErrorMessage"));
+
+            if (_expectedErrors.Count > 0)
+            {
+                errors.Count.ShouldBe(_expectedErrors.Count);
+                foreach (var expectedError in _expectedErrors)
+                {
+                    errors.Any(e =>
+                            string.Equals(e.Name, expectedError.Field, StringComparison.OrdinalIgnoreCase)
+                            && e.Message == expectedError.Message)
+                        .ShouldBeTrue();
+                }
+            }
+        }
+
+        [Then("the validation error response JSON contains")]
+        public void ThenTheValidationErrorResponseJsonContains(Table table)
+        {
+            _expectedErrors = table.Rows
+                .Select(row => new ValidationErrorExpectation(row["Field"], row["Message"]))
+                .ToList();
+
+            AllureJson.AttachObject(
+                "Expected validation errors (JSON) ",
+                _expectedErrors,
+                _apiContext.JsonOptions);
         }
 
         private async Task<T?> DeserializeResponse<T>(HttpResponseMessage response)
@@ -104,5 +131,15 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Orders.GetOrdersByClie
             var value = GetRequiredValue(values, key);
             return int.Parse(value, CultureInfo.InvariantCulture);
         }
+
+        private static GetOrdersByClientIdValidationRequest ParseRequestTable(Table table)
+        {
+            var row = table.Rows.Single();
+            return new GetOrdersByClientIdValidationRequest(Guid.Parse(row["ClientId"]));
+        }
+
+        private sealed record GetOrdersByClientIdValidationRequest(Guid ClientId);
+
+        private sealed record ValidationErrorExpectation(string Field, string Message);
     }
 }

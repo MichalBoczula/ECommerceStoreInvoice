@@ -3,6 +3,8 @@ Feature: Get orders by client id validation error
 
   Scenario: Get orders by client id returns problem details when validation fails
     Given I have an invalid client id for orders retrieval
+      | ClientId                             |
+      | 00000000-0000-0000-0000-000000000000 |
     When I request orders by invalid client id
     Then problem details are returned for get orders by client id validation error
       | Field             | Value                                                        |
@@ -13,3 +15,6 @@ Feature: Get orders by client id validation error
       | Instance          | /orders/client/00000000-0000-0000-0000-000000000000         |
       | ErrorsCount       | 1                                                            |
       | FirstErrorMessage | ClientId cannot be empty Guid.                               |
+    And the validation error response JSON contains
+      | Field    | Message                       |
+      | clientId | ClientId cannot be empty Guid. |
