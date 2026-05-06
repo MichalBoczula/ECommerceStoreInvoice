@@ -15,5 +15,5 @@ Feature: Get invoice by id validation error
       | Instance          | /invoices/00000000-0000-0000-0000-000000000000              |
       | ErrorsCount       | 1                                                            |
       | FirstErrorName    | ClientIdIsEmptyValidationRule                                 |
-      | FirstErrorEntity  | Invoice                                                      |
+      | FirstErrorEntity  | ShoppingCart                                                 |
       | FirstErrorMessage | ClientId cannot be empty Guid.                               |
