@@ -37,8 +37,16 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Orders.CreateOrderVali
         }
 
         [When("I submit the create order request for the empty shopping cart")]
-        public async Task WhenISubmitTheCreateOrderRequestForTheEmptyShoppingCart()
+        public async Task WhenISubmitTheCreateOrderRequestForTheEmptyShoppingCart(Table table)
         {
+            var requestDefinition = ParseExpectedTable(table);
+            var requestObject = BuildCreateOrderRequestObject(requestDefinition, _clientId);
+
+            AllureJson.AttachObject(
+                "Create order validation request object",
+                requestObject,
+                _apiContext.JsonOptions);
+
             _apiContext.Response = await _apiContext.HttpClient.PostAsync($"/orders/{_clientId}", content: null);
 
             var body = await _apiContext.Response.Content.ReadAsStringAsync();
@@ -71,7 +79,45 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Orders.CreateOrderVali
             var errors = problemDetails.Errors.ToList();
             errors.Count.ShouldBe(ParseInt(expected, "ErrorsCount"));
             errors.ShouldNotBeEmpty();
+            errors[0].Field.ShouldBe(GetRequiredValue(expected, "FirstErrorField"));
             errors[0].Message.ShouldBe(GetRequiredValue(expected, "FirstErrorMessage"));
+
+            var expectedResponseObject = BuildCreateOrderValidationErrorResponseObject(expected, _clientId);
+            AllureJson.AttachObject(
+                "Create order validation expected response object",
+                expectedResponseObject,
+                _apiContext.JsonOptions);
+        }
+
+        private static object BuildCreateOrderRequestObject(IReadOnlyDictionary<string, string> values, Guid clientId)
+        {
+            return new
+            {
+                Method = GetRequiredValue(values, "Method"),
+                Path = GetRequiredValue(values, "PathTemplate").Replace("{clientId}", clientId.ToString(), StringComparison.OrdinalIgnoreCase),
+                ContentType = GetRequiredValue(values, "ContentType"),
+                Body = (object?)null
+            };
+        }
+
+        private static object BuildCreateOrderValidationErrorResponseObject(IReadOnlyDictionary<string, string> values, Guid clientId)
+        {
+            return new
+            {
+                status = ParseInt(values, "StatusCode"),
+                title = GetRequiredValue(values, "Title"),
+                detail = GetRequiredValue(values, "Detail"),
+                type = GetRequiredValue(values, "Type"),
+                instance = GetRequiredValue(values, "Instance").Replace("{clientId}", clientId.ToString(), StringComparison.OrdinalIgnoreCase),
+                errors = new[]
+                {
+                    new
+                    {
+                        field = GetRequiredValue(values, "FirstErrorField"),
+                        message = GetRequiredValue(values, "FirstErrorMessage")
+                    }
+                }
+            };
         }
 
         private async Task<T?> DeserializeResponse<T>(HttpResponseMessage response)
