@@ -3,6 +3,8 @@ Feature: Get invoice by id validation error
 
   Scenario: Get invoice by id returns problem details when validation fails
     Given I have an invalid invoice id for invoice retrieval
+      | Field     | Value                                |
+      | InvoiceId | 00000000-0000-0000-0000-000000000000 |
     When I request invoice by invalid invoice id
     Then problem details are returned for get invoice by id validation error
       | Field             | Value                                                        |
@@ -12,4 +14,6 @@ Feature: Get invoice by id validation error
       | Type              | https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.1 |
       | Instance          | /invoices/00000000-0000-0000-0000-000000000000              |
       | ErrorsCount       | 1                                                            |
+      | FirstErrorName    | ClientId                                                     |
+      | FirstErrorEntity  | Invoice                                                      |
       | FirstErrorMessage | ClientId cannot be empty Guid.                               |
