@@ -6,13 +6,6 @@ Feature: Create invoice for order validation error
       | Field    | Value                                |
       | ClientId | 11111111-1111-1111-1111-111111111111 |
       | OrderId  | 00000000-0000-0000-0000-000000000000 |
-    And I document create invoice request json
-      """
-      {
-        "clientId": "11111111-1111-1111-1111-111111111111",
-        "orderId": "00000000-0000-0000-0000-000000000000"
-      }
-      """
     When I submit the create invoice request with invalid order id
     Then problem details are returned for create invoice for order validation error
       | Field             | Value                                                        |
@@ -23,18 +16,3 @@ Feature: Create invoice for order validation error
       | Instance          | /invoices/11111111-1111-1111-1111-111111111111/00000000-0000-0000-0000-000000000000 |
       | ErrorsCount       | 1                                                            |
       | FirstErrorMessage | ClientId cannot be empty Guid.                               |
-    And I document create invoice validation response json
-      """
-      {
-        "type": "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.1",
-        "title": "Validation failed.",
-        "status": 400,
-        "detail": "One or more validation errors occurred.",
-        "instance": "/invoices/11111111-1111-1111-1111-111111111111/00000000-0000-0000-0000-000000000000",
-        "errors": [
-          {
-            "message": "ClientId cannot be empty Guid."
-          }
-        ]
-      }
-      """
