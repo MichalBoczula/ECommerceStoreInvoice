@@ -3,11 +3,17 @@ Feature: Update shopping cart not found
 
   Scenario: Update shopping cart returns problem details when shopping cart does not exist
     Given I have a non-existing client id for shopping cart update
+      | Field    | Value         |
+      | ClientId | <generatedId> |
     And I have an update shopping cart request for a non-existing shopping cart
       | ProductId                            | Name   | Brand | UnitPriceAmount | UnitPriceCurrency | Quantity |
       | 11111111-1111-1111-1111-111111111111 | Phone  | Apple | 999.99          | usd               | 1        |
       | 22222222-2222-2222-2222-222222222222 | Watch  | Apple | 399.99          | usd               | 2        |
     When I submit the update shopping cart request for a non-existing shopping cart
+      | Field    | Value                       |
+      | Method   | PUT                         |
+      | Endpoint | /shopping-carts/{clientId}  |
+      | Lines    | 2                           |
     Then problem details are returned for update shopping cart not found
       | Field      | Value                                                        |
       | StatusCode | 404                                                          |
@@ -16,3 +22,8 @@ Feature: Update shopping cart not found
       | HasDetail  | true                                                         |
       | Instance   | /shopping-carts/{clientId}                                   |
       | HasTraceId | true                                                         |
+    And the update shopping cart not found response data is
+      | Field            | Value                                    |
+      | DetailContainsId | true                                     |
+      | DetailContains   | ShoppingCart                             |
+      | TraceId          | <generated>                              |
