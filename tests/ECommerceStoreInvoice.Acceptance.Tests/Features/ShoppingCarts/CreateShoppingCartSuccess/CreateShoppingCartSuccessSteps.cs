@@ -19,14 +19,15 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.CreateSh
             _apiContext = apiContext;
         }
 
-        [Given("I have a valid client id for shopping cart creation")]
-        public void GivenIHaveAValidClientIdForShoppingCartCreation()
+        [Given("I prepare the create shopping cart request")]
+        public void GivenIPrepareTheCreateShoppingCartRequest(Table table)
         {
-            _clientId = Guid.NewGuid();
+            var request = BuildRequestFromTable(table);
+            _clientId = request.ClientId;
 
             AllureJson.AttachObject(
                 "Create shopping cart request",
-                new { ClientId = _clientId },
+                request,
                 _apiContext.JsonOptions);
         }
 
@@ -39,8 +40,8 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.CreateSh
             AllureJson.AttachRawJson($"Response JSON ({(int)_apiContext.Response.StatusCode})", body);
         }
 
-        [Then("the shopping cart is created successfully")]
-        public async Task ThenTheShoppingCartIsCreatedSuccessfully(Table table)
+        [Then("the shopping cart response should match")]
+        public async Task ThenTheShoppingCartResponseShouldMatch(Table table)
         {
             var expected = ParseExpectedTable(table);
 
@@ -96,6 +97,22 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.CreateSh
             return values;
         }
 
+
+        private static CreateShoppingCartRequestDoc BuildRequestFromTable(Table table)
+        {
+            var values = ParseExpectedTable(table);
+            var clientIdRaw = GetRequiredValue(values, "ClientId");
+
+            var clientId = clientIdRaw.Equals("auto", StringComparison.OrdinalIgnoreCase)
+                ? Guid.NewGuid()
+                : Guid.Parse(clientIdRaw);
+
+            return new CreateShoppingCartRequestDoc
+            {
+                ClientId = clientId
+            };
+        }
+
         private static string GetRequiredValue(IReadOnlyDictionary<string, string> values, string key)
         {
             if (!values.TryGetValue(key, out var value))
@@ -147,6 +164,10 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.CreateSh
 
             result = bool.Parse(value);
             return true;
+        }
+        private sealed class CreateShoppingCartRequestDoc
+        {
+            public Guid ClientId { get; init; }
         }
     }
 }
