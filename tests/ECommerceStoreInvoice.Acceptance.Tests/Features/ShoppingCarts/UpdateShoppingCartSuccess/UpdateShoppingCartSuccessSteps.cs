@@ -40,35 +40,37 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.UpdateSh
         }
 
         [Given("I have a valid update shopping cart request")]
-        public void GivenIHaveAValidUpdateShoppingCartRequest()
+        public void GivenIHaveAValidUpdateShoppingCartRequest(Table table)
         {
+            var values = ParseExpectedTable(table);
+
             _request = new UpdateShoppingCartRequestDto
             {
                 Lines =
                 [
                     new ShoppingCartLineRequestDto
                     {
-                        ProductId = Guid.NewGuid(),
-                        Name = "Phone",
-                        Brand = "Apple",
-                        UnitPriceAmount = 999.99m,
-                        UnitPriceCurrency = "usd",
-                        Quantity = 2
+                        ProductId = ParseGuid(values, "Line1ProductId"),
+                        Name = GetRequiredValue(values, "Line1Name"),
+                        Brand = GetRequiredValue(values, "Line1Brand"),
+                        UnitPriceAmount = ParseDecimal(values, "Line1UnitPriceAmount", 0m),
+                        UnitPriceCurrency = GetRequiredValue(values, "Line1UnitPriceCurrency"),
+                        Quantity = ParseInt(values, "Line1Quantity", 0)
                     },
                     new ShoppingCartLineRequestDto
                     {
-                        ProductId = Guid.NewGuid(),
-                        Name = "Watch",
-                        Brand = "Apple",
-                        UnitPriceAmount = 399.99m,
-                        UnitPriceCurrency = "usd",
-                        Quantity = 1
+                        ProductId = ParseGuid(values, "Line2ProductId"),
+                        Name = GetRequiredValue(values, "Line2Name"),
+                        Brand = GetRequiredValue(values, "Line2Brand"),
+                        UnitPriceAmount = ParseDecimal(values, "Line2UnitPriceAmount", 0m),
+                        UnitPriceCurrency = GetRequiredValue(values, "Line2UnitPriceCurrency"),
+                        Quantity = ParseInt(values, "Line2Quantity", 0)
                     }
                 ]
             };
 
             AllureJson.AttachObject(
-                "Update shopping cart request",
+                "Update shopping cart request (from Gherkin table)",
                 _request,
                 _apiContext.JsonOptions);
         }
@@ -111,7 +113,8 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.UpdateSh
             {
                 if (hasClientId)
                 {
-                    shoppingCart!.ClientId.ShouldBe(_clientId);
+                    var expectedClientId = GetExpectedValue(expected, "ClientId", "from-scenario-client-id");
+                    shoppingCart!.ClientId.ShouldBe(expectedClientId.Equals("from-scenario-client-id", StringComparison.OrdinalIgnoreCase) ? _clientId : Guid.Parse(expectedClientId));
                 }
                 else
                 {
@@ -123,14 +126,24 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.UpdateSh
             shoppingCart.TotalCurrency.ShouldBe(GetExpectedValue(expected, "TotalCurrency", shoppingCart.TotalCurrency));
             shoppingCart.Lines.Count.ShouldBe(ParseInt(expected, "LinesCount", shoppingCart.Lines.Count));
 
-            var firstLine = shoppingCart.Lines.FirstOrDefault();
+            var firstLine = shoppingCart.Lines.ElementAtOrDefault(0);
             if (firstLine is not null)
             {
-                firstLine.Name.ShouldBe(GetExpectedValue(expected, "FirstLineName", firstLine.Name));
-                firstLine.Brand.ShouldBe(GetExpectedValue(expected, "FirstLineBrand", firstLine.Brand));
-                firstLine.Quantity.ShouldBe(ParseInt(expected, "FirstLineQuantity", firstLine.Quantity));
-                firstLine.TotalAmount.ShouldBe(ParseDecimal(expected, "FirstLineTotalAmount", firstLine.TotalAmount));
-                firstLine.TotalCurrency.ShouldBe(GetExpectedValue(expected, "FirstLineTotalCurrency", firstLine.TotalCurrency));
+                firstLine.Name.ShouldBe(GetExpectedValue(expected, "Line1Name", firstLine.Name));
+                firstLine.Brand.ShouldBe(GetExpectedValue(expected, "Line1Brand", firstLine.Brand));
+                firstLine.Quantity.ShouldBe(ParseInt(expected, "Line1Quantity", firstLine.Quantity));
+                firstLine.TotalAmount.ShouldBe(ParseDecimal(expected, "Line1TotalAmount", firstLine.TotalAmount));
+                firstLine.TotalCurrency.ShouldBe(GetExpectedValue(expected, "Line1TotalCurrency", firstLine.TotalCurrency));
+            }
+
+            var secondLine = shoppingCart.Lines.ElementAtOrDefault(1);
+            if (secondLine is not null)
+            {
+                secondLine.Name.ShouldBe(GetExpectedValue(expected, "Line2Name", secondLine.Name));
+                secondLine.Brand.ShouldBe(GetExpectedValue(expected, "Line2Brand", secondLine.Brand));
+                secondLine.Quantity.ShouldBe(ParseInt(expected, "Line2Quantity", secondLine.Quantity));
+                secondLine.TotalAmount.ShouldBe(ParseDecimal(expected, "Line2TotalAmount", secondLine.TotalAmount));
+                secondLine.TotalCurrency.ShouldBe(GetExpectedValue(expected, "Line2TotalCurrency", secondLine.TotalCurrency));
             }
         }
 
@@ -192,6 +205,12 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.UpdateSh
             return int.Parse(value, CultureInfo.InvariantCulture);
         }
 
+
+        private static Guid ParseGuid(IReadOnlyDictionary<string, string> values, string key)
+        {
+            var value = GetRequiredValue(values, key);
+            return Guid.Parse(value);
+        }
         private static bool TryGetBool(IReadOnlyDictionary<string, string> values, string key, out bool result)
         {
             if (!values.TryGetValue(key, out var value))
