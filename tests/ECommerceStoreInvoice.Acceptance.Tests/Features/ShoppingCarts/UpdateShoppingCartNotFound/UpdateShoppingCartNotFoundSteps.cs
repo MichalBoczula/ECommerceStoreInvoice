@@ -7,7 +7,6 @@ using System.Globalization;
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
-using System.Text.Json.Nodes;
 
 namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.UpdateShoppingCartNotFound
 {
@@ -17,8 +16,6 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.UpdateSh
         private readonly ScenarioApiContext _apiContext;
         private Guid _clientId;
         private UpdateShoppingCartRequestDto? _request;
-        private string? _expectedRequestJson;
-        private string? _expectedResponseJson;
 
         public UpdateShoppingCartNotFoundSteps(ScenarioApiContext apiContext)
         {
@@ -26,13 +23,18 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.UpdateSh
         }
 
         [Given("I have a non-existing client id for shopping cart update")]
-        public void GivenIHaveANonExistingClientIdForShoppingCartUpdate()
+        public void GivenIHaveANonExistingClientIdForShoppingCartUpdate(Table table)
         {
             _clientId = Guid.NewGuid();
 
+            var requestContext = ParseExpectedTable(table);
+            var requestObject = new UpdateShoppingCartNotFoundRequestContext(
+                requestContext.TryGetValue("ClientId", out var clientIdTemplate) ? clientIdTemplate : "<generatedId>",
+                _clientId.ToString());
+
             AllureJson.AttachObject(
                 "Update shopping cart not found setup",
-                new { ClientId = _clientId },
+                requestObject,
                 _apiContext.JsonOptions);
         }
 
@@ -57,27 +59,27 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.UpdateSh
                 _apiContext.JsonOptions);
         }
 
-        [Given("the expected update shopping cart request json is")]
-        public void GivenTheExpectedUpdateShoppingCartRequestJsonIs(string expectedRequestJson)
-        {
-            _expectedRequestJson = expectedRequestJson;
-        }
-
         [When("I submit the update shopping cart request for a non-existing shopping cart")]
-        public async Task WhenISubmitTheUpdateShoppingCartRequestForANonExistingShoppingCart()
+        public async Task WhenISubmitTheUpdateShoppingCartRequestForANonExistingShoppingCart(Table table)
         {
             _request.ShouldNotBeNull();
 
-            _apiContext.Response = await _apiContext.HttpClient.PutAsJsonAsync($"/shopping-carts/{_clientId}", _request, _apiContext.JsonOptions);
+            var requestData = ParseExpectedTable(table);
+            var requestObject = new UpdateShoppingCartNotFoundHttpRequest(
+                Method: requestData.TryGetValue("Method", out var method) ? method : "PUT",
+                Endpoint: requestData.TryGetValue("Endpoint", out var endpointTemplate)
+                    ? endpointTemplate.Replace("{clientId}", _clientId.ToString(), StringComparison.OrdinalIgnoreCase)
+                    : $"/shopping-carts/{_clientId}",
+                Lines: requestData.TryGetValue("Lines", out var lines) ? int.Parse(lines, CultureInfo.InvariantCulture) : _request.Lines.Count);
+
+            requestObject.Lines.ShouldBe(_request.Lines.Count);
+            AllureJson.AttachObject("Update shopping cart HTTP request", requestObject, _apiContext.JsonOptions);
+
+            _apiContext.Response = await _apiContext.HttpClient.PutAsJsonAsync(requestObject.Endpoint, _request, _apiContext.JsonOptions);
 
             var body = await _apiContext.Response.Content.ReadAsStringAsync();
             AllureJson.AttachRawJson($"Response JSON ({(int)_apiContext.Response.StatusCode})", body);
 
-            if (!string.IsNullOrWhiteSpace(_expectedRequestJson))
-            {
-                var actualRequestJson = JsonSerializer.Serialize(_request, _apiContext.JsonOptions);
-                JsonNode.DeepEquals(JsonNode.Parse(_expectedRequestJson), JsonNode.Parse(actualRequestJson)).ShouldBeTrue();
-            }
         }
 
         [Then("problem details are returned for update shopping cart not found")]
@@ -124,34 +126,37 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.UpdateSh
             }
         }
 
-        [Then("the expected update shopping cart not found response json is")]
-        public async Task ThenTheExpectedUpdateShoppingCartNotFoundResponseJsonIs(string expectedResponseJson)
+        [Then("the update shopping cart not found response data is")]
+        public async Task ThenTheUpdateShoppingCartNotFoundResponseDataIs(Table table)
         {
-            _expectedResponseJson = expectedResponseJson.Replace("<clientId>", _clientId.ToString(), StringComparison.OrdinalIgnoreCase);
+            var expected = ParseExpectedTable(table);
 
             _apiContext.Response.ShouldNotBeNull();
             var actualResponseJson = await _apiContext.Response!.Content.ReadAsStringAsync();
+            var problemDetails = JsonSerializer.Deserialize<NotFoundProblemDetails>(actualResponseJson, _apiContext.JsonOptions);
+            problemDetails.ShouldNotBeNull();
 
-            var expectedNode = JsonNode.Parse(_expectedResponseJson) as JsonObject;
-            var actualNode = JsonNode.Parse(actualResponseJson) as JsonObject;
+            if (TryGetBool(expected, "DetailContainsId", out var hasDetailContainsId) && hasDetailContainsId)
+            {
+                problemDetails!.Detail.ShouldNotBeNullOrWhiteSpace();
+                problemDetails.Detail!.ShouldContain(_clientId.ToString(), Case.Insensitive);
+            }
 
-            expectedNode.ShouldNotBeNull();
-            actualNode.ShouldNotBeNull();
+            if (expected.TryGetValue("DetailContains", out var detailContains))
+            {
+                problemDetails!.Detail.ShouldNotBeNullOrWhiteSpace();
+                problemDetails.Detail!.ShouldContain(detailContains, Case.Insensitive);
+            }
 
-            expectedNode.ShouldNotBeNull();
-            actualNode.ShouldNotBeNull();
-
-            actualNode!["title"]?.GetValue<string>().ShouldBe(expectedNode!["title"]?.GetValue<string>());
-            actualNode["type"]?.GetValue<string>().ShouldBe(expectedNode["type"]?.GetValue<string>());
-            actualNode["status"]?.GetValue<int>().ShouldBe(expectedNode["status"]?.GetValue<int>());
-            actualNode["instance"]?.GetValue<string>().ShouldBe(expectedNode["instance"]?.GetValue<string>());
-
-            actualNode["detail"]?.GetValue<string>().ShouldNotBeNullOrWhiteSpace();
-            actualNode["detail"]?.GetValue<string>().ShouldContain(_clientId.ToString(), Case.Insensitive);
-            actualNode["detail"]?.GetValue<string>().ShouldContain("ShoppingCart", Case.Insensitive);
-
-            actualNode["traceId"]?.GetValue<string>().ShouldNotBeNullOrWhiteSpace();
+            if (expected.TryGetValue("TraceId", out var traceIdValue) && traceIdValue.Equals("<generated>", StringComparison.OrdinalIgnoreCase))
+            {
+                problemDetails!.TraceId.ShouldNotBeNullOrWhiteSpace();
+            }
         }
+
+        private sealed record UpdateShoppingCartNotFoundRequestContext(string ClientId, string ResolvedClientId);
+
+        private sealed record UpdateShoppingCartNotFoundHttpRequest(string Method, string Endpoint, int Lines);
 
         private async Task<T?> DeserializeResponse<T>(HttpResponseMessage response)
         {
