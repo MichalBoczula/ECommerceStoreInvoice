@@ -19,14 +19,24 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.GetShopp
             _apiContext = apiContext;
         }
 
-        [Given("I have a non-existing client id for shopping cart retrieval")]
-        public void GivenIHaveANonExistingClientIdForShoppingCartRetrieval()
+        [Given("I have a non-existing shopping cart request payload")]
+        public void GivenIHaveANonExistingShoppingCartRequestPayload(Table table)
         {
+            var requestValues = ParseExpectedTable(table);
             _clientId = Guid.NewGuid();
+
+            var pathTemplate = GetRequiredValue(requestValues, "Path");
+            var request = new
+            {
+                Method = GetRequiredValue(requestValues, "Method"),
+                PathTemplate = pathTemplate,
+                Path = pathTemplate.Replace("{clientId}", _clientId.ToString(), StringComparison.OrdinalIgnoreCase),
+                ClientId = _clientId
+            };
 
             AllureJson.AttachObject(
                 "Get shopping cart not found request",
-                new { ClientId = _clientId },
+                request,
                 _apiContext.JsonOptions);
         }
 
@@ -81,6 +91,35 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.GetShopp
                     problemDetails.TraceId.ShouldBeNullOrWhiteSpace();
                 }
             }
+        }
+
+        [Then("the problem details json contains")]
+        public async Task ThenTheProblemDetailsJsonContains(Table table)
+        {
+            var expected = ParseExpectedTable(table);
+            var problemDetails = await DeserializeResponse<NotFoundProblemDetails>(_apiContext.Response!);
+            problemDetails.ShouldNotBeNull();
+
+            problemDetails!.Title.ShouldBe(GetRequiredValue(expected, "title"));
+            problemDetails.Type.ShouldBe(GetRequiredValue(expected, "type"));
+            problemDetails.Status.ShouldBe(int.Parse(GetRequiredValue(expected, "status"), CultureInfo.InvariantCulture));
+            problemDetails.Instance.ShouldBe(GetRequiredValue(expected, "instance").Replace("{clientId}", _clientId.ToString(), StringComparison.OrdinalIgnoreCase));
+
+            var detailRule = GetRequiredValue(expected, "detail");
+            if (detailRule.StartsWith("contains:", StringComparison.OrdinalIgnoreCase))
+            {
+                var expectedFragment = detailRule["contains:".Length..];
+                problemDetails.Detail.ShouldNotBeNullOrWhiteSpace();
+                problemDetails.Detail!.ShouldContain(expectedFragment, Case.Insensitive);
+            }
+
+            if (string.Equals(GetRequiredValue(expected, "traceId"), "not-empty", StringComparison.OrdinalIgnoreCase))
+            {
+                problemDetails.TraceId.ShouldNotBeNullOrWhiteSpace();
+            }
+
+            AllureJson.AttachObject("Expected problem details json", expected, _apiContext.JsonOptions);
+            AllureJson.AttachObject("Actual problem details json", problemDetails, _apiContext.JsonOptions);
         }
 
         private async Task<T?> DeserializeResponse<T>(HttpResponseMessage response)
