@@ -31,8 +31,16 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.CreateSh
         }
 
         [When("I submit the create shopping cart request with invalid data")]
-        public async Task WhenISubmitTheCreateShoppingCartRequestWithInvalidData()
+        public async Task WhenISubmitTheCreateShoppingCartRequestWithInvalidData(Table table)
         {
+            var requestDefinition = ParseExpectedTable(table);
+            var requestObject = BuildCreateShoppingCartRequestObject(requestDefinition, _clientId);
+
+            AllureJson.AttachObject(
+                "Create shopping cart validation request object",
+                requestObject,
+                _apiContext.JsonOptions);
+
             _apiContext.Response = await _apiContext.HttpClient.PostAsync($"/shopping-carts/{_clientId}", content: null);
 
             var body = await _apiContext.Response.Content.ReadAsStringAsync();
@@ -44,6 +52,11 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.CreateSh
         {
             var expected = ParseExpectedTable(table);
 
+            AllureJson.AttachObject(
+                "Expected create shopping cart validation error",
+                expected,
+                _apiContext.JsonOptions);
+
             _apiContext.Response.ShouldNotBeNull();
             _apiContext.Response!.StatusCode.ShouldBe(ParseStatusCode(expected, "StatusCode"));
 
@@ -53,12 +66,49 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.CreateSh
             problemDetails!.Title.ShouldBe(GetRequiredValue(expected, "Title"));
             problemDetails.Detail.ShouldBe(GetRequiredValue(expected, "Detail"));
             problemDetails.Type.ShouldBe(GetRequiredValue(expected, "Type"));
-            problemDetails.Instance.ShouldBe(GetRequiredValue(expected, "Instance"));
+            var expectedInstance = GetRequiredValue(expected, "Instance").Replace("{clientId}", _clientId.ToString(), StringComparison.OrdinalIgnoreCase);
+            problemDetails.Instance.ShouldBe(expectedInstance);
 
             var errors = problemDetails.Errors.ToList();
             errors.Count.ShouldBe(ParseInt(expected, "ErrorsCount"));
             errors.ShouldNotBeEmpty();
             errors[0].Message.ShouldBe(GetRequiredValue(expected, "FirstErrorMessage"));
+
+            var expectedResponseObject = BuildCreateShoppingCartValidationErrorResponseObject(expected, _clientId);
+            AllureJson.AttachObject(
+                "Create shopping cart validation expected response object",
+                expectedResponseObject,
+                _apiContext.JsonOptions);
+        }
+
+        private static object BuildCreateShoppingCartRequestObject(IReadOnlyDictionary<string, string> values, Guid clientId)
+        {
+            return new
+            {
+                Method = GetRequiredValue(values, "Method"),
+                Path = GetRequiredValue(values, "PathTemplate").Replace("{clientId}", clientId.ToString(), StringComparison.OrdinalIgnoreCase),
+                ContentType = GetRequiredValue(values, "ContentType"),
+                Body = (object?)null
+            };
+        }
+
+        private static object BuildCreateShoppingCartValidationErrorResponseObject(IReadOnlyDictionary<string, string> values, Guid clientId)
+        {
+            return new
+            {
+                status = ParseInt(values, "StatusCode"),
+                title = GetRequiredValue(values, "Title"),
+                detail = GetRequiredValue(values, "Detail"),
+                type = GetRequiredValue(values, "Type"),
+                instance = GetRequiredValue(values, "Instance").Replace("{clientId}", clientId.ToString(), StringComparison.OrdinalIgnoreCase),
+                errors = new[]
+                {
+                    new
+                    {
+                        message = GetRequiredValue(values, "FirstErrorMessage")
+                    }
+                }
+            };
         }
 
         private async Task<T?> DeserializeResponse<T>(HttpResponseMessage response)
