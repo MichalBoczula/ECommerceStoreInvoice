@@ -22,11 +22,18 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Orders.GetOrdersByIdSu
             _apiContext = apiContext;
         }
 
-        [Given("I have an existing order id")]
-        public async Task GivenIHaveAnExistingOrderId()
+        [Given("I have an existing order id with setup data")]
+        public async Task GivenIHaveAnExistingOrderIdWithSetupData(Table table)
         {
+            var setup = ParseExpectedTable(table);
+
             _clientId = Guid.NewGuid();
             var productId = Guid.NewGuid();
+            var productName = GetRequiredValue(setup, "ProductName");
+            var productBrand = GetRequiredValue(setup, "ProductBrand");
+            var unitPriceAmount = ParseDecimal(setup, "UnitPriceAmount", fallback: 0m);
+            var unitPriceCurrency = GetRequiredValue(setup, "UnitPriceCurrency");
+            var quantity = ParseInt(setup, "Quantity", fallback: 0);
 
             AllureJson.AttachObject(
                 "Get order by id setup request",
@@ -38,11 +45,11 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Orders.GetOrdersByIdSu
                         new
                         {
                             ProductId = productId,
-                            Name = "Laptop",
-                            Brand = "Lenovo",
-                            UnitPriceAmount = 999.99m,
-                            UnitPriceCurrency = "usd",
-                            Quantity = 2
+                            Name = productName,
+                            Brand = productBrand,
+                            UnitPriceAmount = unitPriceAmount,
+                            UnitPriceCurrency = unitPriceCurrency,
+                            Quantity = quantity
                         }
                     }
                 },
@@ -61,11 +68,11 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Orders.GetOrdersByIdSu
                     new ShoppingCartLineRequestDto
                     {
                         ProductId = productId,
-                        Name = "Laptop",
-                        Brand = "Lenovo",
-                        UnitPriceAmount = 999.99m,
-                        UnitPriceCurrency = "usd",
-                        Quantity = 2
+                        Name = productName,
+                        Brand = productBrand,
+                        UnitPriceAmount = unitPriceAmount,
+                        UnitPriceCurrency = unitPriceCurrency,
+                        Quantity = quantity
                     }
                 ]
             };
