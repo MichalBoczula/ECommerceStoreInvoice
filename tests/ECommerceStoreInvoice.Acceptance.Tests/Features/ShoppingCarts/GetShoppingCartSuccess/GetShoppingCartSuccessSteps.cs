@@ -13,6 +13,7 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.GetShopp
     {
         private readonly ScenarioApiContext _apiContext;
         private Guid _clientId;
+        private ShoppingCartResponseDto? _shoppingCartResponse;
 
         public GetShoppingCartSuccessSteps(ScenarioApiContext apiContext)
         {
@@ -36,6 +37,22 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.GetShopp
             AllureJson.AttachRawJson($"Setup response JSON ({(int)createResponse.StatusCode})", createBody);
         }
 
+        [Given("the get shopping cart request data is")]
+        public void GivenTheGetShoppingCartRequestDataIs(Table table)
+        {
+            var requestMetadata = ParseExpectedTable(table);
+            var endpoint = GetRequiredValue(requestMetadata, "Endpoint");
+
+            var requestObject = new
+            {
+                Method = GetRequiredValue(requestMetadata, "Method"),
+                Endpoint = $"{endpoint}/{_clientId}",
+                ClientId = _clientId
+            };
+
+            AllureJson.AttachObject("Get shopping cart request object", requestObject, _apiContext.JsonOptions);
+        }
+
         [When("I request the shopping cart by client id")]
         public async Task WhenIRequestTheShoppingCartByClientId()
         {
@@ -53,8 +70,9 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.GetShopp
             _apiContext.Response.ShouldNotBeNull();
             _apiContext.Response!.StatusCode.ShouldBe(ParseStatusCode(expected, "StatusCode"));
 
-            var shoppingCart = await DeserializeResponse<ShoppingCartResponseDto>(_apiContext.Response);
-            shoppingCart.ShouldNotBeNull();
+            _shoppingCartResponse = await DeserializeResponse<ShoppingCartResponseDto>(_apiContext.Response);
+            _shoppingCartResponse.ShouldNotBeNull();
+            var shoppingCart = _shoppingCartResponse;
 
             if (TryGetBool(expected, "HasId", out var hasId))
             {
@@ -83,6 +101,30 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.GetShopp
             shoppingCart!.TotalAmount.ShouldBe(ParseDecimal(expected, "TotalAmount", shoppingCart.TotalAmount));
             shoppingCart.TotalCurrency.ShouldBe(GetExpectedValue(expected, "TotalCurrency", shoppingCart.TotalCurrency));
             shoppingCart.Lines.Count.ShouldBe(ParseInt(expected, "LinesCount", shoppingCart.Lines.Count));
+        }
+
+        [Then("the shopping cart response payload is")]
+        public void ThenTheShoppingCartResponsePayloadIs(Table table)
+        {
+            _shoppingCartResponse.ShouldNotBeNull();
+
+            var expectedPayload = ParseExpectedTable(table);
+            var responseObject = new
+            {
+                Id = _shoppingCartResponse!.Id,
+                ClientId = _shoppingCartResponse.ClientId,
+                TotalAmount = _shoppingCartResponse.TotalAmount,
+                TotalCurrency = _shoppingCartResponse.TotalCurrency,
+                Lines = _shoppingCartResponse.Lines
+            };
+
+            AllureJson.AttachObject("Get shopping cart response object", responseObject, _apiContext.JsonOptions);
+
+            _shoppingCartResponse.Id.ShouldNotBe(Guid.Empty);
+            _shoppingCartResponse.ClientId.ShouldBe(_clientId);
+            _shoppingCartResponse.TotalAmount.ShouldBe(ParseDecimal(expectedPayload, "TotalAmount", _shoppingCartResponse.TotalAmount));
+            _shoppingCartResponse.TotalCurrency.ShouldBe(GetExpectedValue(expectedPayload, "TotalCurrency", _shoppingCartResponse.TotalCurrency));
+            _shoppingCartResponse.Lines.Count.ShouldBe(0);
         }
 
         private async Task<T?> DeserializeResponse<T>(HttpResponseMessage response)
