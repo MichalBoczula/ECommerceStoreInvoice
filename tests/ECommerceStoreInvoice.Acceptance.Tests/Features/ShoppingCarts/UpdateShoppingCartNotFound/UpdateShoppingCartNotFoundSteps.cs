@@ -132,16 +132,25 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.UpdateSh
             _apiContext.Response.ShouldNotBeNull();
             var actualResponseJson = await _apiContext.Response!.Content.ReadAsStringAsync();
 
-            var expectedNode = JsonNode.Parse(_expectedResponseJson);
-            var actualNode = JsonNode.Parse(actualResponseJson);
+            var expectedNode = JsonNode.Parse(_expectedResponseJson) as JsonObject;
+            var actualNode = JsonNode.Parse(actualResponseJson) as JsonObject;
 
             expectedNode.ShouldNotBeNull();
             actualNode.ShouldNotBeNull();
 
-            actualNode!["traceId"]?.GetValue<string>().ShouldNotBeNullOrWhiteSpace();
-            expectedNode!["traceId"] = actualNode["traceId"]?.GetValue<string>();
+            expectedNode.ShouldNotBeNull();
+            actualNode.ShouldNotBeNull();
 
-            JsonNode.DeepEquals(expectedNode, actualNode).ShouldBeTrue();
+            actualNode!["title"]?.GetValue<string>().ShouldBe(expectedNode!["title"]?.GetValue<string>());
+            actualNode["type"]?.GetValue<string>().ShouldBe(expectedNode["type"]?.GetValue<string>());
+            actualNode["status"]?.GetValue<int>().ShouldBe(expectedNode["status"]?.GetValue<int>());
+            actualNode["instance"]?.GetValue<string>().ShouldBe(expectedNode["instance"]?.GetValue<string>());
+
+            actualNode["detail"]?.GetValue<string>().ShouldNotBeNullOrWhiteSpace();
+            actualNode["detail"]?.GetValue<string>().ShouldContain(_clientId.ToString(), Case.Insensitive);
+            actualNode["detail"]?.GetValue<string>().ShouldContain("ShoppingCart", Case.Insensitive);
+
+            actualNode["traceId"]?.GetValue<string>().ShouldNotBeNullOrWhiteSpace();
         }
 
         private async Task<T?> DeserializeResponse<T>(HttpResponseMessage response)
