@@ -1,7 +1,13 @@
 Feature: Get order by id
 
   Scenario: Get order by id returns an existing order
-    Given I have an existing order id
+    Given I have an existing order id with setup data
+      | Field            | Value  |
+      | ProductName      | Laptop |
+      | ProductBrand     | Lenovo |
+      | UnitPriceAmount  | 999.99 |
+      | UnitPriceCurrency| usd    |
+      | Quantity         | 2      |
     When I request order by id
     Then the order is returned successfully by id
       | Field                      | Value   |
