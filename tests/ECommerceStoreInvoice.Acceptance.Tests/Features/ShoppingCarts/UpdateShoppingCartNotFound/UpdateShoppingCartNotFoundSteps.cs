@@ -7,6 +7,7 @@ using System.Globalization;
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.UpdateShoppingCartNotFound
 {
@@ -16,6 +17,8 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.UpdateSh
         private readonly ScenarioApiContext _apiContext;
         private Guid _clientId;
         private UpdateShoppingCartRequestDto? _request;
+        private string? _expectedRequestJson;
+        private string? _expectedResponseJson;
 
         public UpdateShoppingCartNotFoundSteps(ScenarioApiContext apiContext)
         {
@@ -54,6 +57,12 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.UpdateSh
                 _apiContext.JsonOptions);
         }
 
+        [Given("the expected update shopping cart request json is")]
+        public void GivenTheExpectedUpdateShoppingCartRequestJsonIs(string expectedRequestJson)
+        {
+            _expectedRequestJson = expectedRequestJson;
+        }
+
         [When("I submit the update shopping cart request for a non-existing shopping cart")]
         public async Task WhenISubmitTheUpdateShoppingCartRequestForANonExistingShoppingCart()
         {
@@ -63,6 +72,12 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.UpdateSh
 
             var body = await _apiContext.Response.Content.ReadAsStringAsync();
             AllureJson.AttachRawJson($"Response JSON ({(int)_apiContext.Response.StatusCode})", body);
+
+            if (!string.IsNullOrWhiteSpace(_expectedRequestJson))
+            {
+                var actualRequestJson = JsonSerializer.Serialize(_request, _apiContext.JsonOptions);
+                JsonNode.DeepEquals(JsonNode.Parse(_expectedRequestJson), JsonNode.Parse(actualRequestJson)).ShouldBeTrue();
+            }
         }
 
         [Then("problem details are returned for update shopping cart not found")]
@@ -107,6 +122,26 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.UpdateSh
                     problemDetails.TraceId.ShouldBeNullOrWhiteSpace();
                 }
             }
+        }
+
+        [Then("the expected update shopping cart not found response json is")]
+        public async Task ThenTheExpectedUpdateShoppingCartNotFoundResponseJsonIs(string expectedResponseJson)
+        {
+            _expectedResponseJson = expectedResponseJson.Replace("<clientId>", _clientId.ToString(), StringComparison.OrdinalIgnoreCase);
+
+            _apiContext.Response.ShouldNotBeNull();
+            var actualResponseJson = await _apiContext.Response!.Content.ReadAsStringAsync();
+
+            var expectedNode = JsonNode.Parse(_expectedResponseJson);
+            var actualNode = JsonNode.Parse(actualResponseJson);
+
+            expectedNode.ShouldNotBeNull();
+            actualNode.ShouldNotBeNull();
+
+            actualNode!["traceId"]?.GetValue<string>().ShouldNotBeNullOrWhiteSpace();
+            expectedNode!["traceId"] = actualNode["traceId"]?.GetValue<string>();
+
+            JsonNode.DeepEquals(expectedNode, actualNode).ShouldBeTrue();
         }
 
         private async Task<T?> DeserializeResponse<T>(HttpResponseMessage response)
