@@ -60,6 +60,19 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.UpdateSh
                 _apiContext.JsonOptions);
         }
 
+        [Given("update shopping cart request fields are documented")]
+        public void GivenUpdateShoppingCartRequestFieldsAreDocumented(Table table)
+        {
+            var documentedRequest = ParseFieldValueTable(table, resolveClientId: true);
+            AllureJson.AttachObject("Update shopping cart request fields", documentedRequest, _apiContext.JsonOptions);
+        }
+
+        [Given("update shopping cart request json is documented")]
+        public void GivenUpdateShoppingCartRequestJsonIsDocumented(string json)
+        {
+            AllureJson.AttachRawJson("Update shopping cart request JSON example", ResolveClientIdPlaceholder(json));
+        }
+
         [When("I submit the invalid update shopping cart request")]
         public async Task WhenISubmitTheInvalidUpdateShoppingCartRequest()
         {
@@ -100,6 +113,19 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.UpdateSh
             errors[0].Message.ShouldBe(GetRequiredValue(expected, "FirstErrorMessage"));
         }
 
+        [Then("update shopping cart validation error fields are documented")]
+        public void ThenUpdateShoppingCartValidationErrorFieldsAreDocumented(Table table)
+        {
+            var documentedResponse = ParseFieldValueTable(table, resolveClientId: true);
+            AllureJson.AttachObject("Update shopping cart validation error fields", documentedResponse, _apiContext.JsonOptions);
+        }
+
+        [Then("update shopping cart validation error json is documented")]
+        public void ThenUpdateShoppingCartValidationErrorJsonIsDocumented(string json)
+        {
+            AllureJson.AttachRawJson("Update shopping cart validation error JSON example", ResolveClientIdPlaceholder(json));
+        }
+
         private async Task<T?> DeserializeResponse<T>(HttpResponseMessage response)
         {
             var content = await response.Content.ReadAsStringAsync();
@@ -138,5 +164,20 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.UpdateSh
             var value = GetRequiredValue(values, key);
             return int.Parse(value, CultureInfo.InvariantCulture);
         }
+
+        private Dictionary<string, string> ParseFieldValueTable(Table table, bool resolveClientId)
+        {
+            var values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var row in table.Rows)
+            {
+                var value = row["Value"];
+                values[row["Field"]] = resolveClientId ? ResolveClientIdPlaceholder(value) : value;
+            }
+
+            return values;
+        }
+
+        private string ResolveClientIdPlaceholder(string value)
+            => value.Replace("{clientId}", _clientId.ToString(), StringComparison.OrdinalIgnoreCase);
     }
 }
