@@ -18,7 +18,10 @@ public class OrderMappingBenchmarks
     [GlobalSetup]
     public void Setup()
     {
-        _document = (OrderDocument)OrderDocumentBenchmarkDataFactory.CreateWithLines(LinesCount);
+        _document = OrderDocumentBenchmarkDataFactory.CreateWithLines(
+                    LinesCount,
+                    Guid.NewGuid(),
+                    Guid.NewGuid());
         _domain = OrderMapping.MapToDomain(_document);
     }
 
