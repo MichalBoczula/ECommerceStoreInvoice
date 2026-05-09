@@ -16,27 +16,31 @@ internal class Program
 {
     private static void Main(string[] args)
     {
-        // General application mapping benchmarks
+        // 1. General application mapping benchmarks
         BenchmarkRunner.Run<MappingConfigBenchmarks>();
 
-        // ShoppingCarts
+        // 2. ShoppingCarts (Mapping & Database)
         BenchmarkRunner.Run<ShoppingCartMappingConfigBenchmarks>();
         BenchmarkRunner.Run<ShoppingCartMappingBenchmarks>();
         BenchmarkRunner.Run<ShoppingCartRepositoryBenchmarks>();
 
-        // Orders
+        // 3. Orders (Mapping & Database)
         BenchmarkRunner.Run<OrderMappingConfigBenchmarks>();
         BenchmarkRunner.Run<OrderMappingBenchmarks>();
+        BenchmarkRunner.Run<OrderRepositoryBenchmarks>();
 
-        // Invoices
+        // 4. Invoices (Mapping & Database)
         BenchmarkRunner.Run<InvoiceMappingConfigBenchmarks>();
         BenchmarkRunner.Run<InvoiceMappingBenchmarks>();
+        BenchmarkRunner.Run<InvoiceRepositoryBenchmarks>();
 
-        // ClientDataVersions
+        // 5. ClientDataVersions (Mapping & Database)
         BenchmarkRunner.Run<ClientDataVersionMappingConfigBenchmarks>();
         BenchmarkRunner.Run<ClientDataVersionMappingBenchmarks>();
+        BenchmarkRunner.Run<ClientDataVersionRepositoryBenchmarks>();
 
-        // ProductVersions
+        // 6. ProductVersions (Mapping & Database)
         BenchmarkRunner.Run<ProductVersionMappingBenchmarks>();
+        BenchmarkRunner.Run<ProductVersionRepositoryBenchmarks>();
     }
 }
