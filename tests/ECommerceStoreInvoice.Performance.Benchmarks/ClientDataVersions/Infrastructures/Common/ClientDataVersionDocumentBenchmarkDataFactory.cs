@@ -6,12 +6,12 @@ internal static class ClientDataVersionDocumentBenchmarkDataFactory
 {
     private static readonly DateTime BenchmarkDate = new(2026, 1, 1, 12, 0, 0, DateTimeKind.Utc);
 
-    public static ClientDataVersionDocument Create()
+    public static ClientDataVersionDocument Create(Guid id, Guid clientId, DateTime createdAt)
     {
         return new ClientDataVersionDocument
         {
-            Id = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
-            ClientId = Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
+            Id = id,
+            ClientId = clientId,
             ClientName = "John Doe",
             PostalCode = "00-001",
             City = "Warsaw",
@@ -21,7 +21,9 @@ internal static class ClientDataVersionDocumentBenchmarkDataFactory
             PhoneNumber = "123456789",
             PhonePrefix = "+48",
             AddressEmail = "john.doe@example.com",
-            CreatedAt = BenchmarkDate
+            CreatedAt = createdAt
         };
     }
+
+    public static ClientDataVersionDocument Create() => Create(Guid.NewGuid(), Guid.NewGuid(), BenchmarkDate);
 }
