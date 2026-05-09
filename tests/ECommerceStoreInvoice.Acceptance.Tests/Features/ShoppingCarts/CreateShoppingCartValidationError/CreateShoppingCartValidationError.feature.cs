@@ -158,35 +158,50 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.CreateSh
 #line 4
     await testRunner.GivenAsync("I have an invalid client id for shopping cart creation", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
-#line 5
-    await testRunner.WhenAsync("I submit the create shopping cart request with invalid data", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
-#line hidden
-                global::Reqnroll.Table table30 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table7 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table30.AddRow(new string[] {
+                table7.AddRow(new string[] {
+                            "Method",
+                            "POST"});
+                table7.AddRow(new string[] {
+                            "PathTemplate",
+                            "/shopping-carts/{clientId}"});
+                table7.AddRow(new string[] {
+                            "ContentType",
+                            "application/json"});
+                table7.AddRow(new string[] {
+                            "Body",
+                            "null"});
+#line 5
+    await testRunner.WhenAsync("I submit the create shopping cart request with invalid data", ((string)(null)), table7, "When ");
+#line hidden
+                global::Reqnroll.Table table8 = new global::Reqnroll.Table(new string[] {
+                            "Field",
+                            "Value"});
+                table8.AddRow(new string[] {
                             "StatusCode",
                             "400"});
-                table30.AddRow(new string[] {
+                table8.AddRow(new string[] {
                             "Title",
                             "Validation failed."});
-                table30.AddRow(new string[] {
+                table8.AddRow(new string[] {
                             "Detail",
                             "One or more validation errors occurred."});
-                table30.AddRow(new string[] {
+                table8.AddRow(new string[] {
                             "Type",
                             "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.1"});
-                table30.AddRow(new string[] {
+                table8.AddRow(new string[] {
                             "Instance",
-                            "/shopping-carts/00000000-0000-0000-0000-000000000000"});
-                table30.AddRow(new string[] {
+                            "/shopping-carts/{clientId}"});
+                table8.AddRow(new string[] {
                             "ErrorsCount",
                             "1"});
-                table30.AddRow(new string[] {
+                table8.AddRow(new string[] {
                             "FirstErrorMessage",
                             "ClientId cannot be empty Guid."});
-#line 6
-    await testRunner.ThenAsync("problem details are returned for create shopping cart validation error", ((string)(null)), table30, "Then ");
+#line 11
+    await testRunner.ThenAsync("problem details are returned for create shopping cart validation error", ((string)(null)), table8, "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
