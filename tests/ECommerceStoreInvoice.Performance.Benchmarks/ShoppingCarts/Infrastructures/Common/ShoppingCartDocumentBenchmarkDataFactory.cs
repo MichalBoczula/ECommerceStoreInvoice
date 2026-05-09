@@ -8,10 +8,17 @@ internal static class ShoppingCartDocumentBenchmarkDataFactory
 
     public static ShoppingCartDocument CreateWithLines(int linesCount)
     {
+        return CreateWithLines(
+            linesCount,
+            Guid.NewGuid());
+    }
+
+    public static ShoppingCartDocument CreateWithLines(int linesCount, Guid clientId)
+    {
         return new ShoppingCartDocument
         {
-            Id = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
-            ClientId = Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
+            Id = Guid.NewGuid(),
+            ClientId = clientId,
             CreatedAt = BenchmarkDate,
             UpdatedAt = BenchmarkDate,
             Lines = Enumerable.Range(1, linesCount)
