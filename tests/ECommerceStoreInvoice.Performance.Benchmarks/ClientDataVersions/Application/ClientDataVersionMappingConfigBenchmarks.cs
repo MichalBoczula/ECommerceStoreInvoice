@@ -16,7 +16,7 @@ public class ClientDataVersionMappingConfigBenchmarks
     [GlobalSetup]
     public void Setup()
     {
-        _clientId = Guid.Parse("cccccccc-cccc-cccc-cccc-cccccccccccc");
+        _clientId = Guid.NewGuid();
         _request = ClientDataVersionMappingConfigBenchmarkDataFactory.CreateRequest();
         _clientDataVersion = ClientDataVersionMappingConfigBenchmarkDataFactory.CreateDomainClientDataVersion(_clientId);
     }
