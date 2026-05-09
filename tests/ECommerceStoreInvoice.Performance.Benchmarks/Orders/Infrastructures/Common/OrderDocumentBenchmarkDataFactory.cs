@@ -7,12 +7,12 @@ internal static class OrderDocumentBenchmarkDataFactory
 {
     private static readonly DateTime BenchmarkDate = new(2026, 1, 1, 12, 0, 0, DateTimeKind.Utc);
 
-    public static object CreateWithLines(int linesCount)
+    public static OrderDocument CreateWithLines(int linesCount, Guid id, Guid clientId)
     {
         return new OrderDocument
         {
-            Id = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
-            ClientId = Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
+            Id = id,
+            ClientId = clientId,
             CreatedAt = BenchmarkDate,
             UpdatedAt = BenchmarkDate,
             Status = OrderStatus.Created,
@@ -34,23 +34,17 @@ internal static class OrderDocumentBenchmarkDataFactory
     {
         var unitPriceAmount = 10.99m + index;
         var quantity = index;
-        var totalAmount = unitPriceAmount * quantity;
 
         return new OrderLineDocument
         {
-            ProductVersionId = CreateDeterministicGuid(index),
+            ProductVersionId = Guid.NewGuid(),
             Name = $"Product {index}",
             Brand = $"Brand {index % 5}",
             UnitPriceAmount = unitPriceAmount,
             UnitPriceCurrency = "PLN",
             Quantity = quantity,
-            TotalAmount = totalAmount,
+            TotalAmount = unitPriceAmount * quantity,
             TotalCurrency = "PLN"
         };
-    }
-
-    private static Guid CreateDeterministicGuid(int index)
-    {
-        return Guid.Parse($"00000000-0000-0000-0000-{index:000000000000}");
     }
 }

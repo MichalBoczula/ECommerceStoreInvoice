@@ -20,7 +20,6 @@ public class ProductVersionRepositoryBenchmarks
     private const string DatabaseName = "product-version-repository-benchmarks";
     private const string ProductVersionsCollectionName = "product-versions";
 
-    // W ProductVersion zazwyczaj nie mamy LinesCount, ale zachowujemy strukturę pól
     private MongoDbContainer _mongoContainer = null!;
     private MongoDbContext _context = null!;
     private ProductVersionRepository _repository = null!;
