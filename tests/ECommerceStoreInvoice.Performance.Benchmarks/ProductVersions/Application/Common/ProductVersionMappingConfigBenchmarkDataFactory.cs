@@ -1,3 +1,4 @@
+using ECommerceStoreInvoice.Application.Common.RequestsDto.ProductVersions;
 using ECommerceStoreInvoice.Domain.AggregatesModel.Common.ValueObjects;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate;
 
@@ -7,6 +8,18 @@ internal static class ProductVersionMappingConfigBenchmarkDataFactory
 {
     private static readonly DateTime BenchmarkDate = new(2026, 1, 1, 12, 0, 0, DateTimeKind.Utc);
 
+    public static CreateProductVersionRequestDto CreateRequest()
+    {
+        return new CreateProductVersionRequestDto
+        {
+            ProductId = Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
+            Name = "Product Name",
+            Brand = "Contoso",
+            PriceAmount = 199.99m,
+            PriceCurrency = "USD"
+        };
+    }
+
     public static ProductVersion CreateDomainProductVersion()
     {
         return ProductVersion.Rehydrate(
@@ -14,7 +27,7 @@ internal static class ProductVersionMappingConfigBenchmarkDataFactory
             true,
             BenchmarkDate,
             null,
-            Guid.NewGuid(),
+            Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
             new Money(199.99m, "USD"),
             "Product Name",
             "Contoso");
