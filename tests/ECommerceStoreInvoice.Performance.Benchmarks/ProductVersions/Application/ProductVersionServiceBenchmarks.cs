@@ -7,6 +7,7 @@ using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate.Repositories;
 using ECommerceStoreInvoice.Domain.Validation.Abstract;
 using ECommerceStoreInvoice.Domain.Validation.Common;
+using ECommerceStoreInvoice.Performance.Benchmarks.ProductVersions.Application.Common;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 
