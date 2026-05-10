@@ -4,7 +4,7 @@ using ECommerceStoreInvoice.Domain.Validation.Abstract;
 using ECommerceStoreInvoice.Domain.Validation.Concrete.Policies;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace ECommerceStoreInvoice.Performance.Benchmarks.ShoppingCarts.Domain
+namespace ECommerceStoreInvoice.Performance.Benchmarks.ClientDataVersions.Domain
 {
     [MemoryDiagnoser]
     [Orderer(SummaryOrderPolicy.FastestToSlowest)]
