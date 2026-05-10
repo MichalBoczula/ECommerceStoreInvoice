@@ -6,6 +6,7 @@ using ECommerceStoreInvoice.Performance.Benchmarks.Invoices.Application;
 using ECommerceStoreInvoice.Performance.Benchmarks.Invoices.Domain;
 using ECommerceStoreInvoice.Performance.Benchmarks.Invoices.Infrastructures;
 using ECommerceStoreInvoice.Performance.Benchmarks.Orders.Application;
+using ECommerceStoreInvoice.Performance.Benchmarks.Orders.Domain;
 using ECommerceStoreInvoice.Performance.Benchmarks.Orders.Infrastructures;
 using ECommerceStoreInvoice.Performance.Benchmarks.ProductVersions.Application;
 using ECommerceStoreInvoice.Performance.Benchmarks.ProductVersions.Infrastructures;
@@ -28,6 +29,7 @@ internal class Program
         BenchmarkRunner.Run<OrderMappingConfigBenchmarks>();
         BenchmarkRunner.Run<OrderMappingBenchmarks>();
         BenchmarkRunner.Run<OrderRepositoryBenchmarks>();
+        BenchmarkRunner.Run<UpdateOrderValidationPolicyBenchmarks>();
 
         // 3. Invoices (Mapping & Database)
         BenchmarkRunner.Run<InvoiceMappingConfigBenchmarks>();
