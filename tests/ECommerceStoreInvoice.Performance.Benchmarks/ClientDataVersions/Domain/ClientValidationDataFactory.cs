@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ECommerceStoreInvoice.Performance.Benchmarks.ShoppingCarts.Domain
+namespace ECommerceStoreInvoice.Performance.Benchmarks.ClientDataVersions.Domain
 {
     internal static class ClientValidationDataFactory
     {
