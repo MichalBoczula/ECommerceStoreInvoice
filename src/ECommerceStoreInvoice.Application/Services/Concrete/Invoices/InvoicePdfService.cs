@@ -5,17 +5,24 @@ using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate;
 using Microsoft.Playwright;
 using System.Globalization;
 using System.Net;
+using System.Diagnostics;
 
 namespace ECommerceStoreInvoice.Application.Services.Concrete.Invoices
 {
-    internal sealed class InvoicePdfService : IInvoicePdfService
+    internal sealed class InvoicePdfService : IInvoicePdfService, IAsyncDisposable
     {
         private const decimal VatRate = 0.23m;
+        private static readonly SemaphoreSlim _initializationLock = new(1, 1);
+        private static bool _playwrightInstalled;
+
+        private IPlaywright? _playwright;
+        private IBrowser? _browser;
+        private string? _cachedMainTemplate;
+        private string? _cachedLineTemplate;
 
         public async Task<string> GenerateInvoicePdf(Order order, ClientDataVersionResponseDto? clientDataVersion)
         {
-            var templatePath = GetTemplatePath();
-            var template = await File.ReadAllTextAsync(templatePath);
+            await EnsureInitializedAsync();
 
             var lines = BuildInvoiceLines(order);
             var subtotal = lines.Sum(x => x.TotalAmount);
@@ -23,7 +30,7 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Invoices
             var tax = Math.Round(subtotal * VatRate, 2);
             var grandTotal = subtotal + tax;
 
-            var withRows = ReplaceOrderLinesSection(template, lines);
+            var withRows = ReplaceOrderLinesSection(_cachedMainTemplate!, lines);
             var withOrderData = ApplyOrderTokens(withRows, order);
             var withClientData = ApplyClientTokens(withOrderData, order.ClientId, clientDataVersion);
             var withStoreData = ApplyStoreTokens(withClientData);
@@ -32,29 +39,92 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Invoices
             var invoiceHtml = ApplyFinalTokens(withTotals, order.Id);
             var invoicePath = GetInvoicePdfPath(order.Id);
 
-            using var playwright = await Playwright.CreateAsync();
-            await using var browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions { Headless = true });
-            var page = await browser.NewPageAsync();
-            await page.SetContentAsync(invoiceHtml);
-            await page.PdfAsync(new PagePdfOptions
+            var page = await _browser!.NewPageAsync();
+            try
             {
-                Path = invoicePath,
-                Format = "A4",
-                PrintBackground = true
-            });
+                await page.SetContentAsync(invoiceHtml);
+                await page.PdfAsync(new PagePdfOptions
+                {
+                    Path = invoicePath,
+                    Format = "A4",
+                    PrintBackground = true
+                });
+            }
+            finally
+            {
+                await page.CloseAsync();
+            }
 
             return new Uri(invoicePath).AbsoluteUri;
         }
 
-        internal string GetTemplatePath()
+        private async Task EnsureInitializedAsync()
         {
-            return Path.Combine(AppContext.BaseDirectory, "Templates", "InvoiceTemplate.html");
+            if (_browser != null && _cachedMainTemplate != null) return;
+
+            await _initializationLock.WaitAsync();
+            try
+            {
+                if (_browser == null)
+                {
+                    await EnsurePlaywrightInstalledAsync();
+                    _playwright = await Playwright.CreateAsync();
+                    _browser = await _playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions { Headless = true });
+                }
+
+                if (_cachedMainTemplate == null)
+                {
+                    _cachedMainTemplate = await File.ReadAllTextAsync(GetTemplatePath());
+                    _cachedLineTemplate = await File.ReadAllTextAsync(GetLineTemplatePath());
+                }
+            }
+            finally
+            {
+                _initializationLock.Release();
+            }
         }
 
-        internal string GetLineTemplatePath()
+        private async Task EnsurePlaywrightInstalledAsync()
         {
-            return Path.Combine(AppContext.BaseDirectory, "Templates", "InvoiceLineTemplate.html");
+            if (_playwrightInstalled) return;
+
+            var scriptPath = FindPlaywrightScriptPath();
+            var startInfo = new ProcessStartInfo
+            {
+                FileName = "pwsh",
+                Arguments = $"\"{scriptPath}\" install",
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+
+            using var process = Process.Start(startInfo) ?? throw new InvalidOperationException("Failed to start Playwright installation.");
+            await process.WaitForExitAsync();
+
+            if (process.ExitCode != 0)
+            {
+                var error = await process.StandardError.ReadToEndAsync();
+                throw new InvalidOperationException($"Playwright installation failed: {error}");
+            }
+
+            _playwrightInstalled = true;
         }
+
+        private string FindPlaywrightScriptPath()
+        {
+            var directory = new DirectoryInfo(AppContext.BaseDirectory);
+            while (directory is not null)
+            {
+                var path = Path.Combine(directory.FullName, "playwright.ps1");
+                if (File.Exists(path)) return path;
+                directory = directory.Parent;
+            }
+            throw new FileNotFoundException("Could not find playwright.ps1");
+        }
+
+        internal string GetTemplatePath() => Path.Combine(AppContext.BaseDirectory, "Templates", "InvoiceTemplate.html");
+        internal string GetLineTemplatePath() => Path.Combine(AppContext.BaseDirectory, "Templates", "InvoiceLineTemplate.html");
 
         internal IReadOnlyCollection<InvoiceLineDto> BuildInvoiceLines(Order order)
         {
@@ -73,16 +143,12 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Invoices
         internal string ReplaceOrderLinesSection(string template, IReadOnlyCollection<InvoiceLineDto> lines)
         {
             var rows = string.Join(Environment.NewLine, lines.Select(BuildLineRow));
-
             var startToken = "<tbody>";
             var endToken = "</tbody>";
             var startIndex = template.IndexOf(startToken, StringComparison.Ordinal);
             var endIndex = template.IndexOf(endToken, StringComparison.Ordinal);
 
-            if (startIndex == -1 || endIndex == -1 || endIndex < startIndex)
-            {
-                return template;
-            }
+            if (startIndex == -1 || endIndex == -1 || endIndex < startIndex) return template;
 
             var bodyStart = startIndex + startToken.Length;
             return template[..bodyStart] + Environment.NewLine + rows + Environment.NewLine + template[endIndex..];
@@ -90,9 +156,7 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Invoices
 
         internal string BuildLineRow(InvoiceLineDto line)
         {
-            var lineTemplate = File.ReadAllText(GetLineTemplatePath());
-
-            return lineTemplate
+            return _cachedLineTemplate!
                 .Replace("{{Line.Name}}", Escape(line.Name))
                 .Replace("{{Line.ProductVersionId}}", Escape(line.ProductVersionId))
                 .Replace("{{Line.Brand}}", Escape(line.Brand))
@@ -130,16 +194,7 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Invoices
 
         internal string ApplyStoreTokens(string template)
         {
-            const string storeStreet = "Invoice Street";
-            const string storeBuildingNumber = "10";
-            const string storeApartmentNumber = "2";
-            const string storePostalCode = "00-000";
-            const string storeCity = "Store";
-
-            var storeAddress = string.IsNullOrWhiteSpace(storeApartmentNumber)
-                ? $"{storeStreet} {storeBuildingNumber}, {storePostalCode} {storeCity}"
-                : $"{storeStreet} {storeBuildingNumber}/{storeApartmentNumber}, {storePostalCode} {storeCity}";
-
+            const string storeAddress = "Invoice Street 10/2, 00-000 Store";
             return template
                 .Replace("{{Store.Name}}", "ECommerce Store")
                 .Replace("{{Store.Address}}", storeAddress)
@@ -160,10 +215,11 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Invoices
 
         internal string ApplyFinalTokens(string template, Guid orderId)
         {
+            var now = DateTime.UtcNow.ToString("u");
             return template
                 .Replace("{{Invoice.Id}}", orderId.ToString())
-                .Replace("{{Invoice.IssueDateUtc}}", DateTime.UtcNow.ToString("u"))
-                .Replace("{{Invoice.GeneratedAtUtc}}", DateTime.UtcNow.ToString("u"))
+                .Replace("{{Invoice.IssueDateUtc}}", now)
+                .Replace("{{Invoice.GeneratedAtUtc}}", now)
                 .Replace("{{#Order.Lines}}", string.Empty)
                 .Replace("{{/Order.Lines}}", string.Empty);
         }
@@ -175,25 +231,15 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Invoices
             return Path.Combine(directory, $"{orderId}.pdf");
         }
 
-        internal string GetInvoicesDirectoryPath()
-        {
-            var solutionRoot = ResolveSolutionRoot();
-            return Path.Combine(solutionRoot, "Invoices");
-        }
+        internal string GetInvoicesDirectoryPath() => Path.Combine(ResolveSolutionRoot(), "Invoices");
 
         internal string ResolveSolutionRoot()
         {
             var fromBase = FindDirectoryContainingSolutionFile(AppContext.BaseDirectory);
-            if (fromBase is not null)
-            {
-                return fromBase;
-            }
+            if (fromBase is not null) return fromBase;
 
             var fromCurrent = FindDirectoryContainingSolutionFile(Directory.GetCurrentDirectory());
-            if (fromCurrent is not null)
-            {
-                return fromCurrent;
-            }
+            if (fromCurrent is not null) return fromCurrent;
 
             return Directory.GetCurrentDirectory();
         }
@@ -204,25 +250,19 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Invoices
             while (directory is not null)
             {
                 var solutionFile = Path.Combine(directory.FullName, "ECommerceStoreInvoice.slnx");
-                if (File.Exists(solutionFile))
-                {
-                    return directory.FullName;
-                }
-
+                if (File.Exists(solutionFile)) return directory.FullName;
                 directory = directory.Parent;
             }
-
             return null;
         }
 
-        internal string FormatMoney(decimal value)
-        {
-            return value.ToString("0.00", CultureInfo.InvariantCulture);
-        }
+        internal string FormatMoney(decimal value) => value.ToString("0.00", CultureInfo.InvariantCulture);
+        internal string Escape(string value) => WebUtility.HtmlEncode(value);
 
-        internal string Escape(string value)
+        public async ValueTask DisposeAsync()
         {
-            return WebUtility.HtmlEncode(value);
+            if (_browser != null) await _browser.DisposeAsync();
+            _playwright?.Dispose();
         }
     }
 }
