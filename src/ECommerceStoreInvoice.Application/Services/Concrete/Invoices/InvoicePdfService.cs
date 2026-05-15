@@ -156,7 +156,9 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Invoices
 
         internal string BuildLineRow(InvoiceLineDto line)
         {
-            return _cachedLineTemplate!
+            var lineTemplate = GetLineTemplate();
+
+            return lineTemplate
                 .Replace("{{Line.Name}}", Escape(line.Name))
                 .Replace("{{Line.ProductVersionId}}", Escape(line.ProductVersionId))
                 .Replace("{{Line.Brand}}", Escape(line.Brand))
@@ -254,6 +256,12 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Invoices
                 directory = directory.Parent;
             }
             return null;
+        }
+
+        internal string GetLineTemplate()
+        {
+            _cachedLineTemplate ??= File.ReadAllText(GetLineTemplatePath());
+            return _cachedLineTemplate;
         }
 
         internal string FormatMoney(decimal value) => value.ToString("0.00", CultureInfo.InvariantCulture);
