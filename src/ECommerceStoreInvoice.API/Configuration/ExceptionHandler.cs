@@ -38,7 +38,7 @@ public sealed class ExceptionHandler : IExceptionHandler
 
             ResourceAlreadyExistsException resourceAlreadyExistsException =>
                 ResourceAlreadyExistsExceptionHandlerExtension.HandleResourceAlreadyExistsException(
-                    context, resourceAlreadyExistsException, cancellationToken),
+                    context, resourceAlreadyExistsException, _logger, cancellationToken),
 
             _ => DefaultExceptionHandlerExtension.HandleDefaultException(context, exception, _logger, cancellationToken)
         });
