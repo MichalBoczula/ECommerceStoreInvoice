@@ -5,11 +5,14 @@ using ECommerceStoreInvoice.Application;
 using ECommerceStoreInvoice.Domain;
 using ECommerceStoreInvoice.Infrastructure;
 using ECommerceStoreInvoice.Infrastructure.Configuration;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddEndpointsApiExplorer();
+builder.Host.UseSerilog((context, configuration) =>
+    configuration.ReadFrom.Configuration(context.Configuration));
 
+builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApiDocument(options =>
 {
     options.PostProcess = document =>
@@ -22,10 +25,8 @@ builder.Services.AddOpenApiDocument(options =>
 });
 
 builder.Services.AddHealthChecks();
-
 builder.Services.AddExceptionHandler<ExceptionHandler>();
 builder.Services.AddProblemDetails();
-
 builder.Services.AddDomain();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplication();
@@ -36,6 +37,8 @@ await app.Services.InitializeInfrastructureAsync();
 
 app.UseExceptionHandler();
 
+app.UseSerilogRequestLogging();
+
 app.UseOpenApi();
 app.UseSwaggerUi();
 app.UseHttpsRedirection();
@@ -45,7 +48,6 @@ app.MapOrdersEndpoints();
 app.MapShoppingCartEndpoints();
 app.MapClientDataVersionsEndpoints();
 app.MapDocumentationEndpoints();
-
 app.MapHealthChecks("/health");
 
 app.Run();

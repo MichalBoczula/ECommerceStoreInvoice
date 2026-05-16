@@ -3,48 +3,46 @@ using ECommerceStoreInvoice.API.Configuration.Extensions;
 using ECommerceStoreInvoice.Domain.Validation.Common;
 using Microsoft.AspNetCore.Diagnostics;
 
-namespace ECommerceStoreInvoice.API.Configuration
+namespace ECommerceStoreInvoice.API.Configuration;
+
+public sealed class ExceptionHandler : IExceptionHandler
 {
-    public sealed class ExceptionHandler : IExceptionHandler
+    private readonly ILogger<ExceptionHandler> _logger;
+
+    public ExceptionHandler(ILogger<ExceptionHandler> logger)
     {
-        private readonly ILogger<ExceptionHandler> _logger;
+        _logger = logger;
+    }
 
-        public ExceptionHandler(ILogger<ExceptionHandler> logger)
+    public async ValueTask<bool> TryHandleAsync(
+        HttpContext context,
+        Exception exception,
+        CancellationToken cancellationToken)
+    {
+        await (exception switch
         {
-            _logger = logger;
-        }
+            ValidationException validationException =>
+                ValidationExceptionHandlerExtension.HandleValidationException(
+                    context, validationException, cancellationToken),
 
-        public async ValueTask<bool> TryHandleAsync(
-            HttpContext context,
-            Exception exception,
-            CancellationToken cancellationToken)
-        {
-            await (exception switch
-            {
-                ValidationException validationException =>
-                    ValidationExceptionHandlerExtension.HandleValidationException(
-                        context, validationException, cancellationToken),
+            ResourceNotFoundException notFoundException =>
+                context.HandleNotFoundException(notFoundException, _logger, cancellationToken),
 
-                ResourceNotFoundException notFoundException =>
-                    NotFoundExceptionHandlerExtension.HandleNotFoundException(
-                        context, notFoundException, cancellationToken),
+            BadHttpRequestException badHttpRequestException when badHttpRequestException.InnerException is JsonException =>
+                JsonDeserializationExceptionHandlerExtension.HandleJsonDeserializationException(
+                    context, badHttpRequestException, cancellationToken),
 
-                BadHttpRequestException badHttpRequestException when badHttpRequestException.InnerException is JsonException =>
-                    JsonDeserializationExceptionHandlerExtension.HandleJsonDeserializationException(
-                        context, badHttpRequestException, cancellationToken),
+            JsonException jsonException =>
+                JsonDeserializationExceptionHandlerExtension.HandleJsonDeserializationException(
+                    context, jsonException, cancellationToken),
 
-                JsonException jsonException =>
-                    JsonDeserializationExceptionHandlerExtension.HandleJsonDeserializationException(
-                        context, jsonException, cancellationToken),
+            ResourceAlreadyExistsException resourceAlreadyExistsException =>
+                ResourceAlreadyExistsExceptionHandlerExtension.HandleResourceAlreadyExistsException(
+                    context, resourceAlreadyExistsException, cancellationToken),
 
-                ResourceAlreadyExistsException resourceAlreadyExistsException =>
-                    ResourceAlreadyExistsExceptionHandlerExtension.HandleResourceAlreadyExistsException(
-                        context, resourceAlreadyExistsException, cancellationToken),
+            _ => DefaultExceptionHandlerExtension.HandleDefaultException(context, exception, _logger, cancellationToken)
+        });
 
-                _ => DefaultExceptionHandlerExtension.HandleDefaultException(context, exception, _logger, cancellationToken)
-            });
-
-            return true;
-        }
+        return true;
     }
 }

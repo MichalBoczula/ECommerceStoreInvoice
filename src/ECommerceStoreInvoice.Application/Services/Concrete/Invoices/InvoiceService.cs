@@ -1,4 +1,5 @@
-﻿using ECommerceStoreInvoice.Application.Common.ResponsesDto;
+﻿using Microsoft.Extensions.Logging;
+using ECommerceStoreInvoice.Application.Common.ResponsesDto;
 using ECommerceStoreInvoice.Application.Services.Abstract.ClientDataVersions;
 using ECommerceStoreInvoice.Application.Descriptors.Invoices;
 using ECommerceStoreInvoice.Application.Services.Abstract.Invoices;
@@ -15,11 +16,14 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Invoices
         IClientDataVersionService clientDataVersionService,
         IInvoicePdfService invoicePdfService,
         IValidationPolicy<Guid> guidValidationPolicy,
-        IValidationPolicy<InvoiceOrderStatusValidationContext> createInvoiceValidationPolicy)
+        IValidationPolicy<InvoiceOrderStatusValidationContext> createInvoiceValidationPolicy,
+        ILogger<InvoiceService> logger) 
         : IInvoiceService
     {
         public async Task<InvoiceResponseDto> CreateInvoiceForOrder(Guid clientId, Guid orderId)
         {
+            logger.LogInformation("Initiating invoice generation flow for OrderId: {OrderId} and ClientId: {ClientId}", orderId, clientId);
+
             var descriptor = new CreateInvoiceForOrderDescriptor();
 
             var validationResult = await descriptor.ValidateClientId(clientId, guidValidationPolicy);
@@ -38,6 +42,7 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Invoices
 
             var existingInvoice = await descriptor.LoadInvoiceByOrderId(orderId, invoiceRepository);
             descriptor.ThrowAlreadyExistsExceptionIfInvoiceAlreadyExists(orderId, existingInvoice);
+
             validationResult = await descriptor.ValidateOrderStatus(order!, createInvoiceValidationPolicy);
             descriptor.ThrowValidationExceptionIfOrderStatusInvalid(validationResult);
 
@@ -47,11 +52,15 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Invoices
             var invoice = descriptor.CreateInvoice(orderId, clientDataVersion!.Id, storageUrl);
             var createdInvoice = await descriptor.SaveInvoice(invoice, invoiceRepository);
 
+            logger.LogInformation("Successfully completed invoice generation. InvoiceId: {InvoiceId} mapped to OrderId: {OrderId}", createdInvoice.Id, orderId);
+
             return descriptor.MapToResponse(createdInvoice);
         }
 
         public async Task<InvoiceResponseDto> GetInvoiceById(Guid invoiceId)
         {
+            logger.LogDebug("Processing read request for InvoiceId: {InvoiceId}", invoiceId);
+
             var descriptor = new GetInvoiceByIdDescriptor();
 
             var validationResult = await descriptor.ValidateInvoiceId(invoiceId, guidValidationPolicy);

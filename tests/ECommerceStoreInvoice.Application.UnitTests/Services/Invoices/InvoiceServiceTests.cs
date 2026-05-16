@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using ECommerceStoreInvoice.Application.Services.Abstract.ClientDataVersions;
 using ECommerceStoreInvoice.Application.Services.Abstract.Invoices;
 using ECommerceStoreInvoice.Application.Services.Concrete.Invoices;
@@ -38,6 +39,8 @@ public sealed class InvoiceServiceTests
         var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
         var invoiceStatusValidationPolicyMock = new Mock<IValidationPolicy<InvoiceOrderStatusValidationContext>>(MockBehavior.Strict);
 
+        var loggerMock = new Mock<ILogger<InvoiceService>>(MockBehavior.Loose);
+
         guidValidationPolicyMock
             .Setup(policy => policy.Validate(clientId))
             .ReturnsAsync(invalidResult);
@@ -48,7 +51,8 @@ public sealed class InvoiceServiceTests
             clientDataVersionServiceMock.Object,
             invoicePdfServiceMock.Object,
             guidValidationPolicyMock.Object,
-            invoiceStatusValidationPolicyMock.Object);
+            invoiceStatusValidationPolicyMock.Object,
+            loggerMock.Object);
 
         await Should.ThrowAsync<ValidationException>(() => sut.CreateInvoiceForOrder(clientId, orderId));
 
@@ -78,6 +82,7 @@ public sealed class InvoiceServiceTests
         var invoicePdfServiceMock = new Mock<IInvoicePdfService>(MockBehavior.Strict);
         var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
         var invoiceStatusValidationPolicyMock = new Mock<IValidationPolicy<InvoiceOrderStatusValidationContext>>(MockBehavior.Strict);
+        var loggerMock = new Mock<ILogger<InvoiceService>>(MockBehavior.Loose);
 
         var sequence = new MockSequence();
         guidValidationPolicyMock
@@ -96,7 +101,8 @@ public sealed class InvoiceServiceTests
             clientDataVersionServiceMock.Object,
             invoicePdfServiceMock.Object,
             guidValidationPolicyMock.Object,
-            invoiceStatusValidationPolicyMock.Object);
+            invoiceStatusValidationPolicyMock.Object,
+            loggerMock.Object);
 
         await Should.ThrowAsync<ValidationException>(() => sut.CreateInvoiceForOrder(clientId, orderId));
 
@@ -124,6 +130,7 @@ public sealed class InvoiceServiceTests
         var invoicePdfServiceMock = new Mock<IInvoicePdfService>(MockBehavior.Strict);
         var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
         var invoiceStatusValidationPolicyMock = new Mock<IValidationPolicy<InvoiceOrderStatusValidationContext>>(MockBehavior.Strict);
+        var loggerMock = new Mock<ILogger<InvoiceService>>(MockBehavior.Loose);
 
         guidValidationPolicyMock
             .Setup(policy => policy.Validate(invoiceId))
@@ -135,7 +142,8 @@ public sealed class InvoiceServiceTests
             clientDataVersionServiceMock.Object,
             invoicePdfServiceMock.Object,
             guidValidationPolicyMock.Object,
-            invoiceStatusValidationPolicyMock.Object);
+            invoiceStatusValidationPolicyMock.Object,
+            loggerMock.Object);
 
         await Should.ThrowAsync<ValidationException>(() => sut.GetInvoiceById(invoiceId));
 
@@ -171,6 +179,7 @@ public sealed class InvoiceServiceTests
         var invoicePdfServiceMock = new Mock<IInvoicePdfService>(MockBehavior.Strict);
         var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
         var invoiceStatusValidationPolicyMock = new Mock<IValidationPolicy<InvoiceOrderStatusValidationContext>>(MockBehavior.Strict);
+        var loggerMock = new Mock<ILogger<InvoiceService>>(MockBehavior.Loose);
 
         var sequence = new MockSequence();
         guidValidationPolicyMock
@@ -199,7 +208,8 @@ public sealed class InvoiceServiceTests
             clientDataVersionServiceMock.Object,
             invoicePdfServiceMock.Object,
             guidValidationPolicyMock.Object,
-            invoiceStatusValidationPolicyMock.Object);
+            invoiceStatusValidationPolicyMock.Object,
+            loggerMock.Object);
 
         await Should.ThrowAsync<ResourceAlreadyExistsException>(() => sut.CreateInvoiceForOrder(clientId, orderId));
 
@@ -261,6 +271,8 @@ public sealed class InvoiceServiceTests
         var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
         var invoiceStatusValidationPolicyMock = new Mock<IValidationPolicy<InvoiceOrderStatusValidationContext>>(MockBehavior.Strict);
 
+        var loggerMock = new Mock<ILogger<InvoiceService>>(MockBehavior.Loose);
+
         var sequence = new MockSequence();
 
         guidValidationPolicyMock
@@ -312,7 +324,8 @@ public sealed class InvoiceServiceTests
             clientDataVersionServiceMock.Object,
             invoicePdfServiceMock.Object,
             guidValidationPolicyMock.Object,
-            invoiceStatusValidationPolicyMock.Object);
+            invoiceStatusValidationPolicyMock.Object,
+            loggerMock.Object);
 
         var response = await sut.CreateInvoiceForOrder(clientId, orderId);
 
@@ -324,6 +337,24 @@ public sealed class InvoiceServiceTests
         clientDataVersionServiceMock.Verify(service => service.GetByClientId(clientId), Times.Once);
         invoicePdfServiceMock.Verify(service => service.GenerateInvoicePdf(order, clientDataVersion), Times.Once);
         invoiceRepositoryMock.Verify(repo => repo.CreateInvoice(It.IsAny<Invoice>()), Times.Once);
+
+        loggerMock.Verify(
+            x => x.Log(
+                LogLevel.Information,
+                It.IsAny<EventId>(),
+                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Initiating invoice generation flow")),
+                It.IsAny<Exception>(),
+                It.Is<Func<It.IsAnyType, Exception?, string>>((v, t) => true)),
+            Times.Once);
+
+        loggerMock.Verify(
+            x => x.Log(
+                LogLevel.Information,
+                It.IsAny<EventId>(),
+                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Successfully completed invoice generation")),
+                It.IsAny<Exception>(),
+                It.Is<Func<It.IsAnyType, Exception?, string>>((v, t) => true)),
+            Times.Once);
 
         response.ShouldNotBeNull();
         response.Id.ShouldBe(createdInvoice.Id);
