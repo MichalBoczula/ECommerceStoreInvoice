@@ -30,11 +30,11 @@ public sealed class ExceptionHandler : IExceptionHandler
 
             BadHttpRequestException badHttpRequestException when badHttpRequestException.InnerException is JsonException =>
                 JsonDeserializationExceptionHandlerExtension.HandleJsonDeserializationException(
-                    context, badHttpRequestException, cancellationToken),
+                    context, badHttpRequestException, _logger, cancellationToken),
 
             JsonException jsonException =>
                 JsonDeserializationExceptionHandlerExtension.HandleJsonDeserializationException(
-                    context, jsonException, cancellationToken),
+                    context, jsonException, _logger, cancellationToken),
 
             ResourceAlreadyExistsException resourceAlreadyExistsException =>
                 ResourceAlreadyExistsExceptionHandlerExtension.HandleResourceAlreadyExistsException(
