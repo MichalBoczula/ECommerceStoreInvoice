@@ -5,18 +5,23 @@ using ECommerceStoreInvoice.Domain.AggregatesModel.Common.Enums;
 using ECommerceStoreInvoice.Domain.AggregatesModel.Common.ValueObjects;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate.ValueObjects;
+using Microsoft.Extensions.Logging;
 using Microsoft.Playwright;
+using Moq;
 using Shouldly;
 
 namespace ECommerceStoreInvoice.Application.UnitTests.Services.Invoices;
 
 public sealed class InvoicePdfServiceTests
 {
+    private readonly Mock<ILogger<InvoicePdfService>> _loggerMock = new();
+
+    private InvoicePdfService CreateSut() => new(_loggerMock.Object);
     [Fact]
     public void GetTemplatePath_ShouldReturnInvoiceTemplatePathUnderTemplatesDirectory()
     {
         // Arrange
-        var sut = new InvoicePdfService();
+        var sut = CreateSut();
         var expectedPath = Path.Combine(AppContext.BaseDirectory, "Templates", "InvoiceTemplate.html");
 
         // Act
@@ -30,7 +35,7 @@ public sealed class InvoicePdfServiceTests
     public void GetLineTemplatePath_ShouldReturnInvoiceLineTemplatePathUnderTemplatesDirectory()
     {
         // Arrange
-        var sut = new InvoicePdfService();
+        var sut = CreateSut();
         var expectedPath = Path.Combine(AppContext.BaseDirectory, "Templates", "InvoiceLineTemplate.html");
 
         // Act
@@ -69,7 +74,7 @@ public sealed class InvoicePdfServiceTests
             OrderStatus.Created,
             new Money(orderLines.Sum(x => x.Total.Amount), "USD"));
 
-        var sut = new InvoicePdfService();
+        var sut = CreateSut();
 
         // Act
         var result = sut.BuildInvoiceLines(order).ToList();
@@ -107,7 +112,7 @@ public sealed class InvoicePdfServiceTests
             OrderStatus.Created,
             new Money(0m, "USD"));
 
-        var sut = new InvoicePdfService();
+        var sut = CreateSut();
 
         // Act
         var result = sut.BuildInvoiceLines(order);
@@ -120,7 +125,7 @@ public sealed class InvoicePdfServiceTests
     public void ReplaceOrderLinesSection_WhenTemplateContainsTbody_ShouldReplaceBodyWithBuiltRows()
     {
         // Arrange
-        var sut = new InvoicePdfService();
+        var sut = CreateSut();
         var lines = new List<InvoiceLineDto>
         {
             new()
@@ -157,7 +162,7 @@ public sealed class InvoicePdfServiceTests
     public void BuildLineRow_WhenLineContainsHtmlSensitiveCharacters_ShouldEscapeAndFormatValues()
     {
         // Arrange
-        var sut = new InvoicePdfService();
+        var sut = CreateSut();
         var line = new InvoiceLineDto
         {
             ProductVersionId = "11111111-1111-1111-1111-111111111111",
@@ -196,7 +201,7 @@ public sealed class InvoicePdfServiceTests
             OrderStatus.Created,
             new Money(0m, "USD"));
 
-        var sut = new InvoicePdfService();
+        var sut = CreateSut();
         var template = "Invoice {{InvoiceNumber}} {{Order.Id}} {{Order.CreatedAtUtc}} {{Order.Status}} {{Order.ClientId}}";
 
         // Act
@@ -235,7 +240,7 @@ public sealed class InvoicePdfServiceTests
             CreatedAt = DateTime.UtcNow
         };
 
-        var sut = new InvoicePdfService();
+        var sut = CreateSut();
         var template = "Name: {{Client.Name}}, Address: {{Client.Address}}, Email: {{Client.Email}}, Phone: {{Client.Phone}}, ClientId: {{Order.ClientId}}";
 
         // Act
@@ -258,7 +263,7 @@ public sealed class InvoicePdfServiceTests
     public void ApplyStoreTokens_WhenTemplateContainsStoreTokens_ShouldReplaceStorePlaceholders()
     {
         // Arrange
-        var sut = new InvoicePdfService();
+        var sut = CreateSut();
         var template = "Store: {{Store.Name}}, {{Store.Address}}, {{Store.Email}}, {{Store.Phone}}";
 
         // Act
@@ -284,7 +289,7 @@ public sealed class InvoicePdfServiceTests
         const decimal grandTotal = 151.782m;
         const string currency = "USD";
 
-        var sut = new InvoicePdfService();
+        var sut = CreateSut();
         var template = """
             Subtotal: {{Order.Total.Amount}} {{Order.Total.Currency}}
             Tax: {{Invoice.Tax.Amount}} {{Invoice.Tax.Currency}}
@@ -311,7 +316,7 @@ public sealed class InvoicePdfServiceTests
     {
         // Arrange
         var orderId = Guid.Parse("cccccccc-cccc-cccc-cccc-cccccccccccc");
-        var sut = new InvoicePdfService();
+        var sut = CreateSut();
         var template = """
             Invoice: {{Invoice.Id}}
             Issue: {{Invoice.IssueDateUtc}}
@@ -338,7 +343,7 @@ public sealed class InvoicePdfServiceTests
     public void FindDirectoryContainingSolutionFile_WhenSolutionExistsInAncestor_ShouldReturnAncestorDirectory()
     {
         // Arrange
-        var sut = new InvoicePdfService();
+        var sut = CreateSut();
         var tempRoot = Path.Combine(Path.GetTempPath(), $"invoicepdf-{Guid.NewGuid():N}");
         var nestedDirectory = Path.Combine(tempRoot, "a", "b", "c");
         Directory.CreateDirectory(nestedDirectory);
@@ -365,7 +370,7 @@ public sealed class InvoicePdfServiceTests
     public void ResolveSolutionRoot_WhenCalled_ShouldReturnDirectoryContainingSolutionFileOrCurrentDirectory()
     {
         // Arrange
-        var sut = new InvoicePdfService();
+        var sut = CreateSut();
 
         // Act
         var result = sut.ResolveSolutionRoot();
@@ -386,7 +391,7 @@ public sealed class InvoicePdfServiceTests
     public void FormatMoney_WhenCalled_ShouldReturnInvariantStringWithTwoDecimals(decimal input, string expected)
     {
         // Arrange
-        var sut = new InvoicePdfService();
+        var sut = CreateSut();
 
         // Act
         var result = sut.FormatMoney(input);
@@ -399,7 +404,7 @@ public sealed class InvoicePdfServiceTests
     public void Escape_WhenValueContainsHtmlSensitiveCharacters_ShouldReturnHtmlEncodedValue()
     {
         // Arrange
-        var sut = new InvoicePdfService();
+        var sut = CreateSut();
         var value = "\"Special\" <tag> & 'quote'";
 
         // Act
@@ -414,7 +419,7 @@ public sealed class InvoicePdfServiceTests
     {
         // Arrange
         var orderId = Guid.Parse("ffffffff-0000-ffff-ffff-ffffffffffff");
-        var sut = new InvoicePdfService();
+        var sut = CreateSut();
 
         // Act
         var result = sut.GetInvoicePdfPath(orderId);
