@@ -17,7 +17,7 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Invoices
         IInvoicePdfService invoicePdfService,
         IValidationPolicy<Guid> guidValidationPolicy,
         IValidationPolicy<InvoiceOrderStatusValidationContext> createInvoiceValidationPolicy,
-        ILogger<InvoiceService> logger) 
+        ILogger<IInvoiceService> logger) 
         : IInvoiceService
     {
         public async Task<InvoiceResponseDto> CreateInvoiceForOrder(Guid clientId, Guid orderId)
