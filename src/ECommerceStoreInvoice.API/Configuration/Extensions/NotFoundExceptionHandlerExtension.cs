@@ -11,8 +11,10 @@ public static class NotFoundExceptionHandlerExtension
         ILogger logger,
         CancellationToken cancellationToken)
     {
-        logger.LogWarning(
-            "Resource tracking failure: Type {ResourceType} with Id {ResourceId} was not found during action {ActionName} at path {RequestPath}. TraceId: {TraceId}",
+        logger.LogError(
+            exception,
+            "Error in {ProcessName}. Resource {ResourceType} with id {ResourceId} was not found. Action {ActionName}. Path {RequestPath}. TraceId {TraceId}.",
+            nameof(HandleNotFoundException),
             exception.ResourceType,
             exception.ResourceId,
             exception.ActionName,
