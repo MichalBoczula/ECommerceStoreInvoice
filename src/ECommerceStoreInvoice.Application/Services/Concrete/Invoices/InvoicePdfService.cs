@@ -2,6 +2,7 @@ using ECommerceStoreInvoice.Application.Common.ResponsesDto.Invoices;
 using ECommerceStoreInvoice.Application.Common.ResponsesDto.ClientDataVersions;
 using ECommerceStoreInvoice.Application.Services.Abstract.Invoices;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate;
+using Microsoft.Extensions.Logging;
 using Microsoft.Playwright;
 using System.Globalization;
 using System.Net;
@@ -9,7 +10,8 @@ using System.Diagnostics;
 
 namespace ECommerceStoreInvoice.Application.Services.Concrete.Invoices
 {
-    internal sealed class InvoicePdfService : IInvoicePdfService, IAsyncDisposable
+    internal sealed class InvoicePdfService(
+        ILogger<InvoicePdfService> logger) : IInvoicePdfService, IAsyncDisposable
     {
         private const decimal VatRate = 0.23m;
         private static readonly SemaphoreSlim _initializationLock = new(1, 1);
@@ -22,6 +24,7 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Invoices
 
         public async Task<string> GenerateInvoicePdf(Order order, ClientDataVersionResponseDto? clientDataVersion)
         {
+            logger.LogInformation("Starting PDF generation for OrderId: {OrderId} and ClientId: {ClientId}", order.Id, order.ClientId);
             await EnsureInitializedAsync();
 
             var lines = BuildInvoiceLines(order);
@@ -55,7 +58,9 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Invoices
                 await page.CloseAsync();
             }
 
-            return new Uri(invoicePath).AbsoluteUri;
+            var invoiceUri = new Uri(invoicePath).AbsoluteUri;
+            logger.LogInformation("Successfully generated PDF for OrderId: {OrderId}. Output path: {InvoicePath}", order.Id, invoicePath);
+            return invoiceUri;
         }
 
         private async Task EnsureInitializedAsync()

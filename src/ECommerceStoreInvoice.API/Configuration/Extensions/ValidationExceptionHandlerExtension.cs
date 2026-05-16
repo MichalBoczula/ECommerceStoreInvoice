@@ -4,8 +4,18 @@ namespace ECommerceStoreInvoice.API.Configuration.Extensions
 {
     public static class ValidationExceptionHandlerExtension
     {
-        public static async Task HandleValidationException(this HttpContext context, ValidationException validationException, CancellationToken cancellationToken)
+        public static async Task HandleValidationException(
+            this HttpContext context,
+            ValidationException validationException,
+            ILogger logger,
+            CancellationToken cancellationToken)
         {
+            logger.LogWarning(
+                "Validation failure: Request at path {RequestPath} failed validation with {ErrorCount} error(s). TraceId: {TraceId}",
+                context.Request.Path,
+                validationException.ValidationResult.GetValidationErrors().Count,
+                context.TraceIdentifier);
+
             context.Response.StatusCode = StatusCodes.Status400BadRequest;
             context.Response.ContentType = "application/problem+json";
 
