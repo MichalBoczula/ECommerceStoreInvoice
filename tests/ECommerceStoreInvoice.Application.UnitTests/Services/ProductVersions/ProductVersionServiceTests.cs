@@ -5,6 +5,7 @@ using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate.Repositories;
 using ECommerceStoreInvoice.Domain.Validation.Abstract;
 using ECommerceStoreInvoice.Domain.Validation.Common;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Shouldly;
 
@@ -39,6 +40,7 @@ public sealed class ProductVersionServiceTests
         var productVersionRepositoryMock = new Mock<IProductVersionRepository>(MockBehavior.Strict);
         var productVersionValidationPolicyMock = new Mock<IValidationPolicy<ProductVersion>>(MockBehavior.Strict);
         var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
+        var loggerMock = new Mock<ILogger<ProductVersionService>>();
 
         productVersionValidationPolicyMock
             .Setup(policy => policy.Validate(It.IsAny<ProductVersion>()))
@@ -51,7 +53,8 @@ public sealed class ProductVersionServiceTests
         var sut = new ProductVersionService(
             productVersionRepositoryMock.Object,
             productVersionValidationPolicyMock.Object,
-            guidValidationPolicyMock.Object);
+            guidValidationPolicyMock.Object,
+            loggerMock.Object);
 
         // Act
         var response = await sut.CreateProductVersion(request);
@@ -101,6 +104,7 @@ public sealed class ProductVersionServiceTests
         var productVersionRepositoryMock = new Mock<IProductVersionRepository>(MockBehavior.Strict);
         var productVersionValidationPolicyMock = new Mock<IValidationPolicy<ProductVersion>>(MockBehavior.Strict);
         var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
+        var loggerMock = new Mock<ILogger<ProductVersionService>>();
 
         productVersionValidationPolicyMock
             .Setup(policy => policy.Validate(It.IsAny<ProductVersion>()))
@@ -109,7 +113,8 @@ public sealed class ProductVersionServiceTests
         var sut = new ProductVersionService(
             productVersionRepositoryMock.Object,
             productVersionValidationPolicyMock.Object,
-            guidValidationPolicyMock.Object);
+            guidValidationPolicyMock.Object,
+            loggerMock.Object);
 
         // Act / Assert
         await Should.ThrowAsync<ValidationException>(() => sut.CreateProductVersion(request));
@@ -137,6 +142,7 @@ public sealed class ProductVersionServiceTests
         var productVersionRepositoryMock = new Mock<IProductVersionRepository>(MockBehavior.Strict);
         var productVersionValidationPolicyMock = new Mock<IValidationPolicy<ProductVersion>>(MockBehavior.Strict);
         var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
+        var loggerMock = new Mock<ILogger<ProductVersionService>>();
 
         var sequence = new MockSequence();
         guidValidationPolicyMock
@@ -152,7 +158,8 @@ public sealed class ProductVersionServiceTests
         var sut = new ProductVersionService(
             productVersionRepositoryMock.Object,
             productVersionValidationPolicyMock.Object,
-            guidValidationPolicyMock.Object);
+            guidValidationPolicyMock.Object,
+            loggerMock.Object);
 
         // Act
         var response = await sut.GetProductVersionById(id);
@@ -189,6 +196,7 @@ public sealed class ProductVersionServiceTests
         var productVersionRepositoryMock = new Mock<IProductVersionRepository>(MockBehavior.Strict);
         var productVersionValidationPolicyMock = new Mock<IValidationPolicy<ProductVersion>>(MockBehavior.Strict);
         var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
+        var loggerMock = new Mock<ILogger<ProductVersionService>>();
 
         guidValidationPolicyMock
             .Setup(policy => policy.Validate(id))
@@ -197,7 +205,8 @@ public sealed class ProductVersionServiceTests
         var sut = new ProductVersionService(
             productVersionRepositoryMock.Object,
             productVersionValidationPolicyMock.Object,
-            guidValidationPolicyMock.Object);
+            guidValidationPolicyMock.Object,
+            loggerMock.Object);
 
         // Act / Assert
         await Should.ThrowAsync<ValidationException>(() => sut.GetProductVersionById(id));
@@ -216,6 +225,7 @@ public sealed class ProductVersionServiceTests
         var productVersionRepositoryMock = new Mock<IProductVersionRepository>(MockBehavior.Strict);
         var productVersionValidationPolicyMock = new Mock<IValidationPolicy<ProductVersion>>(MockBehavior.Strict);
         var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
+        var loggerMock = new Mock<ILogger<ProductVersionService>>();
 
         var sequence = new MockSequence();
         guidValidationPolicyMock
@@ -231,7 +241,8 @@ public sealed class ProductVersionServiceTests
         var sut = new ProductVersionService(
             productVersionRepositoryMock.Object,
             productVersionValidationPolicyMock.Object,
-            guidValidationPolicyMock.Object);
+            guidValidationPolicyMock.Object,
+            loggerMock.Object);
 
         // Act / Assert
         var ex = await Should.ThrowAsync<ResourceNotFoundException>(() => sut.GetProductVersionById(id));
