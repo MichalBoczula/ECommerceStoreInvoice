@@ -5,6 +5,7 @@ using ECommerceStoreInvoice.Domain.AggregatesModel.ClientDataVersionAggregate.Re
 using ECommerceStoreInvoice.Domain.AggregatesModel.ClientDataVersionAggregate.ValueObjects;
 using ECommerceStoreInvoice.Domain.Validation.Abstract;
 using ECommerceStoreInvoice.Domain.Validation.Common;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Shouldly;
 
@@ -36,6 +37,7 @@ public sealed class ClientDataVersionServiceTests
         var clientDataVersionRepositoryMock = new Mock<IClientDataVersionRepository>(MockBehavior.Strict);
         var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
         var clientDataVersionValidationPolicyMock = new Mock<IValidationPolicy<ClientDataVersion>>(MockBehavior.Strict);
+        var loggerMock = new Mock<ILogger<ClientDataVersionService>>(MockBehavior.Loose);
 
         var sequence = new MockSequence();
         guidValidationPolicyMock
@@ -66,7 +68,8 @@ public sealed class ClientDataVersionServiceTests
         var sut = new ClientDataVersionService(
             clientDataVersionRepositoryMock.Object,
             guidValidationPolicyMock.Object,
-            clientDataVersionValidationPolicyMock.Object);
+            clientDataVersionValidationPolicyMock.Object,
+            loggerMock.Object);
 
         // Act
         var response = await sut.Create(clientId, request);
@@ -119,6 +122,7 @@ public sealed class ClientDataVersionServiceTests
         var clientDataVersionRepositoryMock = new Mock<IClientDataVersionRepository>(MockBehavior.Strict);
         var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
         var clientDataVersionValidationPolicyMock = new Mock<IValidationPolicy<ClientDataVersion>>(MockBehavior.Strict);
+        var loggerMock = new Mock<ILogger<ClientDataVersionService>>(MockBehavior.Loose);
 
         guidValidationPolicyMock
             .Setup(policy => policy.Validate(clientId))
@@ -127,7 +131,8 @@ public sealed class ClientDataVersionServiceTests
         var sut = new ClientDataVersionService(
             clientDataVersionRepositoryMock.Object,
             guidValidationPolicyMock.Object,
-            clientDataVersionValidationPolicyMock.Object);
+            clientDataVersionValidationPolicyMock.Object,
+            loggerMock.Object);
 
         // Act / Assert
         await Should.ThrowAsync<ValidationException>(() => sut.Create(clientId, request));
@@ -166,6 +171,7 @@ public sealed class ClientDataVersionServiceTests
         var clientDataVersionRepositoryMock = new Mock<IClientDataVersionRepository>(MockBehavior.Strict);
         var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
         var clientDataVersionValidationPolicyMock = new Mock<IValidationPolicy<ClientDataVersion>>(MockBehavior.Strict);
+        var loggerMock = new Mock<ILogger<ClientDataVersionService>>(MockBehavior.Loose);
 
         var sequence = new MockSequence();
         guidValidationPolicyMock
@@ -181,7 +187,8 @@ public sealed class ClientDataVersionServiceTests
         var sut = new ClientDataVersionService(
             clientDataVersionRepositoryMock.Object,
             guidValidationPolicyMock.Object,
-            clientDataVersionValidationPolicyMock.Object);
+            clientDataVersionValidationPolicyMock.Object,
+            loggerMock.Object);
 
         // Act / Assert
         await Should.ThrowAsync<ValidationException>(() => sut.Create(clientId, request));
@@ -210,6 +217,7 @@ public sealed class ClientDataVersionServiceTests
         var clientDataVersionRepositoryMock = new Mock<IClientDataVersionRepository>(MockBehavior.Strict);
         var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
         var clientDataVersionValidationPolicyMock = new Mock<IValidationPolicy<ClientDataVersion>>(MockBehavior.Strict);
+        var loggerMock = new Mock<ILogger<ClientDataVersionService>>(MockBehavior.Loose);
 
         var sequence = new MockSequence();
         guidValidationPolicyMock
@@ -225,7 +233,8 @@ public sealed class ClientDataVersionServiceTests
         var sut = new ClientDataVersionService(
             clientDataVersionRepositoryMock.Object,
             guidValidationPolicyMock.Object,
-            clientDataVersionValidationPolicyMock.Object);
+            clientDataVersionValidationPolicyMock.Object,
+            loggerMock.Object);
 
         // Act
         var response = await sut.GetByClientId(clientId);
@@ -267,6 +276,7 @@ public sealed class ClientDataVersionServiceTests
         var clientDataVersionRepositoryMock = new Mock<IClientDataVersionRepository>(MockBehavior.Strict);
         var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
         var clientDataVersionValidationPolicyMock = new Mock<IValidationPolicy<ClientDataVersion>>(MockBehavior.Strict);
+        var loggerMock = new Mock<ILogger<ClientDataVersionService>>(MockBehavior.Loose);
 
         guidValidationPolicyMock
             .Setup(policy => policy.Validate(clientId))
@@ -275,7 +285,8 @@ public sealed class ClientDataVersionServiceTests
         var sut = new ClientDataVersionService(
             clientDataVersionRepositoryMock.Object,
             guidValidationPolicyMock.Object,
-            clientDataVersionValidationPolicyMock.Object);
+            clientDataVersionValidationPolicyMock.Object,
+            loggerMock.Object);
 
         // Act / Assert
         await Should.ThrowAsync<ValidationException>(() => sut.GetByClientId(clientId));
@@ -294,6 +305,7 @@ public sealed class ClientDataVersionServiceTests
         var clientDataVersionRepositoryMock = new Mock<IClientDataVersionRepository>(MockBehavior.Strict);
         var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
         var clientDataVersionValidationPolicyMock = new Mock<IValidationPolicy<ClientDataVersion>>(MockBehavior.Strict);
+        var loggerMock = new Mock<ILogger<ClientDataVersionService>>(MockBehavior.Loose);
 
         var sequence = new MockSequence();
         guidValidationPolicyMock
@@ -309,7 +321,8 @@ public sealed class ClientDataVersionServiceTests
         var sut = new ClientDataVersionService(
             clientDataVersionRepositoryMock.Object,
             guidValidationPolicyMock.Object,
-            clientDataVersionValidationPolicyMock.Object);
+            clientDataVersionValidationPolicyMock.Object,
+            loggerMock.Object);
 
         // Act / Assert
         var ex = await Should.ThrowAsync<ResourceNotFoundException>(() => sut.GetByClientId(clientId));
