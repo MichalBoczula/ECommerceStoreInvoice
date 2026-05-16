@@ -5,8 +5,20 @@ namespace ECommerceStoreInvoice.API.Configuration.Extensions
 {
     public static class ResourceAlreadyExistsExceptionHandlerExtension
     {
-        public static async Task HandleResourceAlreadyExistsException(this HttpContext context, ResourceAlreadyExistsException exception, CancellationToken cancellationToken)
+        public static async Task HandleResourceAlreadyExistsException(
+            this HttpContext context,
+            ResourceAlreadyExistsException exception,
+            ILogger logger,
+            CancellationToken cancellationToken)
         {
+            logger.LogWarning(
+                "Resource conflict detected: Type {ResourceType} with Id {ResourceId} already exists during action {ActionName} at path {RequestPath}. TraceId: {TraceId}",
+                exception.ResourceType,
+                exception.ResourceId,
+                exception.ActionName,
+                context.Request.Path,
+                context.TraceIdentifier);
+
             context.Response.StatusCode = StatusCodes.Status409Conflict;
             context.Response.ContentType = "application/problem+json";
 
