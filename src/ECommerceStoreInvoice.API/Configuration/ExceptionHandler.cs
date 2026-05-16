@@ -23,7 +23,7 @@ public sealed class ExceptionHandler : IExceptionHandler
         {
             ValidationException validationException =>
                 ValidationExceptionHandlerExtension.HandleValidationException(
-                    context, validationException, cancellationToken),
+                    context, validationException, _logger, cancellationToken),
 
             ResourceNotFoundException notFoundException =>
                 context.HandleNotFoundException(notFoundException, _logger, cancellationToken),

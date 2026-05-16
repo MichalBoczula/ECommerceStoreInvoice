@@ -39,7 +39,7 @@ public sealed class InvoiceServiceTests
         var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
         var invoiceStatusValidationPolicyMock = new Mock<IValidationPolicy<InvoiceOrderStatusValidationContext>>(MockBehavior.Strict);
 
-        var loggerMock = new Mock<ILogger<InvoiceService>>(MockBehavior.Loose);
+        var loggerMock = new Mock<ILogger<IInvoiceService>>(MockBehavior.Loose);
 
         guidValidationPolicyMock
             .Setup(policy => policy.Validate(clientId))
@@ -82,7 +82,7 @@ public sealed class InvoiceServiceTests
         var invoicePdfServiceMock = new Mock<IInvoicePdfService>(MockBehavior.Strict);
         var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
         var invoiceStatusValidationPolicyMock = new Mock<IValidationPolicy<InvoiceOrderStatusValidationContext>>(MockBehavior.Strict);
-        var loggerMock = new Mock<ILogger<InvoiceService>>(MockBehavior.Loose);
+        var loggerMock = new Mock<ILogger<IInvoiceService>>(MockBehavior.Loose);
 
         var sequence = new MockSequence();
         guidValidationPolicyMock
@@ -130,7 +130,7 @@ public sealed class InvoiceServiceTests
         var invoicePdfServiceMock = new Mock<IInvoicePdfService>(MockBehavior.Strict);
         var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
         var invoiceStatusValidationPolicyMock = new Mock<IValidationPolicy<InvoiceOrderStatusValidationContext>>(MockBehavior.Strict);
-        var loggerMock = new Mock<ILogger<InvoiceService>>(MockBehavior.Loose);
+        var loggerMock = new Mock<ILogger<IInvoiceService>>(MockBehavior.Loose);
 
         guidValidationPolicyMock
             .Setup(policy => policy.Validate(invoiceId))
@@ -179,7 +179,7 @@ public sealed class InvoiceServiceTests
         var invoicePdfServiceMock = new Mock<IInvoicePdfService>(MockBehavior.Strict);
         var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
         var invoiceStatusValidationPolicyMock = new Mock<IValidationPolicy<InvoiceOrderStatusValidationContext>>(MockBehavior.Strict);
-        var loggerMock = new Mock<ILogger<InvoiceService>>(MockBehavior.Loose);
+        var loggerMock = new Mock<ILogger<IInvoiceService>>(MockBehavior.Loose);
 
         var sequence = new MockSequence();
         guidValidationPolicyMock
@@ -271,7 +271,7 @@ public sealed class InvoiceServiceTests
         var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
         var invoiceStatusValidationPolicyMock = new Mock<IValidationPolicy<InvoiceOrderStatusValidationContext>>(MockBehavior.Strict);
 
-        var loggerMock = new Mock<ILogger<InvoiceService>>(MockBehavior.Loose);
+        var loggerMock = new Mock<ILogger<IInvoiceService>>(MockBehavior.Loose);
 
         var sequence = new MockSequence();
 
