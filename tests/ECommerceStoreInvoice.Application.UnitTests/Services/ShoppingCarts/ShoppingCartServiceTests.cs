@@ -5,6 +5,7 @@ using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.ValueOb
 using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.Repositories;
 using ECommerceStoreInvoice.Domain.Validation.Abstract;
 using ECommerceStoreInvoice.Domain.Validation.Common;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Shouldly;
 
@@ -23,6 +24,7 @@ public sealed class ShoppingCartServiceTests
         var shoppingCartRepositoryMock = new Mock<IShoppingCartRepository>(MockBehavior.Strict);
         var shoppingCartLineValidationPolicyMock = new Mock<IValidationPolicy<IReadOnlyCollection<ShoppingCartLine>>>(MockBehavior.Strict);
         var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
+        var loggerMock = new Mock<ILogger<ShoppingCartService>>(MockBehavior.Loose);
 
         var sequence = new MockSequence();
         guidValidationPolicyMock
@@ -38,7 +40,8 @@ public sealed class ShoppingCartServiceTests
         var sut = new ShoppingCartService(
             shoppingCartRepositoryMock.Object,
             shoppingCartLineValidationPolicyMock.Object,
-            guidValidationPolicyMock.Object);
+            guidValidationPolicyMock.Object,
+            loggerMock.Object);
 
         // Act
         var response = await sut.GetShoppingCartByClientId(clientId);
@@ -73,6 +76,7 @@ public sealed class ShoppingCartServiceTests
         var shoppingCartRepositoryMock = new Mock<IShoppingCartRepository>(MockBehavior.Strict);
         var shoppingCartLineValidationPolicyMock = new Mock<IValidationPolicy<IReadOnlyCollection<ShoppingCartLine>>>(MockBehavior.Strict);
         var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
+        var loggerMock = new Mock<ILogger<ShoppingCartService>>(MockBehavior.Loose);
 
         guidValidationPolicyMock
             .Setup(policy => policy.Validate(clientId))
@@ -81,7 +85,8 @@ public sealed class ShoppingCartServiceTests
         var sut = new ShoppingCartService(
             shoppingCartRepositoryMock.Object,
             shoppingCartLineValidationPolicyMock.Object,
-            guidValidationPolicyMock.Object);
+            guidValidationPolicyMock.Object,
+            loggerMock.Object);
 
         // Act / Assert
         await Should.ThrowAsync<ValidationException>(() => sut.GetShoppingCartByClientId(clientId));
@@ -100,6 +105,7 @@ public sealed class ShoppingCartServiceTests
         var shoppingCartRepositoryMock = new Mock<IShoppingCartRepository>(MockBehavior.Strict);
         var shoppingCartLineValidationPolicyMock = new Mock<IValidationPolicy<IReadOnlyCollection<ShoppingCartLine>>>(MockBehavior.Strict);
         var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
+        var loggerMock = new Mock<ILogger<ShoppingCartService>>(MockBehavior.Loose);
 
         var sequence = new MockSequence();
         guidValidationPolicyMock
@@ -115,7 +121,8 @@ public sealed class ShoppingCartServiceTests
         var sut = new ShoppingCartService(
             shoppingCartRepositoryMock.Object,
             shoppingCartLineValidationPolicyMock.Object,
-            guidValidationPolicyMock.Object);
+            guidValidationPolicyMock.Object,
+            loggerMock.Object);
 
         // Act / Assert
         var ex = await Should.ThrowAsync<ResourceNotFoundException>(() => sut.GetShoppingCartByClientId(clientId));
@@ -139,6 +146,7 @@ public sealed class ShoppingCartServiceTests
         var shoppingCartRepositoryMock = new Mock<IShoppingCartRepository>(MockBehavior.Strict);
         var shoppingCartLineValidationPolicyMock = new Mock<IValidationPolicy<IReadOnlyCollection<ShoppingCartLine>>>(MockBehavior.Strict);
         var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
+        var loggerMock = new Mock<ILogger<ShoppingCartService>>(MockBehavior.Loose);
 
         var sequence = new MockSequence();
         guidValidationPolicyMock
@@ -159,7 +167,8 @@ public sealed class ShoppingCartServiceTests
         var sut = new ShoppingCartService(
             shoppingCartRepositoryMock.Object,
             shoppingCartLineValidationPolicyMock.Object,
-            guidValidationPolicyMock.Object);
+            guidValidationPolicyMock.Object,
+            loggerMock.Object);
 
         // Act
         var response = await sut.CreateShoppingCart(clientId);
@@ -195,6 +204,7 @@ public sealed class ShoppingCartServiceTests
         var shoppingCartRepositoryMock = new Mock<IShoppingCartRepository>(MockBehavior.Strict);
         var shoppingCartLineValidationPolicyMock = new Mock<IValidationPolicy<IReadOnlyCollection<ShoppingCartLine>>>(MockBehavior.Strict);
         var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
+        var loggerMock = new Mock<ILogger<ShoppingCartService>>(MockBehavior.Loose);
 
         guidValidationPolicyMock
             .Setup(policy => policy.Validate(clientId))
@@ -203,7 +213,8 @@ public sealed class ShoppingCartServiceTests
         var sut = new ShoppingCartService(
             shoppingCartRepositoryMock.Object,
             shoppingCartLineValidationPolicyMock.Object,
-            guidValidationPolicyMock.Object);
+            guidValidationPolicyMock.Object,
+            loggerMock.Object);
 
         // Act / Assert
         await Should.ThrowAsync<ValidationException>(() => sut.CreateShoppingCart(clientId));
@@ -224,6 +235,7 @@ public sealed class ShoppingCartServiceTests
         var shoppingCartRepositoryMock = new Mock<IShoppingCartRepository>(MockBehavior.Strict);
         var shoppingCartLineValidationPolicyMock = new Mock<IValidationPolicy<IReadOnlyCollection<ShoppingCartLine>>>(MockBehavior.Strict);
         var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
+        var loggerMock = new Mock<ILogger<ShoppingCartService>>(MockBehavior.Loose);
 
         var sequence = new MockSequence();
         guidValidationPolicyMock
@@ -239,7 +251,8 @@ public sealed class ShoppingCartServiceTests
         var sut = new ShoppingCartService(
             shoppingCartRepositoryMock.Object,
             shoppingCartLineValidationPolicyMock.Object,
-            guidValidationPolicyMock.Object);
+            guidValidationPolicyMock.Object,
+            loggerMock.Object);
 
         // Act / Assert
         var ex = await Should.ThrowAsync<ResourceAlreadyExistsException>(() => sut.CreateShoppingCart(clientId));
@@ -288,6 +301,7 @@ public sealed class ShoppingCartServiceTests
         var shoppingCartRepositoryMock = new Mock<IShoppingCartRepository>(MockBehavior.Strict);
         var shoppingCartLineValidationPolicyMock = new Mock<IValidationPolicy<IReadOnlyCollection<ShoppingCartLine>>>(MockBehavior.Strict);
         var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
+        var loggerMock = new Mock<ILogger<ShoppingCartService>>(MockBehavior.Loose);
 
         var sequence = new MockSequence();
         guidValidationPolicyMock
@@ -315,7 +329,8 @@ public sealed class ShoppingCartServiceTests
         var sut = new ShoppingCartService(
             shoppingCartRepositoryMock.Object,
             shoppingCartLineValidationPolicyMock.Object,
-            guidValidationPolicyMock.Object);
+            guidValidationPolicyMock.Object,
+            loggerMock.Object);
 
         // Act
         var response = await sut.UpdateShoppingCart(clientId, request);
@@ -366,6 +381,7 @@ public sealed class ShoppingCartServiceTests
         var shoppingCartRepositoryMock = new Mock<IShoppingCartRepository>(MockBehavior.Strict);
         var shoppingCartLineValidationPolicyMock = new Mock<IValidationPolicy<IReadOnlyCollection<ShoppingCartLine>>>(MockBehavior.Strict);
         var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
+        var loggerMock = new Mock<ILogger<ShoppingCartService>>(MockBehavior.Loose);
 
         guidValidationPolicyMock
             .Setup(policy => policy.Validate(clientId))
@@ -374,7 +390,8 @@ public sealed class ShoppingCartServiceTests
         var sut = new ShoppingCartService(
             shoppingCartRepositoryMock.Object,
             shoppingCartLineValidationPolicyMock.Object,
-            guidValidationPolicyMock.Object);
+            guidValidationPolicyMock.Object,
+            loggerMock.Object);
 
         // Act / Assert
         await Should.ThrowAsync<ValidationException>(() => sut.UpdateShoppingCart(clientId, request));
@@ -410,6 +427,7 @@ public sealed class ShoppingCartServiceTests
         var shoppingCartRepositoryMock = new Mock<IShoppingCartRepository>(MockBehavior.Strict);
         var shoppingCartLineValidationPolicyMock = new Mock<IValidationPolicy<IReadOnlyCollection<ShoppingCartLine>>>(MockBehavior.Strict);
         var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
+        var loggerMock = new Mock<ILogger<ShoppingCartService>>(MockBehavior.Loose);
 
         var sequence = new MockSequence();
         guidValidationPolicyMock
@@ -425,7 +443,8 @@ public sealed class ShoppingCartServiceTests
         var sut = new ShoppingCartService(
             shoppingCartRepositoryMock.Object,
             shoppingCartLineValidationPolicyMock.Object,
-            guidValidationPolicyMock.Object);
+            guidValidationPolicyMock.Object,
+            loggerMock.Object);
 
         // Act / Assert
         var ex = await Should.ThrowAsync<ResourceNotFoundException>(() => sut.UpdateShoppingCart(clientId, request));
@@ -472,6 +491,7 @@ public sealed class ShoppingCartServiceTests
         var shoppingCartRepositoryMock = new Mock<IShoppingCartRepository>(MockBehavior.Strict);
         var shoppingCartLineValidationPolicyMock = new Mock<IValidationPolicy<IReadOnlyCollection<ShoppingCartLine>>>(MockBehavior.Strict);
         var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
+        var loggerMock = new Mock<ILogger<ShoppingCartService>>(MockBehavior.Loose);
 
         var sequence = new MockSequence();
         guidValidationPolicyMock
@@ -492,7 +512,8 @@ public sealed class ShoppingCartServiceTests
         var sut = new ShoppingCartService(
             shoppingCartRepositoryMock.Object,
             shoppingCartLineValidationPolicyMock.Object,
-            guidValidationPolicyMock.Object);
+            guidValidationPolicyMock.Object,
+            loggerMock.Object);
 
         // Act / Assert
         await Should.ThrowAsync<ValidationException>(() => sut.UpdateShoppingCart(clientId, request));
