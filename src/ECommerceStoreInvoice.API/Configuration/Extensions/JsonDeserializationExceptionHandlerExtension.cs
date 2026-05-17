@@ -6,7 +6,11 @@ namespace ECommerceStoreInvoice.API.Configuration.Extensions
 {
     public static class JsonDeserializationExceptionHandlerExtension
     {
-        public static async Task HandleJsonDeserializationException(this HttpContext context, Exception exception, CancellationToken cancellationToken)
+        public static async Task HandleJsonDeserializationException(
+            this HttpContext context,
+            Exception exception,
+            ILogger logger,
+            CancellationToken cancellationToken)
         {
             context.Response.StatusCode = StatusCodes.Status400BadRequest;
             context.Response.ContentType = "application/problem+json";
@@ -14,6 +18,16 @@ namespace ECommerceStoreInvoice.API.Configuration.Extensions
             var jsonException = exception as JsonException ?? exception.InnerException as JsonException;
             var (typeName, missingProperties) = ExtractMissingInformation(jsonException?.Message);
             var detail = BuildDetail(typeName, missingProperties, jsonException?.Message ?? exception.Message);
+            var simpleTypeName = string.IsNullOrWhiteSpace(typeName)
+                ? "payload"
+                : typeName.Split('.').Last();
+
+            logger.LogWarning(
+                "JSON deserialization failure: Type {PayloadType} with missing properties {MissingProperties} at path {RequestPath}. TraceId: {TraceId}",
+                simpleTypeName,
+                missingProperties.Count == 0 ? "none" : string.Join(", ", missingProperties),
+                context.Request.Path,
+                context.TraceIdentifier);
 
             await context.Response.WriteAsJsonAsync(new ProblemDetails
             {
