@@ -13,15 +13,9 @@ builder.Host.UseSerilog((context, configuration) =>
     configuration.ReadFrom.Configuration(context.Configuration));
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddOpenApiDocument(options =>
+builder.Services.AddSwaggerGen(c =>
 {
-    options.PostProcess = document =>
-    {
-        foreach (var schema in document.Components.Schemas.Values)
-        {
-            schema.FixGuidFormats();
-        }
-    };
+    c.SupportNonNullableReferenceTypes();
 });
 
 builder.Services.AddHealthChecks();
@@ -39,8 +33,8 @@ app.UseExceptionHandler();
 
 app.UseSerilogRequestLogging();
 
-app.UseOpenApi();
-app.UseSwaggerUi();
+app.UseSwagger();
+app.UseSwaggerUI();
 app.UseHttpsRedirection();
 
 app.MapInvoicesEndpoints();
