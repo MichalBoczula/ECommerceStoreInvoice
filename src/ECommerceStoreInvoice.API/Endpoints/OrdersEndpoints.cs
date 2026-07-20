@@ -20,7 +20,7 @@ namespace ECommerceStoreInvoice.API.Endpoints
 
         private static void MapOrdersCommands(IEndpointRouteBuilder group)
         {
-            group.MapPost("/client/{clientId:guid}", async (Guid clientId, IOrderService orderService) => 
+            group.MapPost("/{clientId:guid}", async (Guid clientId, IOrderService orderService) =>
             {
                 var order = await orderService.CreateOrder(clientId);
 
