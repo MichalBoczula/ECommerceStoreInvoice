@@ -15,7 +15,7 @@ namespace ECommerceStoreInvoice.API.Endpoints
     {
         public static IEndpointRouteBuilder MapDocumentationEndpoints(this IEndpointRouteBuilder app)
         {
-            var group = app.MapGroup("/documentation").WithTags("Documentation");
+            var group = app.MapGroup("/orders-documentation").WithTags("Documentation");
 
             MapFlowDocumentation(group);
             MapValidationDocumentation(group);
