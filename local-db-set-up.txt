@@ -1,0 +1,1 @@
+docker run -d --name invoices-mongodb-local -p 27017:27017 -e MONGO_INITDB_ROOT_USERNAME=admin -e MONGO_INITDB_ROOT_PASSWORD=admin123 mongo:8.0
