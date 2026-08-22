@@ -159,92 +159,92 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Invoices.CreateInvoice
             else
             {
                 await this.ScenarioStartAsync();
-                global::Reqnroll.Table table7 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table19 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table7.AddRow(new string[] {
+                table19.AddRow(new string[] {
                             "ClientName",
                             "John Doe"});
-                table7.AddRow(new string[] {
+                table19.AddRow(new string[] {
                             "PostalCode",
                             "00-001"});
-                table7.AddRow(new string[] {
+                table19.AddRow(new string[] {
                             "City",
                             "NewYork"});
-                table7.AddRow(new string[] {
+                table19.AddRow(new string[] {
                             "Street",
                             "Main.St"});
-                table7.AddRow(new string[] {
+                table19.AddRow(new string[] {
                             "BuildingNumber",
                             "10A"});
-                table7.AddRow(new string[] {
+                table19.AddRow(new string[] {
                             "ApartmentNumber",
                             "5"});
-                table7.AddRow(new string[] {
+                table19.AddRow(new string[] {
                             "PhoneNumber",
                             "123456789"});
-                table7.AddRow(new string[] {
+                table19.AddRow(new string[] {
                             "PhonePrefix",
                             "48"});
-                table7.AddRow(new string[] {
+                table19.AddRow(new string[] {
                             "AddressEmail",
                             "john.doe@test.com"});
-                table7.AddRow(new string[] {
+                table19.AddRow(new string[] {
                             "ProductName",
                             "Laptop"});
-                table7.AddRow(new string[] {
+                table19.AddRow(new string[] {
                             "ProductBrand",
                             "Lenovo"});
-                table7.AddRow(new string[] {
+                table19.AddRow(new string[] {
                             "UnitPriceAmount",
                             "999.99"});
-                table7.AddRow(new string[] {
+                table19.AddRow(new string[] {
                             "UnitPriceCurrency",
                             "usd"});
-                table7.AddRow(new string[] {
+                table19.AddRow(new string[] {
                             "Quantity",
                             "2"});
-                table7.AddRow(new string[] {
+                table19.AddRow(new string[] {
                             "OrderStatusAfterCreation",
                             "Paid"});
 #line 5
-    await testRunner.GivenAsync("I have a paid order for invoice creation", ((string)(null)), table7, "Given ");
+    await testRunner.GivenAsync("I have a paid order for invoice creation", ((string)(null)), table19, "Given ");
 #line hidden
-                global::Reqnroll.Table table8 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table20 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table8.AddRow(new string[] {
+                table20.AddRow(new string[] {
                             "HttpMethod",
                             "POST"});
-                table8.AddRow(new string[] {
+                table20.AddRow(new string[] {
                             "Route",
                             "/invoices/{clientId}/{orderId}"});
 #line 22
-    await testRunner.WhenAsync("I submit the create invoice for order request", ((string)(null)), table8, "When ");
+    await testRunner.WhenAsync("I submit the create invoice for order request", ((string)(null)), table20, "When ");
 #line hidden
-                global::Reqnroll.Table table9 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table21 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table9.AddRow(new string[] {
+                table21.AddRow(new string[] {
                             "StatusCode",
                             "200"});
-                table9.AddRow(new string[] {
+                table21.AddRow(new string[] {
                             "HasId",
                             "true"});
-                table9.AddRow(new string[] {
+                table21.AddRow(new string[] {
                             "HasOrderId",
                             "true"});
-                table9.AddRow(new string[] {
+                table21.AddRow(new string[] {
                             "HasClientDataVersionId",
                             "true"});
-                table9.AddRow(new string[] {
+                table21.AddRow(new string[] {
                             "HasStorageUrl",
                             "true"});
-                table9.AddRow(new string[] {
+                table21.AddRow(new string[] {
                             "HasCreatedAt",
                             "true"});
 #line 26
-    await testRunner.ThenAsync("the invoice is created successfully", ((string)(null)), table9, "Then ");
+    await testRunner.ThenAsync("the invoice is created successfully", ((string)(null)), table21, "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

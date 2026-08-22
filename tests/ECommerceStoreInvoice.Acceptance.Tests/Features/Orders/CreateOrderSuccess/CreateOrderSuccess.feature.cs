@@ -154,80 +154,80 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Orders.CreateOrderSucc
             else
             {
                 await this.ScenarioStartAsync();
-                global::Reqnroll.Table table4 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table33 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table4.AddRow(new string[] {
+                table33.AddRow(new string[] {
                             "Name",
                             "Laptop"});
-                table4.AddRow(new string[] {
+                table33.AddRow(new string[] {
                             "Brand",
                             "Lenovo"});
-                table4.AddRow(new string[] {
+                table33.AddRow(new string[] {
                             "UnitPriceAmount",
                             "999.99"});
-                table4.AddRow(new string[] {
+                table33.AddRow(new string[] {
                             "UnitPriceCurrency",
                             "usd"});
-                table4.AddRow(new string[] {
+                table33.AddRow(new string[] {
                             "Quantity",
                             "2"});
 #line 4
-    await testRunner.GivenAsync("I have a valid shopping cart for order creation", ((string)(null)), table4, "Given ");
+    await testRunner.GivenAsync("I have a valid shopping cart for order creation", ((string)(null)), table33, "Given ");
 #line hidden
 #line 11
     await testRunner.WhenAsync("I submit the create order request", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-                global::Reqnroll.Table table5 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table34 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table5.AddRow(new string[] {
+                table34.AddRow(new string[] {
                             "StatusCode",
                             "200"});
-                table5.AddRow(new string[] {
+                table34.AddRow(new string[] {
                             "HasId",
                             "true"});
-                table5.AddRow(new string[] {
+                table34.AddRow(new string[] {
                             "HasClientId",
                             "true"});
-                table5.AddRow(new string[] {
+                table34.AddRow(new string[] {
                             "Status",
                             "Created"});
-                table5.AddRow(new string[] {
+                table34.AddRow(new string[] {
                             "TotalAmount",
                             "1999.98"});
-                table5.AddRow(new string[] {
+                table34.AddRow(new string[] {
                             "TotalCurrency",
                             "USD"});
-                table5.AddRow(new string[] {
+                table34.AddRow(new string[] {
                             "LinesCount",
                             "1"});
-                table5.AddRow(new string[] {
+                table34.AddRow(new string[] {
                             "FirstLineHasProductVersionId",
                             "true"});
-                table5.AddRow(new string[] {
+                table34.AddRow(new string[] {
                             "FirstLineName",
                             "Laptop"});
-                table5.AddRow(new string[] {
+                table34.AddRow(new string[] {
                             "FirstLineBrand",
                             "Lenovo"});
-                table5.AddRow(new string[] {
+                table34.AddRow(new string[] {
                             "FirstLineQuantity",
                             "2"});
-                table5.AddRow(new string[] {
+                table34.AddRow(new string[] {
                             "FirstLineUnitPriceAmount",
                             "999.99"});
-                table5.AddRow(new string[] {
+                table34.AddRow(new string[] {
                             "FirstLineUnitPriceCurrency",
                             "USD"});
-                table5.AddRow(new string[] {
+                table34.AddRow(new string[] {
                             "FirstLineTotalAmount",
                             "1999.98"});
-                table5.AddRow(new string[] {
+                table34.AddRow(new string[] {
                             "FirstLineTotalCurrency",
                             "USD"});
 #line 12
-    await testRunner.ThenAsync("the order is created successfully", ((string)(null)), table5, "Then ");
+    await testRunner.ThenAsync("the order is created successfully", ((string)(null)), table34, "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

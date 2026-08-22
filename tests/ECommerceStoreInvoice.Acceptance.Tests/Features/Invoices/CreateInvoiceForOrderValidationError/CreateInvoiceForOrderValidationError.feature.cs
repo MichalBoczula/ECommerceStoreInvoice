@@ -159,48 +159,48 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Invoices.CreateInvoice
             else
             {
                 await this.ScenarioStartAsync();
-                global::Reqnroll.Table table1 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table22 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table1.AddRow(new string[] {
+                table22.AddRow(new string[] {
                             "ClientId",
                             "11111111-1111-1111-1111-111111111111"});
-                table1.AddRow(new string[] {
+                table22.AddRow(new string[] {
                             "OrderId",
                             "00000000-0000-0000-0000-000000000000"});
 #line 5
-    await testRunner.GivenAsync("I have invoice creation identifiers", ((string)(null)), table1, "Given ");
+    await testRunner.GivenAsync("I have invoice creation identifiers", ((string)(null)), table22, "Given ");
 #line hidden
 #line 9
     await testRunner.WhenAsync("I submit the create invoice request with invalid order id", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-                global::Reqnroll.Table table2 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table23 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table2.AddRow(new string[] {
+                table23.AddRow(new string[] {
                             "StatusCode",
                             "400"});
-                table2.AddRow(new string[] {
+                table23.AddRow(new string[] {
                             "Title",
                             "Validation failed."});
-                table2.AddRow(new string[] {
+                table23.AddRow(new string[] {
                             "Detail",
                             "One or more validation errors occurred."});
-                table2.AddRow(new string[] {
+                table23.AddRow(new string[] {
                             "Type",
                             "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.1"});
-                table2.AddRow(new string[] {
+                table23.AddRow(new string[] {
                             "Instance",
                             "/invoices/11111111-1111-1111-1111-111111111111/00000000-0000-0000-0000-0000000000" +
                                 "00"});
-                table2.AddRow(new string[] {
+                table23.AddRow(new string[] {
                             "ErrorsCount",
                             "1"});
-                table2.AddRow(new string[] {
+                table23.AddRow(new string[] {
                             "FirstErrorMessage",
                             "ClientId cannot be empty Guid."});
 #line 10
-    await testRunner.ThenAsync("problem details are returned for create invoice for order validation error", ((string)(null)), table2, "Then ");
+    await testRunner.ThenAsync("problem details are returned for create invoice for order validation error", ((string)(null)), table23, "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

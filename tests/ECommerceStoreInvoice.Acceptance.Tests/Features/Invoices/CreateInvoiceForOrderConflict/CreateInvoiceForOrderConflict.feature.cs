@@ -159,83 +159,83 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Invoices.CreateInvoice
             else
             {
                 await this.ScenarioStartAsync();
-                global::Reqnroll.Table table1 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table13 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table1.AddRow(new string[] {
+                table13.AddRow(new string[] {
                             "ClientName",
                             "John Doe"});
-                table1.AddRow(new string[] {
+                table13.AddRow(new string[] {
                             "PostalCode",
                             "00-001"});
-                table1.AddRow(new string[] {
+                table13.AddRow(new string[] {
                             "City",
                             "NewYork"});
-                table1.AddRow(new string[] {
+                table13.AddRow(new string[] {
                             "Street",
                             "Main.St"});
-                table1.AddRow(new string[] {
+                table13.AddRow(new string[] {
                             "BuildingNumber",
                             "10A"});
-                table1.AddRow(new string[] {
+                table13.AddRow(new string[] {
                             "ApartmentNumber",
                             "5"});
-                table1.AddRow(new string[] {
+                table13.AddRow(new string[] {
                             "PhoneNumber",
                             "123456789"});
-                table1.AddRow(new string[] {
+                table13.AddRow(new string[] {
                             "PhonePrefix",
                             "48"});
-                table1.AddRow(new string[] {
+                table13.AddRow(new string[] {
                             "AddressEmail",
                             "john.doe@test.com"});
-                table1.AddRow(new string[] {
+                table13.AddRow(new string[] {
                             "ProductName",
                             "Laptop"});
-                table1.AddRow(new string[] {
+                table13.AddRow(new string[] {
                             "ProductBrand",
                             "Lenovo"});
-                table1.AddRow(new string[] {
+                table13.AddRow(new string[] {
                             "UnitPriceAmount",
                             "999.99"});
-                table1.AddRow(new string[] {
+                table13.AddRow(new string[] {
                             "UnitPriceCurrency",
                             "usd"});
-                table1.AddRow(new string[] {
+                table13.AddRow(new string[] {
                             "Quantity",
                             "2"});
-                table1.AddRow(new string[] {
+                table13.AddRow(new string[] {
                             "OrderStatus",
                             "Paid"});
 #line 5
-    await testRunner.GivenAsync("I have an existing invoice for a paid order", ((string)(null)), table1, "Given ");
+    await testRunner.GivenAsync("I have an existing invoice for a paid order", ((string)(null)), table13, "Given ");
 #line hidden
-                global::Reqnroll.Table table2 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table14 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table2.AddRow(new string[] {
+                table14.AddRow(new string[] {
                             "HasBody",
                             "false"});
 #line 22
-    await testRunner.WhenAsync("I submit the duplicate create invoice for order request", ((string)(null)), table2, "When ");
+    await testRunner.WhenAsync("I submit the duplicate create invoice for order request", ((string)(null)), table14, "When ");
 #line hidden
-                global::Reqnroll.Table table3 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table15 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table3.AddRow(new string[] {
+                table15.AddRow(new string[] {
                             "StatusCode",
                             "409"});
-                table3.AddRow(new string[] {
+                table15.AddRow(new string[] {
                             "Title",
                             "Conflict."});
-                table3.AddRow(new string[] {
+                table15.AddRow(new string[] {
                             "HasDetailWithOrderId",
                             "true"});
-                table3.AddRow(new string[] {
+                table15.AddRow(new string[] {
                             "Type",
                             "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.8"});
 #line 25
-    await testRunner.ThenAsync("duplicate create invoice for order returns conflict", ((string)(null)), table3, "Then ");
+    await testRunner.ThenAsync("duplicate create invoice for order returns conflict", ((string)(null)), table15, "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

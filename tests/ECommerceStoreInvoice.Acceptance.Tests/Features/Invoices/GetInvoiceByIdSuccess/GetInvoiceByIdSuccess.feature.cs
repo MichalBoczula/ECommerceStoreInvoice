@@ -161,59 +161,59 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Invoices.GetInvoiceByI
 #line 5
     await testRunner.GivenAsync("I have an existing invoice id", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
-                global::Reqnroll.Table table14 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table26 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table14.AddRow(new string[] {
+                table26.AddRow(new string[] {
                             "Method",
                             "GET"});
-                table14.AddRow(new string[] {
+                table26.AddRow(new string[] {
                             "EndpointTemplate",
                             "/invoices/{invoiceId}"});
-                table14.AddRow(new string[] {
+                table26.AddRow(new string[] {
                             "HasInvoiceId",
                             "true"});
-                table14.AddRow(new string[] {
+                table26.AddRow(new string[] {
                             "InvoiceIdSource",
                             "setup-created-invoice"});
-                table14.AddRow(new string[] {
+                table26.AddRow(new string[] {
                             "Accept",
                             "application/json"});
 #line 6
-    await testRunner.AndAsync("the get invoice by id request is documented as", ((string)(null)), table14, "And ");
+    await testRunner.AndAsync("the get invoice by id request is documented as", ((string)(null)), table26, "And ");
 #line hidden
 #line 13
     await testRunner.WhenAsync("I request invoice by id", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-                global::Reqnroll.Table table15 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table27 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table15.AddRow(new string[] {
+                table27.AddRow(new string[] {
                             "StatusCode",
                             "200"});
-                table15.AddRow(new string[] {
+                table27.AddRow(new string[] {
                             "HasId",
                             "true"});
-                table15.AddRow(new string[] {
+                table27.AddRow(new string[] {
                             "HasOrderId",
                             "true"});
-                table15.AddRow(new string[] {
+                table27.AddRow(new string[] {
                             "HasClientDataVersionId",
                             "true"});
-                table15.AddRow(new string[] {
+                table27.AddRow(new string[] {
                             "HasStorageUrl",
                             "true"});
-                table15.AddRow(new string[] {
+                table27.AddRow(new string[] {
                             "HasCreatedAt",
                             "true"});
-                table15.AddRow(new string[] {
+                table27.AddRow(new string[] {
                             "OrderIdSource",
                             "setup-created-order"});
-                table15.AddRow(new string[] {
+                table27.AddRow(new string[] {
                             "IdSource",
                             "setup-created-invoice"});
 #line 14
-    await testRunner.ThenAsync("the invoice is returned successfully by id", ((string)(null)), table15, "Then ");
+    await testRunner.ThenAsync("the invoice is returned successfully by id", ((string)(null)), table27, "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

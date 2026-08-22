@@ -158,68 +158,68 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.GetShopp
 #line 4
     await testRunner.GivenAsync("I have an existing shopping cart for retrieval", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
-                global::Reqnroll.Table table12 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table57 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table12.AddRow(new string[] {
+                table57.AddRow(new string[] {
                             "Method",
                             "GET"});
-                table12.AddRow(new string[] {
+                table57.AddRow(new string[] {
                             "Endpoint",
                             "/shopping-carts/client"});
-                table12.AddRow(new string[] {
+                table57.AddRow(new string[] {
                             "ClientId",
                             "<existing shopping cart client id>"});
 #line 5
-    await testRunner.AndAsync("the get shopping cart request data is", ((string)(null)), table12, "And ");
+    await testRunner.AndAsync("the get shopping cart request data is", ((string)(null)), table57, "And ");
 #line hidden
 #line 10
     await testRunner.WhenAsync("I request the shopping cart by client id", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-                global::Reqnroll.Table table13 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table58 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table13.AddRow(new string[] {
+                table58.AddRow(new string[] {
                             "StatusCode",
                             "200"});
-                table13.AddRow(new string[] {
+                table58.AddRow(new string[] {
                             "HasId",
                             "true"});
-                table13.AddRow(new string[] {
+                table58.AddRow(new string[] {
                             "HasClientId",
                             "true"});
-                table13.AddRow(new string[] {
+                table58.AddRow(new string[] {
                             "TotalAmount",
                             "0"});
-                table13.AddRow(new string[] {
+                table58.AddRow(new string[] {
                             "TotalCurrency",
                             "USD"});
-                table13.AddRow(new string[] {
+                table58.AddRow(new string[] {
                             "LinesCount",
                             "0"});
 #line 11
-    await testRunner.ThenAsync("the shopping cart is returned successfully", ((string)(null)), table13, "Then ");
+    await testRunner.ThenAsync("the shopping cart is returned successfully", ((string)(null)), table58, "Then ");
 #line hidden
-                global::Reqnroll.Table table14 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table59 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table14.AddRow(new string[] {
+                table59.AddRow(new string[] {
                             "Id",
                             "<generated guid>"});
-                table14.AddRow(new string[] {
+                table59.AddRow(new string[] {
                             "ClientId",
                             "<existing shopping cart client id>"});
-                table14.AddRow(new string[] {
+                table59.AddRow(new string[] {
                             "TotalAmount",
                             "0"});
-                table14.AddRow(new string[] {
+                table59.AddRow(new string[] {
                             "TotalCurrency",
                             "USD"});
-                table14.AddRow(new string[] {
+                table59.AddRow(new string[] {
                             "Lines",
                             "[]"});
 #line 19
-    await testRunner.AndAsync("the shopping cart response payload is", ((string)(null)), table14, "And ");
+    await testRunner.AndAsync("the shopping cart response payload is", ((string)(null)), table59, "And ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

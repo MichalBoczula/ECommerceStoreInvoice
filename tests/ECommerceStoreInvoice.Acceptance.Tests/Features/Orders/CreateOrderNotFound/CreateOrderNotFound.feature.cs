@@ -158,53 +158,53 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Orders.CreateOrderNotF
             else
             {
                 await this.ScenarioStartAsync();
-                global::Reqnroll.Table table1 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table30 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table1.AddRow(new string[] {
+                table30.AddRow(new string[] {
                             "ClientId",
                             "<generatedId>"});
 #line 5
-    await testRunner.GivenAsync("I have a non-existing client id for order creation", ((string)(null)), table1, "Given ");
+    await testRunner.GivenAsync("I have a non-existing client id for order creation", ((string)(null)), table30, "Given ");
 #line hidden
-                global::Reqnroll.Table table2 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table31 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table2.AddRow(new string[] {
+                table31.AddRow(new string[] {
                             "Method",
                             "POST"});
-                table2.AddRow(new string[] {
+                table31.AddRow(new string[] {
                             "Endpoint",
                             "/orders/{clientId}"});
-                table2.AddRow(new string[] {
+                table31.AddRow(new string[] {
                             "Body",
                             "null"});
 #line 8
-    await testRunner.WhenAsync("I submit create order request for a non-existing client", ((string)(null)), table2, "When ");
+    await testRunner.WhenAsync("I submit create order request for a non-existing client", ((string)(null)), table31, "When ");
 #line hidden
-                global::Reqnroll.Table table3 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table32 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table3.AddRow(new string[] {
+                table32.AddRow(new string[] {
                             "StatusCode",
                             "404"});
-                table3.AddRow(new string[] {
+                table32.AddRow(new string[] {
                             "Title",
                             "Resource not found."});
-                table3.AddRow(new string[] {
+                table32.AddRow(new string[] {
                             "Type",
                             "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.4"});
-                table3.AddRow(new string[] {
+                table32.AddRow(new string[] {
                             "HasDetail",
                             "true"});
-                table3.AddRow(new string[] {
+                table32.AddRow(new string[] {
                             "Instance",
                             "/orders/{clientId}"});
-                table3.AddRow(new string[] {
+                table32.AddRow(new string[] {
                             "HasTraceId",
                             "true"});
 #line 13
-    await testRunner.ThenAsync("problem details are returned for create order not found", ((string)(null)), table3, "Then ");
+    await testRunner.ThenAsync("problem details are returned for create order not found", ((string)(null)), table32, "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

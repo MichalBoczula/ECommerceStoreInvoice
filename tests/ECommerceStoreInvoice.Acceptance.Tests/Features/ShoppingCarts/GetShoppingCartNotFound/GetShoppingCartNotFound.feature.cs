@@ -158,71 +158,71 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.GetShopp
             else
             {
                 await this.ScenarioStartAsync();
-                global::Reqnroll.Table table9 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table54 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table9.AddRow(new string[] {
+                table54.AddRow(new string[] {
                             "Method",
                             "GET"});
-                table9.AddRow(new string[] {
+                table54.AddRow(new string[] {
                             "Path",
                             "/shopping-carts/client/{clientId}"});
-                table9.AddRow(new string[] {
+                table54.AddRow(new string[] {
                             "ClientId",
                             "auto"});
 #line 4
-    await testRunner.GivenAsync("I have a non-existing shopping cart request payload", ((string)(null)), table9, "Given ");
+    await testRunner.GivenAsync("I have a non-existing shopping cart request payload", ((string)(null)), table54, "Given ");
 #line hidden
 #line 9
     await testRunner.WhenAsync("I request the shopping cart by client id for non-existing client", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-                global::Reqnroll.Table table10 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table55 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table10.AddRow(new string[] {
+                table55.AddRow(new string[] {
                             "StatusCode",
                             "404"});
-                table10.AddRow(new string[] {
+                table55.AddRow(new string[] {
                             "Title",
                             "Resource not found."});
-                table10.AddRow(new string[] {
+                table55.AddRow(new string[] {
                             "Type",
                             "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.4"});
-                table10.AddRow(new string[] {
+                table55.AddRow(new string[] {
                             "HasDetail",
                             "true"});
-                table10.AddRow(new string[] {
+                table55.AddRow(new string[] {
                             "Instance",
                             "/shopping-carts/client/{clientId}"});
-                table10.AddRow(new string[] {
+                table55.AddRow(new string[] {
                             "HasTraceId",
                             "true"});
 #line 10
-    await testRunner.ThenAsync("problem details are returned for get shopping cart not found", ((string)(null)), table10, "Then ");
+    await testRunner.ThenAsync("problem details are returned for get shopping cart not found", ((string)(null)), table55, "Then ");
 #line hidden
-                global::Reqnroll.Table table11 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table56 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table11.AddRow(new string[] {
+                table56.AddRow(new string[] {
                             "title",
                             "Resource not found."});
-                table11.AddRow(new string[] {
+                table56.AddRow(new string[] {
                             "type",
                             "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.4"});
-                table11.AddRow(new string[] {
+                table56.AddRow(new string[] {
                             "status",
                             "404"});
-                table11.AddRow(new string[] {
+                table56.AddRow(new string[] {
                             "instance",
                             "/shopping-carts/client/{clientId}"});
-                table11.AddRow(new string[] {
+                table56.AddRow(new string[] {
                             "detail",
                             "contains:ShoppingCart"});
-                table11.AddRow(new string[] {
+                table56.AddRow(new string[] {
                             "traceId",
                             "not-empty"});
 #line 18
-    await testRunner.AndAsync("the problem details json contains", ((string)(null)), table11, "And ");
+    await testRunner.AndAsync("the problem details json contains", ((string)(null)), table56, "And ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

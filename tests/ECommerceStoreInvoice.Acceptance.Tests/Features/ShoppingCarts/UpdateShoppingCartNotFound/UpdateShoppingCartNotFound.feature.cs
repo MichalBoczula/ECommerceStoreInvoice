@@ -159,30 +159,30 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.UpdateSh
             else
             {
                 await this.ScenarioStartAsync();
-                global::Reqnroll.Table table15 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table60 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table15.AddRow(new string[] {
+                table60.AddRow(new string[] {
                             "ClientId",
                             "<generatedId>"});
 #line 5
-    await testRunner.GivenAsync("I have a non-existing client id for shopping cart update", ((string)(null)), table15, "Given ");
+    await testRunner.GivenAsync("I have a non-existing client id for shopping cart update", ((string)(null)), table60, "Given ");
 #line hidden
-                global::Reqnroll.Table table16 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table61 = new global::Reqnroll.Table(new string[] {
                             "ProductId",
                             "Name",
                             "Brand",
                             "UnitPriceAmount",
                             "UnitPriceCurrency",
                             "Quantity"});
-                table16.AddRow(new string[] {
+                table61.AddRow(new string[] {
                             "11111111-1111-1111-1111-111111111111",
                             "Phone",
                             "Apple",
                             "999.99",
                             "usd",
                             "1"});
-                table16.AddRow(new string[] {
+                table61.AddRow(new string[] {
                             "22222222-2222-2222-2222-222222222222",
                             "Watch",
                             "Apple",
@@ -190,61 +190,61 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.UpdateSh
                             "usd",
                             "2"});
 #line 8
-    await testRunner.AndAsync("I have an update shopping cart request for a non-existing shopping cart", ((string)(null)), table16, "And ");
+    await testRunner.AndAsync("I have an update shopping cart request for a non-existing shopping cart", ((string)(null)), table61, "And ");
 #line hidden
-                global::Reqnroll.Table table17 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table62 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table17.AddRow(new string[] {
+                table62.AddRow(new string[] {
                             "Method",
                             "PUT"});
-                table17.AddRow(new string[] {
+                table62.AddRow(new string[] {
                             "Endpoint",
                             "/shopping-carts/{clientId}"});
-                table17.AddRow(new string[] {
+                table62.AddRow(new string[] {
                             "Lines",
                             "2"});
 #line 12
-    await testRunner.WhenAsync("I submit the update shopping cart request for a non-existing shopping cart", ((string)(null)), table17, "When ");
+    await testRunner.WhenAsync("I submit the update shopping cart request for a non-existing shopping cart", ((string)(null)), table62, "When ");
 #line hidden
-                global::Reqnroll.Table table18 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table63 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table18.AddRow(new string[] {
+                table63.AddRow(new string[] {
                             "StatusCode",
                             "404"});
-                table18.AddRow(new string[] {
+                table63.AddRow(new string[] {
                             "Title",
                             "Resource not found."});
-                table18.AddRow(new string[] {
+                table63.AddRow(new string[] {
                             "Type",
                             "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.4"});
-                table18.AddRow(new string[] {
+                table63.AddRow(new string[] {
                             "HasDetail",
                             "true"});
-                table18.AddRow(new string[] {
+                table63.AddRow(new string[] {
                             "Instance",
                             "/shopping-carts/{clientId}"});
-                table18.AddRow(new string[] {
+                table63.AddRow(new string[] {
                             "HasTraceId",
                             "true"});
 #line 17
-    await testRunner.ThenAsync("problem details are returned for update shopping cart not found", ((string)(null)), table18, "Then ");
+    await testRunner.ThenAsync("problem details are returned for update shopping cart not found", ((string)(null)), table63, "Then ");
 #line hidden
-                global::Reqnroll.Table table19 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table64 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table19.AddRow(new string[] {
+                table64.AddRow(new string[] {
                             "DetailContainsId",
                             "true"});
-                table19.AddRow(new string[] {
+                table64.AddRow(new string[] {
                             "DetailContains",
                             "ShoppingCart"});
-                table19.AddRow(new string[] {
+                table64.AddRow(new string[] {
                             "TraceId",
                             "<generated>"});
 #line 25
-    await testRunner.AndAsync("the update shopping cart not found response data is", ((string)(null)), table19, "And ");
+    await testRunner.AndAsync("the update shopping cart not found response data is", ((string)(null)), table64, "And ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

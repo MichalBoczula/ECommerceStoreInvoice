@@ -158,41 +158,41 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Orders.GetOrdersByIdNo
             else
             {
                 await this.ScenarioStartAsync();
-                global::Reqnroll.Table table15 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table44 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table15.AddRow(new string[] {
+                table44.AddRow(new string[] {
                             "OrderId",
                             "generated-non-existing"});
 #line 5
-    await testRunner.GivenAsync("I have a non-existing order id for orders retrieval", ((string)(null)), table15, "Given ");
+    await testRunner.GivenAsync("I have a non-existing order id for orders retrieval", ((string)(null)), table44, "Given ");
 #line hidden
 #line 8
     await testRunner.WhenAsync("I request order by id for non-existing order", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-                global::Reqnroll.Table table16 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table45 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table16.AddRow(new string[] {
+                table45.AddRow(new string[] {
                             "StatusCode",
                             "404"});
-                table16.AddRow(new string[] {
+                table45.AddRow(new string[] {
                             "Title",
                             "Resource not found."});
-                table16.AddRow(new string[] {
+                table45.AddRow(new string[] {
                             "Type",
                             "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.4"});
-                table16.AddRow(new string[] {
+                table45.AddRow(new string[] {
                             "HasDetail",
                             "true"});
-                table16.AddRow(new string[] {
+                table45.AddRow(new string[] {
                             "Instance",
                             "/orders/{orderId}"});
-                table16.AddRow(new string[] {
+                table45.AddRow(new string[] {
                             "HasTraceId",
                             "true"});
 #line 9
-    await testRunner.ThenAsync("problem details are returned for get order by id not found", ((string)(null)), table16, "Then ");
+    await testRunner.ThenAsync("problem details are returned for get order by id not found", ((string)(null)), table45, "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

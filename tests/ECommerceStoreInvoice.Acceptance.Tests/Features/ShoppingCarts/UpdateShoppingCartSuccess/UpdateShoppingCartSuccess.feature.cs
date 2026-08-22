@@ -158,107 +158,107 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.UpdateSh
 #line 4
     await testRunner.GivenAsync("I have an existing shopping cart for update", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
-                global::Reqnroll.Table table20 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table65 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table20.AddRow(new string[] {
+                table65.AddRow(new string[] {
                             "Line1ProductId",
                             "11111111-1111-1111-1111-111111111111"});
-                table20.AddRow(new string[] {
+                table65.AddRow(new string[] {
                             "Line1Name",
                             "Phone"});
-                table20.AddRow(new string[] {
+                table65.AddRow(new string[] {
                             "Line1Brand",
                             "Apple"});
-                table20.AddRow(new string[] {
+                table65.AddRow(new string[] {
                             "Line1UnitPriceAmount",
                             "999.99"});
-                table20.AddRow(new string[] {
+                table65.AddRow(new string[] {
                             "Line1UnitPriceCurrency",
                             "usd"});
-                table20.AddRow(new string[] {
+                table65.AddRow(new string[] {
                             "Line1Quantity",
                             "2"});
-                table20.AddRow(new string[] {
+                table65.AddRow(new string[] {
                             "Line2ProductId",
                             "22222222-2222-2222-2222-222222222222"});
-                table20.AddRow(new string[] {
+                table65.AddRow(new string[] {
                             "Line2Name",
                             "Watch"});
-                table20.AddRow(new string[] {
+                table65.AddRow(new string[] {
                             "Line2Brand",
                             "Apple"});
-                table20.AddRow(new string[] {
+                table65.AddRow(new string[] {
                             "Line2UnitPriceAmount",
                             "399.99"});
-                table20.AddRow(new string[] {
+                table65.AddRow(new string[] {
                             "Line2UnitPriceCurrency",
                             "usd"});
-                table20.AddRow(new string[] {
+                table65.AddRow(new string[] {
                             "Line2Quantity",
                             "1"});
 #line 5
-    await testRunner.AndAsync("I have a valid update shopping cart request", ((string)(null)), table20, "And ");
+    await testRunner.AndAsync("I have a valid update shopping cart request", ((string)(null)), table65, "And ");
 #line hidden
 #line 19
     await testRunner.WhenAsync("I submit the update shopping cart request", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-                global::Reqnroll.Table table21 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table66 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table21.AddRow(new string[] {
+                table66.AddRow(new string[] {
                             "StatusCode",
                             "200"});
-                table21.AddRow(new string[] {
+                table66.AddRow(new string[] {
                             "HasId",
                             "true"});
-                table21.AddRow(new string[] {
+                table66.AddRow(new string[] {
                             "HasClientId",
                             "true"});
-                table21.AddRow(new string[] {
+                table66.AddRow(new string[] {
                             "ClientId",
                             "from-scenario-client-id"});
-                table21.AddRow(new string[] {
+                table66.AddRow(new string[] {
                             "TotalAmount",
                             "2399.97"});
-                table21.AddRow(new string[] {
+                table66.AddRow(new string[] {
                             "TotalCurrency",
                             "USD"});
-                table21.AddRow(new string[] {
+                table66.AddRow(new string[] {
                             "LinesCount",
                             "2"});
-                table21.AddRow(new string[] {
+                table66.AddRow(new string[] {
                             "Line1Name",
                             "Phone"});
-                table21.AddRow(new string[] {
+                table66.AddRow(new string[] {
                             "Line1Brand",
                             "Apple"});
-                table21.AddRow(new string[] {
+                table66.AddRow(new string[] {
                             "Line1Quantity",
                             "2"});
-                table21.AddRow(new string[] {
+                table66.AddRow(new string[] {
                             "Line1TotalAmount",
                             "1999.98"});
-                table21.AddRow(new string[] {
+                table66.AddRow(new string[] {
                             "Line1TotalCurrency",
                             "USD"});
-                table21.AddRow(new string[] {
+                table66.AddRow(new string[] {
                             "Line2Name",
                             "Watch"});
-                table21.AddRow(new string[] {
+                table66.AddRow(new string[] {
                             "Line2Brand",
                             "Apple"});
-                table21.AddRow(new string[] {
+                table66.AddRow(new string[] {
                             "Line2Quantity",
                             "1"});
-                table21.AddRow(new string[] {
+                table66.AddRow(new string[] {
                             "Line2TotalAmount",
                             "399.99"});
-                table21.AddRow(new string[] {
+                table66.AddRow(new string[] {
                             "Line2TotalCurrency",
                             "USD"});
 #line 20
-    await testRunner.ThenAsync("the shopping cart is updated successfully", ((string)(null)), table21, "Then ");
+    await testRunner.ThenAsync("the shopping cart is updated successfully", ((string)(null)), table66, "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

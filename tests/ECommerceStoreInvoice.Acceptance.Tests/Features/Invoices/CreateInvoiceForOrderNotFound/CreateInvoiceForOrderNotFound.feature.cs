@@ -159,77 +159,77 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Invoices.CreateInvoice
             else
             {
                 await this.ScenarioStartAsync();
-                global::Reqnroll.Table table4 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table16 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table4.AddRow(new string[] {
+                table16.AddRow(new string[] {
                             "ClientName",
                             "John Doe"});
-                table4.AddRow(new string[] {
+                table16.AddRow(new string[] {
                             "PostalCode",
                             "00-001"});
-                table4.AddRow(new string[] {
+                table16.AddRow(new string[] {
                             "City",
                             "NewYork"});
-                table4.AddRow(new string[] {
+                table16.AddRow(new string[] {
                             "Street",
                             "Main.St"});
-                table4.AddRow(new string[] {
+                table16.AddRow(new string[] {
                             "BuildingNumber",
                             "10A"});
-                table4.AddRow(new string[] {
+                table16.AddRow(new string[] {
                             "ApartmentNumber",
                             "5"});
-                table4.AddRow(new string[] {
+                table16.AddRow(new string[] {
                             "PhoneNumber",
                             "123456789"});
-                table4.AddRow(new string[] {
+                table16.AddRow(new string[] {
                             "PhonePrefix",
                             "48"});
-                table4.AddRow(new string[] {
+                table16.AddRow(new string[] {
                             "AddressEmail",
                             "john.doe@test.com"});
 #line 5
-    await testRunner.GivenAsync("I have an existing client and a non-existing order id for invoice creation", ((string)(null)), table4, "Given ");
+    await testRunner.GivenAsync("I have an existing client and a non-existing order id for invoice creation", ((string)(null)), table16, "Given ");
 #line hidden
-                global::Reqnroll.Table table5 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table17 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table5.AddRow(new string[] {
+                table17.AddRow(new string[] {
                             "Endpoint",
                             "/invoices/{clientId}/{orderId}"});
-                table5.AddRow(new string[] {
+                table17.AddRow(new string[] {
                             "Method",
                             "POST"});
-                table5.AddRow(new string[] {
+                table17.AddRow(new string[] {
                             "BodyJson",
                             "null"});
 #line 16
-    await testRunner.WhenAsync("I submit create invoice for a non-existing order request", ((string)(null)), table5, "When ");
+    await testRunner.WhenAsync("I submit create invoice for a non-existing order request", ((string)(null)), table17, "When ");
 #line hidden
-                global::Reqnroll.Table table6 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table18 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table6.AddRow(new string[] {
+                table18.AddRow(new string[] {
                             "StatusCode",
                             "404"});
-                table6.AddRow(new string[] {
+                table18.AddRow(new string[] {
                             "Title",
                             "Resource not found."});
-                table6.AddRow(new string[] {
+                table18.AddRow(new string[] {
                             "Type",
                             "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.4"});
-                table6.AddRow(new string[] {
+                table18.AddRow(new string[] {
                             "HasDetail",
                             "true"});
-                table6.AddRow(new string[] {
+                table18.AddRow(new string[] {
                             "Instance",
                             "/invoices/{clientId}/{orderId}"});
-                table6.AddRow(new string[] {
+                table18.AddRow(new string[] {
                             "HasTraceId",
                             "true"});
 #line 21
-    await testRunner.ThenAsync("problem details are returned for create invoice order not found", ((string)(null)), table6, "Then ");
+    await testRunner.ThenAsync("problem details are returned for create invoice order not found", ((string)(null)), table18, "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

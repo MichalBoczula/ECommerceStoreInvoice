@@ -155,44 +155,44 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Orders.GetOrdersByClie
             else
             {
                 await this.ScenarioStartAsync();
-                global::Reqnroll.Table table8 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table37 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table8.AddRow(new string[] {
+                table37.AddRow(new string[] {
                             "ClientId",
                             "AUTO"});
-                table8.AddRow(new string[] {
+                table37.AddRow(new string[] {
                             "Method",
                             "GET"});
-                table8.AddRow(new string[] {
+                table37.AddRow(new string[] {
                             "Endpoint",
                             "/orders/client/{id}"});
-                table8.AddRow(new string[] {
+                table37.AddRow(new string[] {
                             "Description",
                             "Client has no orders"});
 #line 4
-    await testRunner.GivenAsync("I have a client without orders", ((string)(null)), table8, "Given ");
+    await testRunner.GivenAsync("I have a client without orders", ((string)(null)), table37, "Given ");
 #line hidden
 #line 10
     await testRunner.WhenAsync("I request orders by client id for the client without orders", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-                global::Reqnroll.Table table9 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table38 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table9.AddRow(new string[] {
+                table38.AddRow(new string[] {
                             "StatusCode",
                             "200"});
-                table9.AddRow(new string[] {
+                table38.AddRow(new string[] {
                             "OrdersCount",
                             "0"});
-                table9.AddRow(new string[] {
+                table38.AddRow(new string[] {
                             "IsEmpty",
                             "true"});
-                table9.AddRow(new string[] {
+                table38.AddRow(new string[] {
                             "OrdersJson",
                             "[]"});
 #line 11
-    await testRunner.ThenAsync("an empty list of orders is returned successfully", ((string)(null)), table9, "Then ");
+    await testRunner.ThenAsync("an empty list of orders is returned successfully", ((string)(null)), table38, "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
