@@ -1,10 +1,12 @@
 using ECommerceStoreInvoice.Application.Common.FlowDescriptors;
 using ECommerceStoreInvoice.Application.Common.ResponsesDto.Orders;
 using ECommerceStoreInvoice.Application.Mapping;
+using ECommerceStoreInvoice.Domain.AggregatesModel.Common.ValueObjects;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate.Repositories;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate.Repositories;
+using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.Repositories;
 using ECommerceStoreInvoice.Domain.Validation.Abstract;
 using ECommerceStoreInvoice.Domain.Validation.Common;
@@ -55,9 +57,9 @@ namespace ECommerceStoreInvoice.Application.Descriptors.Orders
                     productVersionRepository.CreateProductVersion(
                         new ProductVersion(
                             line.ProductId,
-                            line.UnitPrice,
-                            line.Name,
-                            line.Brand)))
+                            new Money(),
+                            "line.Name",
+                            "line.Brand")))
                 .ToArray();
 
             return await Task.WhenAll(tasks);

@@ -1,4 +1,5 @@
 ﻿using ECommerceStoreInvoice.Domain.AggregatesModel.Common.ValueObjects;
+using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.ValueObjects;
 using Shouldly;
 

@@ -1,4 +1,5 @@
-﻿using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.Repositories;
+﻿using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate;
+using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.Repositories;
 using ECommerceStoreInvoice.Infrastructure.Context;
 using ECommerceStoreInvoice.Infrastructure.Mapping;
 using MongoDB.Driver;
@@ -47,6 +48,11 @@ namespace ECommerceStoreInvoice.Infrastructure.Repositories
                 throw new InvalidOperationException($"Shopping cart with id '{shoppingCart.Id}' was not found.");
 
             return shoppingCart;
+        }
+
+        Task<ShoppingCart?> IShoppingCartRepository.GetShoppingCartByClientId(Guid clientId)
+        {
+            throw new NotImplementedException();
         }
     }
 }

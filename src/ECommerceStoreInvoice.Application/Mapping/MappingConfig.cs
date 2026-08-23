@@ -11,6 +11,7 @@ using ECommerceStoreInvoice.Domain.AggregatesModel.InvoiceAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate.ValueObjects;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate;
+using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.ValueObjects;
 
 namespace ECommerceStoreInvoice.Application.Mapping
@@ -60,8 +61,6 @@ namespace ECommerceStoreInvoice.Application.Mapping
                 ClientId = shoppingCart.ClientId,
                 CreatedAt = shoppingCart.CreatedAt,
                 UpdatedAt = shoppingCart.UpdatedAt,
-                TotalAmount = shoppingCart.Total.Amount,
-                TotalCurrency = shoppingCart.Total.Currency,
                 Lines = shoppingCart.Lines.Select(MapToResponse).ToList()
             };
         }
@@ -133,9 +132,6 @@ namespace ECommerceStoreInvoice.Application.Mapping
         {
             return new ShoppingCartLine(
                 request.ProductId,
-                request.Name,
-                request.Brand,
-                new Money(request.UnitPriceAmount, request.UnitPriceCurrency),
                 request.Quantity);
         }
 
@@ -143,9 +139,9 @@ namespace ECommerceStoreInvoice.Application.Mapping
         {
             return new OrderLine(
                 productVersion.Id,
-                shoppingCartLine.Name,
-                shoppingCartLine.Brand,
-                shoppingCartLine.UnitPrice,
+                "",
+                "",
+                new Money(),
                 shoppingCartLine.Quantity);
         }
 
@@ -153,14 +149,8 @@ namespace ECommerceStoreInvoice.Application.Mapping
         {
             return new ShoppingCartLineResponseDto
             {
-                Name = shoppingCartLine.Name,
                 ProductId = shoppingCartLine.ProductId,
-                Brand = shoppingCartLine.Brand,
-                UnitPriceAmount = shoppingCartLine.UnitPrice.Amount,
-                UnitPriceCurrency = shoppingCartLine.UnitPrice.Currency,
                 Quantity = shoppingCartLine.Quantity,
-                TotalAmount = shoppingCartLine.Total.Amount,
-                TotalCurrency = shoppingCartLine.Total.Currency
             };
         }
 

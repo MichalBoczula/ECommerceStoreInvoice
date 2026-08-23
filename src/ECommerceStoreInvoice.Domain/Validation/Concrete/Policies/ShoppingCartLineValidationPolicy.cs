@@ -13,9 +13,8 @@ namespace ECommerceStoreInvoice.Domain.Validation.Concrete.Policies
         public ShoppingCartLineValidationPolicy()
         {
             _rules.Add(new ShoppingCartLineIsNullValidationRule());
-            _rules.Add(new ShoppingCartLineStringsValidationRule());
+            _rules.Add(new ShoppingCartLineGuidValidationRule());
             _rules.Add(new ShoppingCartLineQuantityValidationRule());
-            _rules.Add(new ShoppingCartLineMoneyValidationRule());
         }
 
         public async Task<ValidationResult> Validate(IReadOnlyCollection<ShoppingCartLine> entity)

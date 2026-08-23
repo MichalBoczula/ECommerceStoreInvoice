@@ -1,6 +1,7 @@
 using ECommerceStoreInvoice.Application.Common.FlowDescriptors;
 using ECommerceStoreInvoice.Application.Common.ResponsesDto.ShoppingCarts;
 using ECommerceStoreInvoice.Application.Mapping;
+using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.Repositories;
 using ECommerceStoreInvoice.Domain.Validation.Abstract;
 using ECommerceStoreInvoice.Domain.Validation.Common;

@@ -17,7 +17,7 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Invoices
         IInvoicePdfService invoicePdfService,
         IValidationPolicy<Guid> guidValidationPolicy,
         IValidationPolicy<InvoiceOrderStatusValidationContext> createInvoiceValidationPolicy,
-        ILogger<IInvoiceService> logger) 
+        ILogger<IInvoiceService> logger)
         : IInvoiceService
     {
         public async Task<InvoiceResponseDto> CreateInvoiceForOrder(Guid clientId, Guid orderId)
@@ -47,7 +47,7 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Invoices
             descriptor.ThrowValidationExceptionIfOrderStatusInvalid(validationResult);
 
             var clientDataVersion = await clientDataVersionService.GetByClientId(clientId);
-            var storageUrl = await descriptor.GenerateInvoicePdf(order, clientDataVersion, invoicePdfService);
+            var storageUrl = await descriptor.GenerateInvoicePdf(order!, clientDataVersion, invoicePdfService);
 
             var invoice = descriptor.CreateInvoice(orderId, clientDataVersion!.Id, storageUrl);
             var createdInvoice = await descriptor.SaveInvoice(invoice, invoiceRepository);
