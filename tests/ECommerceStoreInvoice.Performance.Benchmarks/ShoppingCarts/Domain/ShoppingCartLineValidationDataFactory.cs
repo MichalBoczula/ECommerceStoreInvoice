@@ -1,5 +1,4 @@
-﻿using ECommerceStoreInvoice.Domain.AggregatesModel.Common.ValueObjects;
-using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.ValueObjects;
+﻿using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.ValueObjects;
 
 namespace ECommerceStoreInvoice.Performance.Benchmarks.ShoppingCarts.Domain
 {
@@ -9,8 +8,8 @@ namespace ECommerceStoreInvoice.Performance.Benchmarks.ShoppingCarts.Domain
         {
             return
             [
-                new ShoppingCartLine(Guid.NewGuid(), "Keyboard", "Logi", new Money(99, "USD"), 1),
-                new ShoppingCartLine(Guid.NewGuid(), "Mouse", "Logi", new Money(49, "USD"), 2)
+                new ShoppingCartLine(Guid.NewGuid(), 1),
+                new ShoppingCartLine(Guid.NewGuid(), 2)
             ];
         }
 
@@ -18,7 +17,7 @@ namespace ECommerceStoreInvoice.Performance.Benchmarks.ShoppingCarts.Domain
         {
             return
             [
-                new ShoppingCartLine(Guid.NewGuid(), "Keyboard", "Logi", new Money(99, "USD"), 0)
+                new ShoppingCartLine(Guid.NewGuid(), 0)
             ];
         }
 
@@ -26,7 +25,7 @@ namespace ECommerceStoreInvoice.Performance.Benchmarks.ShoppingCarts.Domain
         {
             return
             [
-                new ShoppingCartLine(Guid.NewGuid(), "", "", new Money(-10, "EUR"), 0)
+                new ShoppingCartLine(Guid.NewGuid(), 0)
             ];
         }
     }

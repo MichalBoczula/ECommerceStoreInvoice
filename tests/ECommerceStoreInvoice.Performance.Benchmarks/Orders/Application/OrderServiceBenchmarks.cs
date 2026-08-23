@@ -7,6 +7,7 @@ using ECommerceStoreInvoice.Domain.AggregatesModel.Common.Enums;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate.Repositories;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate.Repositories;
+using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.Repositories;
 using ECommerceStoreInvoice.Domain.Validation.Abstract;
 using ECommerceStoreInvoice.Domain.Validation.Common;

@@ -3,6 +3,7 @@ using BenchmarkDotNet.Order;
 using ECommerceStoreInvoice.Application.Common.RequestsDto.ShoppingCarts;
 using ECommerceStoreInvoice.Application.Services.Abstract.ShoppingCarts;
 using ECommerceStoreInvoice.Application.Services.Concrete.ShoppingCarts;
+using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.Repositories;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.ValueObjects;
 using ECommerceStoreInvoice.Domain.Validation.Abstract;

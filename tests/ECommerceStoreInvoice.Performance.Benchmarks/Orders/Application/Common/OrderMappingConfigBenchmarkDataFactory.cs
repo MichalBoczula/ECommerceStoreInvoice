@@ -3,6 +3,7 @@ using ECommerceStoreInvoice.Domain.AggregatesModel.Common.ValueObjects;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate.ValueObjects;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate;
+using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.ValueObjects;
 
 namespace ECommerceStoreInvoice.Performance.Benchmarks.Orders.Application.Common;
@@ -22,9 +23,6 @@ internal static class OrderMappingConfigBenchmarkDataFactory
     {
         return new ShoppingCartLine(
             CreateDeterministicGuid(index),
-            $"Product {index}",
-            $"Brand {index % 5}",
-            new Money(10.99m + index, "PLN"),
             index);
     }
 

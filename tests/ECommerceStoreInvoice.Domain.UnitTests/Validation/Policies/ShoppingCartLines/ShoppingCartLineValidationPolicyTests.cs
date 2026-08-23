@@ -1,5 +1,4 @@
-﻿using ECommerceStoreInvoice.Domain.AggregatesModel.Common.ValueObjects;
-using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.ValueObjects;
+﻿using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.ValueObjects;
 using ECommerceStoreInvoice.Domain.Validation.Concrete.Policies;
 using Shouldly;
 
@@ -14,7 +13,7 @@ namespace ECommerceStoreInvoice.Domain.UnitTests.Validation.Policies.ShoppingCar
             var policy = new ShoppingCartLineValidationPolicy();
             var lines = new List<ShoppingCartLine>
             {
-                new(Guid.NewGuid(), "", "", new Money(-10, "EUR"), 0)
+                new(Guid.Empty, 0)
             };
 
             // Act
@@ -22,12 +21,9 @@ namespace ECommerceStoreInvoice.Domain.UnitTests.Validation.Policies.ShoppingCar
 
             // Assert
             result.IsValid.ShouldBeFalse();
-            result.GetValidationErrors().Count.ShouldBe(5);
-            result.GetValidationErrors().ShouldContain(e => e.Name == "ShoppingCartLineStringsValidationRule" && e.Message == "Name cannot be null or whitespace.");
-            result.GetValidationErrors().ShouldContain(e => e.Name == "ShoppingCartLineStringsValidationRule" && e.Message == "Brand cannot be null or whitespace.");
-            result.GetValidationErrors().ShouldContain(e => e.Name == "ShoppingCartLineStringsValidationRule" && e.Message == "Unit price currency must be USD.");
-            result.GetValidationErrors().ShouldContain(e => e.Name == "ShoppingCartLineQuantityValidationRule");
-            result.GetValidationErrors().ShouldContain(e => e.Name == "ShoppingCartLineMoneyValidationRule");
+            result.GetValidationErrors().Count.ShouldBe(2);
+            result.GetValidationErrors().ShouldContain(e => e.Name == "ProductId" && e.Message == "ProductId cannot be empty.");
+            result.GetValidationErrors().ShouldContain(e => e.Name == "Quantity" && e.Message == "Quantity must be greater than zero.");
         }
 
         [Fact]
@@ -37,8 +33,8 @@ namespace ECommerceStoreInvoice.Domain.UnitTests.Validation.Policies.ShoppingCar
             var policy = new ShoppingCartLineValidationPolicy();
             var lines = new List<ShoppingCartLine>
             {
-                new(Guid.NewGuid(), "Keyboard", "Logi", new Money(99, "USD"), 1),
-                new(Guid.NewGuid(), "Mouse", "Logi", new Money(49, "USD"), 2)
+                new(Guid.NewGuid(), 1),
+                new(Guid.NewGuid(), 2)
             };
 
             // Act
@@ -59,12 +55,10 @@ namespace ECommerceStoreInvoice.Domain.UnitTests.Validation.Policies.ShoppingCar
             var descriptor = policy.Describe();
 
             // Assert
-            descriptor.PolicyName.ShouldBe("ShoppingCartLineValidationPolicy");
-            descriptor.Rules.Count.ShouldBe(4);
-            descriptor.Rules.ShouldContain(r => r.RuleName == "ShoppingCartLineIsNullValidationRule");
-            descriptor.Rules.ShouldContain(r => r.RuleName == "ShoppingCartLineStringsValidationRule");
+            descriptor.PolicyName.ShouldBe(nameof(ShoppingCartLineValidationPolicy));
+            descriptor.Rules.Count.ShouldBe(2);
+            descriptor.Rules.ShouldContain(r => r.RuleName == "ShoppingCartLineGuidValidationRule");
             descriptor.Rules.ShouldContain(r => r.RuleName == "ShoppingCartLineQuantityValidationRule");
-            descriptor.Rules.ShouldContain(r => r.RuleName == "ShoppingCartLineMoneyValidationRule");
         }
     }
 }

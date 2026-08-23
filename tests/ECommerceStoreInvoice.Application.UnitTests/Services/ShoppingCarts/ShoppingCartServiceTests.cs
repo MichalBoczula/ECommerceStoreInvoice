@@ -1,8 +1,8 @@
 using ECommerceStoreInvoice.Application.Common.RequestsDto.ShoppingCarts;
 using ECommerceStoreInvoice.Application.Services.Concrete.ShoppingCarts;
-using ECommerceStoreInvoice.Domain.AggregatesModel.Common.ValueObjects;
-using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.ValueObjects;
+using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.Repositories;
+using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.ValueObjects;
 using ECommerceStoreInvoice.Domain.Validation.Abstract;
 using ECommerceStoreInvoice.Domain.Validation.Common;
 using Microsoft.Extensions.Logging;
@@ -54,8 +54,6 @@ public sealed class ShoppingCartServiceTests
         response.ShouldNotBeNull();
         response.Id.ShouldBe(shoppingCart.Id);
         response.ClientId.ShouldBe(shoppingCart.ClientId);
-        response.TotalAmount.ShouldBe(shoppingCart.Total.Amount);
-        response.TotalCurrency.ShouldBe(shoppingCart.Total.Currency);
         response.Lines.Count.ShouldBe(shoppingCart.Lines.Count);
     }
 
@@ -182,8 +180,6 @@ public sealed class ShoppingCartServiceTests
         response.ShouldNotBeNull();
         response.Id.ShouldBe(createdShoppingCart.Id);
         response.ClientId.ShouldBe(clientId);
-        response.TotalAmount.ShouldBe(createdShoppingCart.Total.Amount);
-        response.TotalCurrency.ShouldBe(createdShoppingCart.Total.Currency);
         response.Lines.ShouldBeEmpty();
     }
 
@@ -269,26 +265,21 @@ public sealed class ShoppingCartServiceTests
     {
         // Arrange
         var clientId = Guid.NewGuid();
+        var product1Id = Guid.NewGuid();
+        var product2Id = Guid.NewGuid();
+
         var request = new UpdateShoppingCartRequestDto
         {
             Lines =
             [
                 new ShoppingCartLineRequestDto
                 {
-                    ProductId = Guid.NewGuid(),
-                    Name = "Phone",
-                    Brand = "Apple",
-                    UnitPriceAmount = 999.99m,
-                    UnitPriceCurrency = "usd",
+                    ProductId = product1Id,
                     Quantity = 2
                 },
                 new ShoppingCartLineRequestDto
                 {
-                    ProductId = Guid.NewGuid(),
-                    Name = "Watch",
-                    Brand = "Apple",
-                    UnitPriceAmount = 399.99m,
-                    UnitPriceCurrency = "usd",
+                    ProductId = product2Id,
                     Quantity = 1
                 }
             ]
@@ -317,8 +308,7 @@ public sealed class ShoppingCartServiceTests
         shoppingCartLineValidationPolicyMock
             .InSequence(sequence)
             .Setup(policy => policy.Validate(It.Is<IReadOnlyCollection<ShoppingCartLine>>(lines =>
-                lines.Count == request.Lines.Count &&
-                lines.All(line => line.UnitPrice.Currency == "USD"))))
+                lines.Count == request.Lines.Count)))
             .ReturnsAsync(linesValidationResult);
 
         shoppingCartRepositoryMock
@@ -345,8 +335,6 @@ public sealed class ShoppingCartServiceTests
         response.Id.ShouldBe(shoppingCart.Id);
         response.ClientId.ShouldBe(clientId);
         response.Lines.Count.ShouldBe(request.Lines.Count);
-        response.TotalCurrency.ShouldBe("USD");
-        response.TotalAmount.ShouldBe((999.99m * 2) + 399.99m);
     }
 
     [Fact]
@@ -361,10 +349,6 @@ public sealed class ShoppingCartServiceTests
                 new ShoppingCartLineRequestDto
                 {
                     ProductId = Guid.NewGuid(),
-                    Name = "Phone",
-                    Brand = "Apple",
-                    UnitPriceAmount = 1m,
-                    UnitPriceCurrency = "USD",
                     Quantity = 1
                 }
             ]
@@ -413,10 +397,6 @@ public sealed class ShoppingCartServiceTests
                 new ShoppingCartLineRequestDto
                 {
                     ProductId = Guid.NewGuid(),
-                    Name = "Phone",
-                    Brand = "Apple",
-                    UnitPriceAmount = 1m,
-                    UnitPriceCurrency = "USD",
                     Quantity = 1
                 }
             ]
@@ -467,11 +447,7 @@ public sealed class ShoppingCartServiceTests
             [
                 new ShoppingCartLineRequestDto
                 {
-                    ProductId = Guid.NewGuid(),
-                    Name = string.Empty,
-                    Brand = string.Empty,
-                    UnitPriceAmount = -1m,
-                    UnitPriceCurrency = string.Empty,
+                    ProductId = Guid.Empty,
                     Quantity = 0
                 }
             ]
@@ -484,8 +460,8 @@ public sealed class ShoppingCartServiceTests
         invalidLinesResult.AddValidationError(new ValidationError
         {
             Entity = nameof(ShoppingCartLine),
-            Name = nameof(ShoppingCartLine.Name),
-            Message = "Name cannot be empty"
+            Name = nameof(ShoppingCartLine.Quantity),
+            Message = "Quantity must be greater than zero."
         });
 
         var shoppingCartRepositoryMock = new Mock<IShoppingCartRepository>(MockBehavior.Strict);
@@ -529,8 +505,8 @@ public sealed class ShoppingCartServiceTests
             DateTime.UtcNow.AddDays(-1),
             DateTime.UtcNow,
             [
-                new ShoppingCartLine(Guid.NewGuid(), "Phone", "Apple", new Money(1000m, "USD"), 1),
-                new ShoppingCartLine(Guid.NewGuid(), "Headphones", "Sony", new Money(100m, "USD"), 2)
+                new ShoppingCartLine(Guid.NewGuid(), 1),
+                new ShoppingCartLine(Guid.NewGuid(), 2)
             ]);
     }
 }

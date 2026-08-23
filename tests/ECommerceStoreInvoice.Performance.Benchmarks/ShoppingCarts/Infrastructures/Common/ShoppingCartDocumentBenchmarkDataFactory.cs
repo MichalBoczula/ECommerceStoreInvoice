@@ -29,20 +29,12 @@ internal static class ShoppingCartDocumentBenchmarkDataFactory
 
     private static ShoppingCartLineDocument CreateLine(int index)
     {
-        var unitPriceAmount = 10.99m + index;
         var quantity = index;
-        var totalAmount = unitPriceAmount * quantity;
 
         return new ShoppingCartLineDocument
         {
             ProductId = CreateDeterministicGuid(index),
-            Name = $"Product {index}",
-            Brand = $"Brand {index % 5}",
-            UnitPriceAmount = unitPriceAmount,
-            UnitPriceCurrency = "PLN",
-            Quantity = quantity,
-            TotalAmount = totalAmount,
-            TotalCurrency = "PLN"
+            Quantity = quantity
         };
     }
 

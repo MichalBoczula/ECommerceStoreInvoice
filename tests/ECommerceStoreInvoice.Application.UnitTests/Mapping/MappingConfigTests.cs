@@ -9,6 +9,7 @@ using ECommerceStoreInvoice.Domain.AggregatesModel.InvoiceAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate.ValueObjects;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate;
+using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.ValueObjects;
 using Shouldly;
 
@@ -17,7 +18,7 @@ namespace ECommerceStoreInvoice.Application.UnitTests.Mapping;
 public sealed class MappingConfigTests
 {
     [Fact]
-    public void MapToDomain_ShoppingCartLines_ShouldMapAllFieldsAndDerivedTotals()
+    public void MapToDomain_ShoppingCartLines_ShouldMapAllFields()
     {
         // Arrange
         var productId = Guid.NewGuid();
@@ -26,10 +27,6 @@ public sealed class MappingConfigTests
             new()
             {
                 ProductId = productId,
-                Name = "Wireless Mouse",
-                Brand = "Contoso",
-                UnitPriceAmount = 25.50m,
-                UnitPriceCurrency = "USD",
                 Quantity = 2
             }
         ];
@@ -41,13 +38,7 @@ public sealed class MappingConfigTests
         result.Count.ShouldBe(1);
         var line = result.Single();
         line.ProductId.ShouldBe(productId);
-        line.Name.ShouldBe("Wireless Mouse");
-        line.Brand.ShouldBe("Contoso");
-        line.UnitPrice.Amount.ShouldBe(25.50m);
-        line.UnitPrice.Currency.ShouldBe("USD");
         line.Quantity.ShouldBe(2);
-        line.Total.Amount.ShouldBe(51.00m);
-        line.Total.Currency.ShouldBe("USD");
     }
 
     [Fact]
@@ -85,16 +76,12 @@ public sealed class MappingConfigTests
     }
 
     [Fact]
-    public void MapToDomain_Order_ShouldUseProductVersionIdsAndCartLineValues()
+    public void MapToDomain_Order_ShouldUseProductVersionValuesAndCartLineQuantities()
     {
         // Arrange
         var clientId = Guid.NewGuid();
-        var cartLine = new ShoppingCartLine(
-            Guid.NewGuid(),
-            "Laptop",
-            "Fabrikam",
-            new Money(1000m, "USD"),
-            1);
+        var productId = Guid.NewGuid();
+        var cartLine = new ShoppingCartLine(productId, 2);
 
         var shoppingCart = ShoppingCart.Rehydrate(
             Guid.NewGuid(),
@@ -108,10 +95,10 @@ public sealed class MappingConfigTests
             true,
             DateTime.UtcNow.AddDays(-1),
             null,
-            cartLine.ProductId,
-            cartLine.UnitPrice,
-            cartLine.Name,
-            cartLine.Brand);
+            productId,
+            new Money(1000m, "USD"),
+            "Laptop",
+            "Fabrikam");
 
         // Act
         var result = MappingConfig.MapToDomain(shoppingCart, [productVersion]);
@@ -119,29 +106,25 @@ public sealed class MappingConfigTests
         // Assert
         result.ClientId.ShouldBe(clientId);
         result.Lines.Count.ShouldBe(1);
-        result.Total.Amount.ShouldBe(1000m);
+        result.Total.Amount.ShouldBe(2000m);
         result.Total.Currency.ShouldBe("USD");
 
         var orderLine = result.Lines.Single();
         orderLine.ProductVersionId.ShouldBe(productVersion.Id);
-        orderLine.Name.ShouldBe(cartLine.Name);
-        orderLine.Brand.ShouldBe(cartLine.Brand);
-        orderLine.UnitPrice.Amount.ShouldBe(cartLine.UnitPrice.Amount);
-        orderLine.UnitPrice.Currency.ShouldBe(cartLine.UnitPrice.Currency);
+        orderLine.Name.ShouldBe(productVersion.Name);
+        orderLine.Brand.ShouldBe(productVersion.Brand);
+        orderLine.UnitPrice.Amount.ShouldBe(productVersion.Price.Amount);
+        orderLine.UnitPrice.Currency.ShouldBe(productVersion.Price.Currency);
         orderLine.Quantity.ShouldBe(cartLine.Quantity);
     }
 
     [Fact]
-    public void MapToResponse_ShoppingCart_ShouldMapHeaderAndLineTotals()
+    public void MapToResponse_ShoppingCart_ShouldMapHeaderAndLineQuantities()
     {
         // Arrange
         var clientId = Guid.NewGuid();
-        var line = new ShoppingCartLine(
-            Guid.NewGuid(),
-            "Keyboard",
-            "Contoso",
-            new Money(100m, "USD"),
-            3);
+        var productId = Guid.NewGuid();
+        var line = new ShoppingCartLine(productId, 3);
 
         var shoppingCart = ShoppingCart.Rehydrate(
             Guid.NewGuid(),
@@ -158,10 +141,9 @@ public sealed class MappingConfigTests
         result.ClientId.ShouldBe(clientId);
         result.CreatedAt.ShouldBe(shoppingCart.CreatedAt);
         result.UpdatedAt.ShouldBe(shoppingCart.UpdatedAt);
-        result.TotalAmount.ShouldBe(300m);
-        result.TotalCurrency.ShouldBe("USD");
         result.Lines.Count.ShouldBe(1);
-        result.Lines.Single().TotalAmount.ShouldBe(300m);
+        result.Lines.Single().ProductId.ShouldBe(productId);
+        result.Lines.Single().Quantity.ShouldBe(3);
     }
 
     [Fact]

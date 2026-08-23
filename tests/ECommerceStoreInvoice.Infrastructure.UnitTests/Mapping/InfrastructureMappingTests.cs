@@ -1,3 +1,4 @@
+
 using ECommerceStoreInvoice.Domain.AggregatesModel.ClientDataVersionAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ClientDataVersionAggregate.ValueObjects;
 using ECommerceStoreInvoice.Domain.AggregatesModel.Common.Enums;
@@ -6,13 +7,9 @@ using ECommerceStoreInvoice.Domain.AggregatesModel.InvoiceAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate.ValueObjects;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate;
+using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.ValueObjects;
 using ECommerceStoreInvoice.Infrastructure.Mapping;
-using ECommerceStoreInvoice.Infrastructure.Persistence.ClientDataVersions;
-using ECommerceStoreInvoice.Infrastructure.Persistence.Invoices;
-using ECommerceStoreInvoice.Infrastructure.Persistence.Orders;
-using ECommerceStoreInvoice.Infrastructure.Persistence.ProductVersions;
-using ECommerceStoreInvoice.Infrastructure.Persistence.ShoppingCarts;
 using Shouldly;
 
 namespace ECommerceStoreInvoice.Infrastructure.UnitTests.Mapping;
@@ -126,7 +123,7 @@ public sealed class InfrastructureMappingTests
     [Fact]
     public void ShoppingCartMapping_ShouldMapBothDirectionsIncludingLines()
     {
-        var line = new ShoppingCartLine(Guid.NewGuid(), "Keyboard", "Contoso", new Money(120m, "USD"), 3);
+        var line = new ShoppingCartLine(Guid.NewGuid(), 3);
         var domain = ShoppingCart.Rehydrate(
             Guid.NewGuid(),
             Guid.NewGuid(),
@@ -137,27 +134,19 @@ public sealed class InfrastructureMappingTests
         var document = ShoppingCartMapping.MapToDocument(domain);
 
         document.Lines.Count.ShouldBe(1);
-        document.Lines.Single().UnitPriceAmount.ShouldBe(120m);
-        document.Lines.Single().TotalAmount.ShouldBe(360m);
-
         var mappedBack = ShoppingCartMapping.MapToDomain(document);
 
         mappedBack.Id.ShouldBe(domain.Id);
         mappedBack.ClientId.ShouldBe(domain.ClientId);
-        mappedBack.Total.Amount.ShouldBe(360m);
-        mappedBack.Lines.Single().Name.ShouldBe("Keyboard");
     }
 
     [Fact]
     public void ShoppingCartMapping_MapLineToDocument_ShouldMapLineFields()
     {
-        var line = new ShoppingCartLine(Guid.NewGuid(), "Mouse", "Contoso", new Money(35m, "USD"), 2);
+        var line = new ShoppingCartLine(Guid.NewGuid(), 2);
 
         var document = ShoppingCartMapping.MapLineToDocument(line);
 
         document.ProductId.ShouldBe(line.ProductId);
-        document.UnitPriceCurrency.ShouldBe("USD");
-        document.TotalAmount.ShouldBe(70m);
-        document.TotalCurrency.ShouldBe("USD");
     }
 }

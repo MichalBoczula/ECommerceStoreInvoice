@@ -1,7 +1,9 @@
+
 using System.Reflection;
 using BenchmarkDotNet.Attributes;
 using ECommerceStoreInvoice.Application.Common.RequestsDto.ShoppingCarts;
 using ECommerceStoreInvoice.Application.Mapping;
+using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.ValueObjects;
 using ECommerceStoreInvoice.Performance.Benchmarks.ShoppingCarts.Application.Common;
 

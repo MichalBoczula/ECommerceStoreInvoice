@@ -1,5 +1,4 @@
-﻿using ECommerceStoreInvoice.Domain.AggregatesModel.Common.ValueObjects;
-using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate;
+﻿using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.ValueObjects;
 using Shouldly;
 
@@ -8,7 +7,7 @@ namespace ECommerceStoreInvoice.Domain.UnitTests.Domain.ShoppingCartAggregate
     public class ShoppingCartTests
     {
         [Fact]
-        public void Ctor_ShouldInitializeEmptyCartWithDefaultUsdTotal()
+        public void Ctor_ShouldInitializeEmptyCart()
         {
             // Arrange
             var clientId = Guid.NewGuid();
@@ -17,22 +16,23 @@ namespace ECommerceStoreInvoice.Domain.UnitTests.Domain.ShoppingCartAggregate
             var cart = new ShoppingCart(clientId);
 
             // Assert
+            cart.Id.ShouldNotBe(Guid.Empty);
             cart.ClientId.ShouldBe(clientId);
             cart.Lines.ShouldBeEmpty();
-            cart.Total.Amount.ShouldBe(0);
-            cart.Total.Currency.ShouldBe("USD");
             cart.UpdatedAt.ShouldBeGreaterThanOrEqualTo(cart.CreatedAt);
         }
 
         [Fact]
-        public void ReplaceLines_ShouldReplaceAllLinesAndRecalculateTotal()
+        public void ReplaceLines_ShouldReplaceAllLines()
         {
             // Arrange
             var cart = new ShoppingCart(Guid.NewGuid());
+            var productAId = Guid.NewGuid();
+            var productBId = Guid.NewGuid();
             var lines = new[]
             {
-                new ShoppingCartLine(Guid.NewGuid(), "Mouse", "BrandA", new Money(100, "USD"), 2),
-                new ShoppingCartLine(Guid.NewGuid(), "Keyboard", "BrandB", new Money(50, "USD"), 3)
+                new ShoppingCartLine(productAId, 2),
+                new ShoppingCartLine(productBId, 3)
             };
 
             // Act
@@ -40,17 +40,17 @@ namespace ECommerceStoreInvoice.Domain.UnitTests.Domain.ShoppingCartAggregate
 
             // Assert
             cart.Lines.Count.ShouldBe(2);
-            cart.Total.Amount.ShouldBe(350);
-            cart.Total.Currency.ShouldBe("USD");
+            cart.Lines.ShouldContain(x => x.ProductId == productAId && x.Quantity == 2);
+            cart.Lines.ShouldContain(x => x.ProductId == productBId && x.Quantity == 3);
         }
 
         [Fact]
-        public void Clear_ShouldRemoveAllLinesAndSetTotalToZero()
+        public void Clear_ShouldRemoveAllLines()
         {
             // Arrange
             var cart = new ShoppingCart(Guid.NewGuid());
             cart.ReplaceLines([
-                new ShoppingCartLine(Guid.NewGuid(), "Mouse", "BrandA", new Money(100, "USD"), 1)
+                new ShoppingCartLine(Guid.NewGuid(), 1)
             ]);
 
             // Act
@@ -58,21 +58,20 @@ namespace ECommerceStoreInvoice.Domain.UnitTests.Domain.ShoppingCartAggregate
 
             // Assert
             cart.Lines.ShouldBeEmpty();
-            cart.Total.Amount.ShouldBe(0);
-            cart.Total.Currency.ShouldBe("USD");
         }
 
         [Fact]
-        public void Rehydrate_ShouldUseProvidedStateAndRecalculateTotal()
+        public void Rehydrate_ShouldRestoreStateCorrectly()
         {
             // Arrange
             var id = Guid.NewGuid();
             var clientId = Guid.NewGuid();
+            var productId = Guid.NewGuid();
             var createdAt = new DateTime(2026, 1, 1, 10, 0, 0, DateTimeKind.Utc);
             var updatedAt = new DateTime(2026, 1, 1, 11, 0, 0, DateTimeKind.Utc);
             var lines = new[]
             {
-                new ShoppingCartLine(Guid.NewGuid(), "Headphones", "BrandC", new Money(75, "eur"), 2)
+                new ShoppingCartLine(productId, 5)
             };
 
             // Act
@@ -84,8 +83,21 @@ namespace ECommerceStoreInvoice.Domain.UnitTests.Domain.ShoppingCartAggregate
             cart.CreatedAt.ShouldBe(createdAt);
             cart.UpdatedAt.ShouldBe(updatedAt);
             cart.Lines.Count.ShouldBe(1);
-            cart.Total.Amount.ShouldBe(150);
-            cart.Total.Currency.ShouldBe("EUR");
+            cart.Lines.First().ProductId.ShouldBe(productId);
+            cart.Lines.First().Quantity.ShouldBe(5);
+        }
+
+        [Fact]
+        public void ShoppingCartLine_ChangeQuantity_ShouldUpdateQuantity()
+        {
+            // Arrange
+            var line = new ShoppingCartLine(Guid.NewGuid(), 2);
+
+            // Act
+            line.ChangeQuantity(10);
+
+            // Assert
+            line.Quantity.ShouldBe(10);
         }
     }
 }

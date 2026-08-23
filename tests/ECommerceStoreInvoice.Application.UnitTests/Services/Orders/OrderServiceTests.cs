@@ -14,6 +14,7 @@ using ECommerceStoreInvoice.Domain.Validation.Common;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Shouldly;
+using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate;
 
 namespace ECommerceStoreInvoice.Application.UnitTests.Services.Orders;
 
@@ -36,9 +37,9 @@ public sealed class OrderServiceTests
                 DateTime.UtcNow,
                 null,
                 line.ProductId,
-                line.UnitPrice,
-                line.Name,
-                line.Brand);
+                new Money(),
+                "",
+                "");
 
         var createdProductVersions = shoppingCart.Lines
             .Select(CreateProductVersionFromLine)
@@ -49,12 +50,12 @@ public sealed class OrderServiceTests
             clientId,
             [
                 .. createdProductVersions.Zip(shoppingCart.Lines, (productVersion, line) =>
-                    new OrderLine(productVersion.Id, line.Name, line.Brand, line.UnitPrice, line.Quantity))
+                    new OrderLine(productVersion.Id, "", "", new Money(), line.Quantity))
             ],
             DateTime.UtcNow.AddMinutes(-1),
             DateTime.UtcNow,
             OrderStatus.Created,
-            new Money(shoppingCart.Total.Amount, shoppingCart.Total.Currency));
+            new Money());
 
         var orderRepositoryMock = new Mock<IOrderRepository>(MockBehavior.Strict);
         var productVersionRepositoryMock = new Mock<IProductVersionRepository>(MockBehavior.Strict);
@@ -80,11 +81,7 @@ public sealed class OrderServiceTests
             var productVersion = createdProductVersions.Single(p => p.ProductId == line.ProductId);
             productVersionRepositoryMock
                 .Setup(repo => repo.CreateProductVersion(It.Is<ProductVersion>(pv =>
-                    pv.ProductId == line.ProductId &&
-                    pv.Name == line.Name &&
-                    pv.Brand == line.Brand &&
-                    pv.Price.Amount == line.UnitPrice.Amount &&
-                    pv.Price.Currency == line.UnitPrice.Currency)))
+                    pv.ProductId == line.ProductId)))
                 .ReturnsAsync(productVersion);
         }
 
@@ -92,9 +89,7 @@ public sealed class OrderServiceTests
             .InSequence(sequence)
             .Setup(policy => policy.Validate(It.Is<Order>(order =>
                 order.ClientId == clientId &&
-                order.Lines.Count == shoppingCart.Lines.Count &&
-                order.Total.Amount == shoppingCart.Total.Amount &&
-                order.Total.Currency == shoppingCart.Total.Currency)))
+                order.Lines.Count == shoppingCart.Lines.Count)))
             .ReturnsAsync(orderValidationResult);
 
         orderRepositoryMock
@@ -106,9 +101,7 @@ public sealed class OrderServiceTests
             .InSequence(sequence)
             .Setup(repo => repo.UpdateShoppingCart(It.Is<ShoppingCart>(cart =>
                 cart.ClientId == clientId &&
-                cart.Lines.Count == 0 &&
-                cart.Total.Amount == 0m &&
-                cart.Total.Currency == shoppingCart.Total.Currency)))
+                cart.Lines.Count == 0)))
             .ReturnsAsync((ShoppingCart cart) => cart);
 
         var sut = new OrderService(
@@ -269,7 +262,7 @@ public sealed class OrderServiceTests
         {
             productVersionRepositoryMock
                 .Setup(repo => repo.CreateProductVersion(It.Is<ProductVersion>(pv => pv.ProductId == line.ProductId)))
-                .ReturnsAsync(new ProductVersion(line.ProductId, line.UnitPrice, line.Name, line.Brand));
+                .ReturnsAsync(new ProductVersion(line.ProductId, new Money(), "", ""));
         }
 
         orderValidationPolicyMock
@@ -651,8 +644,8 @@ public sealed class OrderServiceTests
             DateTime.UtcNow.AddDays(-1),
             DateTime.UtcNow.AddMinutes(-1),
             [
-                new ShoppingCartLine(Guid.NewGuid(), "Phone", "Apple", new Money(1999.99m, "USD"), 1),
-                new ShoppingCartLine(Guid.NewGuid(), "Watch", "Apple", new Money(799.00m, "USD"), 2)
+                new ShoppingCartLine(Guid.NewGuid(), 1),
+                new ShoppingCartLine(Guid.NewGuid(), 2)
             ]);
     }
 

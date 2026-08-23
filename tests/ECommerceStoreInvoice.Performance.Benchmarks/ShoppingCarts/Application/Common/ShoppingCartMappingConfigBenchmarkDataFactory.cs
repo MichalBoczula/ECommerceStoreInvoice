@@ -1,5 +1,5 @@
 using ECommerceStoreInvoice.Application.Common.RequestsDto.ShoppingCarts;
-using ECommerceStoreInvoice.Domain.AggregatesModel.Common.ValueObjects;
+using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.ValueObjects;
 
 namespace ECommerceStoreInvoice.Performance.Benchmarks.ShoppingCarts.Application.Common;
@@ -13,10 +13,6 @@ internal static class ShoppingCartMappingConfigBenchmarkDataFactory
         return new ShoppingCartLineRequestDto
         {
             ProductId = CreateDeterministicGuid(index),
-            Name = $"Product {index}",
-            Brand = $"Brand {index % 5}",
-            UnitPriceAmount = 10.99m + index,
-            UnitPriceCurrency = "PLN",
             Quantity = index
         };
     }
@@ -32,9 +28,6 @@ internal static class ShoppingCartMappingConfigBenchmarkDataFactory
     {
         return new ShoppingCartLine(
             CreateDeterministicGuid(index),
-            $"Product {index}",
-            $"Brand {index % 5}",
-            new Money(10.99m + index, "PLN"),
             index);
     }
 

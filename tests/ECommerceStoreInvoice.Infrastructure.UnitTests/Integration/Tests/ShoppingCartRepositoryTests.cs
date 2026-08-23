@@ -1,4 +1,4 @@
-﻿using ECommerceStoreInvoice.Domain.AggregatesModel.Common.ValueObjects;
+﻿using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.Repositories;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.ValueObjects;
 using ECommerceStoreInvoice.Infrastructure.UnitTests.Integration.Configuration;
@@ -43,13 +43,7 @@ namespace ECommerceStoreInvoice.Infrastructure.UnitTests.Integration.Tests
             result.ClientId.ShouldBe(shoppingCart.ClientId);
             result.Lines.Count.ShouldBe(1);
             result.Lines.Single().ProductId.ShouldBe(shoppingCart.Lines.Single().ProductId);
-            result.Lines.Single().Name.ShouldBe(shoppingCart.Lines.Single().Name);
-            result.Lines.Single().Brand.ShouldBe(shoppingCart.Lines.Single().Brand);
-            result.Lines.Single().UnitPrice.Amount.ShouldBe(shoppingCart.Lines.Single().UnitPrice.Amount);
-            result.Lines.Single().UnitPrice.Currency.ShouldBe(shoppingCart.Lines.Single().UnitPrice.Currency);
             result.Lines.Single().Quantity.ShouldBe(shoppingCart.Lines.Single().Quantity);
-            result.Total.Amount.ShouldBe(shoppingCart.Total.Amount);
-            result.Total.Currency.ShouldBe(shoppingCart.Total.Currency);
         }
 
         [Fact]
@@ -79,8 +73,6 @@ namespace ECommerceStoreInvoice.Infrastructure.UnitTests.Integration.Tests
             result.ClientId.ShouldBe(clientId);
             result.Lines.Count.ShouldBe(1);
             result.Lines.Single().Quantity.ShouldBe(3);
-            result.Total.Amount.ShouldBe(299.97m);
-            result.Total.Currency.ShouldBe("USD");
         }
 
         [Fact]
@@ -119,6 +111,7 @@ namespace ECommerceStoreInvoice.Infrastructure.UnitTests.Integration.Tests
                 .GetRequiredService<IShoppingCartRepository>();
 
             var clientId = Guid.NewGuid();
+            var newProductId = Guid.NewGuid();
 
             var originalShoppingCart = CreateShoppingCart(clientId, quantity: 1);
             await repository.CreateShoppingCart(originalShoppingCart);
@@ -129,12 +122,7 @@ namespace ECommerceStoreInvoice.Infrastructure.UnitTests.Integration.Tests
                 originalShoppingCart.CreatedAt,
                 DateTime.UtcNow,
                 [
-                    new ShoppingCartLine(
-                        Guid.NewGuid(),
-                        "Laptop",
-                        "Contoso",
-                        new Money(2500m, "USD"),
-                        2)
+                    new ShoppingCartLine(newProductId, 5)
                 ]);
 
             // act
@@ -147,12 +135,8 @@ namespace ECommerceStoreInvoice.Infrastructure.UnitTests.Integration.Tests
             result.Id.ShouldBe(originalShoppingCart.Id);
             result.ClientId.ShouldBe(clientId);
             result.Lines.Count.ShouldBe(1);
-            result.Lines.Single().Name.ShouldBe("Laptop");
-            result.Lines.Single().Brand.ShouldBe("Contoso");
-            result.Lines.Single().UnitPrice.Amount.ShouldBe(2500m);
-            result.Lines.Single().Quantity.ShouldBe(2);
-            result.Total.Amount.ShouldBe(5000m);
-            result.Total.Currency.ShouldBe("USD");
+            result.Lines.Single().ProductId.ShouldBe(newProductId);
+            result.Lines.Single().Quantity.ShouldBe(5);
         }
 
         private static ShoppingCart CreateShoppingCart(Guid clientId, int quantity)
@@ -163,12 +147,7 @@ namespace ECommerceStoreInvoice.Infrastructure.UnitTests.Integration.Tests
                 DateTime.UtcNow,
                 DateTime.UtcNow,
                 [
-                    new ShoppingCartLine(
-                        Guid.NewGuid(),
-                        "Monitor",
-                        "Fabrikam",
-                        new Money(99.99m, "USD"),
-                        quantity)
+                    new ShoppingCartLine(Guid.NewGuid(), quantity)
                 ]);
         }
     }

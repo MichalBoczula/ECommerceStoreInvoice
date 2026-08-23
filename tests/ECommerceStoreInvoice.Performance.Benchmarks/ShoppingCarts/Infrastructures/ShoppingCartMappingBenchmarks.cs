@@ -1,4 +1,5 @@
 ﻿using BenchmarkDotNet.Attributes;
+using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.ValueObjects;
 using ECommerceStoreInvoice.Infrastructure.Mapping;
 using ECommerceStoreInvoice.Infrastructure.Persistence.ShoppingCarts;
