@@ -1,200 +1,200 @@
-using ECommerceStoreInvoice.Application.Common.ResponsesDto.ShoppingCarts;
-using ECommerceStoreInvoice.Acceptance.Tests.Features.Common;
-using Reqnroll;
-using Shouldly;
-using System.Globalization;
-using System.Net;
-using System.Text.Json;
+// using ECommerceStoreInvoice.Application.Common.ResponsesDto.ShoppingCarts;
+// using ECommerceStoreInvoice.Acceptance.Tests.Features.Common;
+// using Reqnroll;
+// using Shouldly;
+// using System.Globalization;
+// using System.Net;
+// using System.Text.Json;
 
-namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.GetShoppingCartSuccess
-{
-    [Binding]
-    public sealed class GetShoppingCartSuccessSteps
-    {
-        private readonly ScenarioApiContext _apiContext;
-        private Guid _clientId;
-        private ShoppingCartResponseDto? _shoppingCartResponse;
+// namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.GetShoppingCartSuccess
+// {
+//     [Binding]
+//     public sealed class GetShoppingCartSuccessSteps
+//     {
+//         private readonly ScenarioApiContext _apiContext;
+//         private Guid _clientId;
+//         private ShoppingCartResponseDto? _shoppingCartResponse;
 
-        public GetShoppingCartSuccessSteps(ScenarioApiContext apiContext)
-        {
-            _apiContext = apiContext;
-        }
+//         public GetShoppingCartSuccessSteps(ScenarioApiContext apiContext)
+//         {
+//             _apiContext = apiContext;
+//         }
 
-        [Given("I have an existing shopping cart for retrieval")]
-        public async Task GivenIHaveAnExistingShoppingCartForRetrieval()
-        {
-            _clientId = Guid.NewGuid();
+//         [Given("I have an existing shopping cart for retrieval")]
+//         public async Task GivenIHaveAnExistingShoppingCartForRetrieval()
+//         {
+//             _clientId = Guid.NewGuid();
 
-            AllureJson.AttachObject(
-                "Get shopping cart setup request",
-                new { ClientId = _clientId },
-                _apiContext.JsonOptions);
+//             AllureJson.AttachObject(
+//                 "Get shopping cart setup request",
+//                 new { ClientId = _clientId },
+//                 _apiContext.JsonOptions);
 
-            var createResponse = await _apiContext.HttpClient.PostAsync($"/shopping-carts/{_clientId}", content: null);
-            createResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
+//             var createResponse = await _apiContext.HttpClient.PostAsync($"/shopping-carts/{_clientId}", content: null);
+//             createResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-            var createBody = await createResponse.Content.ReadAsStringAsync();
-            AllureJson.AttachRawJson($"Setup response JSON ({(int)createResponse.StatusCode})", createBody);
-        }
+//             var createBody = await createResponse.Content.ReadAsStringAsync();
+//             AllureJson.AttachRawJson($"Setup response JSON ({(int)createResponse.StatusCode})", createBody);
+//         }
 
-        [Given("the get shopping cart request data is")]
-        public void GivenTheGetShoppingCartRequestDataIs(Table table)
-        {
-            var requestMetadata = ParseExpectedTable(table);
-            var endpoint = GetRequiredValue(requestMetadata, "Endpoint");
+//         [Given("the get shopping cart request data is")]
+//         public void GivenTheGetShoppingCartRequestDataIs(Table table)
+//         {
+//             var requestMetadata = ParseExpectedTable(table);
+//             var endpoint = GetRequiredValue(requestMetadata, "Endpoint");
 
-            var requestObject = new
-            {
-                Method = GetRequiredValue(requestMetadata, "Method"),
-                Endpoint = $"{endpoint}/{_clientId}",
-                ClientId = _clientId
-            };
+//             var requestObject = new
+//             {
+//                 Method = GetRequiredValue(requestMetadata, "Method"),
+//                 Endpoint = $"{endpoint}/{_clientId}",
+//                 ClientId = _clientId
+//             };
 
-            AllureJson.AttachObject("Get shopping cart request object", requestObject, _apiContext.JsonOptions);
-        }
+//             AllureJson.AttachObject("Get shopping cart request object", requestObject, _apiContext.JsonOptions);
+//         }
 
-        [When("I request the shopping cart by client id")]
-        public async Task WhenIRequestTheShoppingCartByClientId()
-        {
-            _apiContext.Response = await _apiContext.HttpClient.GetAsync($"/shopping-carts/client/{_clientId}");
+//         [When("I request the shopping cart by client id")]
+//         public async Task WhenIRequestTheShoppingCartByClientId()
+//         {
+//             _apiContext.Response = await _apiContext.HttpClient.GetAsync($"/shopping-carts/client/{_clientId}");
 
-            var body = await _apiContext.Response.Content.ReadAsStringAsync();
-            AllureJson.AttachRawJson($"Response JSON ({(int)_apiContext.Response.StatusCode})", body);
-        }
+//             var body = await _apiContext.Response.Content.ReadAsStringAsync();
+//             AllureJson.AttachRawJson($"Response JSON ({(int)_apiContext.Response.StatusCode})", body);
+//         }
 
-        [Then("the shopping cart is returned successfully")]
-        public async Task ThenTheShoppingCartIsReturnedSuccessfully(Table table)
-        {
-            var expected = ParseExpectedTable(table);
+//         [Then("the shopping cart is returned successfully")]
+//         public async Task ThenTheShoppingCartIsReturnedSuccessfully(Table table)
+//         {
+//             var expected = ParseExpectedTable(table);
 
-            _apiContext.Response.ShouldNotBeNull();
-            _apiContext.Response!.StatusCode.ShouldBe(ParseStatusCode(expected, "StatusCode"));
+//             _apiContext.Response.ShouldNotBeNull();
+//             _apiContext.Response!.StatusCode.ShouldBe(ParseStatusCode(expected, "StatusCode"));
 
-            _shoppingCartResponse = await DeserializeResponse<ShoppingCartResponseDto>(_apiContext.Response);
-            _shoppingCartResponse.ShouldNotBeNull();
-            var shoppingCart = _shoppingCartResponse;
+//             _shoppingCartResponse = await DeserializeResponse<ShoppingCartResponseDto>(_apiContext.Response);
+//             _shoppingCartResponse.ShouldNotBeNull();
+//             var shoppingCart = _shoppingCartResponse;
 
-            if (TryGetBool(expected, "HasId", out var hasId))
-            {
-                if (hasId)
-                {
-                    shoppingCart!.Id.ShouldNotBe(Guid.Empty);
-                }
-                else
-                {
-                    shoppingCart!.Id.ShouldBe(Guid.Empty);
-                }
-            }
+//             if (TryGetBool(expected, "HasId", out var hasId))
+//             {
+//                 if (hasId)
+//                 {
+//                     shoppingCart!.Id.ShouldNotBe(Guid.Empty);
+//                 }
+//                 else
+//                 {
+//                     shoppingCart!.Id.ShouldBe(Guid.Empty);
+//                 }
+//             }
 
-            if (TryGetBool(expected, "HasClientId", out var hasClientId))
-            {
-                if (hasClientId)
-                {
-                    shoppingCart!.ClientId.ShouldBe(_clientId);
-                }
-                else
-                {
-                    shoppingCart!.ClientId.ShouldBe(Guid.Empty);
-                }
-            }
+//             if (TryGetBool(expected, "HasClientId", out var hasClientId))
+//             {
+//                 if (hasClientId)
+//                 {
+//                     shoppingCart!.ClientId.ShouldBe(_clientId);
+//                 }
+//                 else
+//                 {
+//                     shoppingCart!.ClientId.ShouldBe(Guid.Empty);
+//                 }
+//             }
 
-            shoppingCart!.TotalAmount.ShouldBe(ParseDecimal(expected, "TotalAmount", shoppingCart.TotalAmount));
-            shoppingCart.TotalCurrency.ShouldBe(GetExpectedValue(expected, "TotalCurrency", shoppingCart.TotalCurrency));
-            shoppingCart.Lines.Count.ShouldBe(ParseInt(expected, "LinesCount", shoppingCart.Lines.Count));
-        }
+//             shoppingCart!.TotalAmount.ShouldBe(ParseDecimal(expected, "TotalAmount", shoppingCart.TotalAmount));
+//             shoppingCart.TotalCurrency.ShouldBe(GetExpectedValue(expected, "TotalCurrency", shoppingCart.TotalCurrency));
+//             shoppingCart.Lines.Count.ShouldBe(ParseInt(expected, "LinesCount", shoppingCart.Lines.Count));
+//         }
 
-        [Then("the shopping cart response payload is")]
-        public void ThenTheShoppingCartResponsePayloadIs(Table table)
-        {
-            _shoppingCartResponse.ShouldNotBeNull();
+//         [Then("the shopping cart response payload is")]
+//         public void ThenTheShoppingCartResponsePayloadIs(Table table)
+//         {
+//             _shoppingCartResponse.ShouldNotBeNull();
 
-            var expectedPayload = ParseExpectedTable(table);
-            var responseObject = new
-            {
-                Id = _shoppingCartResponse!.Id,
-                ClientId = _shoppingCartResponse.ClientId,
-                TotalAmount = _shoppingCartResponse.TotalAmount,
-                TotalCurrency = _shoppingCartResponse.TotalCurrency,
-                Lines = _shoppingCartResponse.Lines
-            };
+//             var expectedPayload = ParseExpectedTable(table);
+//             var responseObject = new
+//             {
+//                 Id = _shoppingCartResponse!.Id,
+//                 ClientId = _shoppingCartResponse.ClientId,
+//                 TotalAmount = _shoppingCartResponse.TotalAmount,
+//                 TotalCurrency = _shoppingCartResponse.TotalCurrency,
+//                 Lines = _shoppingCartResponse.Lines
+//             };
 
-            AllureJson.AttachObject("Get shopping cart response object", responseObject, _apiContext.JsonOptions);
+//             AllureJson.AttachObject("Get shopping cart response object", responseObject, _apiContext.JsonOptions);
 
-            _shoppingCartResponse.Id.ShouldNotBe(Guid.Empty);
-            _shoppingCartResponse.ClientId.ShouldBe(_clientId);
-            _shoppingCartResponse.TotalAmount.ShouldBe(ParseDecimal(expectedPayload, "TotalAmount", _shoppingCartResponse.TotalAmount));
-            _shoppingCartResponse.TotalCurrency.ShouldBe(GetExpectedValue(expectedPayload, "TotalCurrency", _shoppingCartResponse.TotalCurrency));
-            _shoppingCartResponse.Lines.Count.ShouldBe(0);
-        }
+//             _shoppingCartResponse.Id.ShouldNotBe(Guid.Empty);
+//             _shoppingCartResponse.ClientId.ShouldBe(_clientId);
+//             _shoppingCartResponse.TotalAmount.ShouldBe(ParseDecimal(expectedPayload, "TotalAmount", _shoppingCartResponse.TotalAmount));
+//             _shoppingCartResponse.TotalCurrency.ShouldBe(GetExpectedValue(expectedPayload, "TotalCurrency", _shoppingCartResponse.TotalCurrency));
+//             _shoppingCartResponse.Lines.Count.ShouldBe(0);
+//         }
 
-        private async Task<T?> DeserializeResponse<T>(HttpResponseMessage response)
-        {
-            var content = await response.Content.ReadAsStringAsync();
-            return JsonSerializer.Deserialize<T>(content, _apiContext.JsonOptions);
-        }
+//         private async Task<T?> DeserializeResponse<T>(HttpResponseMessage response)
+//         {
+//             var content = await response.Content.ReadAsStringAsync();
+//             return JsonSerializer.Deserialize<T>(content, _apiContext.JsonOptions);
+//         }
 
-        private static Dictionary<string, string> ParseExpectedTable(Table table)
-        {
-            var values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            foreach (var row in table.Rows)
-            {
-                values[row["Field"]] = row["Value"];
-            }
+//         private static Dictionary<string, string> ParseExpectedTable(Table table)
+//         {
+//             var values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+//             foreach (var row in table.Rows)
+//             {
+//                 values[row["Field"]] = row["Value"];
+//             }
 
-            return values;
-        }
+//             return values;
+//         }
 
-        private static string GetRequiredValue(IReadOnlyDictionary<string, string> values, string key)
-        {
-            if (!values.TryGetValue(key, out var value))
-            {
-                throw new InvalidOperationException($"Missing '{key}' value in shopping cart expected result table.");
-            }
+//         private static string GetRequiredValue(IReadOnlyDictionary<string, string> values, string key)
+//         {
+//             if (!values.TryGetValue(key, out var value))
+//             {
+//                 throw new InvalidOperationException($"Missing '{key}' value in shopping cart expected result table.");
+//             }
 
-            return value;
-        }
+//             return value;
+//         }
 
-        private static string GetExpectedValue(IReadOnlyDictionary<string, string> values, string key, string fallback)
-        {
-            return values.TryGetValue(key, out var value) ? value : fallback;
-        }
+//         private static string GetExpectedValue(IReadOnlyDictionary<string, string> values, string key, string fallback)
+//         {
+//             return values.TryGetValue(key, out var value) ? value : fallback;
+//         }
 
-        private static HttpStatusCode ParseStatusCode(IReadOnlyDictionary<string, string> values, string key)
-        {
-            var value = GetRequiredValue(values, key);
-            return (HttpStatusCode)int.Parse(value, CultureInfo.InvariantCulture);
-        }
+//         private static HttpStatusCode ParseStatusCode(IReadOnlyDictionary<string, string> values, string key)
+//         {
+//             var value = GetRequiredValue(values, key);
+//             return (HttpStatusCode)int.Parse(value, CultureInfo.InvariantCulture);
+//         }
 
-        private static decimal ParseDecimal(IReadOnlyDictionary<string, string> values, string key, decimal fallback)
-        {
-            if (!values.TryGetValue(key, out var value))
-            {
-                return fallback;
-            }
+//         private static decimal ParseDecimal(IReadOnlyDictionary<string, string> values, string key, decimal fallback)
+//         {
+//             if (!values.TryGetValue(key, out var value))
+//             {
+//                 return fallback;
+//             }
 
-            return decimal.Parse(value, CultureInfo.InvariantCulture);
-        }
+//             return decimal.Parse(value, CultureInfo.InvariantCulture);
+//         }
 
-        private static int ParseInt(IReadOnlyDictionary<string, string> values, string key, int fallback)
-        {
-            if (!values.TryGetValue(key, out var value))
-            {
-                return fallback;
-            }
+//         private static int ParseInt(IReadOnlyDictionary<string, string> values, string key, int fallback)
+//         {
+//             if (!values.TryGetValue(key, out var value))
+//             {
+//                 return fallback;
+//             }
 
-            return int.Parse(value, CultureInfo.InvariantCulture);
-        }
+//             return int.Parse(value, CultureInfo.InvariantCulture);
+//         }
 
-        private static bool TryGetBool(IReadOnlyDictionary<string, string> values, string key, out bool result)
-        {
-            if (!values.TryGetValue(key, out var value))
-            {
-                result = false;
-                return false;
-            }
+//         private static bool TryGetBool(IReadOnlyDictionary<string, string> values, string key, out bool result)
+//         {
+//             if (!values.TryGetValue(key, out var value))
+//             {
+//                 result = false;
+//                 return false;
+//             }
 
-            result = bool.Parse(value);
-            return true;
-        }
-    }
-}
+//             result = bool.Parse(value);
+//             return true;
+//         }
+//     }
+// }

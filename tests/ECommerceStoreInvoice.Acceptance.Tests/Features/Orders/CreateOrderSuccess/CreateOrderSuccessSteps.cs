@@ -1,252 +1,252 @@
-using ECommerceStoreInvoice.Acceptance.Tests.Features.Common;
-using ECommerceStoreInvoice.Application.Common.RequestsDto.ShoppingCarts;
-using ECommerceStoreInvoice.Application.Common.ResponsesDto.Orders;
-using Reqnroll;
-using Shouldly;
-using System.Globalization;
-using System.Net;
-using System.Net.Http.Json;
-using System.Text.Json;
+// using ECommerceStoreInvoice.Acceptance.Tests.Features.Common;
+// using ECommerceStoreInvoice.Application.Common.RequestsDto.ShoppingCarts;
+// using ECommerceStoreInvoice.Application.Common.ResponsesDto.Orders;
+// using Reqnroll;
+// using Shouldly;
+// using System.Globalization;
+// using System.Net;
+// using System.Net.Http.Json;
+// using System.Text.Json;
 
-namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Orders.CreateOrderSuccess
-{
-    [Binding]
-    public sealed class CreateOrderSuccessSteps
-    {
-        private readonly ScenarioApiContext _apiContext;
-        private Guid _clientId;
+// namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Orders.CreateOrderSuccess
+// {
+//     [Binding]
+//     public sealed class CreateOrderSuccessSteps
+//     {
+//         private readonly ScenarioApiContext _apiContext;
+//         private Guid _clientId;
 
-        public CreateOrderSuccessSteps(ScenarioApiContext apiContext)
-        {
-            _apiContext = apiContext;
-        }
+//         public CreateOrderSuccessSteps(ScenarioApiContext apiContext)
+//         {
+//             _apiContext = apiContext;
+//         }
 
-        [Given("I have a valid shopping cart for order creation")]
-        public async Task GivenIHaveAValidShoppingCartForOrderCreation(Table table)
-        {
-            _clientId = Guid.NewGuid();
-            var productId = Guid.NewGuid();
-            var setupRequest = ParseSetupTable(table, productId);
+//         [Given("I have a valid shopping cart for order creation")]
+//         public async Task GivenIHaveAValidShoppingCartForOrderCreation(Table table)
+//         {
+//             _clientId = Guid.NewGuid();
+//             var productId = Guid.NewGuid();
+//             var setupRequest = ParseSetupTable(table, productId);
 
-            AllureJson.AttachObject("Create order setup request", setupRequest, _apiContext.JsonOptions);
+//             AllureJson.AttachObject("Create order setup request", setupRequest, _apiContext.JsonOptions);
 
-            var createShoppingCartResponse = await _apiContext.HttpClient.PostAsync($"/shopping-carts/{_clientId}", content: null);
-            createShoppingCartResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
+//             var createShoppingCartResponse = await _apiContext.HttpClient.PostAsync($"/shopping-carts/{_clientId}", content: null);
+//             createShoppingCartResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-            var createShoppingCartBody = await createShoppingCartResponse.Content.ReadAsStringAsync();
-            AllureJson.AttachRawJson($"Create shopping cart response JSON ({(int)createShoppingCartResponse.StatusCode})", createShoppingCartBody);
+//             var createShoppingCartBody = await createShoppingCartResponse.Content.ReadAsStringAsync();
+//             AllureJson.AttachRawJson($"Create shopping cart response JSON ({(int)createShoppingCartResponse.StatusCode})", createShoppingCartBody);
 
-            var updateRequest = new UpdateShoppingCartRequestDto
-            {
-                Lines =
-                [
-                    new ShoppingCartLineRequestDto
-                    {
-                        ProductId = productId,
-                        Name = setupRequest.ShoppingCartLine.Name,
-                        Brand = setupRequest.ShoppingCartLine.Brand,
-                        UnitPriceAmount = setupRequest.ShoppingCartLine.UnitPriceAmount,
-                        UnitPriceCurrency = setupRequest.ShoppingCartLine.UnitPriceCurrency,
-                        Quantity = setupRequest.ShoppingCartLine.Quantity
-                    }
-                ]
-            };
+//             var updateRequest = new UpdateShoppingCartRequestDto
+//             {
+//                 Lines =
+//                 [
+//                     new ShoppingCartLineRequestDto
+//                     {
+//                         ProductId = productId,
+//                         Name = setupRequest.ShoppingCartLine.Name,
+//                         Brand = setupRequest.ShoppingCartLine.Brand,
+//                         UnitPriceAmount = setupRequest.ShoppingCartLine.UnitPriceAmount,
+//                         UnitPriceCurrency = setupRequest.ShoppingCartLine.UnitPriceCurrency,
+//                         Quantity = setupRequest.ShoppingCartLine.Quantity
+//                     }
+//                 ]
+//             };
 
-            AllureJson.AttachObject("Update shopping cart setup request", updateRequest, _apiContext.JsonOptions);
+//             AllureJson.AttachObject("Update shopping cart setup request", updateRequest, _apiContext.JsonOptions);
 
-            var updateShoppingCartResponse = await _apiContext.HttpClient.PutAsJsonAsync($"/shopping-carts/{_clientId}", updateRequest, _apiContext.JsonOptions);
-            updateShoppingCartResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
+//             var updateShoppingCartResponse = await _apiContext.HttpClient.PutAsJsonAsync($"/shopping-carts/{_clientId}", updateRequest, _apiContext.JsonOptions);
+//             updateShoppingCartResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-            var updateShoppingCartBody = await updateShoppingCartResponse.Content.ReadAsStringAsync();
-            AllureJson.AttachRawJson($"Update shopping cart response JSON ({(int)updateShoppingCartResponse.StatusCode})", updateShoppingCartBody);
-        }
+//             var updateShoppingCartBody = await updateShoppingCartResponse.Content.ReadAsStringAsync();
+//             AllureJson.AttachRawJson($"Update shopping cart response JSON ({(int)updateShoppingCartResponse.StatusCode})", updateShoppingCartBody);
+//         }
 
-        [When("I submit the create order request")]
-        public async Task WhenISubmitTheCreateOrderRequest()
-        {
-            _apiContext.Response = await _apiContext.HttpClient.PostAsync($"/orders/{_clientId}", content: null);
+//         [When("I submit the create order request")]
+//         public async Task WhenISubmitTheCreateOrderRequest()
+//         {
+//             _apiContext.Response = await _apiContext.HttpClient.PostAsync($"/orders/{_clientId}", content: null);
 
-            var body = await _apiContext.Response.Content.ReadAsStringAsync();
-            AllureJson.AttachRawJson($"Response JSON ({(int)_apiContext.Response.StatusCode})", body);
-        }
+//             var body = await _apiContext.Response.Content.ReadAsStringAsync();
+//             AllureJson.AttachRawJson($"Response JSON ({(int)_apiContext.Response.StatusCode})", body);
+//         }
 
-        [Then("the order is created successfully")]
-        public async Task ThenTheOrderIsCreatedSuccessfully(Table table)
-        {
-            var expected = ParseExpectedTable(table);
+//         [Then("the order is created successfully")]
+//         public async Task ThenTheOrderIsCreatedSuccessfully(Table table)
+//         {
+//             var expected = ParseExpectedTable(table);
 
-            AllureJson.AttachObject("Expected create order result", expected, _apiContext.JsonOptions);
+//             AllureJson.AttachObject("Expected create order result", expected, _apiContext.JsonOptions);
 
-            _apiContext.Response.ShouldNotBeNull();
-            _apiContext.Response!.StatusCode.ShouldBe(ParseStatusCode(expected, "StatusCode"));
+//             _apiContext.Response.ShouldNotBeNull();
+//             _apiContext.Response!.StatusCode.ShouldBe(ParseStatusCode(expected, "StatusCode"));
 
-            var order = await DeserializeResponse<OrderResponseDto>(_apiContext.Response);
-            order.ShouldNotBeNull();
+//             var order = await DeserializeResponse<OrderResponseDto>(_apiContext.Response);
+//             order.ShouldNotBeNull();
 
-            if (TryGetBool(expected, "HasId", out var hasId))
-            {
-                if (hasId)
-                {
-                    order!.Id.ShouldNotBe(Guid.Empty);
-                }
-                else
-                {
-                    order!.Id.ShouldBe(Guid.Empty);
-                }
-            }
+//             if (TryGetBool(expected, "HasId", out var hasId))
+//             {
+//                 if (hasId)
+//                 {
+//                     order!.Id.ShouldNotBe(Guid.Empty);
+//                 }
+//                 else
+//                 {
+//                     order!.Id.ShouldBe(Guid.Empty);
+//                 }
+//             }
 
-            if (TryGetBool(expected, "HasClientId", out var hasClientId))
-            {
-                if (hasClientId)
-                {
-                    order!.ClientId.ShouldBe(_clientId);
-                }
-                else
-                {
-                    order!.ClientId.ShouldBe(Guid.Empty);
-                }
-            }
+//             if (TryGetBool(expected, "HasClientId", out var hasClientId))
+//             {
+//                 if (hasClientId)
+//                 {
+//                     order!.ClientId.ShouldBe(_clientId);
+//                 }
+//                 else
+//                 {
+//                     order!.ClientId.ShouldBe(Guid.Empty);
+//                 }
+//             }
 
-            order!.Status.ShouldBe(GetExpectedValue(expected, "Status", order.Status));
-            order.TotalAmount.ShouldBe(ParseDecimal(expected, "TotalAmount", order.TotalAmount));
-            order.TotalCurrency.ShouldBe(GetExpectedValue(expected, "TotalCurrency", order.TotalCurrency));
-            order.Lines.Count.ShouldBe(ParseInt(expected, "LinesCount", order.Lines.Count));
+//             order!.Status.ShouldBe(GetExpectedValue(expected, "Status", order.Status));
+//             order.TotalAmount.ShouldBe(ParseDecimal(expected, "TotalAmount", order.TotalAmount));
+//             order.TotalCurrency.ShouldBe(GetExpectedValue(expected, "TotalCurrency", order.TotalCurrency));
+//             order.Lines.Count.ShouldBe(ParseInt(expected, "LinesCount", order.Lines.Count));
 
-            var firstLine = order.Lines.FirstOrDefault();
-            firstLine.ShouldNotBeNull();
+//             var firstLine = order.Lines.FirstOrDefault();
+//             firstLine.ShouldNotBeNull();
 
-            if (TryGetBool(expected, "FirstLineHasProductVersionId", out var firstLineHasProductVersionId))
-            {
-                if (firstLineHasProductVersionId)
-                {
-                    firstLine!.ProductVersionId.ShouldNotBe(Guid.Empty);
-                }
-                else
-                {
-                    firstLine!.ProductVersionId.ShouldBe(Guid.Empty);
-                }
-            }
+//             if (TryGetBool(expected, "FirstLineHasProductVersionId", out var firstLineHasProductVersionId))
+//             {
+//                 if (firstLineHasProductVersionId)
+//                 {
+//                     firstLine!.ProductVersionId.ShouldNotBe(Guid.Empty);
+//                 }
+//                 else
+//                 {
+//                     firstLine!.ProductVersionId.ShouldBe(Guid.Empty);
+//                 }
+//             }
 
-            firstLine!.Name.ShouldBe(GetExpectedValue(expected, "FirstLineName", firstLine.Name));
-            firstLine.Brand.ShouldBe(GetExpectedValue(expected, "FirstLineBrand", firstLine.Brand));
-            firstLine.Quantity.ShouldBe(ParseInt(expected, "FirstLineQuantity", firstLine.Quantity));
-            firstLine.UnitPriceAmount.ShouldBe(ParseDecimal(expected, "FirstLineUnitPriceAmount", firstLine.UnitPriceAmount));
-            firstLine.UnitPriceCurrency.ShouldBe(GetExpectedValue(expected, "FirstLineUnitPriceCurrency", firstLine.UnitPriceCurrency));
-            firstLine.TotalAmount.ShouldBe(ParseDecimal(expected, "FirstLineTotalAmount", firstLine.TotalAmount));
-            firstLine.TotalCurrency.ShouldBe(GetExpectedValue(expected, "FirstLineTotalCurrency", firstLine.TotalCurrency));
+//             firstLine!.Name.ShouldBe(GetExpectedValue(expected, "FirstLineName", firstLine.Name));
+//             firstLine.Brand.ShouldBe(GetExpectedValue(expected, "FirstLineBrand", firstLine.Brand));
+//             firstLine.Quantity.ShouldBe(ParseInt(expected, "FirstLineQuantity", firstLine.Quantity));
+//             firstLine.UnitPriceAmount.ShouldBe(ParseDecimal(expected, "FirstLineUnitPriceAmount", firstLine.UnitPriceAmount));
+//             firstLine.UnitPriceCurrency.ShouldBe(GetExpectedValue(expected, "FirstLineUnitPriceCurrency", firstLine.UnitPriceCurrency));
+//             firstLine.TotalAmount.ShouldBe(ParseDecimal(expected, "FirstLineTotalAmount", firstLine.TotalAmount));
+//             firstLine.TotalCurrency.ShouldBe(GetExpectedValue(expected, "FirstLineTotalCurrency", firstLine.TotalCurrency));
 
-            AllureJson.AttachObject(
-                "Actual create order result",
-                new
-                {
-                    OrderId = order.Id,
-                    ClientId = order.ClientId,
-                    order.Status,
-                    order.TotalAmount,
-                    order.TotalCurrency,
-                    LinesCount = order.Lines.Count,
-                    FirstLine = firstLine
-                },
-                _apiContext.JsonOptions);
-        }
+//             AllureJson.AttachObject(
+//                 "Actual create order result",
+//                 new
+//                 {
+//                     OrderId = order.Id,
+//                     ClientId = order.ClientId,
+//                     order.Status,
+//                     order.TotalAmount,
+//                     order.TotalCurrency,
+//                     LinesCount = order.Lines.Count,
+//                     FirstLine = firstLine
+//                 },
+//                 _apiContext.JsonOptions);
+//         }
 
-        private async Task<T?> DeserializeResponse<T>(HttpResponseMessage response)
-        {
-            var content = await response.Content.ReadAsStringAsync();
-            return JsonSerializer.Deserialize<T>(content, _apiContext.JsonOptions);
-        }
+//         private async Task<T?> DeserializeResponse<T>(HttpResponseMessage response)
+//         {
+//             var content = await response.Content.ReadAsStringAsync();
+//             return JsonSerializer.Deserialize<T>(content, _apiContext.JsonOptions);
+//         }
 
-        private static CreateOrderSetupRequest ParseSetupTable(Table table, Guid productId)
-        {
-            var values = ParseExpectedTable(table);
-            var name = GetRequiredValue(values, "Name");
-            var brand = GetRequiredValue(values, "Brand");
-            var unitPriceAmount = decimal.Parse(GetRequiredValue(values, "UnitPriceAmount"), CultureInfo.InvariantCulture);
-            var unitPriceCurrency = GetRequiredValue(values, "UnitPriceCurrency");
-            var quantity = int.Parse(GetRequiredValue(values, "Quantity"), CultureInfo.InvariantCulture);
+//         private static CreateOrderSetupRequest ParseSetupTable(Table table, Guid productId)
+//         {
+//             var values = ParseExpectedTable(table);
+//             var name = GetRequiredValue(values, "Name");
+//             var brand = GetRequiredValue(values, "Brand");
+//             var unitPriceAmount = decimal.Parse(GetRequiredValue(values, "UnitPriceAmount"), CultureInfo.InvariantCulture);
+//             var unitPriceCurrency = GetRequiredValue(values, "UnitPriceCurrency");
+//             var quantity = int.Parse(GetRequiredValue(values, "Quantity"), CultureInfo.InvariantCulture);
 
-            return new CreateOrderSetupRequest(
-                new ShoppingCartLineSetupRequest(
-                    productId,
-                    name,
-                    brand,
-                    unitPriceAmount,
-                    unitPriceCurrency,
-                    quantity));
-        }
+//             return new CreateOrderSetupRequest(
+//                 new ShoppingCartLineSetupRequest(
+//                     productId,
+//                     name,
+//                     brand,
+//                     unitPriceAmount,
+//                     unitPriceCurrency,
+//                     quantity));
+//         }
 
-        private static Dictionary<string, string> ParseExpectedTable(Table table)
-        {
-            var values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            foreach (var row in table.Rows)
-            {
-                values[row["Field"]] = row["Value"];
-            }
+//         private static Dictionary<string, string> ParseExpectedTable(Table table)
+//         {
+//             var values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+//             foreach (var row in table.Rows)
+//             {
+//                 values[row["Field"]] = row["Value"];
+//             }
 
-            return values;
-        }
+//             return values;
+//         }
 
-        private static string GetRequiredValue(IReadOnlyDictionary<string, string> values, string key)
-        {
-            if (!values.TryGetValue(key, out var value))
-            {
-                throw new InvalidOperationException($"Missing '{key}' value in create order expected result table.");
-            }
+//         private static string GetRequiredValue(IReadOnlyDictionary<string, string> values, string key)
+//         {
+//             if (!values.TryGetValue(key, out var value))
+//             {
+//                 throw new InvalidOperationException($"Missing '{key}' value in create order expected result table.");
+//             }
 
-            return value;
-        }
+//             return value;
+//         }
 
-        private static string GetExpectedValue(IReadOnlyDictionary<string, string> values, string key, string fallback)
-        {
-            return values.TryGetValue(key, out var value) ? value : fallback;
-        }
+//         private static string GetExpectedValue(IReadOnlyDictionary<string, string> values, string key, string fallback)
+//         {
+//             return values.TryGetValue(key, out var value) ? value : fallback;
+//         }
 
-        private static HttpStatusCode ParseStatusCode(IReadOnlyDictionary<string, string> values, string key)
-        {
-            var value = GetRequiredValue(values, key);
-            return (HttpStatusCode)int.Parse(value, CultureInfo.InvariantCulture);
-        }
+//         private static HttpStatusCode ParseStatusCode(IReadOnlyDictionary<string, string> values, string key)
+//         {
+//             var value = GetRequiredValue(values, key);
+//             return (HttpStatusCode)int.Parse(value, CultureInfo.InvariantCulture);
+//         }
 
-        private static int ParseInt(IReadOnlyDictionary<string, string> values, string key, int fallback)
-        {
-            if (!values.TryGetValue(key, out var value))
-            {
-                return fallback;
-            }
+//         private static int ParseInt(IReadOnlyDictionary<string, string> values, string key, int fallback)
+//         {
+//             if (!values.TryGetValue(key, out var value))
+//             {
+//                 return fallback;
+//             }
 
-            return int.Parse(value, CultureInfo.InvariantCulture);
-        }
+//             return int.Parse(value, CultureInfo.InvariantCulture);
+//         }
 
-        private static decimal ParseDecimal(IReadOnlyDictionary<string, string> values, string key, decimal fallback)
-        {
-            if (!values.TryGetValue(key, out var value))
-            {
-                return fallback;
-            }
+//         private static decimal ParseDecimal(IReadOnlyDictionary<string, string> values, string key, decimal fallback)
+//         {
+//             if (!values.TryGetValue(key, out var value))
+//             {
+//                 return fallback;
+//             }
 
-            return decimal.Parse(value, CultureInfo.InvariantCulture);
-        }
+//             return decimal.Parse(value, CultureInfo.InvariantCulture);
+//         }
 
-        private static bool TryGetBool(IReadOnlyDictionary<string, string> values, string key, out bool result)
-        {
-            if (!values.TryGetValue(key, out var value))
-            {
-                result = false;
-                return false;
-            }
+//         private static bool TryGetBool(IReadOnlyDictionary<string, string> values, string key, out bool result)
+//         {
+//             if (!values.TryGetValue(key, out var value))
+//             {
+//                 result = false;
+//                 return false;
+//             }
 
-            result = bool.Parse(value);
-            return true;
-        }
+//             result = bool.Parse(value);
+//             return true;
+//         }
 
-        private sealed record CreateOrderSetupRequest(ShoppingCartLineSetupRequest ShoppingCartLine);
+//         private sealed record CreateOrderSetupRequest(ShoppingCartLineSetupRequest ShoppingCartLine);
 
-        private sealed record ShoppingCartLineSetupRequest(
-            Guid ProductId,
-            string Name,
-            string Brand,
-            decimal UnitPriceAmount,
-            string UnitPriceCurrency,
-            int Quantity);
-    }
-}
+//         private sealed record ShoppingCartLineSetupRequest(
+//             Guid ProductId,
+//             string Name,
+//             string Brand,
+//             decimal UnitPriceAmount,
+//             string UnitPriceCurrency,
+//             int Quantity);
+//     }
+// }

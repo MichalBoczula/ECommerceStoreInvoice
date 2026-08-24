@@ -207,10 +207,9 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.UpdateSh
     await testRunner.AndAsync("I have an invalid update shopping cart request", ((string)(null)), table68, "And ");
 #line hidden
 #line 18
-    await testRunner.AndAsync("update shopping cart request json is documented", "{\r\n  \"lines\": [\r\n    {\r\n      \"productId\": \"33333333-3333-3333-3333-333333333333\"" +
-                        ",\r\n      \"name\": \"Phone\",\r\n      \"brand\": \"Apple\",\r\n      \"unitPrice\": {\r\n      " +
-                        "  \"amount\": 999.99,\r\n        \"currency\": \"usd\"\r\n      },\r\n      \"quantity\": 0\r\n " +
-                        "   }\r\n  ]\r\n}", ((global::Reqnroll.Table)(null)), "And ");
+    await testRunner.AndAsync("update shopping cart request json is documented", "{\n  \"lines\": [\n    {\n      \"productId\": \"33333333-3333-3333-3333-333333333333\",\n " +
+                        "     \"name\": \"Phone\",\n      \"brand\": \"Apple\",\n      \"unitPrice\": {\n        \"amou" +
+                        "nt\": 999.99,\n        \"currency\": \"usd\"\n      },\n      \"quantity\": 0\n    }\n  ]\n}", ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
 #line 35
     await testRunner.WhenAsync("I submit the invalid update shopping cart request", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
