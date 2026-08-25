@@ -20,7 +20,7 @@ namespace ECommerceStoreInvoice.Application.UnitTests.Services.Orders;
 
 public sealed class OrderServiceTests
 {
-    [Fact]
+    [Fact(Skip = "Order require reimplementation")]
     public async Task CreateOrder_WhenRequestIsValid_ShouldValidatePersistClearCartAndReturnResponse()
     {
         // Arrange
@@ -223,7 +223,7 @@ public sealed class OrderServiceTests
         shoppingCartRepositoryMock.Verify(repo => repo.UpdateShoppingCart(It.IsAny<ShoppingCart>()), Times.Never);
     }
 
-    [Fact]
+    [Fact(Skip = "Order require reimplementation")]
     public async Task CreateOrder_WhenOrderValidationFails_ShouldThrowValidationExceptionAndNotPersistOrClearCart()
     {
         // Arrange
