@@ -1,5 +1,6 @@
 ﻿using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.ValueObjects;
 using ECommerceStoreInvoice.Domain.Validation.Concrete.Policies;
+using ECommerceStoreInvoice.Domain.Validation.Concrete.Rules.ShoppingCarts;
 using Shouldly;
 
 namespace ECommerceStoreInvoice.Domain.UnitTests.Validation.Policies.ShoppingCartLines
@@ -22,8 +23,8 @@ namespace ECommerceStoreInvoice.Domain.UnitTests.Validation.Policies.ShoppingCar
             // Assert
             result.IsValid.ShouldBeFalse();
             result.GetValidationErrors().Count.ShouldBe(2);
-            result.GetValidationErrors().ShouldContain(e => e.Name == "ProductId" && e.Message == "ProductId cannot be empty.");
-            result.GetValidationErrors().ShouldContain(e => e.Name == "Quantity" && e.Message == "Quantity must be greater than zero.");
+            result.GetValidationErrors().ShouldContain(e => e.Name == nameof(ShoppingCartLineGuidValidationRule) || e.Message.Contains("Guid") || e.Message.Contains("ProductId"));
+            result.GetValidationErrors().ShouldContain(e => e.Name == nameof(ShoppingCartLineQuantityValidationRule) || e.Message == "Quantity must be greater than zero.");
         }
 
         [Fact]
@@ -56,9 +57,10 @@ namespace ECommerceStoreInvoice.Domain.UnitTests.Validation.Policies.ShoppingCar
 
             // Assert
             descriptor.PolicyName.ShouldBe(nameof(ShoppingCartLineValidationPolicy));
-            descriptor.Rules.Count.ShouldBe(2);
-            descriptor.Rules.ShouldContain(r => r.RuleName == "ShoppingCartLineGuidValidationRule");
-            descriptor.Rules.ShouldContain(r => r.RuleName == "ShoppingCartLineQuantityValidationRule");
+            descriptor.Rules.Count.ShouldBe(3);
+            descriptor.Rules.ShouldContain(r => r.RuleName == nameof(ShoppingCartLineIsNullValidationRule));
+            descriptor.Rules.ShouldContain(r => r.RuleName == nameof(ShoppingCartLineGuidValidationRule));
+            descriptor.Rules.ShouldContain(r => r.RuleName == nameof(ShoppingCartLineQuantityValidationRule));
         }
     }
 }

@@ -49,10 +49,5 @@ namespace ECommerceStoreInvoice.Infrastructure.Repositories
 
             return shoppingCart;
         }
-
-        Task<ShoppingCart?> IShoppingCartRepository.GetShoppingCartByClientId(Guid clientId)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

@@ -6,15 +6,29 @@ namespace ECommerceStoreInvoice.Domain.Validation.Concrete.Rules.ShoppingCarts
 {
     internal sealed class ShoppingCartLineGuidValidationRule : IValidationRule<ShoppingCartLine>
     {
+        private readonly ValidationError shoppingCartLineIdIsEmpty;
+
+        public ShoppingCartLineGuidValidationRule()
+        {
+            shoppingCartLineIdIsEmpty = new ValidationError
+            {
+                Message = "ShoppingCartLine Id cannot be empty Guid.",
+                Name = nameof(ShoppingCartLineGuidValidationRule),
+                Entity = nameof(ShoppingCartLine)
+            };
+        }
+
         public List<ValidationError> Describe()
         {
-            throw new NotImplementedException();
+            return [shoppingCartLineIdIsEmpty];
         }
 
-        public Task IsValid(ShoppingCartLine entity, ValidationResult validationResults)
+        public async Task IsValid(ShoppingCartLine entity, ValidationResult validationResults)
         {
-            throw new NotImplementedException();
+            if (entity.ProductId == Guid.Empty)
+            {
+                validationResults.AddValidationError(shoppingCartLineIdIsEmpty);
+            }
         }
-
     }
 }
