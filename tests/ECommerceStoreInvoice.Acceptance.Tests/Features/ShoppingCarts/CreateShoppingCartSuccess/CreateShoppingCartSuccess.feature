@@ -10,6 +10,6 @@ Feature: Create shopping cart
       | StatusCode    | 200   |
       | HasId         | true  |
       | HasClientId   | true  |
-      | TotalAmount   | 0     |
-      | TotalCurrency | USD   |
+      | HasCreatedAt  | true  |
+      | HasUpdatedAt  | true  |
       | LinesCount    | 0     |
