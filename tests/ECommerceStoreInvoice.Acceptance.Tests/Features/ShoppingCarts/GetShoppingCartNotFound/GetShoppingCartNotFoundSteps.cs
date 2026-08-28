@@ -13,6 +13,7 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.GetShopp
     {
         private readonly ScenarioApiContext _apiContext;
         private Guid _clientId;
+        private string _requestPath = null!;
 
         public GetShoppingCartNotFoundSteps(ScenarioApiContext apiContext)
         {
@@ -26,11 +27,12 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.GetShopp
             _clientId = Guid.NewGuid();
 
             var pathTemplate = GetRequiredValue(requestValues, "Path");
+            _requestPath = pathTemplate.Replace("{clientId}", _clientId.ToString(), StringComparison.OrdinalIgnoreCase);
             var request = new
             {
                 Method = GetRequiredValue(requestValues, "Method"),
                 PathTemplate = pathTemplate,
-                Path = pathTemplate.Replace("{clientId}", _clientId.ToString(), StringComparison.OrdinalIgnoreCase),
+                Path = _requestPath,
                 ClientId = _clientId
             };
 
@@ -43,7 +45,7 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.GetShopp
         [When("I request the shopping cart by client id for non-existing client")]
         public async Task WhenIRequestTheShoppingCartByClientIdForNonExistingClient()
         {
-            _apiContext.Response = await _apiContext.HttpClient.GetAsync($"/shopping-carts/client/{_clientId}");
+            _apiContext.Response = await _apiContext.HttpClient.GetAsync(_requestPath);
 
             var body = await _apiContext.Response.Content.ReadAsStringAsync();
             AllureJson.AttachRawJson($"Response JSON ({(int)_apiContext.Response.StatusCode})", body);
@@ -80,8 +82,10 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.GetShopp
             var expectedInstance = GetRequiredValue(expected, "Instance").Replace("{clientId}", _clientId.ToString(), StringComparison.OrdinalIgnoreCase);
             problemDetails.Instance.ShouldBe(expectedInstance);
 
+            bool? hasTraceIdValue = null;
             if (TryGetBool(expected, "HasTraceId", out var hasTraceId))
             {
+                hasTraceIdValue = hasTraceId;
                 if (hasTraceId)
                 {
                     problemDetails.TraceId.ShouldNotBeNullOrWhiteSpace();
@@ -91,6 +95,21 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.GetShopp
                     problemDetails.TraceId.ShouldBeNullOrWhiteSpace();
                 }
             }
+
+            var expectedResponse = new
+            {
+                StatusCode = (int)ParseStatusCode(expected, "StatusCode"),
+                Title = GetRequiredValue(expected, "Title"),
+                Type = GetRequiredValue(expected, "Type"),
+                HasDetail = TryGetBool(expected, "HasDetail", out var expectedHasDetail) ? expectedHasDetail : (bool?)null,
+                Instance = expectedInstance,
+                HasTraceId = hasTraceIdValue
+            };
+
+            AllureJson.AttachObject(
+                "Get shopping cart not found expected response",
+                expectedResponse,
+                _apiContext.JsonOptions);
         }
 
         [Then("the problem details json contains")]
