@@ -189,11 +189,11 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.GetShopp
                             "HasClientId",
                             "true"});
                 table58.AddRow(new string[] {
-                            "TotalAmount",
-                            "0"});
+                            "HasCreatedAt",
+                            "true"});
                 table58.AddRow(new string[] {
-                            "TotalCurrency",
-                            "USD"});
+                            "HasUpdatedAt",
+                            "true"});
                 table58.AddRow(new string[] {
                             "LinesCount",
                             "0"});
@@ -210,11 +210,11 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.GetShopp
                             "ClientId",
                             "<existing shopping cart client id>"});
                 table59.AddRow(new string[] {
-                            "TotalAmount",
-                            "0"});
+                            "CreatedAt",
+                            "<generated timestamp>"});
                 table59.AddRow(new string[] {
-                            "TotalCurrency",
-                            "USD"});
+                            "UpdatedAt",
+                            "<generated timestamp>"});
                 table59.AddRow(new string[] {
                             "Lines",
                             "[]"});

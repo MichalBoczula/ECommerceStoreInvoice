@@ -13,13 +13,13 @@ Feature: Get shopping cart
       | StatusCode    | 200   |
       | HasId         | true  |
       | HasClientId   | true  |
-      | TotalAmount   | 0     |
-      | TotalCurrency | USD   |
+      | HasCreatedAt  | true  |
+      | HasUpdatedAt  | true  |
       | LinesCount    | 0     |
     And the shopping cart response payload is
       | Field         | Value |
       | Id            | <generated guid> |
       | ClientId      | <existing shopping cart client id> |
-      | TotalAmount   | 0     |
-      | TotalCurrency | USD   |
+      | CreatedAt     | <generated timestamp> |
+      | UpdatedAt     | <generated timestamp> |
       | Lines         | []    |
