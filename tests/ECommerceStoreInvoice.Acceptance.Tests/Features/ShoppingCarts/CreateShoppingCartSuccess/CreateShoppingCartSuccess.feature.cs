@@ -155,41 +155,41 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.CreateSh
             else
             {
                 await this.ScenarioStartAsync();
-                global::Reqnroll.Table table50 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table1 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table50.AddRow(new string[] {
+                table1.AddRow(new string[] {
                             "ClientId",
                             "auto"});
 #line 4
-    await testRunner.GivenAsync("I prepare the create shopping cart request", ((string)(null)), table50, "Given ");
+    await testRunner.GivenAsync("I prepare the create shopping cart request", ((string)(null)), table1, "Given ");
 #line hidden
 #line 7
     await testRunner.WhenAsync("I submit the create shopping cart request", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-                global::Reqnroll.Table table51 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table2 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table51.AddRow(new string[] {
+                table2.AddRow(new string[] {
                             "StatusCode",
                             "200"});
-                table51.AddRow(new string[] {
+                table2.AddRow(new string[] {
                             "HasId",
                             "true"});
-                table51.AddRow(new string[] {
+                table2.AddRow(new string[] {
                             "HasClientId",
                             "true"});
-                table51.AddRow(new string[] {
-                            "TotalAmount",
-                            "0"});
-                table51.AddRow(new string[] {
-                            "TotalCurrency",
-                            "USD"});
-                table51.AddRow(new string[] {
+                table2.AddRow(new string[] {
+                            "HasCreatedAt",
+                            "true"});
+                table2.AddRow(new string[] {
+                            "HasUpdatedAt",
+                            "true"});
+                table2.AddRow(new string[] {
                             "LinesCount",
                             "0"});
 #line 8
-    await testRunner.ThenAsync("the shopping cart response should match", ((string)(null)), table51, "Then ");
+    await testRunner.ThenAsync("the shopping cart response should match", ((string)(null)), table2, "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
