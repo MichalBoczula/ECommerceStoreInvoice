@@ -1,5 +1,7 @@
 ﻿using ECommerceStoreInvoice.Domain.AggregatesModel.Common.ValueObjects;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate;
+using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate.ExternalServices;
+using ECommerceStoreInvoice.Infrastructure.ApiClients.Products.Models; // Or wherever Kiota generated MobilePhoneDto
 using ECommerceStoreInvoice.Infrastructure.Persistence.ProductVersions;
 
 namespace ECommerceStoreInvoice.Infrastructure.Mapping
@@ -33,6 +35,16 @@ namespace ECommerceStoreInvoice.Infrastructure.Mapping
                 new Money(productVersionDocument.PriceAmount, productVersionDocument.PriceCurrency),
                 productVersionDocument.Name,
                 productVersionDocument.Brand);
+        }
+
+        public static ExternalProductSnapshot MapToSnapshot(MobilePhoneDto dto)
+        {
+            return new ExternalProductSnapshot(
+                ProductId: dto.Id ?? Guid.Empty,
+                Name: dto.Name ?? string.Empty,
+                Brand: dto.Brand ?? string.Empty,
+                Price: new Money((decimal)(dto.Price?.Amount ?? 0.0), dto.Price?.Currency ?? "PLN")
+            );
         }
     }
 }
