@@ -9,6 +9,7 @@ using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate.ValueObjects;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.ValueObjects;
+using ECommerceStoreInvoice.Infrastructure.ApiClients.Products.Models;
 using ECommerceStoreInvoice.Infrastructure.Mapping;
 using Shouldly;
 
@@ -148,5 +149,57 @@ public sealed class InfrastructureMappingTests
         var document = ShoppingCartMapping.MapLineToDocument(line);
 
         document.ProductId.ShouldBe(line.ProductId);
+    }
+
+    [Fact]
+    public void ProductVersionMapping_MapToSnapshot_ShouldMapFullyPopulatedDto()
+    {
+        // arrange
+        var productId = Guid.NewGuid();
+
+        var dto = new MobilePhoneDto
+        {
+            Id = productId,
+            Name = "Galaxy S26",
+            Brand = "Samsung",
+            Price = new MoneyDto
+            {
+                Amount = 3500.75,
+                Currency = "EUR"
+            }
+        };
+
+        // act
+        var snapshot = ProductVersionMapping.MapToSnapshot(dto);
+
+        // assert
+        snapshot.ProductId.ShouldBe(productId);
+        snapshot.Name.ShouldBe("Galaxy S26");
+        snapshot.Brand.ShouldBe("Samsung");
+        snapshot.Price.Amount.ShouldBe(3500.75m);
+        snapshot.Price.Currency.ShouldBe("EUR");
+    }
+
+    [Fact]
+    public void ProductVersionMapping_MapToSnapshot_ShouldHandleNullValuesGracefully()
+    {
+        // arrange
+        var dto = new MobilePhoneDto
+        {
+            Id = null,
+            Name = null,
+            Brand = null,
+            Price = null
+        };
+
+        // act
+        var snapshot = ProductVersionMapping.MapToSnapshot(dto);
+
+        // assert
+        snapshot.ProductId.ShouldBe(Guid.Empty);
+        snapshot.Name.ShouldBe(string.Empty);
+        snapshot.Brand.ShouldBe(string.Empty);
+        snapshot.Price.Amount.ShouldBe(0m);
+        snapshot.Price.Currency.ShouldBe("USD");
     }
 }

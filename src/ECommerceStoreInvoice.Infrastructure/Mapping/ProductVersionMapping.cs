@@ -43,7 +43,7 @@ namespace ECommerceStoreInvoice.Infrastructure.Mapping
                 ProductId: dto.Id ?? Guid.Empty,
                 Name: dto.Name ?? string.Empty,
                 Brand: dto.Brand ?? string.Empty,
-                Price: new Money((decimal)(dto.Price?.Amount ?? 0.0), dto.Price?.Currency ?? "PLN")
+                Price: new Money((decimal)(dto.Price?.Amount ?? 0.0), dto.Price?.Currency ?? "USD")
             );
         }
     }

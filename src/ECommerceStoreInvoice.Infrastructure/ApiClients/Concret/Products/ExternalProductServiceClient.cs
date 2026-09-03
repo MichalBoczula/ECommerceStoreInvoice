@@ -5,7 +5,7 @@ using Microsoft.Kiota.Abstractions;
 
 namespace ECommerceStoreInvoice.Infrastructure.ApiClients.Concret.Products
 {
-    public sealed class ExternalProductServiceClient : IProductServiceClient
+    internal sealed class ExternalProductServiceClient : IProductServiceClient
     {
         private readonly ProductApiClient _kiotaClient;
 
