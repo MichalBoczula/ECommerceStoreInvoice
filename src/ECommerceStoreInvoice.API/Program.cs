@@ -1,16 +1,20 @@
 using ECommerceStoreInvoice.API.Configuration;
 using ECommerceStoreInvoice.API.Endpoints;
-using ECommerceStoreInvoice.API.Configuration.Extensions;
 using ECommerceStoreInvoice.Application;
 using ECommerceStoreInvoice.Domain;
 using ECommerceStoreInvoice.Infrastructure;
 using ECommerceStoreInvoice.Infrastructure.Configuration;
+using ECommerceStoreInvoice.Infrastructure.ApiClients.Products;
+using Microsoft.Kiota.Abstractions.Authentication;
+using Microsoft.Kiota.Http.HttpClientLibrary;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Host.UseSerilog((context, configuration) =>
     configuration.ReadFrom.Configuration(context.Configuration));
+
+AddExternalProductsClient(builder);
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -46,4 +50,31 @@ app.MapHealthChecks("/health");
 
 app.Run();
 
-public partial class Program;
+static void AddExternalProductsClient(WebApplicationBuilder builder)
+{
+    var productCatalogUrl = builder.Configuration["ExternalServices:ProductCatalog:BaseUrl"];
+    if (string.IsNullOrWhiteSpace(productCatalogUrl))
+    {
+        throw new InvalidOperationException(
+            "HttpClient.BaseAddress for ProductApiClient is not configured. " +
+            "Ensure 'ExternalServices:ProductCatalog:BaseUrl' is provided in configuration.");
+    }
+
+    builder.Services.AddHttpClient<ProductApiClient>(client =>
+    {
+        client.BaseAddress = new Uri(productCatalogUrl);
+        client.Timeout = TimeSpan.FromSeconds(15);
+    })
+    .AddTypedClient<ProductApiClient>((httpClient, sp) =>
+    {
+        var authProvider = new AnonymousAuthenticationProvider();
+        var adapter = new HttpClientRequestAdapter(authProvider, httpClient: httpClient)
+        {
+            BaseUrl = httpClient.BaseAddress!.ToString().TrimEnd('/')
+        };
+
+        return new ProductApiClient(adapter);
+    });
+}
+
+public partial class Program { }
