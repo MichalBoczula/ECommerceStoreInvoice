@@ -30,5 +30,19 @@ namespace ECommerceStoreInvoice.Infrastructure.Repositories
 
             return ProductVersionMapping.MapToDomain(productVersionDocument);
         }
+
+        public async Task<IReadOnlyCollection<ProductVersion>> CreateProductVersions(IReadOnlyCollection<ProductVersion> productVersions)
+        {
+            if (!productVersions.Any())
+            {
+                return productVersions;
+            }
+
+            var documents = productVersions.Select(ProductVersionMapping.MapToDocument).ToList();
+
+            await _context.ProductVersions.InsertManyAsync(documents);
+
+            return productVersions;
+        }
     }
 }

@@ -66,12 +66,7 @@ namespace ECommerceStoreInvoice.Application.Descriptors.ProductVersions
         [FlowStep(order: 6, bpmnId: "SaveMultipleProductVersions")]
         public async Task<IReadOnlyCollection<ProductVersion>> SaveAll(IReadOnlyCollection<ProductVersion> productVersions, IProductVersionRepository productVersionRepository)
         {
-            var savedVersions = new List<ProductVersion>();
-            foreach (var pv in productVersions)
-            {
-                savedVersions.Add(await productVersionRepository.CreateProductVersion(pv));
-            }
-            return savedVersions;
+            return await productVersionRepository.CreateProductVersions(productVersions);
         }
 
         [FlowStep(order: 7, bpmnId: "MapMultipleProductVersionsResponse")]
