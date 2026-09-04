@@ -55,5 +55,29 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.ProductVersions
             logger.LogInformation("Successfully retrieved product version for ProductVersionId: {ProductVersionId}", id);
             return descriptor.MapToResponse(productVersion!);
         }
+
+        public async Task<IReadOnlyCollection<ProductVersionResponseDto>> CreateMultipleProductVersions(CreateMultipleProductVersionsRequestDto request)
+        {
+            var uniqueProductIds = request.ProductIds.Distinct().ToList();
+
+            logger.LogInformation("Initiating multiple product versions creation flow for {Count} unique products.", uniqueProductIds.Count);
+
+            var descriptor = new CreateMultipleProductVersionsDescriptor();
+
+            var externalProducts = await descriptor.FetchExternalProducts(uniqueProductIds, productServiceClient);
+
+            descriptor.ThrowNotFoundExceptionIfAnyProductMissing(uniqueProductIds, externalProducts);
+
+            var productVersions = descriptor.MapToDomain(externalProducts);
+
+            var validationResults = await descriptor.ValidateAll(productVersions, productVersionValidationPolicy);
+            descriptor.ThrowValidationExceptionIfAnyInvalid(validationResults);
+
+            var createdProductVersions = await descriptor.SaveAll(productVersions, productVersionRepository);
+
+            logger.LogInformation("Successfully created {Count} product versions in batch.", createdProductVersions.Count);
+
+            return descriptor.MapToResponse(createdProductVersions);
+        }
     }
 }

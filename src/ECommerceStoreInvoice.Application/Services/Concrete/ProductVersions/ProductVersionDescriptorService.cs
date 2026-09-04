@@ -17,5 +17,11 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.ProductVersions
             var descriptor = new GetProductVersionByIdDescriptor();
             return descriptor.Describe();
         }
+
+        public FlowDescriptor GetCreateMultipleProductVersionsDescriptor()
+        {
+            var descriptor = new CreateMultipleProductVersionsDescriptor();
+            return descriptor.Describe();
+        }
     }
 }
