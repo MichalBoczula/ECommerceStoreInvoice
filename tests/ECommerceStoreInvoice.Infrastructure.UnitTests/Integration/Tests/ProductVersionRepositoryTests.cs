@@ -114,5 +114,53 @@ namespace ECommerceStoreInvoice.Infrastructure.UnitTests.Integration.Tests
             // assert
             result.ShouldBeNull();
         }
+
+        [Fact]
+        public async Task CreateProductVersions_ShouldSaveMultipleProductVersionsInBulk()
+        {
+            // arrange
+            var databaseName = $"invoice-tests-{Guid.NewGuid():N}";
+
+            await using var serviceProvider = TestServiceProviderFactory.Create(
+                _fixture.ConnectionString,
+                databaseName);
+
+            var repository = serviceProvider
+                .GetRequiredService<IProductVersionRepository>();
+
+            var productVersion1 = ProductVersion.Rehydrate(
+                Guid.NewGuid(), true, DateTime.UtcNow, null, Guid.NewGuid(),
+                new Money(150m, "USD"), "Monitor 24", "Dell");
+
+            var productVersion2 = ProductVersion.Rehydrate(
+                Guid.NewGuid(), true, DateTime.UtcNow, null, Guid.NewGuid(),
+                new Money(300m, "USD"), "Monitor 27", "LG");
+
+            var productVersion3 = ProductVersion.Rehydrate(
+                Guid.NewGuid(), true, DateTime.UtcNow, null, Guid.NewGuid(),
+                new Money(900m, "USD"), "MacBook Air", "Apple");
+
+            var batch = new[] { productVersion1, productVersion2, productVersion3 };
+
+            // act
+            await repository.CreateProductVersions(batch);
+
+            // assert
+            var result1 = await repository.GetProductVersionById(productVersion1.Id);
+            var result2 = await repository.GetProductVersionById(productVersion2.Id);
+            var result3 = await repository.GetProductVersionById(productVersion3.Id);
+
+            result1.ShouldNotBeNull();
+            result1.Id.ShouldBe(productVersion1.Id);
+            result1.Name.ShouldBe("Monitor 24");
+
+            result2.ShouldNotBeNull();
+            result2.Id.ShouldBe(productVersion2.Id);
+            result2.Name.ShouldBe("Monitor 27");
+
+            result3.ShouldNotBeNull();
+            result3.Id.ShouldBe(productVersion3.Id);
+            result3.Name.ShouldBe("MacBook Air");
+        }
     }
 }

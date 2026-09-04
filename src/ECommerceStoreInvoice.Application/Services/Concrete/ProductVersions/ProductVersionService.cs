@@ -58,13 +58,17 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.ProductVersions
 
         public async Task<IReadOnlyCollection<ProductVersionResponseDto>> CreateMultipleProductVersions(CreateMultipleProductVersionsRequestDto request)
         {
+            var descriptor = new CreateMultipleProductVersionsDescriptor();
+
+            descriptor.ThrowValidationExceptionIfRequestIsEmpty(request.ProductIds);
+
             var uniqueProductIds = request.ProductIds.Distinct().ToList();
 
             logger.LogInformation("Initiating multiple product versions creation flow for {Count} unique products.", uniqueProductIds.Count);
 
-            var descriptor = new CreateMultipleProductVersionsDescriptor();
-
             var externalProducts = await descriptor.FetchExternalProducts(uniqueProductIds, productServiceClient);
+
+            descriptor.ThrowValidationExceptionIfExternalProductsEmpty(externalProducts);
 
             descriptor.ThrowNotFoundExceptionIfAnyProductMissing(uniqueProductIds, externalProducts);
 

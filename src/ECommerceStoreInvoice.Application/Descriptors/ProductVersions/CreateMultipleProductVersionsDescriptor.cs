@@ -1,4 +1,5 @@
 using ECommerceStoreInvoice.Application.Common.FlowDescriptors;
+using ECommerceStoreInvoice.Application.Common.RequestsDto.ProductVersions;
 using ECommerceStoreInvoice.Application.Common.ResponsesDto;
 using ECommerceStoreInvoice.Application.Mapping;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate;
@@ -13,13 +14,47 @@ namespace ECommerceStoreInvoice.Application.Descriptors.ProductVersions
 
     internal sealed class CreateMultipleProductVersionsDescriptor : FlowDescriberBase<CreateMultipleProductVersions>
     {
-        [FlowStep(order: 1, bpmnId: "FetchMultipleExternalProducts")]
+        [FlowStep(order: 1, bpmnId: "ValidateRequestIsNotEmpty")]
+        public void ThrowValidationExceptionIfRequestIsEmpty(IEnumerable<Guid> productIds)
+        {
+            if (productIds is null || !productIds.Any())
+            {
+                var result = new ValidationResult();
+                result.AddValidationError(new ValidationError
+                {
+                    Entity = nameof(CreateMultipleProductVersionsRequestDto),
+                    Name = nameof(CreateMultipleProductVersionsRequestDto.ProductIds),
+                    Message = "The list of product IDs cannot be empty."
+                });
+
+                throw new ValidationException(result);
+            }
+        }
+
+        [FlowStep(order: 2, bpmnId: "FetchMultipleExternalProducts")]
         public async Task<IReadOnlyCollection<ExternalProductSnapshot>> FetchExternalProducts(IEnumerable<Guid> productIds, IProductServiceClient productServiceClient)
         {
             return await productServiceClient.GetProductsByIds(productIds);
         }
 
-        [FlowStep(order: 2, bpmnId: "EnsureAllExternalProductsExist")]
+        [FlowStep(order: 3, bpmnId: "ValidateExternalProductsNotEmpty")]
+        public void ThrowValidationExceptionIfExternalProductsEmpty(IReadOnlyCollection<ExternalProductSnapshot> externalProducts)
+        {
+            if (externalProducts is null || !externalProducts.Any())
+            {
+                var result = new ValidationResult();
+                result.AddValidationError(new ValidationError
+                {
+                    Entity = nameof(ExternalProductSnapshot),
+                    Name = "ExternalProductsList",
+                    Message = "The external service returned an empty list of products."
+                });
+
+                throw new ValidationException(result);
+            }
+        }
+
+        [FlowStep(order: 4, bpmnId: "EnsureAllExternalProductsExist")]
         public void ThrowNotFoundExceptionIfAnyProductMissing(IEnumerable<Guid> requestedIds, IReadOnlyCollection<ExternalProductSnapshot> externalProducts)
         {
             var foundIds = externalProducts.Select(p => p.ProductId).ToHashSet();
@@ -31,7 +66,7 @@ namespace ECommerceStoreInvoice.Application.Descriptors.ProductVersions
             }
         }
 
-        [FlowStep(order: 3, bpmnId: "MapMultipleProductVersionsDomain")]
+        [FlowStep(order: 5, bpmnId: "MapMultipleProductVersionsDomain")]
         public IReadOnlyCollection<ProductVersion> MapToDomain(IReadOnlyCollection<ExternalProductSnapshot> externalProducts)
         {
             return externalProducts.Select(ep => new ProductVersion(
@@ -42,7 +77,7 @@ namespace ECommerceStoreInvoice.Application.Descriptors.ProductVersions
             )).ToList();
         }
 
-        [FlowStep(order: 4, bpmnId: "ValidateMultipleProductVersions")]
+        [FlowStep(order: 6, bpmnId: "ValidateMultipleProductVersions")]
         public async Task<IReadOnlyCollection<ValidationResult>> ValidateAll(IReadOnlyCollection<ProductVersion> productVersions, IValidationPolicy<ProductVersion> productVersionValidationPolicy)
         {
             var results = new List<ValidationResult>();
@@ -53,7 +88,7 @@ namespace ECommerceStoreInvoice.Application.Descriptors.ProductVersions
             return results;
         }
 
-        [FlowStep(order: 5, bpmnId: "AreAllProductVersionsValid")]
+        [FlowStep(order: 7, bpmnId: "AreAllProductVersionsValid")]
         public void ThrowValidationExceptionIfAnyInvalid(IReadOnlyCollection<ValidationResult> validationResults)
         {
             var firstInvalidResult = validationResults.FirstOrDefault(r => !r.IsValid);
@@ -63,13 +98,13 @@ namespace ECommerceStoreInvoice.Application.Descriptors.ProductVersions
             }
         }
 
-        [FlowStep(order: 6, bpmnId: "SaveMultipleProductVersions")]
+        [FlowStep(order: 8, bpmnId: "SaveMultipleProductVersions")]
         public async Task<IReadOnlyCollection<ProductVersion>> SaveAll(IReadOnlyCollection<ProductVersion> productVersions, IProductVersionRepository productVersionRepository)
         {
             return await productVersionRepository.CreateProductVersions(productVersions);
         }
 
-        [FlowStep(order: 7, bpmnId: "MapMultipleProductVersionsResponse")]
+        [FlowStep(order: 9, bpmnId: "MapMultipleProductVersionsResponse")]
         public IReadOnlyCollection<ProductVersionResponseDto> MapToResponse(IReadOnlyCollection<ProductVersion> productVersions)
         {
             return productVersions.Select(MappingConfig.MapToResponse).ToList();

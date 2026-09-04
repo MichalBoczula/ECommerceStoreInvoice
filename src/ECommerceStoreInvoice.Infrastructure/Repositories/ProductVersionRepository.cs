@@ -33,11 +33,6 @@ namespace ECommerceStoreInvoice.Infrastructure.Repositories
 
         public async Task<IReadOnlyCollection<ProductVersion>> CreateProductVersions(IReadOnlyCollection<ProductVersion> productVersions)
         {
-            if (!productVersions.Any())
-            {
-                return productVersions;
-            }
-
             var documents = productVersions.Select(ProductVersionMapping.MapToDocument).ToList();
 
             await _context.ProductVersions.InsertManyAsync(documents);
