@@ -4,6 +4,7 @@ using ECommerceStoreInvoice.Application.Common.ResponsesDto;
 using ECommerceStoreInvoice.Application.Descriptors.ProductVersions;
 using ECommerceStoreInvoice.Application.Services.Abstract.ProductVersions;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate;
+using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate.ExternalServices;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate.Repositories;
 using ECommerceStoreInvoice.Domain.Validation.Abstract;
 
@@ -11,6 +12,7 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.ProductVersions
 {
     internal sealed class ProductVersionService(
         IProductVersionRepository productVersionRepository,
+        IProductServiceClient productServiceClient,
         IValidationPolicy<ProductVersion> productVersionValidationPolicy,
         IValidationPolicy<Guid> guidValidationPolicy,
         ILogger<ProductVersionService> logger)
@@ -22,12 +24,19 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.ProductVersions
 
             var descriptor = new CreateProductVersionDescriptor();
 
-            var productVersion = descriptor.MapToDomain(request);
+            var externalProduct = await descriptor.FetchExternalProduct(request.ProductId, productServiceClient);
+
+            descriptor.ThrowNotFoundExceptionIfExternalProductMissing(request.ProductId, externalProduct);
+
+            var productVersion = descriptor.MapToDomain(externalProduct!);
+
             var validationResult = await descriptor.Validate(productVersion, productVersionValidationPolicy);
             descriptor.ThrowValidationExceptionIfInvalid(validationResult);
 
             var createdProductVersion = await descriptor.Save(productVersion, productVersionRepository);
+
             logger.LogInformation("Successfully created product version. ProductVersionId: {ProductVersionId} for ProductId: {ProductId}", createdProductVersion.Id, createdProductVersion.ProductId);
+
             return descriptor.MapToResponse(createdProductVersion);
         }
 

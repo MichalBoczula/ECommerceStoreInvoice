@@ -2,6 +2,7 @@ using ECommerceStoreInvoice.Application.Common.RequestsDto.ProductVersions;
 using ECommerceStoreInvoice.Application.Services.Concrete.ProductVersions;
 using ECommerceStoreInvoice.Domain.AggregatesModel.Common.ValueObjects;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate;
+using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate.ExternalServices;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate.Repositories;
 using ECommerceStoreInvoice.Domain.Validation.Abstract;
 using ECommerceStoreInvoice.Domain.Validation.Common;
@@ -19,12 +20,15 @@ public sealed class ProductVersionServiceTests
         // Arrange
         var request = new CreateProductVersionRequestDto
         {
-            ProductId = Guid.NewGuid(),
-            PriceAmount = 499.99m,
-            PriceCurrency = "usd",
-            Name = "iPhone 20",
-            Brand = "Apple"
+            ProductId = Guid.NewGuid()
         };
+
+        var externalSnapshot = new ExternalProductSnapshot(
+            request.ProductId,
+            "iPhone 20",
+            "Apple",
+            new Money(499.99m, "USD")
+        );
 
         var validationResult = new ValidationResult();
         var createdProductVersion = ProductVersion.Rehydrate(
@@ -33,14 +37,19 @@ public sealed class ProductVersionServiceTests
             DateTime.UtcNow,
             null,
             request.ProductId,
-            new Money(request.PriceAmount, request.PriceCurrency.ToUpperInvariant()),
-            request.Name,
-            request.Brand);
+            externalSnapshot.Price,
+            externalSnapshot.Name,
+            externalSnapshot.Brand);
 
         var productVersionRepositoryMock = new Mock<IProductVersionRepository>(MockBehavior.Strict);
+        var productServiceClientMock = new Mock<IProductServiceClient>(MockBehavior.Strict);
         var productVersionValidationPolicyMock = new Mock<IValidationPolicy<ProductVersion>>(MockBehavior.Strict);
         var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
         var loggerMock = new Mock<ILogger<ProductVersionService>>();
+
+        productServiceClientMock
+            .Setup(client => client.GetProductsByIds(It.Is<IEnumerable<Guid>>(ids => ids.Contains(request.ProductId))))
+            .ReturnsAsync([externalSnapshot]);
 
         productVersionValidationPolicyMock
             .Setup(policy => policy.Validate(It.IsAny<ProductVersion>()))
@@ -52,6 +61,7 @@ public sealed class ProductVersionServiceTests
 
         var sut = new ProductVersionService(
             productVersionRepositoryMock.Object,
+            productServiceClientMock.Object,
             productVersionValidationPolicyMock.Object,
             guidValidationPolicyMock.Object,
             loggerMock.Object);
@@ -60,12 +70,14 @@ public sealed class ProductVersionServiceTests
         var response = await sut.CreateProductVersion(request);
 
         // Assert
+        productServiceClientMock.Verify(client => client.GetProductsByIds(It.IsAny<IEnumerable<Guid>>()), Times.Once);
+
         productVersionValidationPolicyMock.Verify(policy => policy.Validate(It.Is<ProductVersion>(pv =>
             pv.ProductId == request.ProductId &&
-            pv.Price.Amount == request.PriceAmount &&
-            pv.Price.Currency == request.PriceCurrency.ToUpperInvariant() &&
-            pv.Name == request.Name &&
-            pv.Brand == request.Brand)), Times.Once);
+            pv.Price.Amount == externalSnapshot.Price.Amount &&
+            pv.Price.Currency == externalSnapshot.Price.Currency &&
+            pv.Name == externalSnapshot.Name &&
+            pv.Brand == externalSnapshot.Brand)), Times.Once);
 
         productVersionRepositoryMock.Verify(repo => repo.CreateProductVersion(It.IsAny<ProductVersion>()), Times.Once);
         guidValidationPolicyMock.Verify(policy => policy.Validate(It.IsAny<Guid>()), Times.Never);
@@ -73,11 +85,49 @@ public sealed class ProductVersionServiceTests
         response.ShouldNotBeNull();
         response.Id.ShouldBe(createdProductVersion.Id);
         response.ProductId.ShouldBe(request.ProductId);
-        response.PriceAmount.ShouldBe(request.PriceAmount);
-        response.PriceCurrency.ShouldBe(request.PriceCurrency.ToUpperInvariant());
-        response.Name.ShouldBe(request.Name);
-        response.Brand.ShouldBe(request.Brand);
+        response.PriceAmount.ShouldBe(externalSnapshot.Price.Amount);
+        response.PriceCurrency.ShouldBe(externalSnapshot.Price.Currency);
+        response.Name.ShouldBe(externalSnapshot.Name);
+        response.Brand.ShouldBe(externalSnapshot.Brand);
         response.IsActive.ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task CreateProductVersion_WhenExternalProductNotFound_ShouldThrowResourceNotFoundException()
+    {
+        // Arrange
+        var request = new CreateProductVersionRequestDto
+        {
+            ProductId = Guid.NewGuid()
+        };
+
+        var productVersionRepositoryMock = new Mock<IProductVersionRepository>(MockBehavior.Strict);
+        var productServiceClientMock = new Mock<IProductServiceClient>(MockBehavior.Strict);
+        var productVersionValidationPolicyMock = new Mock<IValidationPolicy<ProductVersion>>(MockBehavior.Strict);
+        var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
+        var loggerMock = new Mock<ILogger<ProductVersionService>>();
+
+        // Return empty list to simulate 404 / missing product
+        productServiceClientMock
+            .Setup(client => client.GetProductsByIds(It.IsAny<IEnumerable<Guid>>()))
+            .ReturnsAsync(Array.Empty<ExternalProductSnapshot>());
+
+        var sut = new ProductVersionService(
+            productVersionRepositoryMock.Object,
+            productServiceClientMock.Object,
+            productVersionValidationPolicyMock.Object,
+            guidValidationPolicyMock.Object,
+            loggerMock.Object);
+
+        // Act / Assert
+        var ex = await Should.ThrowAsync<ResourceNotFoundException>(() => sut.CreateProductVersion(request));
+
+        ex.ResourceId.ShouldBe(request.ProductId);
+        ex.ResourceType.ShouldBe(nameof(ExternalProductSnapshot));
+
+        productServiceClientMock.Verify(client => client.GetProductsByIds(It.IsAny<IEnumerable<Guid>>()), Times.Once);
+        productVersionValidationPolicyMock.Verify(policy => policy.Validate(It.IsAny<ProductVersion>()), Times.Never);
+        productVersionRepositoryMock.Verify(repo => repo.CreateProductVersion(It.IsAny<ProductVersion>()), Times.Never);
     }
 
     [Fact]
@@ -86,12 +136,15 @@ public sealed class ProductVersionServiceTests
         // Arrange
         var request = new CreateProductVersionRequestDto
         {
-            ProductId = Guid.Empty,
-            PriceAmount = -1,
-            PriceCurrency = "",
-            Name = "",
-            Brand = ""
+            ProductId = Guid.Empty
         };
+
+        var externalSnapshot = new ExternalProductSnapshot(
+            request.ProductId,
+            "",
+            "",
+            new Money(-1, "USD")
+        );
 
         var invalidResult = new ValidationResult();
         invalidResult.AddValidationError(new ValidationError
@@ -102,9 +155,14 @@ public sealed class ProductVersionServiceTests
         });
 
         var productVersionRepositoryMock = new Mock<IProductVersionRepository>(MockBehavior.Strict);
+        var productServiceClientMock = new Mock<IProductServiceClient>(MockBehavior.Strict);
         var productVersionValidationPolicyMock = new Mock<IValidationPolicy<ProductVersion>>(MockBehavior.Strict);
         var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
         var loggerMock = new Mock<ILogger<ProductVersionService>>();
+
+        productServiceClientMock
+            .Setup(client => client.GetProductsByIds(It.IsAny<IEnumerable<Guid>>()))
+            .ReturnsAsync([externalSnapshot]);
 
         productVersionValidationPolicyMock
             .Setup(policy => policy.Validate(It.IsAny<ProductVersion>()))
@@ -112,6 +170,7 @@ public sealed class ProductVersionServiceTests
 
         var sut = new ProductVersionService(
             productVersionRepositoryMock.Object,
+            productServiceClientMock.Object,
             productVersionValidationPolicyMock.Object,
             guidValidationPolicyMock.Object,
             loggerMock.Object);
@@ -119,6 +178,7 @@ public sealed class ProductVersionServiceTests
         // Act / Assert
         await Should.ThrowAsync<ValidationException>(() => sut.CreateProductVersion(request));
 
+        productServiceClientMock.Verify(client => client.GetProductsByIds(It.IsAny<IEnumerable<Guid>>()), Times.Once);
         productVersionRepositoryMock.Verify(repo => repo.CreateProductVersion(It.IsAny<ProductVersion>()), Times.Never);
         guidValidationPolicyMock.Verify(policy => policy.Validate(It.IsAny<Guid>()), Times.Never);
     }
@@ -140,6 +200,7 @@ public sealed class ProductVersionServiceTests
             "Samsung");
 
         var productVersionRepositoryMock = new Mock<IProductVersionRepository>(MockBehavior.Strict);
+        var productServiceClientMock = new Mock<IProductServiceClient>(MockBehavior.Strict);
         var productVersionValidationPolicyMock = new Mock<IValidationPolicy<ProductVersion>>(MockBehavior.Strict);
         var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
         var loggerMock = new Mock<ILogger<ProductVersionService>>();
@@ -157,6 +218,7 @@ public sealed class ProductVersionServiceTests
 
         var sut = new ProductVersionService(
             productVersionRepositoryMock.Object,
+            productServiceClientMock.Object,
             productVersionValidationPolicyMock.Object,
             guidValidationPolicyMock.Object,
             loggerMock.Object);
@@ -194,6 +256,7 @@ public sealed class ProductVersionServiceTests
         });
 
         var productVersionRepositoryMock = new Mock<IProductVersionRepository>(MockBehavior.Strict);
+        var productServiceClientMock = new Mock<IProductServiceClient>(MockBehavior.Strict);
         var productVersionValidationPolicyMock = new Mock<IValidationPolicy<ProductVersion>>(MockBehavior.Strict);
         var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
         var loggerMock = new Mock<ILogger<ProductVersionService>>();
@@ -204,6 +267,7 @@ public sealed class ProductVersionServiceTests
 
         var sut = new ProductVersionService(
             productVersionRepositoryMock.Object,
+            productServiceClientMock.Object,
             productVersionValidationPolicyMock.Object,
             guidValidationPolicyMock.Object,
             loggerMock.Object);
@@ -223,6 +287,7 @@ public sealed class ProductVersionServiceTests
         var validationResult = new ValidationResult();
 
         var productVersionRepositoryMock = new Mock<IProductVersionRepository>(MockBehavior.Strict);
+        var productServiceClientMock = new Mock<IProductServiceClient>(MockBehavior.Strict);
         var productVersionValidationPolicyMock = new Mock<IValidationPolicy<ProductVersion>>(MockBehavior.Strict);
         var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
         var loggerMock = new Mock<ILogger<ProductVersionService>>();
@@ -240,6 +305,7 @@ public sealed class ProductVersionServiceTests
 
         var sut = new ProductVersionService(
             productVersionRepositoryMock.Object,
+            productServiceClientMock.Object,
             productVersionValidationPolicyMock.Object,
             guidValidationPolicyMock.Object,
             loggerMock.Object);

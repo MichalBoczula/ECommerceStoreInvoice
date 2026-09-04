@@ -12,11 +12,7 @@ internal static class ProductVersionMappingConfigBenchmarkDataFactory
     {
         return new CreateProductVersionRequestDto
         {
-            ProductId = Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
-            Name = "Product Name",
-            Brand = "Contoso",
-            PriceAmount = 199.99m,
-            PriceCurrency = "USD"
+            ProductId = Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb")
         };
     }
 
