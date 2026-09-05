@@ -29,6 +29,8 @@ namespace ECommerceStoreInvoice.Domain
             services.AddScoped<IValidationPolicyDescriptorProvider, InvoiceValidationPolicy>();
             services.AddScoped<IValidationPolicy<ProductVersion>, ProductVersionValidationPolicy>();
             services.AddScoped<IValidationPolicyDescriptorProvider, ProductVersionValidationPolicy>();
+            services.AddScoped<IValidationPolicy<IEnumerable<Guid>>, GuidCollectionValidationPolicy>();
+            services.AddScoped<IValidationPolicyDescriptorProvider, GuidCollectionValidationPolicy>();
             return services;
         }
     }

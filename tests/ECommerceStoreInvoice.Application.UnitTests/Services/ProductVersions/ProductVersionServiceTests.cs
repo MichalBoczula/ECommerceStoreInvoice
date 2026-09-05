@@ -45,6 +45,7 @@ public sealed class ProductVersionServiceTests
         var productServiceClientMock = new Mock<IProductServiceClient>(MockBehavior.Strict);
         var productVersionValidationPolicyMock = new Mock<IValidationPolicy<ProductVersion>>(MockBehavior.Strict);
         var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
+        var guidCollectionValidationPolicyMock = new Mock<IValidationPolicy<IEnumerable<Guid>>>(MockBehavior.Strict);
         var loggerMock = new Mock<ILogger<ProductVersionService>>();
 
         productServiceClientMock
@@ -64,6 +65,7 @@ public sealed class ProductVersionServiceTests
             productServiceClientMock.Object,
             productVersionValidationPolicyMock.Object,
             guidValidationPolicyMock.Object,
+            guidCollectionValidationPolicyMock.Object,
             loggerMock.Object);
 
         // Act
@@ -105,6 +107,7 @@ public sealed class ProductVersionServiceTests
         var productServiceClientMock = new Mock<IProductServiceClient>(MockBehavior.Strict);
         var productVersionValidationPolicyMock = new Mock<IValidationPolicy<ProductVersion>>(MockBehavior.Strict);
         var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
+        var guidCollectionValidationPolicyMock = new Mock<IValidationPolicy<IEnumerable<Guid>>>(MockBehavior.Strict);
         var loggerMock = new Mock<ILogger<ProductVersionService>>();
 
         // Return empty list to simulate 404 / missing product
@@ -117,6 +120,7 @@ public sealed class ProductVersionServiceTests
             productServiceClientMock.Object,
             productVersionValidationPolicyMock.Object,
             guidValidationPolicyMock.Object,
+            guidCollectionValidationPolicyMock.Object,
             loggerMock.Object);
 
         // Act / Assert
@@ -158,6 +162,7 @@ public sealed class ProductVersionServiceTests
         var productServiceClientMock = new Mock<IProductServiceClient>(MockBehavior.Strict);
         var productVersionValidationPolicyMock = new Mock<IValidationPolicy<ProductVersion>>(MockBehavior.Strict);
         var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
+        var guidCollectionValidationPolicyMock = new Mock<IValidationPolicy<IEnumerable<Guid>>>(MockBehavior.Strict);
         var loggerMock = new Mock<ILogger<ProductVersionService>>();
 
         productServiceClientMock
@@ -173,6 +178,7 @@ public sealed class ProductVersionServiceTests
             productServiceClientMock.Object,
             productVersionValidationPolicyMock.Object,
             guidValidationPolicyMock.Object,
+            guidCollectionValidationPolicyMock.Object,
             loggerMock.Object);
 
         // Act / Assert
@@ -203,6 +209,7 @@ public sealed class ProductVersionServiceTests
         var productServiceClientMock = new Mock<IProductServiceClient>(MockBehavior.Strict);
         var productVersionValidationPolicyMock = new Mock<IValidationPolicy<ProductVersion>>(MockBehavior.Strict);
         var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
+        var guidCollectionValidationPolicyMock = new Mock<IValidationPolicy<IEnumerable<Guid>>>(MockBehavior.Strict);
         var loggerMock = new Mock<ILogger<ProductVersionService>>();
 
         var sequence = new MockSequence();
@@ -221,6 +228,7 @@ public sealed class ProductVersionServiceTests
             productServiceClientMock.Object,
             productVersionValidationPolicyMock.Object,
             guidValidationPolicyMock.Object,
+            guidCollectionValidationPolicyMock.Object,
             loggerMock.Object);
 
         // Act
@@ -259,6 +267,7 @@ public sealed class ProductVersionServiceTests
         var productServiceClientMock = new Mock<IProductServiceClient>(MockBehavior.Strict);
         var productVersionValidationPolicyMock = new Mock<IValidationPolicy<ProductVersion>>(MockBehavior.Strict);
         var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
+        var guidCollectionValidationPolicyMock = new Mock<IValidationPolicy<IEnumerable<Guid>>>(MockBehavior.Strict);
         var loggerMock = new Mock<ILogger<ProductVersionService>>();
 
         guidValidationPolicyMock
@@ -270,6 +279,7 @@ public sealed class ProductVersionServiceTests
             productServiceClientMock.Object,
             productVersionValidationPolicyMock.Object,
             guidValidationPolicyMock.Object,
+            guidCollectionValidationPolicyMock.Object,
             loggerMock.Object);
 
         // Act / Assert
@@ -290,6 +300,7 @@ public sealed class ProductVersionServiceTests
         var productServiceClientMock = new Mock<IProductServiceClient>(MockBehavior.Strict);
         var productVersionValidationPolicyMock = new Mock<IValidationPolicy<ProductVersion>>(MockBehavior.Strict);
         var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
+        var guidCollectionValidationPolicyMock = new Mock<IValidationPolicy<IEnumerable<Guid>>>(MockBehavior.Strict);
         var loggerMock = new Mock<ILogger<ProductVersionService>>();
 
         var sequence = new MockSequence();
@@ -308,6 +319,7 @@ public sealed class ProductVersionServiceTests
             productServiceClientMock.Object,
             productVersionValidationPolicyMock.Object,
             guidValidationPolicyMock.Object,
+            guidCollectionValidationPolicyMock.Object,
             loggerMock.Object);
 
         // Act / Assert
@@ -343,7 +355,12 @@ public sealed class ProductVersionServiceTests
         var productServiceClientMock = new Mock<IProductServiceClient>(MockBehavior.Strict);
         var productVersionValidationPolicyMock = new Mock<IValidationPolicy<ProductVersion>>(MockBehavior.Strict);
         var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
+        var guidCollectionValidationPolicyMock = new Mock<IValidationPolicy<IEnumerable<Guid>>>(MockBehavior.Strict);
         var loggerMock = new Mock<ILogger<ProductVersionService>>();
+
+        guidCollectionValidationPolicyMock
+            .Setup(policy => policy.Validate(request.ProductIds))
+            .ReturnsAsync(new ValidationResult());
 
         productServiceClientMock
             .Setup(client => client.GetProductsByIds(It.Is<IEnumerable<Guid>>(ids => ids.Contains(productId1) && ids.Contains(productId2))))
@@ -354,18 +371,18 @@ public sealed class ProductVersionServiceTests
             .ReturnsAsync(new ValidationResult());
 
         productVersionRepositoryMock
-            .Setup(repo => repo.CreateProductVersion(It.Is<ProductVersion>(pv => pv.ProductId == productId1)))
-            .ReturnsAsync(createdPv1);
-
-        productVersionRepositoryMock
-            .Setup(repo => repo.CreateProductVersion(It.Is<ProductVersion>(pv => pv.ProductId == productId2)))
-            .ReturnsAsync(createdPv2);
+            .Setup(repo => repo.CreateProductVersions(It.Is<IReadOnlyCollection<ProductVersion>>(versions =>
+                versions.Count == 2 &&
+                versions.Any(pv => pv.ProductId == productId1) &&
+                versions.Any(pv => pv.ProductId == productId2))))
+            .ReturnsAsync([createdPv1, createdPv2]);
 
         var sut = new ProductVersionService(
             productVersionRepositoryMock.Object,
             productServiceClientMock.Object,
             productVersionValidationPolicyMock.Object,
             guidValidationPolicyMock.Object,
+            guidCollectionValidationPolicyMock.Object,
             loggerMock.Object);
 
         // Act
@@ -377,7 +394,7 @@ public sealed class ProductVersionServiceTests
 
         productServiceClientMock.Verify(client => client.GetProductsByIds(It.IsAny<IEnumerable<Guid>>()), Times.Once);
         productVersionValidationPolicyMock.Verify(policy => policy.Validate(It.IsAny<ProductVersion>()), Times.Exactly(2));
-        productVersionRepositoryMock.Verify(repo => repo.CreateProductVersion(It.IsAny<ProductVersion>()), Times.Exactly(2));
+        productVersionRepositoryMock.Verify(repo => repo.CreateProductVersions(It.IsAny<IReadOnlyCollection<ProductVersion>>()), Times.Once);
     }
 
     [Fact]
@@ -398,7 +415,12 @@ public sealed class ProductVersionServiceTests
         var productServiceClientMock = new Mock<IProductServiceClient>(MockBehavior.Strict);
         var productVersionValidationPolicyMock = new Mock<IValidationPolicy<ProductVersion>>(MockBehavior.Strict);
         var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
+        var guidCollectionValidationPolicyMock = new Mock<IValidationPolicy<IEnumerable<Guid>>>(MockBehavior.Strict);
         var loggerMock = new Mock<ILogger<ProductVersionService>>();
+
+        guidCollectionValidationPolicyMock
+            .Setup(policy => policy.Validate(request.ProductIds))
+            .ReturnsAsync(new ValidationResult());
 
         productServiceClientMock
             .Setup(client => client.GetProductsByIds(It.IsAny<IEnumerable<Guid>>()))
@@ -409,6 +431,7 @@ public sealed class ProductVersionServiceTests
             productServiceClientMock.Object,
             productVersionValidationPolicyMock.Object,
             guidValidationPolicyMock.Object,
+            guidCollectionValidationPolicyMock.Object,
             loggerMock.Object);
 
         // Act / Assert
@@ -447,7 +470,12 @@ public sealed class ProductVersionServiceTests
         var productServiceClientMock = new Mock<IProductServiceClient>(MockBehavior.Strict);
         var productVersionValidationPolicyMock = new Mock<IValidationPolicy<ProductVersion>>(MockBehavior.Strict);
         var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
+        var guidCollectionValidationPolicyMock = new Mock<IValidationPolicy<IEnumerable<Guid>>>(MockBehavior.Strict);
         var loggerMock = new Mock<ILogger<ProductVersionService>>();
+
+        guidCollectionValidationPolicyMock
+            .Setup(policy => policy.Validate(request.ProductIds))
+            .ReturnsAsync(new ValidationResult());
 
         productServiceClientMock
             .Setup(client => client.GetProductsByIds(It.IsAny<IEnumerable<Guid>>()))
@@ -462,6 +490,7 @@ public sealed class ProductVersionServiceTests
             productServiceClientMock.Object,
             productVersionValidationPolicyMock.Object,
             guidValidationPolicyMock.Object,
+            guidCollectionValidationPolicyMock.Object,
             loggerMock.Object);
 
         // Act / Assert

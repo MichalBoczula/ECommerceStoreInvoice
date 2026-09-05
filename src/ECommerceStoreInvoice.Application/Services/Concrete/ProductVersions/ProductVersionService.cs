@@ -15,6 +15,7 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.ProductVersions
         IProductServiceClient productServiceClient,
         IValidationPolicy<ProductVersion> productVersionValidationPolicy,
         IValidationPolicy<Guid> guidValidationPolicy,
+        IValidationPolicy<IEnumerable<Guid>> guidCollectionValidationPolicy,
         ILogger<ProductVersionService> logger)
         : IProductVersionService
     {
@@ -60,7 +61,8 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.ProductVersions
         {
             var descriptor = new CreateMultipleProductVersionsDescriptor();
 
-            descriptor.ThrowValidationExceptionIfRequestIsEmpty(request.ProductIds);
+            var requestValidationResult = await guidCollectionValidationPolicy.Validate(request.ProductIds);
+            descriptor.ThrowValidationExceptionIfProductIdsInvalid(requestValidationResult);
 
             var uniqueProductIds = request.ProductIds.Distinct().ToList();
 
