@@ -1,5 +1,4 @@
 using ECommerceStoreInvoice.Application.Common.FlowDescriptors;
-using ECommerceStoreInvoice.Application.Common.RequestsDto.ProductVersions;
 using ECommerceStoreInvoice.Application.Common.ResponsesDto;
 using ECommerceStoreInvoice.Application.Mapping;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate;
@@ -14,21 +13,11 @@ namespace ECommerceStoreInvoice.Application.Descriptors.ProductVersions
 
     internal sealed class CreateMultipleProductVersionsDescriptor : FlowDescriberBase<CreateMultipleProductVersions>
     {
-        [FlowStep(order: 1, bpmnId: "ValidateRequestIsNotEmpty")]
-        public void ThrowValidationExceptionIfRequestIsEmpty(IEnumerable<Guid> productIds)
+        [FlowStep(order: 1, bpmnId: "ValidateProductIds")]
+        public void ThrowValidationExceptionIfProductIdsInvalid(ValidationResult validationResult)
         {
-            if (productIds is null || !productIds.Any())
-            {
-                var result = new ValidationResult();
-                result.AddValidationError(new ValidationError
-                {
-                    Entity = nameof(CreateMultipleProductVersionsRequestDto),
-                    Name = nameof(CreateMultipleProductVersionsRequestDto.ProductIds),
-                    Message = "The list of product IDs cannot be empty."
-                });
-
-                throw new ValidationException(result);
-            }
+            if (!validationResult.IsValid)
+                throw new ValidationException(validationResult);
         }
 
         [FlowStep(order: 2, bpmnId: "FetchMultipleExternalProducts")]
