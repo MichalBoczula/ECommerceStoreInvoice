@@ -102,6 +102,20 @@ public class ProductVersionRepositoryBenchmarks
         return await _repository.CreateProductVersion(newProductVersion);
     }
 
+    [Benchmark]
+    [Arguments(1)]
+    [Arguments(10)]
+    [Arguments(100)]
+    public async Task<IReadOnlyCollection<ProductVersion>> CreateProductVersions(int productVersionsCount)
+    {
+        var productVersions = Enumerable.Range(0, productVersionsCount)
+            .Select(_ => ProductVersionDocumentBenchmarkDataFactory.Create(Guid.NewGuid()))
+            .Select(ProductVersionMapping.MapToDomain)
+            .ToList();
+
+        return await _repository.CreateProductVersions(productVersions);
+    }
+
     [GlobalCleanup]
     public async Task Cleanup()
     {
