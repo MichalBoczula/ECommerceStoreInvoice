@@ -46,31 +46,29 @@ namespace ECommerceStoreInvoice.ExternalProviders.IntegrationTests.Tests
             result.ShouldBeEmpty();
         }
 
-        // [Fact]
-        // public async Task GetProductsByIds_WhenProductsExist_ShouldReturnMappedDomainSnapshots()
-        // {
-        //     // Arrange
-        //     using var scope = _factory.Services.CreateScope();
-        //     var sut = scope.ServiceProvider.GetRequiredService<IProductServiceClient>();
+        [Fact]
+        public async Task GetProductsByIds_WhenProductsExist_ShouldReturnMappedDomainSnapshots()
+        {
+            // Arrange
+            using var scope = _factory.Services.CreateScope();
+            var sut = scope.ServiceProvider.GetRequiredService<IProductServiceClient>();
 
-        //     var existingProductId = Guid.Parse("11111111-1111-1111-1111-111111111111");
+            // Using existing mobile phone ID
+            var existingProductId = Guid.Parse("0f62c3e1-8e3e-4b1f-9d74-3d6e2ff2c6d2");
 
-        //     var existingProductId = await SeedProductInExternalCatalogAsync();
+            // Act
+            var result = await sut.GetProductsByIds([existingProductId]);
 
-        //     // Act
-        //     var result = await sut.GetProductsByIds([existingProductId]);
+            // Assert
+            result.ShouldNotBeNull();
+            result.ShouldNotBeEmpty();
 
-        //     // Assert
-        //     result.ShouldNotBeNull();
-        //     result.ShouldNotBeEmpty();
-
-        //     var snapshot = result.First(p => p.ProductId == existingProductId);
-        //     snapshot.ProductId.ShouldBe(existingProductId);
-        //     snapshot.Name.ShouldNotBeNullOrWhiteSpace();
-        //     snapshot.Brand.ShouldNotBeNullOrWhiteSpace();
-        //     snapshot.Price.Currency.ShouldBe("USD");
-        //     snapshot.Price.Amount.ShouldBeGreaterThan(0);
-        //     snapshot.Price.Currency.ShouldNotBeNullOrWhiteSpace();
-        // }
+            var snapshot = result.First(p => p.ProductId == existingProductId);
+            snapshot.ProductId.ShouldBe(existingProductId);
+            snapshot.Name.ShouldNotBeNullOrWhiteSpace();
+            snapshot.Brand.ShouldNotBeNullOrWhiteSpace();
+            snapshot.Price.Amount.ShouldBeGreaterThan(0);
+            snapshot.Price.Currency.ShouldNotBeNullOrWhiteSpace();
+        }
     }
 }
