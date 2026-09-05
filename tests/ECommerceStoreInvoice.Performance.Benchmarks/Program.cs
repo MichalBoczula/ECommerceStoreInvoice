@@ -52,5 +52,6 @@ internal class Program
         BenchmarkRunner.Run<ProductVersionMappingBenchmarks>();
         BenchmarkRunner.Run<ProductVersionRepositoryBenchmarks>();
         BenchmarkRunner.Run<ProductVersionValidationBenchmarks>();
+        BenchmarkRunner.Run<GuidCollectionValidationBenchmarks>();
     }
 }
