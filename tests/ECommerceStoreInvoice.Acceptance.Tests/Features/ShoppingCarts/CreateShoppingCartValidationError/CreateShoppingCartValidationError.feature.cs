@@ -155,9 +155,6 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.CreateSh
             else
             {
                 await this.ScenarioStartAsync();
-#line 4
-    await testRunner.GivenAsync("I have an invalid client id for shopping cart creation", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
-#line hidden
                 global::Reqnroll.Table table52 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
@@ -165,16 +162,16 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.CreateSh
                             "Method",
                             "POST"});
                 table52.AddRow(new string[] {
-                            "PathTemplate",
+                            "Path",
                             "/shopping-carts/{clientId}"});
                 table52.AddRow(new string[] {
-                            "ContentType",
-                            "application/json"});
-                table52.AddRow(new string[] {
-                            "Body",
-                            "null"});
-#line 5
-    await testRunner.WhenAsync("I submit the create shopping cart request with invalid data", ((string)(null)), table52, "When ");
+                            "ClientId",
+                            "empty"});
+#line 4
+    await testRunner.GivenAsync("I have an invalid create shopping cart request payload", ((string)(null)), table52, "Given ");
+#line hidden
+#line 9
+    await testRunner.WhenAsync("I submit the create shopping cart request with invalid data", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
                 global::Reqnroll.Table table53 = new global::Reqnroll.Table(new string[] {
                             "Field",
@@ -200,7 +197,10 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.CreateSh
                 table53.AddRow(new string[] {
                             "FirstErrorMessage",
                             "ClientId cannot be empty Guid."});
-#line 11
+                table53.AddRow(new string[] {
+                            "HasTraceId",
+                            "true"});
+#line 10
     await testRunner.ThenAsync("problem details are returned for create shopping cart validation error", ((string)(null)), table53, "Then ");
 #line hidden
             }
