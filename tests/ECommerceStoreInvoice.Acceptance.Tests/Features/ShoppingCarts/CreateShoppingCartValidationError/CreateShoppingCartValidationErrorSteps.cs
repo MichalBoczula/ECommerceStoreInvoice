@@ -13,35 +13,39 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.CreateSh
     {
         private readonly ScenarioApiContext _apiContext;
         private Guid _clientId;
+        private string _requestPath = null!;
 
         public CreateShoppingCartValidationErrorSteps(ScenarioApiContext apiContext)
         {
             _apiContext = apiContext;
         }
 
-        [Given("I have an invalid client id for shopping cart creation")]
-        public void GivenIHaveAnInvalidClientIdForShoppingCartCreation()
+        [Given("I have an invalid create shopping cart request payload")]
+        public void GivenIHaveAnInvalidCreateShoppingCartRequestPayload(Table table)
         {
-            _clientId = Guid.Empty;
+            var requestValues = ParseExpectedTable(table);
+            _clientId = ParseClientId(GetRequiredValue(requestValues, "ClientId"));
+
+            var pathTemplate = GetRequiredValue(requestValues, "Path");
+            _requestPath = ResolveClientIdPlaceholder(pathTemplate);
+            var request = new
+            {
+                Method = GetRequiredValue(requestValues, "Method"),
+                PathTemplate = pathTemplate,
+                Path = _requestPath,
+                ClientId = _clientId
+            };
 
             AllureJson.AttachObject(
                 "Create shopping cart invalid request",
-                new { ClientId = _clientId },
+                request,
                 _apiContext.JsonOptions);
         }
 
         [When("I submit the create shopping cart request with invalid data")]
-        public async Task WhenISubmitTheCreateShoppingCartRequestWithInvalidData(Table table)
+        public async Task WhenISubmitTheCreateShoppingCartRequestWithInvalidData()
         {
-            var requestDefinition = ParseExpectedTable(table);
-            var requestObject = BuildCreateShoppingCartRequestObject(requestDefinition, _clientId);
-
-            AllureJson.AttachObject(
-                "Create shopping cart validation request object",
-                requestObject,
-                _apiContext.JsonOptions);
-
-            _apiContext.Response = await _apiContext.HttpClient.PostAsync($"/shopping-carts/{_clientId}", content: null);
+            _apiContext.Response = await _apiContext.HttpClient.PostAsync(_requestPath, content: null);
 
             var body = await _apiContext.Response.Content.ReadAsStringAsync();
             AllureJson.AttachRawJson($"Response JSON ({(int)_apiContext.Response.StatusCode})", body);
@@ -73,23 +77,20 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.CreateSh
             errors.Count.ShouldBe(ParseInt(expected, "ErrorsCount"));
             errors.ShouldNotBeEmpty();
             errors[0].Message.ShouldBe(GetRequiredValue(expected, "FirstErrorMessage"));
+            if (ParseBool(expected, "HasTraceId"))
+            {
+                problemDetails.TraceId.ShouldNotBeNullOrWhiteSpace();
+            }
+            else
+            {
+                problemDetails.TraceId.ShouldBeNullOrWhiteSpace();
+            }
 
             var expectedResponseObject = BuildCreateShoppingCartValidationErrorResponseObject(expected, _clientId);
             AllureJson.AttachObject(
                 "Create shopping cart validation expected response object",
                 expectedResponseObject,
                 _apiContext.JsonOptions);
-        }
-
-        private static object BuildCreateShoppingCartRequestObject(IReadOnlyDictionary<string, string> values, Guid clientId)
-        {
-            return new
-            {
-                Method = GetRequiredValue(values, "Method"),
-                Path = GetRequiredValue(values, "PathTemplate").Replace("{clientId}", clientId.ToString(), StringComparison.OrdinalIgnoreCase),
-                ContentType = GetRequiredValue(values, "ContentType"),
-                Body = (object?)null
-            };
         }
 
         private static object BuildCreateShoppingCartValidationErrorResponseObject(IReadOnlyDictionary<string, string> values, Guid clientId)
@@ -101,6 +102,7 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.CreateSh
                 detail = GetRequiredValue(values, "Detail"),
                 type = GetRequiredValue(values, "Type"),
                 instance = GetRequiredValue(values, "Instance").Replace("{clientId}", clientId.ToString(), StringComparison.OrdinalIgnoreCase),
+                hasTraceId = ParseBool(values, "HasTraceId"),
                 errors = new[]
                 {
                     new
@@ -149,5 +151,14 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.CreateSh
             var value = GetRequiredValue(values, key);
             return int.Parse(value, CultureInfo.InvariantCulture);
         }
+
+        private static bool ParseBool(IReadOnlyDictionary<string, string> values, string key)
+            => bool.Parse(GetRequiredValue(values, key));
+
+        private static Guid ParseClientId(string value)
+            => value.Equals("empty", StringComparison.OrdinalIgnoreCase) ? Guid.Empty : Guid.Parse(value);
+
+        private string ResolveClientIdPlaceholder(string value)
+            => value.Replace("{clientId}", _clientId.ToString(), StringComparison.OrdinalIgnoreCase);
     }
 }
