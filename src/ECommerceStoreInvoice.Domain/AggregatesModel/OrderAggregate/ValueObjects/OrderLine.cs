@@ -2,6 +2,7 @@
 
 namespace ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate.ValueObjects
 {
+    //Data duplication(name, brand, price) directly use product snapshot in model
     public record class OrderLine
     {
         public Guid ProductVersionId { get; init; }

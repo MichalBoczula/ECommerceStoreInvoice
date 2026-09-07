@@ -12,6 +12,8 @@ using ECommerceStoreInvoice.Domain.Validation.Abstract;
 
 namespace ECommerceStoreInvoice.Application.Services.Concrete.Orders
 {
+    //Use newest flow with product snapshot
+    //Create order one transaction
     internal sealed class OrderService(
         IOrderRepository orderRepository,
         IProductVersionRepository productVersionRepository,
