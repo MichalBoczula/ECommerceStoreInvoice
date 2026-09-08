@@ -50,12 +50,11 @@ public sealed class OrderServiceTests
             clientId,
             [
                 .. createdProductVersions.Zip(shoppingCart.Lines, (productVersion, line) =>
-                    new OrderLine(productVersion.Id, "", "", new Money(), line.Quantity))
+                    new OrderLine(productVersion.Id, line.Quantity))
             ],
             DateTime.UtcNow.AddMinutes(-1),
             DateTime.UtcNow,
-            OrderStatus.Created,
-            new Money());
+            OrderStatus.Created);
 
         var orderRepositoryMock = new Mock<IOrderRepository>(MockBehavior.Strict);
         var productVersionRepositoryMock = new Mock<IProductVersionRepository>(MockBehavior.Strict);
@@ -129,8 +128,6 @@ public sealed class OrderServiceTests
         response.Id.ShouldBe(createdOrder.Id);
         response.ClientId.ShouldBe(clientId);
         response.Status.ShouldBe(OrderStatus.Created.ToString());
-        response.TotalAmount.ShouldBe(createdOrder.Total.Amount);
-        response.TotalCurrency.ShouldBe(createdOrder.Total.Currency);
         response.Lines.Count.ShouldBe(createdOrder.Lines.Count);
     }
 
@@ -660,14 +657,13 @@ public sealed class OrderServiceTests
 
     private static Order BuildOrder(Guid orderId, Guid clientId, OrderStatus status)
     {
-        var line = new OrderLine(Guid.NewGuid(), "Phone", "Apple", new Money(100m, "USD"), 2);
+        var line = new OrderLine(Guid.NewGuid(), 2);
         return Order.Rehydrate(
             orderId,
             clientId,
             [line],
             DateTime.UtcNow.AddDays(-1),
             DateTime.UtcNow.AddHours(-1),
-            status,
-            new Money(line.Total.Amount, line.Total.Currency));
+            status);
     }
 }

@@ -16,35 +16,18 @@ internal static class OrderDocumentBenchmarkDataFactory
             CreatedAt = BenchmarkDate,
             UpdatedAt = BenchmarkDate,
             Status = OrderStatus.Created,
-            TotalAmount = CalculateTotal(linesCount),
-            TotalCurrency = "PLN",
             Lines = Enumerable.Range(1, linesCount)
                 .Select(CreateLine)
                 .ToList()
         };
     }
 
-    private static decimal CalculateTotal(int linesCount)
-    {
-        return Enumerable.Range(1, linesCount)
-            .Sum(index => (10.99m + index) * index);
-    }
-
     private static OrderLineDocument CreateLine(int index)
     {
-        var unitPriceAmount = 10.99m + index;
-        var quantity = index;
-
         return new OrderLineDocument
         {
             ProductVersionId = Guid.NewGuid(),
-            Name = $"Product {index}",
-            Brand = $"Brand {index % 5}",
-            UnitPriceAmount = unitPriceAmount,
-            UnitPriceCurrency = "PLN",
-            Quantity = quantity,
-            TotalAmount = unitPriceAmount * quantity,
-            TotalCurrency = "PLN"
+            Quantity = index
         };
     }
 }

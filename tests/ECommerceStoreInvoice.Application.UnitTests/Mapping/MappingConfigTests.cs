@@ -75,8 +75,8 @@ public sealed class MappingConfigTests
         result.AddressEmail.ShouldBe(request.AddressEmail);
     }
 
-    [Fact(Skip = "Order require reimplementation")]
-    public void MapToDomain_Order_ShouldUseProductVersionValuesAndCartLineQuantities()
+    [Fact]
+    public void MapToDomain_Order_ShouldUseProductVersionIdsAndCartLineQuantities()
     {
         // Arrange
         var clientId = Guid.NewGuid();
@@ -106,15 +106,9 @@ public sealed class MappingConfigTests
         // Assert
         result.ClientId.ShouldBe(clientId);
         result.Lines.Count.ShouldBe(1);
-        result.Total.Amount.ShouldBe(2000m);
-        result.Total.Currency.ShouldBe("USD");
 
         var orderLine = result.Lines.Single();
         orderLine.ProductVersionId.ShouldBe(productVersion.Id);
-        orderLine.Name.ShouldBe(productVersion.Name);
-        orderLine.Brand.ShouldBe(productVersion.Brand);
-        orderLine.UnitPrice.Amount.ShouldBe(productVersion.Price.Amount);
-        orderLine.UnitPrice.Currency.ShouldBe(productVersion.Price.Currency);
         orderLine.Quantity.ShouldBe(cartLine.Quantity);
     }
 
@@ -153,11 +147,10 @@ public sealed class MappingConfigTests
         var order = Order.Rehydrate(
             Guid.NewGuid(),
             Guid.NewGuid(),
-            [new OrderLine(Guid.NewGuid(), "Monitor", "Fabrikam", new Money(400m, "USD"), 2)],
+            [new OrderLine(Guid.NewGuid(), 2)],
             new DateTime(2026, 2, 1, 8, 0, 0, DateTimeKind.Utc),
             new DateTime(2026, 2, 2, 9, 0, 0, DateTimeKind.Utc),
-            OrderStatus.Paid,
-            new Money(800m, "USD"));
+            OrderStatus.Paid);
 
         var invoice = Invoice.Rehydrate(
             Guid.NewGuid(),
@@ -194,8 +187,8 @@ public sealed class MappingConfigTests
 
         // Assert
         orderResponse.Status.ShouldBe(OrderStatus.Paid.ToString());
-        orderResponse.TotalAmount.ShouldBe(800m);
-        orderResponse.Lines.Single().TotalAmount.ShouldBe(800m);
+        orderResponse.Lines.Count.ShouldBe(1);
+        orderResponse.Lines.Single().Quantity.ShouldBe(2);
 
         invoiceResponse.OrderId.ShouldBe(order.Id);
         invoiceResponse.StorageUrl.ShouldBe(invoice.StorageUrl);
