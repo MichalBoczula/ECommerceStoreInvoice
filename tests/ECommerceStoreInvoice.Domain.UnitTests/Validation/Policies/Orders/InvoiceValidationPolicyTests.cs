@@ -1,5 +1,4 @@
 using ECommerceStoreInvoice.Domain.AggregatesModel.Common.Enums;
-using ECommerceStoreInvoice.Domain.AggregatesModel.Common.ValueObjects;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate.ValueObjects;
 using ECommerceStoreInvoice.Domain.Validation.Common;
@@ -51,7 +50,7 @@ namespace ECommerceStoreInvoice.Domain.UnitTests.Validation.Policies.Orders
 
         private static Order CreateOrder(OrderStatus status)
         {
-            var line = new OrderLine(Guid.NewGuid(), "Keyboard", "Logi", new Money(100, "USD"), 1);
+            var line = new OrderLine(Guid.NewGuid(), 1);
 
             return Order.Rehydrate(
                 Guid.NewGuid(),
@@ -59,8 +58,7 @@ namespace ECommerceStoreInvoice.Domain.UnitTests.Validation.Policies.Orders
                 [line],
                 DateTime.UtcNow,
                 DateTime.UtcNow,
-                status,
-                new Money(100, "USD"));
+                status);
         }
     }
 }

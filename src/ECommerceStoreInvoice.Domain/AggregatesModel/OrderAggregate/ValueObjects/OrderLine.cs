@@ -2,29 +2,15 @@
 
 namespace ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate.ValueObjects
 {
-    //Data duplication(name, brand, price) directly use product snapshot in model
-    public record class OrderLine
+    public record OrderLine
     {
         public Guid ProductVersionId { get; init; }
-        public string Name { get; init; }
-        public string Brand { get; init; }
-        public Money UnitPrice { get; init; }
         public int Quantity { get; init; }
-        public Money Total { get; init; }
 
-        public OrderLine(
-            Guid productVersionId,
-            string name,
-            string brand,
-            Money unitPrice,
-            int quantity)
+        public OrderLine(Guid productVersionId, int quantity)
         {
             ProductVersionId = productVersionId;
-            Name = name;
-            Brand = brand;
-            UnitPrice = unitPrice;
             Quantity = quantity;
-            Total = new(UnitPrice.Amount * Quantity, UnitPrice.Currency);
         }
     }
 }

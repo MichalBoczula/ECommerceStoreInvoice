@@ -83,7 +83,7 @@ namespace ECommerceStoreInvoice.Application.Descriptors.Orders
         [FlowStep(order: 8, bpmnId: "ChangeOrderStatus")]
         public void ChangeOrderStatus(Order order, OrderStatus newStatus)
         {
-            order.ChangeOrderStatus(newStatus);
+            order.ChangeStatus(newStatus);
         }
 
         [FlowStep(order: 9, bpmnId: "SaveOrder")]

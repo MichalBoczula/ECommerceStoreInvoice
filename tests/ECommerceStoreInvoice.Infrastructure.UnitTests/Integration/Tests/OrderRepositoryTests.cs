@@ -1,5 +1,4 @@
 ﻿using ECommerceStoreInvoice.Domain.AggregatesModel.Common.Enums;
-using ECommerceStoreInvoice.Domain.AggregatesModel.Common.ValueObjects;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate.Repositories;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate.ValueObjects;
@@ -45,14 +44,8 @@ namespace ECommerceStoreInvoice.Infrastructure.UnitTests.Integration.Tests
             result.ClientId.ShouldBe(order.ClientId);
             result.Lines.Count.ShouldBe(1);
             result.Lines.Single().ProductVersionId.ShouldBe(order.Lines.Single().ProductVersionId);
-            result.Lines.Single().Name.ShouldBe(order.Lines.Single().Name);
-            result.Lines.Single().Brand.ShouldBe(order.Lines.Single().Brand);
-            result.Lines.Single().UnitPrice.Amount.ShouldBe(order.Lines.Single().UnitPrice.Amount);
-            result.Lines.Single().UnitPrice.Currency.ShouldBe(order.Lines.Single().UnitPrice.Currency);
             result.Lines.Single().Quantity.ShouldBe(order.Lines.Single().Quantity);
             result.Status.ShouldBe(OrderStatus.Created);
-            result.Total.Amount.ShouldBe(order.Total.Amount);
-            result.Total.Currency.ShouldBe(order.Total.Currency);
         }
 
         [Fact]
@@ -115,20 +108,15 @@ namespace ECommerceStoreInvoice.Infrastructure.UnitTests.Integration.Tests
             result.ClientId.ShouldBe(clientId);
             result.Lines.Count.ShouldBe(1);
             result.Lines.Single().Quantity.ShouldBe(4);
-            result.Total.Amount.ShouldBe(399.96m);
-            result.Total.Currency.ShouldBe("USD");
+            result.Lines.Single().ProductVersionId.ShouldBe(order.Lines.Single().ProductVersionId);
+            result.Status.ShouldBe(OrderStatus.Created);
         }
 
         private static Order CreateOrder(Guid clientId, int quantity)
         {
             var lines = new List<OrderLine>
             {
-                new(
-                    Guid.NewGuid(),
-                    "Monitor",
-                    "Fabrikam",
-                    new Money(99.99m, "USD"),
-                    quantity)
+                new(Guid.NewGuid(), quantity)
             };
 
             return Order.Rehydrate(
@@ -137,8 +125,7 @@ namespace ECommerceStoreInvoice.Infrastructure.UnitTests.Integration.Tests
                 lines,
                 DateTime.UtcNow,
                 DateTime.UtcNow,
-                OrderStatus.Created,
-                new Money(lines.Sum(x => x.Total.Amount), "USD"));
+                OrderStatus.Created);
         }
     }
 }

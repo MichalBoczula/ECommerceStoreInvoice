@@ -16,9 +16,7 @@ namespace ECommerceStoreInvoice.Infrastructure.Mapping
                 Lines = order.Lines.Select(MapLineToDocument).ToList(),
                 CreatedAt = order.CreatedAt,
                 UpdatedAt = order.UpdatedAt,
-                Status = order.Status,
-                TotalAmount = order.Total.Amount,
-                TotalCurrency = order.Total.Currency
+                Status = order.Status
             };
         }
 
@@ -27,9 +25,6 @@ namespace ECommerceStoreInvoice.Infrastructure.Mapping
             var lines = orderDocument.Lines.Select(x =>
                 new OrderLine(
                     x.ProductVersionId,
-                    x.Name,
-                    x.Brand,
-                    new Money(x.UnitPriceAmount, x.UnitPriceCurrency),
                     x.Quantity)).ToList();
 
             return Order.Rehydrate(
@@ -38,8 +33,7 @@ namespace ECommerceStoreInvoice.Infrastructure.Mapping
                 lines,
                 orderDocument.CreatedAt,
                 orderDocument.UpdatedAt,
-                orderDocument.Status,
-                new Money(orderDocument.TotalAmount, orderDocument.TotalCurrency));
+                orderDocument.Status);
         }
 
         private static OrderLineDocument MapLineToDocument(OrderLine orderLine)
@@ -47,13 +41,7 @@ namespace ECommerceStoreInvoice.Infrastructure.Mapping
             return new OrderLineDocument
             {
                 ProductVersionId = orderLine.ProductVersionId,
-                Name = orderLine.Name,
-                Brand = orderLine.Brand,
-                UnitPriceAmount = orderLine.UnitPrice.Amount,
-                UnitPriceCurrency = orderLine.UnitPrice.Currency,
-                Quantity = orderLine.Quantity,
-                TotalAmount = orderLine.Total.Amount,
-                TotalCurrency = orderLine.Total.Currency
+                Quantity = orderLine.Quantity
             };
         }
     }

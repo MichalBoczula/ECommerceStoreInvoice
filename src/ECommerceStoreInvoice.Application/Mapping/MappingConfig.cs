@@ -6,7 +6,6 @@ using ECommerceStoreInvoice.Application.Common.ResponsesDto.Orders;
 using ECommerceStoreInvoice.Application.Common.ResponsesDto.ShoppingCarts;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ClientDataVersionAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ClientDataVersionAggregate.ValueObjects;
-using ECommerceStoreInvoice.Domain.AggregatesModel.Common.ValueObjects;
 using ECommerceStoreInvoice.Domain.AggregatesModel.InvoiceAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate.ValueObjects;
@@ -74,12 +73,9 @@ namespace ECommerceStoreInvoice.Application.Mapping
                 CreatedAt = order.CreatedAt,
                 UpdatedAt = order.UpdatedAt,
                 Status = order.Status.ToString(),
-                TotalAmount = order.Total.Amount,
-                TotalCurrency = order.Total.Currency,
                 Lines = order.Lines.Select(MapToResponse).ToList()
             };
         }
-
 
         public static InvoiceResponseDto MapToResponse(Invoice invoice)
         {
@@ -139,9 +135,6 @@ namespace ECommerceStoreInvoice.Application.Mapping
         {
             return new OrderLine(
                 productVersion.Id,
-                "",
-                "",
-                new Money(),
                 shoppingCartLine.Quantity);
         }
 
@@ -150,7 +143,7 @@ namespace ECommerceStoreInvoice.Application.Mapping
             return new ShoppingCartLineResponseDto
             {
                 ProductId = shoppingCartLine.ProductId,
-                Quantity = shoppingCartLine.Quantity,
+                Quantity = shoppingCartLine.Quantity
             };
         }
 
@@ -159,13 +152,7 @@ namespace ECommerceStoreInvoice.Application.Mapping
             return new OrderLineResponseDto
             {
                 ProductVersionId = orderLine.ProductVersionId,
-                Name = orderLine.Name,
-                Brand = orderLine.Brand,
-                UnitPriceAmount = orderLine.UnitPrice.Amount,
-                UnitPriceCurrency = orderLine.UnitPrice.Currency,
-                Quantity = orderLine.Quantity,
-                TotalAmount = orderLine.Total.Amount,
-                TotalCurrency = orderLine.Total.Currency
+                Quantity = orderLine.Quantity
             };
         }
     }

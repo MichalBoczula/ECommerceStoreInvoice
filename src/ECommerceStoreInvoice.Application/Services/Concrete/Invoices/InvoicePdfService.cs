@@ -24,43 +24,44 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Invoices
 
         public async Task<string> GenerateInvoicePdf(Order order, ClientDataVersionResponseDto? clientDataVersion)
         {
-            logger.LogInformation("Starting PDF generation for OrderId: {OrderId} and ClientId: {ClientId}", order.Id, order.ClientId);
-            await EnsureInitializedAsync();
+            // logger.LogInformation("Starting PDF generation for OrderId: {OrderId} and ClientId: {ClientId}", order.Id, order.ClientId);
+            // await EnsureInitializedAsync();
 
-            var lines = BuildInvoiceLines(order);
-            var subtotal = lines.Sum(x => x.TotalAmount);
-            var currency = lines.FirstOrDefault()?.Currency ?? order.Total.Currency;
-            var tax = Math.Round(subtotal * VatRate, 2);
-            var grandTotal = subtotal + tax;
+            // var lines = BuildInvoiceLines(order);
+            // var subtotal = lines.Sum(x => x.TotalAmount);
+            // var currency = lines.FirstOrDefault()?.Currency ?? order.Total.Currency;
+            // var tax = Math.Round(subtotal * VatRate, 2);
+            // var grandTotal = subtotal + tax;
 
-            var withRows = ReplaceOrderLinesSection(_cachedMainTemplate!, lines);
-            var withOrderData = ApplyOrderTokens(withRows, order);
-            var withClientData = ApplyClientTokens(withOrderData, order.ClientId, clientDataVersion);
-            var withStoreData = ApplyStoreTokens(withClientData);
-            var withTotals = ApplyTotalsTokens(withStoreData, subtotal, tax, grandTotal, currency);
+            // var withRows = ReplaceOrderLinesSection(_cachedMainTemplate!, lines);
+            // var withOrderData = ApplyOrderTokens(withRows, order);
+            // var withClientData = ApplyClientTokens(withOrderData, order.ClientId, clientDataVersion);
+            // var withStoreData = ApplyStoreTokens(withClientData);
+            // var withTotals = ApplyTotalsTokens(withStoreData, subtotal, tax, grandTotal, currency);
 
-            var invoiceHtml = ApplyFinalTokens(withTotals, order.Id);
-            var invoicePath = GetInvoicePdfPath(order.Id);
+            // var invoiceHtml = ApplyFinalTokens(withTotals, order.Id);
+            // var invoicePath = GetInvoicePdfPath(order.Id);
 
-            var page = await _browser!.NewPageAsync();
-            try
-            {
-                await page.SetContentAsync(invoiceHtml);
-                await page.PdfAsync(new PagePdfOptions
-                {
-                    Path = invoicePath,
-                    Format = "A4",
-                    PrintBackground = true
-                });
-            }
-            finally
-            {
-                await page.CloseAsync();
-            }
+            // var page = await _browser!.NewPageAsync();
+            // try
+            // {
+            //     await page.SetContentAsync(invoiceHtml);
+            //     await page.PdfAsync(new PagePdfOptions
+            //     {
+            //         Path = invoicePath,
+            //         Format = "A4",
+            //         PrintBackground = true
+            //     });
+            // }
+            // finally
+            // {
+            //     await page.CloseAsync();
+            // }
 
-            var invoiceUri = new Uri(invoicePath).AbsoluteUri;
-            logger.LogInformation("Successfully generated PDF for OrderId: {OrderId}. Output path: {InvoicePath}", order.Id, invoicePath);
-            return invoiceUri;
+            // var invoiceUri = new Uri(invoicePath).AbsoluteUri;
+            // logger.LogInformation("Successfully generated PDF for OrderId: {OrderId}. Output path: {InvoicePath}", order.Id, invoicePath);
+            // return invoiceUri;
+            throw new NotImplementedException();
         }
 
         private async Task EnsureInitializedAsync()
@@ -133,16 +134,18 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Invoices
 
         internal IReadOnlyCollection<InvoiceLineDto> BuildInvoiceLines(Order order)
         {
-            return order.Lines.Select(line => new InvoiceLineDto
-            {
-                ProductVersionId = line.ProductVersionId.ToString(),
-                Name = line.Name,
-                Brand = line.Brand,
-                Quantity = line.Quantity,
-                UnitAmount = line.UnitPrice.Amount,
-                TotalAmount = line.Total.Amount,
-                Currency = line.UnitPrice.Currency
-            }).ToList();
+            // return order.Lines.Select(line => new InvoiceLineDto
+            // {
+            //     ProductVersionId = line.ProductVersionId.ToString(),
+            //     Name = line.Name,
+            //     Brand = line.Brand,
+            //     Quantity = line.Quantity,
+            //     UnitAmount = line.UnitPrice.Amount,
+            //     TotalAmount = line.Total.Amount,
+            //     Currency = line.UnitPrice.Currency
+            // }).ToList();
+
+            throw new NotImplementedException();
         }
 
         internal string ReplaceOrderLinesSection(string template, IReadOnlyCollection<InvoiceLineDto> lines)

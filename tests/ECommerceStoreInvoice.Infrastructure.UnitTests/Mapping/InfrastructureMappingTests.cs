@@ -1,4 +1,3 @@
-
 using ECommerceStoreInvoice.Domain.AggregatesModel.ClientDataVersionAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ClientDataVersionAggregate.ValueObjects;
 using ECommerceStoreInvoice.Domain.AggregatesModel.Common.Enums;
@@ -96,29 +95,28 @@ public sealed class InfrastructureMappingTests
     [Fact]
     public void OrderMapping_ShouldMapBothDirectionsIncludingLines()
     {
-        var line = new OrderLine(Guid.NewGuid(), "Monitor", "Fabrikam", new Money(400m, "USD"), 2);
+        var line = new OrderLine(Guid.NewGuid(), 2);
         var domain = Order.Rehydrate(
             Guid.NewGuid(),
             Guid.NewGuid(),
             [line],
             new DateTime(2026, 2, 2, 8, 0, 0, DateTimeKind.Utc),
             new DateTime(2026, 2, 2, 9, 0, 0, DateTimeKind.Utc),
-            OrderStatus.Paid,
-            new Money(800m, "USD"));
+            OrderStatus.Paid);
 
         var document = OrderMapping.MapToDocument(domain);
 
         document.Status.ShouldBe(OrderStatus.Paid);
-        document.TotalAmount.ShouldBe(800m);
         document.Lines.Count.ShouldBe(1);
-        document.Lines.Single().TotalAmount.ShouldBe(800m);
+        document.Lines.Single().ProductVersionId.ShouldBe(line.ProductVersionId);
+        document.Lines.Single().Quantity.ShouldBe(2);
 
         var mappedBack = OrderMapping.MapToDomain(document);
 
         mappedBack.Id.ShouldBe(domain.Id);
         mappedBack.Status.ShouldBe(OrderStatus.Paid);
-        mappedBack.Total.Currency.ShouldBe("USD");
         mappedBack.Lines.Single().ProductVersionId.ShouldBe(line.ProductVersionId);
+        mappedBack.Lines.Single().Quantity.ShouldBe(line.Quantity);
     }
 
     [Fact]
