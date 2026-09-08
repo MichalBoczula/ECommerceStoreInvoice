@@ -58,9 +58,6 @@ internal static class OrderMappingConfigBenchmarkDataFactory
         var lines = Enumerable.Range(1, linesCount)
             .Select(index => new OrderLine(
                 CreateDeterministicGuid(index + 1000),
-                $"Product {index}",
-                $"Brand {index % 5}",
-                new Money(10.99m + index, "PLN"),
                 index))
             .ToList();
 
@@ -70,8 +67,7 @@ internal static class OrderMappingConfigBenchmarkDataFactory
             lines,
             BenchmarkDate,
             BenchmarkDate,
-            OrderStatus.Created,
-            new Money(lines.Sum(x => x.Total.Amount), "PLN"));
+            OrderStatus.Created);
     }
 
     private static Guid CreateDeterministicGuid(int index)

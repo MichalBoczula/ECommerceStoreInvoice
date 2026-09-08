@@ -31,9 +31,6 @@ namespace ECommerceStoreInvoice.Performance.Benchmarks.Orders.Domain
         {
             return new OrderLine(
                 Guid.NewGuid(),
-                "Product",
-                "Brand",
-                new Money(100m, "USD"),
                 2);
         }
     }

@@ -2,8 +2,6 @@ using BenchmarkDotNet.Running;
 using ECommerceStoreInvoice.Performance.Benchmarks.ClientDataVersions.Application;
 using ECommerceStoreInvoice.Performance.Benchmarks.ClientDataVersions.Domain;
 using ECommerceStoreInvoice.Performance.Benchmarks.ClientDataVersions.Infrastructures;
-using ECommerceStoreInvoice.Performance.Benchmarks.Invoices.Application;
-using ECommerceStoreInvoice.Performance.Benchmarks.Invoices.Domain;
 using ECommerceStoreInvoice.Performance.Benchmarks.Invoices.Infrastructures;
 using ECommerceStoreInvoice.Performance.Benchmarks.Orders.Application;
 using ECommerceStoreInvoice.Performance.Benchmarks.Orders.Domain;
@@ -35,10 +33,10 @@ internal class Program
         BenchmarkRunner.Run<OrderValidationPolicyBenchmarks>();
 
         // 3. Invoices (Mapping & Database & Validation)
-        BenchmarkRunner.Run<InvoiceMappingConfigBenchmarks>();
+        // BenchmarkRunner.Run<InvoiceMappingConfigBenchmarks>();
         BenchmarkRunner.Run<InvoiceMappingBenchmarks>();
         BenchmarkRunner.Run<InvoiceRepositoryBenchmarks>();
-        BenchmarkRunner.Run<InvoiceValidationPolicyBenchmarks>();
+        // BenchmarkRunner.Run<InvoiceValidationPolicyBenchmarks>();
 
         // 4. ClientDataVersions (Mapping & Database & Validation)
         BenchmarkRunner.Run<ClientDataVersionMappingConfigBenchmarks>();

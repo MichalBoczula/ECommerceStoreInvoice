@@ -32,9 +32,6 @@ namespace ECommerceStoreInvoice.Domain.UnitTests.Validation.Policies.Orders
             var policy = new OrderValidationPolicy();
             var line = new OrderLine(
                 Guid.NewGuid(),
-                "Keyboard",
-                "Logi",
-                new Money(99, "USD"),
                 1);
             var order = new Order(Guid.NewGuid(), [line]);
 

@@ -24,7 +24,7 @@ namespace ECommerceStoreInvoice.Performance.Benchmarks.Orders.Domain
 
         private static Order CreateOrderWithStatus(OrderStatus status)
         {
-            var line = new OrderLine(Guid.NewGuid(), "Keyboard", "Logi", new Money(100, "USD"), 1);
+            var line = new OrderLine(Guid.NewGuid(), 1);
 
             return Order.Rehydrate(
                 Guid.NewGuid(),
@@ -32,8 +32,7 @@ namespace ECommerceStoreInvoice.Performance.Benchmarks.Orders.Domain
                 [line],
                 DateTime.UtcNow,
                 DateTime.UtcNow,
-                status,
-                new Money(100, "USD"));
+                status);
         }
     }
 }

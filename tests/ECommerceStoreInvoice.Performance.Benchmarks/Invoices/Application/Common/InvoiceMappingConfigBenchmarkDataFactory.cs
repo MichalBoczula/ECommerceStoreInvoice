@@ -29,8 +29,7 @@ namespace ECommerceStoreInvoice.Performance.Benchmarks.Invoices.Application.Comm
                 new List<OrderLine>(),
                 BenchmarkDate,
                 BenchmarkDate,
-                OrderStatus.Paid,
-                new Money(500m, "PLN"));
+                OrderStatus.Paid);
         }
 
         public static ClientDataVersionResponseDto CreateClientResponse(Guid clientId)
