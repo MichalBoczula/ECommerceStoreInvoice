@@ -7,26 +7,16 @@ Feature: Update shopping cart validation error
       | Field                      | Value                                |
       | ClientId                   | {clientId}                           |
       | Lines[0].ProductId         | 33333333-3333-3333-3333-333333333333 |
-      | Lines[0].Name              | Phone                                |
-      | Lines[0].Brand             | Apple                                |
-      | Lines[0].UnitPrice.Amount  | 999.99                               |
-      | Lines[0].UnitPrice.Currency| usd                                  |
       | Lines[0].Quantity          | 0                                    |
     And I have an invalid update shopping cart request
-      | ProductId                            | Name  | Brand | UnitPriceAmount | UnitPriceCurrency | Quantity |
-      | 33333333-3333-3333-3333-333333333333 | Phone | Apple | 999.99          | usd               | 0        |
+      | ProductId                            | Quantity |
+      | 33333333-3333-3333-3333-333333333333 | 0        |
     And update shopping cart request json is documented
       """
       {
         "lines": [
           {
             "productId": "33333333-3333-3333-3333-333333333333",
-            "name": "Phone",
-            "brand": "Apple",
-            "unitPrice": {
-              "amount": 999.99,
-              "currency": "usd"
-            },
             "quantity": 0
           }
         ]

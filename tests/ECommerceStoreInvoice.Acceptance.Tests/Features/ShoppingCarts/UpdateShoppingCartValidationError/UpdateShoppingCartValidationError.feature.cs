@@ -172,18 +172,6 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.UpdateSh
                             "Lines[0].ProductId",
                             "33333333-3333-3333-3333-333333333333"});
                 table67.AddRow(new string[] {
-                            "Lines[0].Name",
-                            "Phone"});
-                table67.AddRow(new string[] {
-                            "Lines[0].Brand",
-                            "Apple"});
-                table67.AddRow(new string[] {
-                            "Lines[0].UnitPrice.Amount",
-                            "999.99"});
-                table67.AddRow(new string[] {
-                            "Lines[0].UnitPrice.Currency",
-                            "usd"});
-                table67.AddRow(new string[] {
                             "Lines[0].Quantity",
                             "0"});
 #line 6
@@ -191,26 +179,16 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.UpdateSh
 #line hidden
                 global::Reqnroll.Table table68 = new global::Reqnroll.Table(new string[] {
                             "ProductId",
-                            "Name",
-                            "Brand",
-                            "UnitPriceAmount",
-                            "UnitPriceCurrency",
                             "Quantity"});
                 table68.AddRow(new string[] {
                             "33333333-3333-3333-3333-333333333333",
-                            "Phone",
-                            "Apple",
-                            "999.99",
-                            "usd",
                             "0"});
 #line 15
     await testRunner.AndAsync("I have an invalid update shopping cart request", ((string)(null)), table68, "And ");
 #line hidden
 #line 18
-    await testRunner.AndAsync("update shopping cart request json is documented", "{\r\n  \"lines\": [\r\n    {\r\n      \"productId\": \"33333333-3333-3333-3333-333333333333\"" +
-                        ",\r\n      \"name\": \"Phone\",\r\n      \"brand\": \"Apple\",\r\n      \"unitPrice\": {\r\n      " +
-                        "  \"amount\": 999.99,\r\n        \"currency\": \"usd\"\r\n      },\r\n      \"quantity\": 0\r\n " +
-                        "   }\r\n  ]\r\n}", ((global::Reqnroll.Table)(null)), "And ");
+    await testRunner.AndAsync("update shopping cart request json is documented", "{\n  \"lines\": [\n    {\n      \"productId\": \"33333333-3333-3333-3333-333333333333\",\n" +
+                        "      \"quantity\": 0\n    }\n  ]\n}", ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
 #line 35
     await testRunner.WhenAsync("I submit the invalid update shopping cart request", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
