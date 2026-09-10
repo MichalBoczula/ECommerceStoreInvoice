@@ -2,6 +2,7 @@
 using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate.Repositories;
 using ECommerceStoreInvoice.Infrastructure.Context;
 using ECommerceStoreInvoice.Infrastructure.Mapping;
+using ECommerceStoreInvoice.Infrastructure.Persistence.ProductVersions;
 using MongoDB.Driver;
 
 namespace ECommerceStoreInvoice.Infrastructure.Repositories
@@ -19,6 +20,18 @@ namespace ECommerceStoreInvoice.Infrastructure.Repositories
             return productVersion;
         }
 
+        public async Task<IReadOnlyCollection<ProductVersion>> CreateProductVersions(IReadOnlyCollection<ProductVersion> productVersions)
+        {
+            if (productVersions.Count == 0)
+                return Array.Empty<ProductVersion>();
+
+            var documents = productVersions.Select(ProductVersionMapping.MapToDocument).ToList();
+
+            await _context.ProductVersions.InsertManyAsync(documents);
+
+            return productVersions;
+        }
+
         public async Task<ProductVersion?> GetProductVersionById(Guid id)
         {
             var productVersionDocument = await _context.ProductVersions
@@ -31,13 +44,22 @@ namespace ECommerceStoreInvoice.Infrastructure.Repositories
             return ProductVersionMapping.MapToDomain(productVersionDocument);
         }
 
-        public async Task<IReadOnlyCollection<ProductVersion>> CreateProductVersions(IReadOnlyCollection<ProductVersion> productVersions)
+        public async Task<IReadOnlyCollection<ProductVersion>> GetProductVersionsByIds(IReadOnlyCollection<Guid> ids)
         {
-            var documents = productVersions.Select(ProductVersionMapping.MapToDocument).ToList();
+            if (ids.Count == 0)
+                return Array.Empty<ProductVersion>();
 
-            await _context.ProductVersions.InsertManyAsync(documents);
+            var distinctIds = ids.Distinct().ToList();
 
-            return productVersions;
+            var filter = Builders<ProductVersionDocument>.Filter.In(x => x.Id, distinctIds);
+
+            var documents = await _context.ProductVersions
+                .Find(filter)
+                .ToListAsync();
+
+            return documents
+                .Select(ProductVersionMapping.MapToDomain)
+                .ToList();
         }
     }
 }

@@ -162,89 +162,89 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.ShoppingCarts.UpdateSh
 #line 5
     await testRunner.GivenAsync("I have an existing shopping cart for invalid update", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
-                global::Reqnroll.Table table67 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table1 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table67.AddRow(new string[] {
+                table1.AddRow(new string[] {
                             "ClientId",
                             "{clientId}"});
-                table67.AddRow(new string[] {
+                table1.AddRow(new string[] {
                             "Lines[0].ProductId",
                             "33333333-3333-3333-3333-333333333333"});
-                table67.AddRow(new string[] {
+                table1.AddRow(new string[] {
                             "Lines[0].Quantity",
                             "0"});
 #line 6
-    await testRunner.AndAsync("update shopping cart request fields are documented", ((string)(null)), table67, "And ");
+    await testRunner.AndAsync("update shopping cart request fields are documented", ((string)(null)), table1, "And ");
 #line hidden
-                global::Reqnroll.Table table68 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table2 = new global::Reqnroll.Table(new string[] {
                             "ProductId",
                             "Quantity"});
-                table68.AddRow(new string[] {
+                table2.AddRow(new string[] {
                             "33333333-3333-3333-3333-333333333333",
                             "0"});
-#line 15
-    await testRunner.AndAsync("I have an invalid update shopping cart request", ((string)(null)), table68, "And ");
+#line 11
+    await testRunner.AndAsync("I have an invalid update shopping cart request", ((string)(null)), table2, "And ");
 #line hidden
-#line 18
-    await testRunner.AndAsync("update shopping cart request json is documented", "{\n  \"lines\": [\n    {\n      \"productId\": \"33333333-3333-3333-3333-333333333333\",\n" +
-                        "      \"quantity\": 0\n    }\n  ]\n}", ((global::Reqnroll.Table)(null)), "And ");
+#line 14
+    await testRunner.AndAsync("update shopping cart request json is documented", "{\r\n  \"lines\": [\r\n    {\r\n      \"productId\": \"33333333-3333-3333-3333-333333333333\"" +
+                        ",\r\n      \"quantity\": 0\r\n    }\r\n  ]\r\n}", ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
-#line 35
+#line 25
     await testRunner.WhenAsync("I submit the invalid update shopping cart request", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-                global::Reqnroll.Table table69 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table3 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table69.AddRow(new string[] {
+                table3.AddRow(new string[] {
                             "StatusCode",
                             "400"});
-                table69.AddRow(new string[] {
+                table3.AddRow(new string[] {
                             "Title",
                             "Validation failed."});
-                table69.AddRow(new string[] {
+                table3.AddRow(new string[] {
                             "Detail",
                             "One or more validation errors occurred."});
-                table69.AddRow(new string[] {
+                table3.AddRow(new string[] {
                             "Type",
                             "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.1"});
-                table69.AddRow(new string[] {
+                table3.AddRow(new string[] {
                             "Instance",
                             "/shopping-carts/{clientId}"});
-                table69.AddRow(new string[] {
+                table3.AddRow(new string[] {
                             "ErrorsCount",
                             "1"});
-                table69.AddRow(new string[] {
+                table3.AddRow(new string[] {
                             "FirstErrorMessage",
                             "Quantity must be greater than zero."});
-#line 36
-    await testRunner.ThenAsync("problem details are returned for update shopping cart validation error", ((string)(null)), table69, "Then ");
+#line 26
+    await testRunner.ThenAsync("problem details are returned for update shopping cart validation error", ((string)(null)), table3, "Then ");
 #line hidden
-                global::Reqnroll.Table table70 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table4 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table70.AddRow(new string[] {
+                table4.AddRow(new string[] {
                             "statusCode",
                             "400"});
-                table70.AddRow(new string[] {
+                table4.AddRow(new string[] {
                             "title",
                             "Validation failed."});
-                table70.AddRow(new string[] {
+                table4.AddRow(new string[] {
                             "detail",
                             "One or more validation errors occurred."});
-                table70.AddRow(new string[] {
+                table4.AddRow(new string[] {
                             "type",
                             "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.1"});
-                table70.AddRow(new string[] {
+                table4.AddRow(new string[] {
                             "instance",
                             "/shopping-carts/{clientId}"});
-                table70.AddRow(new string[] {
+                table4.AddRow(new string[] {
                             "errors[0].message",
                             "Quantity must be greater than zero."});
-#line 45
-    await testRunner.AndAsync("update shopping cart validation error fields are documented", ((string)(null)), table70, "And ");
+#line 35
+    await testRunner.AndAsync("update shopping cart validation error fields are documented", ((string)(null)), table4, "And ");
 #line hidden
-#line 53
+#line 43
     await testRunner.AndAsync("update shopping cart validation error json is documented", @"{
   ""statusCode"": 400,
   ""title"": ""Validation failed."",

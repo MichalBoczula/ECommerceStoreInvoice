@@ -1,0 +1,94 @@
+================================================================================
+TODO: MONGO $LOOKUP PIPELINE REFACTORING PLAN
+================================================================================
+
+1. INFRASTRUCTURE LAYER (ECommerceStoreInvoice.Infrastructure)
+--------------------------------------------------------------------------------
+[ ] Create Read Model Document:
+    - Path: Infrastructure/Persistence/Orders/OrderWithProductsDocument.cs
+    - Properties:
+        - Guid Id
+        - Guid ClientId
+        - DateTime CreatedAt
+        - DateTime? UpdatedAt
+        - OrderStatus Status
+        - List<OrderLineDocument> Lines
+        - List<ProductVersionDocument> ProductVersions (populated by $lookup)
+
+[ ] Extend Repository Contract & Implementation:
+    - File: Domain/AggregatesModel/OrderAggregate/Repositories/IOrderRepository.cs
+        - Task<OrderWithProductsDocument?> GetOrderWithProductVersionsById(Guid orderId);
+        - Task<IReadOnlyCollection<OrderWithProductsDocument>> GetOrdersWithProductVersionsByClientId(Guid clientId);
+    - File: Infrastructure/Repositories/OrderRepository.cs
+        - Build Aggregation Pipeline:
+            * Stage 1: .Match(...) (by Id or ClientId)
+            * Stage 2: .Lookup<OrderDocument, ProductVersionDocument, OrderWithProductsDocument>(
+                         foreignCollection: _context.ProductVersions,
+                         localField: o => o.Lines.Select(l => l.ProductVersionId),
+                         foreignField: pv => pv.Id,
+                         as: res => res.ProductVersions)
+
+[ ] Document & Entity Mapping:
+    - Path: Infrastructure/Mapping/OrderMapping.cs
+    - Add mapper:
+        MapToResponseDto(OrderWithProductsDocument doc) -> OrderResponseDto
+        (Calculates LineTotalAmount and root TotalAmount/TotalCurrency from joined ProductVersions)
+
+[ ] Database Indexes Verification:
+    - Ensure index on ProductVersions._id (default)
+    - Ensure compound or secondary index on Orders.ClientId
+
+
+2. APPLICATION LAYER (ECommerceStoreInvoice.Application)
+--------------------------------------------------------------------------------
+[ ] Descriptors Simplification:
+    - File: Descriptors/Orders/GetOrderByIdDescriptor.cs
+        - Remove 2-step loading (LoadOrder + LoadProductVersions)
+        - Replace with single step: LoadOrderWithProducts(orderId, orderRepository)
+        - Update MapToResponse to consume OrderWithProductsDocument directly
+    - File: Descriptors/Orders/GetOrdersByClientIdDescriptor.cs
+        - Remove LoadOrders + LoadProductVersions
+        - Replace with single step: LoadOrdersWithProducts(clientId, orderRepository)
+    - File: Descriptors/Orders/UpdateOrderStatusDescriptor.cs
+        - Decide between post-save lookup read or in-memory entity reuse
+
+[ ] Service Orchestration:
+    - File: Services/Concrete/Orders/OrderService.cs
+        - Streamline GetOrderByOrderId & GetOrdersByClientId flows
+        - Remove redundant IProductVersionRepository / IProductVersionService injections where no longer needed
+
+
+3. UNIT & INTEGRATION TESTS
+--------------------------------------------------------------------------------
+[ ] Infrastructure Tests:
+    - File: Infrastructure.UnitTests/Mapping/InfrastructureMappingTests.cs
+        - Test mapping: OrderWithProductsDocument -> OrderResponseDto
+    - File: Infrastructure.UnitTests/Integration/Tests/OrderRepositoryTests.cs
+        - Test GetOrderWithProductVersionsById (returns order + joined versions)
+        - Test GetOrdersWithProductVersionsByClientId (filters by ClientId + joins versions)
+        - Test missing ID scenario (returns null)
+
+[ ] Application Tests:
+    - File: Application.UnitTests/Descriptors/Orders/GetOrderByIdDescriptorTests.cs
+    - File: Application.UnitTests/Descriptors/Orders/GetOrdersByClientIdDescriptorTests.cs
+    - File: Application.UnitTests/Services/Orders/OrderServiceTests.cs
+
+
+4. API CONTROLLERS & ACCEPTANCE TESTS
+--------------------------------------------------------------------------------
+[ ] Verify API Endpoints:
+    - GET /api/orders/{orderId}
+    - GET /api/clients/{clientId}/orders
+
+[ ] Acceptance & End-to-End Tests:
+    - File: ECommerceStoreInvoice.Acceptance.Tests
+        - End-to-end checkout -> GET order
+        - Verify returned response includes lines with nested product versions, prices, and totals
+
+
+5. HOUSEKEEPING & VULNERABILITIES
+--------------------------------------------------------------------------------
+[ ] Resolve warning CS9113: Remove unused 'logger' in InvoicePdfService.cs
+[ ] Fix warning CS8625: Null literal to non-nullable reference in ClientDataVersionRepositoryTests.cs
+[ ] Resolve NuGet Security Advisory NU1903 (Update SSH.NET dependency across test projects)
+================================================================================

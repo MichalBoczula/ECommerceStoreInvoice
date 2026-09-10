@@ -1,5 +1,6 @@
 using ECommerceStoreInvoice.Application.Common.RequestsDto.ClientDataVersions;
 using ECommerceStoreInvoice.Application.Common.RequestsDto.ShoppingCarts;
+using ECommerceStoreInvoice.Application.Common.ResponsesDto;
 using ECommerceStoreInvoice.Application.Mapping;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ClientDataVersionAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ClientDataVersionAggregate.ValueObjects;
@@ -144,10 +145,12 @@ public sealed class MappingConfigTests
     public void MapToResponse_OrderInvoiceProductVersionAndClientDataVersion_ShouldMapAllExposedFields()
     {
         // Arrange
+        var productVersionId = Guid.NewGuid();
+
         var order = Order.Rehydrate(
             Guid.NewGuid(),
             Guid.NewGuid(),
-            [new OrderLine(Guid.NewGuid(), 2)],
+            [new OrderLine(productVersionId, 2)],
             new DateTime(2026, 2, 1, 8, 0, 0, DateTimeKind.Utc),
             new DateTime(2026, 2, 2, 9, 0, 0, DateTimeKind.Utc),
             OrderStatus.Paid);
@@ -160,7 +163,7 @@ public sealed class MappingConfigTests
             new DateTime(2026, 2, 3, 10, 0, 0, DateTimeKind.Utc));
 
         var productVersion = ProductVersion.Rehydrate(
-            Guid.NewGuid(),
+            productVersionId,
             true,
             new DateTime(2026, 1, 1, 8, 0, 0, DateTimeKind.Utc),
             null,
@@ -179,16 +182,24 @@ public sealed class MappingConfigTests
             "john@example.com",
             new DateTime(2026, 2, 4, 11, 0, 0, DateTimeKind.Utc));
 
-        // Act
-        var orderResponse = MappingConfig.MapToResponse(order);
-        var invoiceResponse = MappingConfig.MapToResponse(invoice);
         var productVersionResponse = MappingConfig.MapToResponse(productVersion);
         var clientDataVersionResponse = MappingConfig.MapToResponse(clientDataVersion);
 
+        // Act
+        var orderResponse = MappingConfig.MapToResponse(order, [productVersionResponse]);
+        var invoiceResponse = MappingConfig.MapToResponse(invoice);
+
         // Assert
         orderResponse.Status.ShouldBe(OrderStatus.Paid.ToString());
+        orderResponse.TotalAmount.ShouldBe(110m); // 55 * 2
+        orderResponse.TotalCurrency.ShouldBe("USD");
         orderResponse.Lines.Count.ShouldBe(1);
-        orderResponse.Lines.Single().Quantity.ShouldBe(2);
+
+        var line = orderResponse.Lines.Single();
+        line.ProductVersionId.ShouldBe(productVersionId);
+        line.Quantity.ShouldBe(2);
+        line.LineTotalAmount.ShouldBe(110m);
+        line.ProductVersion.Name.ShouldBe("Headphones");
 
         invoiceResponse.OrderId.ShouldBe(order.Id);
         invoiceResponse.StorageUrl.ShouldBe(invoice.StorageUrl);
