@@ -12,8 +12,6 @@ using ECommerceStoreInvoice.Domain.Validation.Abstract;
 
 namespace ECommerceStoreInvoice.Application.Services.Concrete.Orders
 {
-    //Use newest flow with product snapshot
-    //Create order one transaction
     internal sealed class OrderService(
         IOrderRepository orderRepository,
         IProductVersionRepository productVersionRepository,
@@ -48,7 +46,7 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Orders
 
             logger.LogInformation("Successfully completed order creation. OrderId: {OrderId} for ClientId: {ClientId}", createdOrder.Id, clientId);
 
-            return descriptor.MapToResponse(createdOrder);
+            return descriptor.MapToResponse(createdOrder, productVersions);
         }
 
         public async Task<IReadOnlyCollection<OrderResponseDto>> GetOrdersByClientId(Guid clientId)
@@ -61,8 +59,9 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Orders
             descriptor.ThrowValidationExceptionIfClientIdInvalid(validationResult);
 
             var orders = await descriptor.LoadOrders(clientId, orderRepository);
+            var productVersions = await descriptor.LoadProductVersions(orders, productVersionRepository);
 
-            return descriptor.MapToResponse(orders);
+            return descriptor.MapToResponse(orders, productVersions);
         }
 
         public async Task<OrderResponseDto> GetOrderByOrderId(Guid orderId)
@@ -77,9 +76,11 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Orders
             var order = await descriptor.LoadOrder(orderId, orderRepository);
             descriptor.ThrowNotFoundExceptionIfOrderMissing(orderId, order);
 
+            var productVersions = await descriptor.LoadProductVersions(order!, productVersionRepository);
+
             logger.LogInformation("Successfully completed read request for OrderId: {OrderId}", orderId);
 
-            return descriptor.MapToResponse(order!);
+            return descriptor.MapToResponse(order!, productVersions);
         }
 
         public async Task<OrderResponseDto> UpdateOrderStatus(Guid orderId, UpdateOrderStatusRequestDto request)
@@ -100,10 +101,11 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Orders
             descriptor.ChangeOrderStatus(order!, newStatus);
 
             var updatedOrder = await descriptor.SaveOrder(order!, orderRepository);
+            var productVersions = await descriptor.LoadProductVersions(updatedOrder, productVersionRepository);
 
             logger.LogInformation("Successfully completed order status update. OrderId: {OrderId} now in Status: {Status}", updatedOrder.Id, updatedOrder.Status);
 
-            return descriptor.MapToResponse(updatedOrder);
+            return descriptor.MapToResponse(updatedOrder, productVersions);
         }
     }
 }

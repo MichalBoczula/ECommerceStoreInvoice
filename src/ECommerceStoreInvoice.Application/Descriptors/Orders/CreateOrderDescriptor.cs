@@ -105,9 +105,13 @@ namespace ECommerceStoreInvoice.Application.Descriptors.Orders
         }
 
         [FlowStep(order: 12, bpmnId: "MapOrderResponse")]
-        public OrderResponseDto MapToResponse(Order order)
+        public OrderResponseDto MapToResponse(Order order, IReadOnlyCollection<ProductVersion> productVersions)
         {
-            return MappingConfig.MapToResponse(order);
+            var productVersionDtos = productVersions
+                .Select(MappingConfig.MapToResponse)
+                .ToList();
+
+            return MappingConfig.MapToResponse(order, productVersionDtos);
         }
     }
 }

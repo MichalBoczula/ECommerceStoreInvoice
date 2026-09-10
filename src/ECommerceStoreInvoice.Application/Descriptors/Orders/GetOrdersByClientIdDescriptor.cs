@@ -3,6 +3,8 @@ using ECommerceStoreInvoice.Application.Common.ResponsesDto.Orders;
 using ECommerceStoreInvoice.Application.Mapping;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate.Repositories;
+using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate;
+using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate.Repositories;
 using ECommerceStoreInvoice.Domain.Validation.Abstract;
 using ECommerceStoreInvoice.Domain.Validation.Common;
 
@@ -33,10 +35,37 @@ namespace ECommerceStoreInvoice.Application.Descriptors.Orders
             return await orderRepository.GetOrdersByClientId(clientId);
         }
 
-        [FlowStep(order: 4, bpmnId: "MapOrdersResponse")]
-        public IReadOnlyCollection<OrderResponseDto> MapToResponse(IReadOnlyCollection<Order> orders)
+        [FlowStep(order: 4, bpmnId: "LoadProductVersions")]
+        public async Task<IReadOnlyCollection<ProductVersion>> LoadProductVersions(
+            IReadOnlyCollection<Order> orders,
+            IProductVersionRepository productVersionRepository)
         {
-            return orders.Select(MappingConfig.MapToResponse).ToList();
+            var productVersionIds = orders
+                .SelectMany(o => o.Lines)
+                .Select(l => l.ProductVersionId)
+                .Distinct()
+                .ToList();
+
+            if (productVersionIds.Count == 0)
+            {
+                return [];
+            }
+
+            return await productVersionRepository.GetProductVersionsByIds(productVersionIds);
+        }
+
+        [FlowStep(order: 5, bpmnId: "MapOrdersResponse")]
+        public IReadOnlyCollection<OrderResponseDto> MapToResponse(
+            IReadOnlyCollection<Order> orders,
+            IReadOnlyCollection<ProductVersion> productVersions)
+        {
+            var productVersionDtos = productVersions
+                .Select(MappingConfig.MapToResponse)
+                .ToList();
+
+            return orders
+                .Select(order => MappingConfig.MapToResponse(order, productVersionDtos))
+                .ToList();
         }
     }
 }
