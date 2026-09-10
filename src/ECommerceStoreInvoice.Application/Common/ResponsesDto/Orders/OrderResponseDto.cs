@@ -7,6 +7,8 @@
         public required DateTime CreatedAt { get; init; }
         public DateTime? UpdatedAt { get; init; }
         public required string Status { get; init; }
+        public required decimal TotalAmount { get; init; }
+        public required string TotalCurrency { get; init; }
         public required IReadOnlyCollection<OrderLineResponseDto> Lines { get; init; }
     }
 }

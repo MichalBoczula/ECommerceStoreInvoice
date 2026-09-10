@@ -64,8 +64,25 @@ namespace ECommerceStoreInvoice.Application.Mapping
             };
         }
 
-        public static OrderResponseDto MapToResponse(Order order)
+        public static OrderResponseDto MapToResponse(
+            Order order,
+            IReadOnlyCollection<ProductVersionResponseDto> productVersions)
         {
+            var versionsDict = productVersions.ToDictionary(pv => pv.Id);
+
+            var lineDtos = order.Lines.Select(orderLine =>
+            {
+                if (!versionsDict.TryGetValue(orderLine.ProductVersionId, out var version))
+                {
+                    throw new InvalidOperationException($"ProductVersion with id '{orderLine.ProductVersionId}' was not found for Order '{order.Id}'.");
+                }
+
+                return MapToResponse(orderLine, version);
+            }).ToList();
+
+            var totalAmount = lineDtos.Sum(l => l.LineTotalAmount);
+            var totalCurrency = lineDtos.FirstOrDefault()?.ProductVersion.PriceCurrency ?? "USD";
+
             return new OrderResponseDto
             {
                 Id = order.Id,
@@ -73,7 +90,9 @@ namespace ECommerceStoreInvoice.Application.Mapping
                 CreatedAt = order.CreatedAt,
                 UpdatedAt = order.UpdatedAt,
                 Status = order.Status.ToString(),
-                Lines = order.Lines.Select(MapToResponse).ToList()
+                TotalAmount = totalAmount,
+                TotalCurrency = totalCurrency,
+                Lines = lineDtos
             };
         }
 
@@ -147,12 +166,16 @@ namespace ECommerceStoreInvoice.Application.Mapping
             };
         }
 
-        private static OrderLineResponseDto MapToResponse(OrderLine orderLine)
+        public static OrderLineResponseDto MapToResponse(
+            OrderLine orderLine,
+            ProductVersionResponseDto productVersion)
         {
             return new OrderLineResponseDto
             {
                 ProductVersionId = orderLine.ProductVersionId,
-                Quantity = orderLine.Quantity
+                Quantity = orderLine.Quantity,
+                ProductVersion = productVersion,
+                LineTotalAmount = productVersion.PriceAmount * orderLine.Quantity
             };
         }
     }
