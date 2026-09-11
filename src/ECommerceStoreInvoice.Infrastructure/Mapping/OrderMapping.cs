@@ -1,6 +1,6 @@
-﻿using ECommerceStoreInvoice.Domain.AggregatesModel.Common.ValueObjects;
-using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate;
+﻿using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate.ValueObjects;
+using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate;
 using ECommerceStoreInvoice.Infrastructure.Persistence.Orders;
 
 namespace ECommerceStoreInvoice.Infrastructure.Mapping
@@ -34,6 +34,29 @@ namespace ECommerceStoreInvoice.Infrastructure.Mapping
                 orderDocument.CreatedAt,
                 orderDocument.UpdatedAt,
                 orderDocument.Status);
+        }
+
+        internal static (Order Order, IReadOnlyCollection<ProductVersion> ProductVersions) MapToDomain(
+            OrderWithProductsDocument document)
+        {
+            var lines = document.Lines.Select(x =>
+                new OrderLine(
+                    x.ProductVersionId,
+                    x.Quantity)).ToList();
+
+            var order = Order.Rehydrate(
+                document.Id,
+                document.ClientId,
+                lines,
+                document.CreatedAt,
+                document.UpdatedAt,
+                document.Status);
+
+            var productVersions = document.ProductVersions
+                .Select(ProductVersionMapping.MapToDomain)
+                .ToList();
+
+            return (order, productVersions);
         }
 
         private static OrderLineDocument MapLineToDocument(OrderLine orderLine)
