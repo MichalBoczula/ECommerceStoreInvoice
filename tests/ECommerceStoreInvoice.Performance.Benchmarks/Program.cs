@@ -28,6 +28,7 @@ internal class Program
         // 2. Orders (Mapping & Database & Validation)
         BenchmarkRunner.Run<OrderMappingConfigBenchmarks>();
         BenchmarkRunner.Run<OrderMappingBenchmarks>();
+        BenchmarkRunner.Run<OrderWithProductsMappingBenchmarks>();
         BenchmarkRunner.Run<OrderRepositoryBenchmarks>();
         BenchmarkRunner.Run<UpdateOrderValidationPolicyBenchmarks>();
         BenchmarkRunner.Run<OrderValidationPolicyBenchmarks>();
