@@ -6,14 +6,9 @@ using MongoDB.Driver;
 
 namespace ECommerceStoreInvoice.Infrastructure.Repositories
 {
-    internal sealed class ShoppingCartRepository : IShoppingCartRepository
+    internal sealed class ShoppingCartRepository(MongoDbContext context) : IShoppingCartRepository
     {
-        private readonly MongoDbContext _context;
-
-        public ShoppingCartRepository(MongoDbContext context)
-        {
-            _context = context;
-        }
+        private readonly MongoDbContext _context = context;
 
         public async Task<ShoppingCart?> GetShoppingCartByClientId(Guid clientId)
         {
