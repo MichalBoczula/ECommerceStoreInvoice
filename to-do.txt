@@ -1,94 +1,94 @@
 ================================================================================
-TODO: MONGO $LOOKUP PIPELINE REFACTORING PLAN
+TODO: MONGO $LOOKUP PIPELINE REFACTORING PLAN (UPDATED)
 ================================================================================
 
-1. INFRASTRUCTURE LAYER (ECommerceStoreInvoice.Infrastructure)
+[x] 1. INFRASTRUCTURE LAYER (COMPLETED)
 --------------------------------------------------------------------------------
-[ ] Create Read Model Document:
-    - Path: Infrastructure/Persistence/Orders/OrderWithProductsDocument.cs
-    - Properties:
-        - Guid Id
-        - Guid ClientId
-        - DateTime CreatedAt
-        - DateTime? UpdatedAt
-        - OrderStatus Status
-        - List<OrderLineDocument> Lines
-        - List<ProductVersionDocument> ProductVersions (populated by $lookup)
-
-[ ] Extend Repository Contract & Implementation:
-    - File: Domain/AggregatesModel/OrderAggregate/Repositories/IOrderRepository.cs
-        - Task<OrderWithProductsDocument?> GetOrderWithProductVersionsById(Guid orderId);
-        - Task<IReadOnlyCollection<OrderWithProductsDocument>> GetOrdersWithProductVersionsByClientId(Guid clientId);
-    - File: Infrastructure/Repositories/OrderRepository.cs
-        - Build Aggregation Pipeline:
-            * Stage 1: .Match(...) (by Id or ClientId)
-            * Stage 2: .Lookup<OrderDocument, ProductVersionDocument, OrderWithProductsDocument>(
-                         foreignCollection: _context.ProductVersions,
-                         localField: o => o.Lines.Select(l => l.ProductVersionId),
-                         foreignField: pv => pv.Id,
-                         as: res => res.ProductVersions)
-
-[ ] Document & Entity Mapping:
-    - Path: Infrastructure/Mapping/OrderMapping.cs
-    - Add mapper:
-        MapToResponseDto(OrderWithProductsDocument doc) -> OrderResponseDto
-        (Calculates LineTotalAmount and root TotalAmount/TotalCurrency from joined ProductVersions)
-
-[ ] Database Indexes Verification:
-    - Ensure index on ProductVersions._id (default)
-    - Ensure compound or secondary index on Orders.ClientId
+[x] Create Read Model Document:
+    - OrderWithProductsDocument created with [BsonId] and List<ProductVersionDocument>
+[x] Extend Repository Contract & Implementation:
+    - IOrderRepository extended with tuple return signatures:
+        * GetOrderWithProductVersionsById(orderId) -> (Order, IReadOnlyCollection<ProductVersion>)?
+        * GetOrdersWithProductVersionsByClientId(clientId) -> IReadOnlyCollection<(Order, IReadOnlyCollection<ProductVersion>)>
+    - OrderRepository implemented using MongoDB $match + $lookup aggregation pipeline
+[x] Document & Entity Mapping:
+    - OrderMapping updated to map OrderWithProductsDocument into domain tuple
+[x] Unit & Benchmark Infrastructure Tests:
+    - OrderMappingTests & Repository integration tests completed
+    - OrderDocumentBenchmarkDataFactory updated and benchmarks aligned
 
 
-2. APPLICATION LAYER (ECommerceStoreInvoice.Application)
+[ ] 2. APPLICATION LAYER: ORDERS
 --------------------------------------------------------------------------------
-[ ] Descriptors Simplification:
-    - File: Descriptors/Orders/GetOrderByIdDescriptor.cs
-        - Remove 2-step loading (LoadOrder + LoadProductVersions)
-        - Replace with single step: LoadOrderWithProducts(orderId, orderRepository)
-        - Update MapToResponse to consume OrderWithProductsDocument directly
-    - File: Descriptors/Orders/GetOrdersByClientIdDescriptor.cs
-        - Remove LoadOrders + LoadProductVersions
-        - Replace with single step: LoadOrdersWithProducts(clientId, orderRepository)
-    - File: Descriptors/Orders/UpdateOrderStatusDescriptor.cs
-        - Decide between post-save lookup read or in-memory entity reuse
-
+[ ] Descriptors Refactor (switch to single-trip lookup):
+    - GetOrderByIdDescriptor:
+        * Replace LoadOrder + LoadProductVersions with single LoadOrderWithProducts step
+        * Update MapToResponse to consume (Order, IReadOnlyCollection<ProductVersion>)
+    - GetOrdersByClientIdDescriptor:
+        * Replace LoadOrders + LoadProductVersions with single LoadOrdersWithProducts step
+        * Update MapToResponse for collection of tuples
+    - UpdateOrderStatusDescriptor:
+        * Verify whether status update triggers lookup refresh or reuses entities
 [ ] Service Orchestration:
-    - File: Services/Concrete/Orders/OrderService.cs
-        - Streamline GetOrderByOrderId & GetOrdersByClientId flows
-        - Remove redundant IProductVersionRepository / IProductVersionService injections where no longer needed
+    - OrderService:
+        * Update GetOrderByOrderId to use the single descriptor step
+        * Update GetOrdersByClientId to use the single descriptor step
+        * Remove redundant IProductVersionRepository / IProductVersionService calls from read flows
+[ ] Application Unit Tests:
+    - Update GetOrderByIdDescriptorTests, GetOrdersByClientIdDescriptorTests, and OrderServiceTests
 
 
-3. UNIT & INTEGRATION TESTS
+[ ] 3. APPLICATION LAYER: INVOICE SERVICE RE-IMPLEMENTATION
 --------------------------------------------------------------------------------
-[ ] Infrastructure Tests:
-    - File: Infrastructure.UnitTests/Mapping/InfrastructureMappingTests.cs
-        - Test mapping: OrderWithProductsDocument -> OrderResponseDto
-    - File: Infrastructure.UnitTests/Integration/Tests/OrderRepositoryTests.cs
-        - Test GetOrderWithProductVersionsById (returns order + joined versions)
-        - Test GetOrdersWithProductVersionsByClientId (filters by ClientId + joins versions)
-        - Test missing ID scenario (returns null)
+[ ] Invoice Generation Flow & Data Sourcing:
+    - Update InvoiceService / InvoicePdfService to leverage order + product version snapshots:
+        * Option A: Pass the (Order, ProductVersions) tuple directly from the single-query lookup
+        * Option B: Resolve product versions cleanly within InvoicePdfService / descriptor
+    - Re-enable and complete the commented-out PDF generation logic in InvoicePdfService:
+        * BuildInvoiceLines calculation (Quantity * UnitPrice from ProductVersion snapshot)
+        * Currency, subtotal, tax (VAT 23%), and grand total calculations
+        * HTML template replacement (tokens, line rows, client tokens, store tokens)
+        * Playwright browser initialization and PDF rendering pipeline
+    - Clean up logger usage (resolving warning CS9113)
+[ ] Invoice Unit Tests:
+    - Update InvoicePdfServiceTests to verify line mapping, totals, and token replacement with mocked snapshots
+    - Update InvoiceServiceTests for end-to-end invoice creation and PDF storage
 
-[ ] Application Tests:
-    - File: Application.UnitTests/Descriptors/Orders/GetOrderByIdDescriptorTests.cs
-    - File: Application.UnitTests/Descriptors/Orders/GetOrdersByClientIdDescriptorTests.cs
-    - File: Application.UnitTests/Services/Orders/OrderServiceTests.cs
 
-
-4. API CONTROLLERS & ACCEPTANCE TESTS
+[ ] 4. API ENDPOINTS & CONTRACTS
 --------------------------------------------------------------------------------
-[ ] Verify API Endpoints:
-    - GET /api/orders/{orderId}
-    - GET /api/clients/{clientId}/orders
-
-[ ] Acceptance & End-to-End Tests:
-    - File: ECommerceStoreInvoice.Acceptance.Tests
-        - End-to-end checkout -> GET order
-        - Verify returned response includes lines with nested product versions, prices, and totals
+[ ] Verify API Controllers / Minimal Endpoints:
+    - GET /api/orders/{orderId} returns OrderResponseDto with enriched lines & totals
+    - GET /api/clients/{clientId}/orders returns enriched OrderResponseDto collection
+    - POST /api/invoices/generate (or relevant invoice endpoint) produces valid invoice response
+[ ] Re-generate / Verify OpenAPI Specification (Swagger):
+    - Ensure OpenAPI doc reflects updated OrderResponseDto, OrderLineResponseDto, and Invoice DTOs
 
 
-5. HOUSEKEEPING & VULNERABILITIES
+[ ] 5. ACCEPTANCE & END-TO-END TESTS
 --------------------------------------------------------------------------------
-[ ] Resolve warning CS9113: Remove unused 'logger' in InvoicePdfService.cs
+[ ] ECommerceStoreInvoice.Acceptance.Tests:
+    - Run end-to-end checkout flow -> fetch order via API
+    - Generate invoice for created order -> verify invoice PDF generation and download link
+    - Assert snapshot immutability (deactivating/changing catalog item does not alter order/invoice snapshots)
+    - Verify subtotal, line totals, tax, and overall total calculations across both order and invoice APIs
+
+
+[ ] 6. BFF & WEB APP CLIENTS (KIOTA)
+--------------------------------------------------------------------------------
+[ ] Kiota Client Generation in BFF:
+    - Regenerate Kiota HTTP client in BFF from updated OpenAPI spec
+    - Update BFF mapping / endpoints consuming the enriched Order and Invoice responses
+[ ] Web App (Frontend / Consumer):
+    - Update Web app models and UI components to display snapshot details:
+        * Product name, brand, unit price, quantity, line total, and grand total
+        * Invoice download and preview links
+    - Remove any obsolete N+1 client-side product version fetches
+
+
+[ ] 7. HOUSEKEEPING & VULNERABILITIES
+--------------------------------------------------------------------------------
+[ ] Resolve warning CS9113: Unused 'logger' in InvoicePdfService.cs
 [ ] Fix warning CS8625: Null literal to non-nullable reference in ClientDataVersionRepositoryTests.cs
-[ ] Resolve NuGet Security Advisory NU1903 (Update SSH.NET dependency across test projects)
+[ ] Address NuGet Security Advisory NU1903 (Update SSH.NET dependency across test projects)
 ================================================================================
