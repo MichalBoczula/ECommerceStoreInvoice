@@ -58,10 +58,9 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Orders
             var validationResult = await descriptor.ValidateClientId(clientId, guidValidationPolicy);
             descriptor.ThrowValidationExceptionIfClientIdInvalid(validationResult);
 
-            var orders = await descriptor.LoadOrders(clientId, orderRepository);
-            var productVersions = await descriptor.LoadProductVersions(orders, productVersionRepository);
+            var ordersWithProductVersions = await descriptor.LoadOrdersWithProductVersions(clientId, orderRepository);
 
-            return descriptor.MapToResponse(orders, productVersions);
+            return descriptor.MapToResponse(ordersWithProductVersions);
         }
 
         public async Task<OrderResponseDto> GetOrderByOrderId(Guid orderId)
@@ -73,14 +72,12 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Orders
             var validationResult = await descriptor.ValidateOrderId(orderId, guidValidationPolicy);
             descriptor.ThrowValidationExceptionIfOrderIdInvalid(validationResult);
 
-            var order = await descriptor.LoadOrder(orderId, orderRepository);
-            descriptor.ThrowNotFoundExceptionIfOrderMissing(orderId, order);
-
-            var productVersions = await descriptor.LoadProductVersions(order!, productVersionRepository);
+            var orderWithProductVersions = await descriptor.LoadOrderWithProductVersions(orderId, orderRepository);
+            descriptor.ThrowNotFoundExceptionIfOrderMissing(orderId, orderWithProductVersions);
 
             logger.LogInformation("Successfully completed read request for OrderId: {OrderId}", orderId);
 
-            return descriptor.MapToResponse(order!, productVersions);
+            return descriptor.MapToResponse(orderWithProductVersions!.Value);
         }
 
         public async Task<OrderResponseDto> UpdateOrderStatus(Guid orderId, UpdateOrderStatusRequestDto request)
@@ -92,16 +89,17 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Orders
             var validationResult = await descriptor.ValidateOrderId(orderId, guidValidationPolicy);
             descriptor.ThrowValidationExceptionIfOrderIdInvalid(validationResult);
 
-            var order = await descriptor.LoadOrder(orderId, orderRepository);
-            descriptor.ThrowNotFoundExceptionIfOrderMissing(orderId, order);
+            var orderWithProducts = await descriptor.LoadOrderWithProductVersions(orderId, orderRepository);
+            descriptor.ThrowNotFoundExceptionIfOrderMissing(orderId, orderWithProducts);
+
+            var (order, productVersions) = orderWithProducts!.Value;
 
             var newStatus = descriptor.ParseStatus(request.Status);
-            validationResult = await descriptor.ValidateStatusTransition(order!, newStatus, updateOrderValidationPolicy);
+            validationResult = await descriptor.ValidateStatusTransition(order, newStatus, updateOrderValidationPolicy);
             descriptor.ThrowValidationExceptionIfStatusTransitionInvalid(validationResult);
-            descriptor.ChangeOrderStatus(order!, newStatus);
+            descriptor.ChangeOrderStatus(order, newStatus);
 
-            var updatedOrder = await descriptor.SaveOrder(order!, orderRepository);
-            var productVersions = await descriptor.LoadProductVersions(updatedOrder, productVersionRepository);
+            var updatedOrder = await descriptor.SaveOrder(order, orderRepository);
 
             logger.LogInformation("Successfully completed order status update. OrderId: {OrderId} now in Status: {Status}", updatedOrder.Id, updatedOrder.Status);
 

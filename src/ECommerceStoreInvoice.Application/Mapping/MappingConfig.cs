@@ -65,6 +65,20 @@ namespace ECommerceStoreInvoice.Application.Mapping
         }
 
         public static OrderResponseDto MapToResponse(
+            (Order Order, IReadOnlyCollection<ProductVersion> ProductVersions) orderWithProducts)
+        {
+            return MapToResponse(orderWithProducts.Order, orderWithProducts.ProductVersions);
+        }
+
+        public static OrderResponseDto MapToResponse(
+            Order order,
+            IReadOnlyCollection<ProductVersion> productVersions)
+        {
+            var productVersionDtos = productVersions.Select(MapToResponse).ToList();
+            return MapToResponse(order, productVersionDtos);
+        }
+
+        public static OrderResponseDto MapToResponse(
             Order order,
             IReadOnlyCollection<ProductVersionResponseDto> productVersions)
         {

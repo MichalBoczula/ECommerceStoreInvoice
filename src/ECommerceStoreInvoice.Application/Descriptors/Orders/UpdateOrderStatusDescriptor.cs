@@ -5,7 +5,6 @@ using ECommerceStoreInvoice.Domain.AggregatesModel.Common.Enums;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate.Repositories;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate;
-using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate.Repositories;
 using ECommerceStoreInvoice.Domain.Validation.Abstract;
 using ECommerceStoreInvoice.Domain.Validation.Common;
 
@@ -30,16 +29,20 @@ namespace ECommerceStoreInvoice.Application.Descriptors.Orders
             }
         }
 
-        [FlowStep(order: 3, bpmnId: "LoadOrder")]
-        public async Task<Order?> LoadOrder(Guid orderId, IOrderRepository orderRepository)
+        [FlowStep(order: 3, bpmnId: "LoadOrderWithProductVersions")]
+        public async Task<(Order Order, IReadOnlyCollection<ProductVersion> ProductVersions)?> LoadOrderWithProductVersions(
+            Guid orderId,
+            IOrderRepository orderRepository)
         {
-            return await orderRepository.GetOrderByOrderId(orderId);
+            return await orderRepository.GetOrderWithProductVersionsById(orderId);
         }
 
         [FlowStep(order: 4, bpmnId: "IsOrderExists")]
-        public void ThrowNotFoundExceptionIfOrderMissing(Guid orderId, Order? order)
+        public void ThrowNotFoundExceptionIfOrderMissing(
+            Guid orderId,
+            (Order Order, IReadOnlyCollection<ProductVersion> ProductVersions)? orderWithProductVersions)
         {
-            if (order is null)
+            if (orderWithProductVersions is null)
             {
                 throw new ResourceNotFoundException(nameof(Order), orderId, $"Order with id '{orderId}' was not found.");
             }
@@ -94,32 +97,12 @@ namespace ECommerceStoreInvoice.Application.Descriptors.Orders
             return await orderRepository.UpdateOrder(order);
         }
 
-        [FlowStep(order: 10, bpmnId: "LoadProductVersions")]
-        public async Task<IReadOnlyCollection<ProductVersion>> LoadProductVersions(
+        [FlowStep(order: 10, bpmnId: "MapOrderResponse")]
+        public OrderResponseDto MapToResponse(
             Order order,
-            IProductVersionRepository productVersionRepository)
+            IReadOnlyCollection<ProductVersion> productVersions)
         {
-            var productVersionIds = order.Lines
-                .Select(l => l.ProductVersionId)
-                .Distinct()
-                .ToList();
-
-            if (productVersionIds.Count == 0)
-            {
-                return [];
-            }
-
-            return await productVersionRepository.GetProductVersionsByIds(productVersionIds);
-        }
-
-        [FlowStep(order: 11, bpmnId: "MapOrderResponse")]
-        public OrderResponseDto MapToResponse(Order order, IReadOnlyCollection<ProductVersion> productVersions)
-        {
-            var productVersionDtos = productVersions
-                .Select(MappingConfig.MapToResponse)
-                .ToList();
-
-            return MappingConfig.MapToResponse(order, productVersionDtos);
+            return MappingConfig.MapToResponse(order, productVersions);
         }
     }
 }
