@@ -142,6 +142,97 @@ public sealed class MappingConfigTests
     }
 
     [Fact]
+    public void MapToResponse_OrderTuple_ShouldMapOrderAndProductVersions()
+    {
+        // Arrange
+        var productVersion = ProductVersion.Rehydrate(
+            Guid.NewGuid(),
+            true,
+            new DateTime(2026, 1, 1, 8, 0, 0, DateTimeKind.Utc),
+            null,
+            Guid.NewGuid(),
+            new Money(25m, "EUR"),
+            "Keyboard",
+            "Contoso");
+
+        var order = Order.Rehydrate(
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            [new OrderLine(productVersion.Id, 3)],
+            new DateTime(2026, 2, 1, 8, 0, 0, DateTimeKind.Utc),
+            new DateTime(2026, 2, 2, 9, 0, 0, DateTimeKind.Utc),
+            OrderStatus.Paid);
+
+        (Order Order, IReadOnlyCollection<ProductVersion> ProductVersions) orderWithProducts =
+            (order, [productVersion]);
+
+        // Act
+        var result = MappingConfig.MapToResponse(orderWithProducts);
+
+        // Assert
+        result.Id.ShouldBe(order.Id);
+        result.ClientId.ShouldBe(order.ClientId);
+        result.CreatedAt.ShouldBe(order.CreatedAt);
+        result.UpdatedAt.ShouldBe(order.UpdatedAt);
+        result.Status.ShouldBe(OrderStatus.Paid.ToString());
+        result.TotalAmount.ShouldBe(75m);
+        result.TotalCurrency.ShouldBe("EUR");
+
+        var line = result.Lines.ShouldHaveSingleItem();
+        line.ProductVersionId.ShouldBe(productVersion.Id);
+        line.Quantity.ShouldBe(3);
+        line.ProductVersion.Id.ShouldBe(productVersion.Id);
+        line.ProductVersion.Name.ShouldBe("Keyboard");
+    }
+
+    [Fact]
+    public void MapToResponse_OrderAndDomainProductVersions_ShouldMapOrderAndProductVersions()
+    {
+        // Arrange
+        var productVersion = ProductVersion.Rehydrate(
+            Guid.NewGuid(),
+            false,
+            new DateTime(2026, 3, 1, 8, 0, 0, DateTimeKind.Utc),
+            new DateTime(2026, 3, 2, 8, 0, 0, DateTimeKind.Utc),
+            Guid.NewGuid(),
+            new Money(12.50m, "PLN"),
+            "Mouse",
+            "Fabrikam");
+
+        var order = Order.Rehydrate(
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            [new OrderLine(productVersion.Id, 4)],
+            new DateTime(2026, 3, 3, 8, 0, 0, DateTimeKind.Utc),
+            new DateTime(2026, 3, 4, 9, 0, 0, DateTimeKind.Utc),
+            OrderStatus.Created);
+
+        IReadOnlyCollection<ProductVersion> productVersions = [productVersion];
+
+        // Act
+        var result = MappingConfig.MapToResponse(order, productVersions);
+
+        // Assert
+        result.Id.ShouldBe(order.Id);
+        result.ClientId.ShouldBe(order.ClientId);
+        result.Status.ShouldBe(OrderStatus.Created.ToString());
+        result.TotalAmount.ShouldBe(50m);
+        result.TotalCurrency.ShouldBe("PLN");
+
+        var line = result.Lines.ShouldHaveSingleItem();
+        line.ProductVersionId.ShouldBe(productVersion.Id);
+        line.Quantity.ShouldBe(4);
+        line.LineTotalAmount.ShouldBe(50m);
+        line.ProductVersion.Id.ShouldBe(productVersion.Id);
+        line.ProductVersion.IsActive.ShouldBeFalse();
+        line.ProductVersion.DeactivatedAt.ShouldBe(productVersion.DeactivatedAt);
+        line.ProductVersion.PriceAmount.ShouldBe(12.50m);
+        line.ProductVersion.PriceCurrency.ShouldBe("PLN");
+        line.ProductVersion.Name.ShouldBe("Mouse");
+        line.ProductVersion.Brand.ShouldBe("Fabrikam");
+    }
+
+    [Fact]
     public void MapToResponse_OrderInvoiceProductVersionAndClientDataVersion_ShouldMapAllExposedFields()
     {
         // Arrange
