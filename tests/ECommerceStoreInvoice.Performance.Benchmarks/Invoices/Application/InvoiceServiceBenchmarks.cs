@@ -8,10 +8,12 @@ using ECommerceStoreInvoice.Domain.AggregatesModel.InvoiceAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.InvoiceAggregate.Repositories;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate.Repositories;
+using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate;
 using ECommerceStoreInvoice.Domain.Validation.Abstract;
 using ECommerceStoreInvoice.Domain.Validation.Common;
 using ECommerceStoreInvoice.Performance.Benchmarks.Invoices.Application.Common;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Moq;
 
 namespace ECommerceStoreInvoice.Performance.Benchmarks.Invoices.Application
@@ -24,7 +26,7 @@ namespace ECommerceStoreInvoice.Performance.Benchmarks.Invoices.Application
         private IServiceProvider _serviceProvider = null!;
         private IInvoiceService _service = null!;
 
-        // Mocki
+        // Mocks
         private readonly Mock<IInvoiceRepository> _invoiceRepoMock = new();
         private readonly Mock<IOrderRepository> _orderRepoMock = new();
         private readonly Mock<IClientDataVersionService> _clientServiceMock = new();
@@ -38,6 +40,7 @@ namespace ECommerceStoreInvoice.Performance.Benchmarks.Invoices.Application
         private Order _sampleOrder = null!;
         private Invoice _sampleInvoice = null!;
         private ClientDataVersionResponseDto _clientResponse = null!;
+        private IReadOnlyCollection<ProductVersion> _sampleProductVersions = null!;
 
         [GlobalSetup]
         public void Setup()
@@ -46,23 +49,34 @@ namespace ECommerceStoreInvoice.Performance.Benchmarks.Invoices.Application
             _orderId = Guid.NewGuid();
             _invoiceId = Guid.NewGuid();
 
-            _sampleOrder = InvoiceMappingConfigBenchmarkDataFactory.CreateSampleOrder(_clientId, _orderId);
+            var sampleOrderWithProducts = InvoiceMappingConfigBenchmarkDataFactory.CreateSampleOrderWithProducts(_clientId, _orderId);
+            _sampleOrder = sampleOrderWithProducts.Order;
+            _sampleProductVersions = sampleOrderWithProducts.ProductVersions;
+
             _sampleInvoice = InvoiceMappingConfigBenchmarkDataFactory.CreateDomainInvoice();
             _clientResponse = InvoiceMappingConfigBenchmarkDataFactory.CreateClientResponse(_clientId);
 
             _guidPolicyMock.Setup(x => x.Validate(It.IsAny<Guid>())).ReturnsAsync(new ValidationResult());
             _statusPolicyMock.Setup(x => x.Validate(It.IsAny<InvoiceOrderStatusValidationContext>())).ReturnsAsync(new ValidationResult());
 
-            _orderRepoMock.Setup(x => x.GetOrderByOrderId(_orderId)).ReturnsAsync(_sampleOrder);
-            _invoiceRepoMock.Setup(x => x.GetInvoiceByOrderId(_orderId)).ReturnsAsync((Invoice?)null); // Brak faktury przy Create
+            _orderRepoMock
+                .Setup(x => x.GetOrderWithProductVersionsById(_orderId))
+                .ReturnsAsync((_sampleOrder, _sampleProductVersions));
+
+            _invoiceRepoMock.Setup(x => x.GetInvoiceByOrderId(_orderId)).ReturnsAsync((Invoice?)null);
             _invoiceRepoMock.Setup(x => x.GetInvoiceById(_invoiceId)).ReturnsAsync(_sampleInvoice);
             _invoiceRepoMock.Setup(x => x.CreateInvoice(It.IsAny<Invoice>())).ReturnsAsync(_sampleInvoice);
 
             _clientServiceMock.Setup(x => x.GetByClientId(_clientId)).ReturnsAsync(_clientResponse);
-            _pdfServiceMock.Setup(x => x.GenerateInvoicePdf(It.IsAny<Order>(), It.IsAny<ClientDataVersionResponseDto>()))
+            _pdfServiceMock
+                .Setup(x => x.GenerateInvoicePdf(
+                    It.IsAny<Order>(),
+                    It.IsAny<IReadOnlyCollection<ProductVersion>>(),
+                    It.IsAny<ClientDataVersionResponseDto?>()))
                 .ReturnsAsync("https://storage.example/invoices/42.pdf");
 
             var services = new ServiceCollection();
+            services.AddLogging();
             services.AddScoped<IInvoiceService, InvoiceService>();
 
             services.AddSingleton(_invoiceRepoMock.Object);

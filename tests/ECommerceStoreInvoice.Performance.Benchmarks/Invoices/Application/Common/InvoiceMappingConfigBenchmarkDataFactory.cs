@@ -4,6 +4,7 @@ using ECommerceStoreInvoice.Domain.AggregatesModel.Common.ValueObjects;
 using ECommerceStoreInvoice.Domain.AggregatesModel.InvoiceAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate.ValueObjects;
+using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate;
 
 namespace ECommerceStoreInvoice.Performance.Benchmarks.Invoices.Application.Common
 {
@@ -21,16 +22,31 @@ namespace ECommerceStoreInvoice.Performance.Benchmarks.Invoices.Application.Comm
                 BenchmarkDate);
         }
 
-        public static Order CreateSampleOrder(Guid clientId, Guid orderId)
+        public static (Order Order, IReadOnlyCollection<ProductVersion> ProductVersions) CreateSampleOrderWithProducts(Guid clientId, Guid orderId)
         {
-            return Order.Rehydrate(
+            var productVersionId = Guid.NewGuid();
+            var productVersion = ProductVersion.Rehydrate(
+                productVersionId,
+                isActive: true,
+                createdAt: BenchmarkDate.AddDays(-1),
+                deactivatedAt: null,
+                productId: Guid.NewGuid(),
+                price: new Money(150.00m, "PLN"),
+                name: "Mechanical Keyboard",
+                brand: "LogiTech");
+
+            var order = Order.Rehydrate(
                 orderId,
                 clientId,
-                new List<OrderLine>(),
+                [new OrderLine(productVersionId, 2)],
                 BenchmarkDate,
                 BenchmarkDate,
                 OrderStatus.Paid);
+
+            return (order, [productVersion]);
         }
+
+        public static Order CreateSampleOrder(Guid clientId, Guid orderId) => CreateSampleOrderWithProducts(clientId, orderId).Order;
 
         public static ClientDataVersionResponseDto CreateClientResponse(Guid clientId)
         {

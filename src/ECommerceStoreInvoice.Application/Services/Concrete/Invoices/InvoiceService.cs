@@ -17,7 +17,7 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Invoices
         IInvoicePdfService invoicePdfService,
         IValidationPolicy<Guid> guidValidationPolicy,
         IValidationPolicy<InvoiceOrderStatusValidationContext> createInvoiceValidationPolicy,
-        ILogger<IInvoiceService> logger)
+        ILogger<InvoiceService> logger)
         : IInvoiceService
     {
         public async Task<InvoiceResponseDto> CreateInvoiceForOrder(Guid clientId, Guid orderId)
@@ -27,27 +27,30 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Invoices
             var descriptor = new CreateInvoiceForOrderDescriptor();
 
             var validationResult = await descriptor.ValidateClientId(clientId, guidValidationPolicy);
-            descriptor.ThrowValidationExceptionIfClientIdInvalid(validationResult);
+            descriptor.ThrowValidationExceptionIfIdInvalid(validationResult);
 
             validationResult = await descriptor.ValidateOrderId(orderId, guidValidationPolicy);
-            descriptor.ThrowValidationExceptionIfOrderIdInvalid(validationResult);
+            descriptor.ThrowValidationExceptionIfIdInvalid(validationResult);
 
-            var order = await descriptor.LoadOrder(orderId, orderRepository);
-            if (order is not null && order.ClientId != clientId)
+            var orderWithProductVersions = await descriptor.LoadOrderWithProductVersions(orderId, orderRepository);
+
+            if (orderWithProductVersions is not null && orderWithProductVersions.Value.Order.ClientId != clientId)
             {
-                order = null;
+                orderWithProductVersions = null;
             }
 
-            descriptor.ThrowNotFoundExceptionIfOrderMissing(orderId, order);
+            descriptor.ThrowNotFoundExceptionIfOrderMissing(orderId, orderWithProductVersions);
+
+            var (order, productVersions) = orderWithProductVersions!.Value;
 
             var existingInvoice = await descriptor.LoadInvoiceByOrderId(orderId, invoiceRepository);
             descriptor.ThrowAlreadyExistsExceptionIfInvoiceAlreadyExists(orderId, existingInvoice);
 
-            validationResult = await descriptor.ValidateOrderStatus(order!, createInvoiceValidationPolicy);
+            validationResult = await descriptor.ValidateOrderStatus(order, createInvoiceValidationPolicy);
             descriptor.ThrowValidationExceptionIfOrderStatusInvalid(validationResult);
 
             var clientDataVersion = await clientDataVersionService.GetByClientId(clientId);
-            var storageUrl = await descriptor.GenerateInvoicePdf(order!, clientDataVersion, invoicePdfService);
+            var storageUrl = await descriptor.GenerateInvoicePdf(order, productVersions, clientDataVersion, invoicePdfService);
 
             var invoice = descriptor.CreateInvoice(orderId, clientDataVersion!.Id, storageUrl);
             var createdInvoice = await descriptor.SaveInvoice(invoice, invoiceRepository);

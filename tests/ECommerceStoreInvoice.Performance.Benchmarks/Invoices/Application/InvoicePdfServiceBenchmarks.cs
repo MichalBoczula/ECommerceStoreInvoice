@@ -1,96 +1,115 @@
-﻿// using BenchmarkDotNet.Attributes;
-// using BenchmarkDotNet.Order;
-// using ECommerceStoreInvoice.Application.Common.ResponsesDto.ClientDataVersions;
-// using ECommerceStoreInvoice.Application.Services.Abstract.Invoices;
-// using ECommerceStoreInvoice.Application.Services.Concrete.Invoices;
-// using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate;
-// using ECommerceStoreInvoice.Performance.Benchmarks.Invoices.Application.Common;
-// using Microsoft.Extensions.DependencyInjection;
-// using System.Diagnostics;
+﻿using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Order;
+using ECommerceStoreInvoice.Application.Common.ResponsesDto.ClientDataVersions;
+using ECommerceStoreInvoice.Application.Services.Abstract.Invoices;
+using ECommerceStoreInvoice.Application.Services.Concrete.Invoices;
+using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate;
+using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate;
+using ECommerceStoreInvoice.Performance.Benchmarks.Invoices.Application.Common;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using System.Diagnostics;
 
-// namespace ECommerceStoreInvoice.Performance.Benchmarks.Invoices.Application
-// {
-//     [MemoryDiagnoser]
-//     [Orderer(SummaryOrderPolicy.FastestToSlowest)]
-//     public class InvoicePdfServiceBenchmarks
-//     {
-//         private IServiceProvider _serviceProvider = null!;
-//         private IInvoicePdfService _service = null!;
-//         private Order _order = null!;
-//         private ClientDataVersionResponseDto _client = null!;
-//         private static bool _playwrightInstalled;
-//         private static readonly SemaphoreSlim PlaywrightInstallSemaphore = new(1, 1);
+namespace ECommerceStoreInvoice.Performance.Benchmarks.Invoices.Application
+{
+    [MemoryDiagnoser]
+    [Orderer(SummaryOrderPolicy.FastestToSlowest)]
+    public class InvoicePdfServiceBenchmarks
+    {
+        private IServiceProvider _serviceProvider = null!;
+        private IInvoicePdfService _service = null!;
+        private Order _order = null!;
+        private IReadOnlyCollection<ProductVersion> _productVersions = null!;
+        private ClientDataVersionResponseDto _client = null!;
+        private static bool _playwrightInstalled;
+        private static readonly SemaphoreSlim PlaywrightInstallSemaphore = new(1, 1);
 
-//         [Params(1, 10)] // 100 może zająć wieczność przy uruchamianiu browsera per test
-//         public int LinesCount { get; set; }
+        [Params(1, 10)]
+        public int LinesCount { get; set; }
 
-//         [GlobalSetup]
-//         public async Task Setup()
-//         {
-//             await EnsurePlaywrightInstalledAsync();
-//             SetupTemplates();
+        [GlobalSetup]
+        public async Task Setup()
+        {
+            await EnsurePlaywrightInstalledAsync();
+            SetupTemplates();
 
-//             var services = new ServiceCollection();
-//             services.AddScoped<IInvoicePdfService, InvoicePdfService>();
-//             _serviceProvider = services.BuildServiceProvider();
-//             _service = _serviceProvider.GetRequiredService<IInvoicePdfService>();
+            var services = new ServiceCollection();
+            services.AddLogging();
+            services.AddScoped<IInvoicePdfService, InvoicePdfService>();
+            _serviceProvider = services.BuildServiceProvider();
+            _service = _serviceProvider.GetRequiredService<IInvoicePdfService>();
 
-//             _order = InvoicePdfServiceBenchmarkDataFactory.CreateOrder(LinesCount);
-//             _client = InvoicePdfServiceBenchmarkDataFactory.CreateClient();
-//         }
+            var orderWithProducts = InvoicePdfServiceBenchmarkDataFactory.CreateOrderWithProducts(LinesCount);
+            _order = orderWithProducts.Order;
+            _productVersions = orderWithProducts.ProductVersions;
+            _client = InvoicePdfServiceBenchmarkDataFactory.CreateClient();
+        }
 
-//         [Benchmark]
-//         public async Task GenerateInvoicePdf_FullFlow()
-//         {
-//             await _service.GenerateInvoicePdf(_order, _client);
-//         }
+        [Benchmark]
+        public async Task GenerateInvoicePdf_FullFlow()
+        {
+            await _service.GenerateInvoicePdf(_order, _productVersions, _client);
+        }
 
-//         private void SetupTemplates()
-//         {
-//             var templateDir = Path.Combine(AppContext.BaseDirectory, "Templates");
-//             Directory.CreateDirectory(templateDir);
+        [GlobalCleanup]
+        public async Task Cleanup()
+        {
+            if (_service is IAsyncDisposable asyncDisposable)
+            {
+                await asyncDisposable.DisposeAsync();
+            }
+            else if (_serviceProvider is IDisposable disposable)
+            {
+                disposable.Dispose();
+            }
+        }
 
-//             var mainTemplate = @"<html><body><h1>Invoice {{InvoiceNumber}}</h1><tbody></tbody></body></html>";
-//             var lineTemplate = @"<tr><td>{{Line.Name}}</td><td>{{Line.TotalAmount}}</td></tr>";
+        private void SetupTemplates()
+        {
+            var templateDir = Path.Combine(AppContext.BaseDirectory, "Templates");
+            Directory.CreateDirectory(templateDir);
 
-//             File.WriteAllText(Path.Combine(templateDir, "InvoiceTemplate.html"), mainTemplate);
-//             File.WriteAllText(Path.Combine(templateDir, "InvoiceLineTemplate.html"), lineTemplate);
-//         }
+            var mainTemplate = @"<html><body><h1>Invoice {{InvoiceNumber}}</h1><tbody></tbody></body></html>";
+            var lineTemplate = @"<tr><td>{{Line.Name}}</td><td>{{Line.TotalAmount}}</td></tr>";
 
-//         private static async Task EnsurePlaywrightInstalledAsync()
-//         {
-//             if (_playwrightInstalled) return;
-//             await PlaywrightInstallSemaphore.WaitAsync();
-//             try
-//             {
-//                 if (_playwrightInstalled) return;
-//                 var scriptPath = FindPlaywrightScriptPath();
-//                 var startInfo = new ProcessStartInfo
-//                 {
-//                     FileName = "pwsh",
-//                     Arguments = $"\"{scriptPath}\" install",
-//                     RedirectStandardOutput = true,
-//                     RedirectStandardError = true,
-//                     UseShellExecute = false,
-//                     CreateNoWindow = true
-//                 };
-//                 using var process = Process.Start(startInfo) ?? throw new Exception("Failed to start PW install");
-//                 await process.WaitForExitAsync();
-//                 _playwrightInstalled = true;
-//             }
-//             finally { PlaywrightInstallSemaphore.Release(); }
-//         }
+            File.WriteAllText(Path.Combine(templateDir, "InvoiceTemplate.html"), mainTemplate);
+            File.WriteAllText(Path.Combine(templateDir, "InvoiceLineTemplate.html"), lineTemplate);
+        }
 
-//         private static string FindPlaywrightScriptPath()
-//         {
-//             var directory = new DirectoryInfo(AppContext.BaseDirectory);
-//             while (directory is not null)
-//             {
-//                 var path = Path.Combine(directory.FullName, "playwright.ps1");
-//                 if (File.Exists(path)) return path;
-//                 directory = directory.Parent;
-//             }
-//             throw new FileNotFoundException("Could not find playwright.ps1");
-//         }
-//     }
-// }
+        private static async Task EnsurePlaywrightInstalledAsync()
+        {
+            if (_playwrightInstalled) return;
+            await PlaywrightInstallSemaphore.WaitAsync();
+            try
+            {
+                if (_playwrightInstalled) return;
+                var scriptPath = FindPlaywrightScriptPath();
+                var startInfo = new ProcessStartInfo
+                {
+                    FileName = "pwsh",
+                    Arguments = $"\"{scriptPath}\" install",
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+                using var process = Process.Start(startInfo) ?? throw new Exception("Failed to start PW install");
+                await process.WaitForExitAsync();
+                _playwrightInstalled = true;
+            }
+            finally { PlaywrightInstallSemaphore.Release(); }
+        }
+
+        private static string FindPlaywrightScriptPath()
+        {
+            var directory = new DirectoryInfo(AppContext.BaseDirectory);
+            while (directory is not null)
+            {
+                var path = Path.Combine(directory.FullName, "playwright.ps1");
+                if (File.Exists(path)) return path;
+                directory = directory.Parent;
+            }
+            throw new FileNotFoundException("Could not find playwright.ps1");
+        }
+    }
+}
