@@ -25,7 +25,6 @@ namespace ECommerceStoreInvoice.Performance.Benchmarks.Orders.Application
         private IServiceProvider _serviceProvider = null!;
         private IOrderService _service = null!;
 
-        // Mocki dla wszystkich zależności
         private readonly Mock<IOrderRepository> _orderRepoMock = new();
         private readonly Mock<IProductVersionRepository> _productRepoMock = new();
         private readonly Mock<IShoppingCartRepository> _cartRepoMock = new();
