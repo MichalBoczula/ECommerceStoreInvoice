@@ -13,6 +13,7 @@ using ECommerceStoreInvoice.Performance.Benchmarks.ShoppingCarts.Application;
 using ECommerceStoreInvoice.Performance.Benchmarks.ShoppingCarts.Infrastructures;
 using ECommerceStoreInvoice.Performance.Benchmarks.ShoppingCarts.Domain;
 using ECommerceStoreInvoice.Performance.Benchmarks.Invoices.Application;
+using ECommerceStoreInvoice.Performance.Benchmarks.Invoices.Domain;
 
 namespace ECommerceStoreInvoice.Performance.Benchmarks;
 
@@ -39,7 +40,7 @@ internal class Program
         BenchmarkRunner.Run<InvoiceMappingConfigBenchmarks>();
         BenchmarkRunner.Run<InvoiceMappingBenchmarks>();
         BenchmarkRunner.Run<InvoiceRepositoryBenchmarks>();
-        // BenchmarkRunner.Run<InvoiceValidationPolicyBenchmarks>();
+        BenchmarkRunner.Run<InvoiceValidationPolicyBenchmarks>();
 
         // 4. ClientDataVersions (Mapping & Database & Validation)
         BenchmarkRunner.Run<ClientDataVersionMappingConfigBenchmarks>();
