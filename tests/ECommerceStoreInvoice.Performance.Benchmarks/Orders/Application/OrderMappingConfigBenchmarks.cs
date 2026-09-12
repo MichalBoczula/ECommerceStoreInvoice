@@ -64,6 +64,12 @@ public class OrderMappingConfigBenchmarks
     }
 
     [Benchmark]
+    public object MapOrderWithProductVersionsToResponse()
+    {
+        return MappingConfig.MapToResponse((_order, _productVersions));
+    }
+
+    [Benchmark]
     public object MapCartAndProductVersionsToDomain()
     {
         return MappingConfig.MapToDomain(_shoppingCart, _productVersions);
