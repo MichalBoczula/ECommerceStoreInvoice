@@ -4,91 +4,69 @@ TODO: MONGO $LOOKUP PIPELINE REFACTORING PLAN (UPDATED)
 
 [x] 1. INFRASTRUCTURE LAYER (COMPLETED)
 --------------------------------------------------------------------------------
-[x] Create Read Model Document:
-    - OrderWithProductsDocument created with [BsonId] and List<ProductVersionDocument>
-[x] Extend Repository Contract & Implementation:
-    - IOrderRepository extended with tuple return signatures:
-        * GetOrderWithProductVersionsById(orderId) -> (Order, IReadOnlyCollection<ProductVersion>)?
-        * GetOrdersWithProductVersionsByClientId(clientId) -> IReadOnlyCollection<(Order, IReadOnlyCollection<ProductVersion>)>
-    - OrderRepository implemented using MongoDB $match + $lookup aggregation pipeline
-[x] Document & Entity Mapping:
-    - OrderMapping updated to map OrderWithProductsDocument into domain tuple
-[x] Unit & Benchmark Infrastructure Tests:
-    - OrderMappingTests & Repository integration tests completed
-    - OrderDocumentBenchmarkDataFactory updated and benchmarks aligned
+[x] Create Read Model Document (OrderWithProductsDocument)
+[x] Extend Repository Contract & MongoDB $lookup implementation in OrderRepository
+[x] Document & Entity Mapping for domain tuples
+[x] Unit & Benchmark Infrastructure Tests (OrderMappingTests, repos, data factories)
 
 
-[ ] 2. APPLICATION LAYER: ORDERS
+[x] 2. APPLICATION LAYER: ORDERS & INVOICES (COMPLETED)
 --------------------------------------------------------------------------------
-[ ] Descriptors Refactor (switch to single-trip lookup):
-    - GetOrderByIdDescriptor:
-        * Replace LoadOrder + LoadProductVersions with single LoadOrderWithProducts step
-        * Update MapToResponse to consume (Order, IReadOnlyCollection<ProductVersion>)
-    - GetOrdersByClientIdDescriptor:
-        * Replace LoadOrders + LoadProductVersions with single LoadOrdersWithProducts step
-        * Update MapToResponse for collection of tuples
-    - UpdateOrderStatusDescriptor:
-        * Verify whether status update triggers lookup refresh or reuses entities
-[ ] Service Orchestration:
-    - OrderService:
-        * Update GetOrderByOrderId to use the single descriptor step
-        * Update GetOrdersByClientId to use the single descriptor step
-        * Remove redundant IProductVersionRepository / IProductVersionService calls from read flows
-[ ] Application Unit Tests:
-    - Update GetOrderByIdDescriptorTests, GetOrdersByClientIdDescriptorTests, and OrderServiceTests
+[x] Descriptors Refactor (GetOrderById, GetOrdersByClientId, UpdateOrderStatus)[cite: 4, 5, 6]
+[x] Service Orchestration (OrderService, InvoiceService)[cite: 2, 10]
+[x] Invoice Service & Playwright PDF Generation Re-implementation[cite: 9]
+[x] Benchmarks Layer Refactor (Order & Invoice Benchmarks + DataFactories)[cite: 18, 19, 20, 21, 22, 23, 24]
 
 
-[ ] 3. APPLICATION LAYER: INVOICE SERVICE RE-IMPLEMENTATION
+[ ] 3. INVOICE: FULL TESTING (UNIT + ACCEPTANCE)
 --------------------------------------------------------------------------------
-[ ] Invoice Generation Flow & Data Sourcing:
-    - Update InvoiceService / InvoicePdfService to leverage order + product version snapshots:
-        * Option A: Pass the (Order, ProductVersions) tuple directly from the single-query lookup
-        * Option B: Resolve product versions cleanly within InvoicePdfService / descriptor
-    - Re-enable and complete the commented-out PDF generation logic in InvoicePdfService:
-        * BuildInvoiceLines calculation (Quantity * UnitPrice from ProductVersion snapshot)
-        * Currency, subtotal, tax (VAT 23%), and grand total calculations
-        * HTML template replacement (tokens, line rows, client tokens, store tokens)
-        * Playwright browser initialization and PDF rendering pipeline
-    - Clean up logger usage (resolving warning CS9113)
-[ ] Invoice Unit Tests:
-    - Update InvoicePdfServiceTests to verify line mapping, totals, and token replacement with mocked snapshots
-    - Update InvoiceServiceTests for end-to-end invoice creation and PDF storage
+[ ] Descriptors & Service Unit Tests:
+    - CreateInvoiceForOrderDescriptorTests (validate single-trip lookup tuple, missing order, existing invoice)
+    - InvoicePdfServiceTests (HTML template token replacement, line calculation, Playwright execution)[cite: 9]
+    - InvoiceServiceTests (mocked lookup and PDF flow)
+[ ] Invoice Acceptance & End-to-End Tests:
+    - POST /api/invoices/generate (or relevant endpoint) for a paid order
+    - Assert invoice persistence, client snapshot association, and generated PDF storage URL
+    - Verify tax (VAT 23%), subtotal, and grand total calculations against order lines[cite: 9]
+    - Verify immutability: changing client or product catalog does not alter invoice output
 
 
-[ ] 4. API ENDPOINTS & CONTRACTS
+[ ] 4. ACCEPTANCE TESTING: ORDERS & SHOPPING CART
+--------------------------------------------------------------------------------
+[ ] Orders Acceptance Tests:
+    - Run and verify complete order lifecycle acceptance tests with $lookup response payload
+[ ] Shopping Cart Acceptance Tests:
+    - Run and verify cart addition, updates, checkout transition, and cleanup
+
+
+[ ] 5. API ENDPOINTS & IMAGE BUILD
 --------------------------------------------------------------------------------
 [ ] Verify API Controllers / Minimal Endpoints:
-    - GET /api/orders/{orderId} returns OrderResponseDto with enriched lines & totals
-    - GET /api/clients/{clientId}/orders returns enriched OrderResponseDto collection
-    - POST /api/invoices/generate (or relevant invoice endpoint) produces valid invoice response
-[ ] Re-generate / Verify OpenAPI Specification (Swagger):
-    - Ensure OpenAPI doc reflects updated OrderResponseDto, OrderLineResponseDto, and Invoice DTOs
+    - Check Orders, Invoices, and ShoppingCart endpoints against updated response contracts
+[ ] Re-generate OpenAPI Specification (Swagger)
+[ ] Build and verify new Docker image containing updated API and Playwright runtime dependencies[cite: 9]
 
 
-[ ] 5. ACCEPTANCE & END-TO-END TESTS
+[ ] 6. BFF (BACKEND-FOR-FRONTEND) & KIOTA CLIENT
 --------------------------------------------------------------------------------
-[ ] ECommerceStoreInvoice.Acceptance.Tests:
-    - Run end-to-end checkout flow -> fetch order via API
-    - Generate invoice for created order -> verify invoice PDF generation and download link
-    - Assert snapshot immutability (deactivating/changing catalog item does not alter order/invoice snapshots)
-    - Verify subtotal, line totals, tax, and overall total calculations across both order and invoice APIs
+[ ] Kiota Client Generation:
+    - Regenerate Kiota HTTP client in BFF using updated OpenAPI specification
+[ ] BFF Layer Implementation:
+    - Update BFF controllers/endpoints consuming new Order and Invoice contracts
+    - Map enriched OrderLine / ProductVersion payloads to frontend view models
 
 
-[ ] 6. BFF & WEB APP CLIENTS (KIOTA)
+[ ] 7. WEB APP (FRONTEND)
 --------------------------------------------------------------------------------
-[ ] Kiota Client Generation in BFF:
-    - Regenerate Kiota HTTP client in BFF from updated OpenAPI spec
-    - Update BFF mapping / endpoints consuming the enriched Order and Invoice responses
-[ ] Web App (Frontend / Consumer):
-    - Update Web app models and UI components to display snapshot details:
-        * Product name, brand, unit price, quantity, line total, and grand total
-        * Invoice download and preview links
-    - Remove any obsolete N+1 client-side product version fetches
+[ ] Frontend Implementation:
+    - Update UI models and components for enriched order summaries (unit prices, brand, grand total)
+    - Add/update invoice preview and download links
+    - Remove obsolete client-side N+1 version fetch calls
 
 
-[ ] 7. HOUSEKEEPING & VULNERABILITIES
+[ ] 8. HOUSEKEEPING & VULNERABILITIES
 --------------------------------------------------------------------------------
-[ ] Resolve warning CS9113: Unused 'logger' in InvoicePdfService.cs
-[ ] Fix warning CS8625: Null literal to non-nullable reference in ClientDataVersionRepositoryTests.cs
-[ ] Address NuGet Security Advisory NU1903 (Update SSH.NET dependency across test projects)
+[ ] Delete obsolete snapshot files: OrderLineSnapshot.cs, OrderSnapshot.cs, ClientSnapshot.cs[cite: 12, 13, 14]
+[ ] Fix warning CS8625 in ClientDataVersionRepositoryTests.cs
+[ ] Address NuGet Security Advisory NU1903 (SSH.NET update)
 ================================================================================
