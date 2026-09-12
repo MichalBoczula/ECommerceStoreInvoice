@@ -381,6 +381,7 @@ public sealed class OrderServiceTests
         var clientId = Guid.NewGuid();
         var guidValidationResult = new ValidationResult();
         var order = BuildOrder(orderId, clientId, OrderStatus.Paid);
+        var productVersions = BuildProductVersions(order);
 
         var orderRepositoryMock = new Mock<IOrderRepository>(MockBehavior.Strict);
         var productVersionRepositoryMock = new Mock<IProductVersionRepository>(MockBehavior.Strict);
@@ -398,8 +399,8 @@ public sealed class OrderServiceTests
 
         orderRepositoryMock
             .InSequence(sequence)
-            .Setup(repo => repo.GetOrderByOrderId(orderId))
-            .ReturnsAsync(order);
+            .Setup(repo => repo.GetOrderWithProductVersionsById(orderId))
+            .ReturnsAsync((order, productVersions));
 
         var sut = new OrderService(
             orderRepositoryMock.Object,
@@ -419,7 +420,7 @@ public sealed class OrderServiceTests
         response.Status.ShouldBe(OrderStatus.Paid.ToString());
 
         guidValidationPolicyMock.Verify(policy => policy.Validate(orderId), Times.Once);
-        orderRepositoryMock.Verify(repo => repo.GetOrderByOrderId(orderId), Times.Once);
+        orderRepositoryMock.Verify(repo => repo.GetOrderWithProductVersionsById(orderId), Times.Once);
         updateOrderValidationPolicyMock.Verify(policy => policy.Validate(It.IsAny<(Order order, OrderStatus newStatus)>()), Times.Never);
     }
 
@@ -446,8 +447,8 @@ public sealed class OrderServiceTests
 
         orderRepositoryMock
             .InSequence(sequence)
-            .Setup(repo => repo.GetOrderByOrderId(orderId))
-            .ReturnsAsync((Order?)null);
+            .Setup(repo => repo.GetOrderWithProductVersionsById(orderId))
+            .ReturnsAsync(((Order Order, IReadOnlyCollection<ProductVersion> ProductVersions)?)null);
 
         var sut = new OrderService(
             orderRepositoryMock.Object,
@@ -461,7 +462,7 @@ public sealed class OrderServiceTests
         // Act / Assert
         await Should.ThrowAsync<ResourceNotFoundException>(() => sut.GetOrderByOrderId(orderId));
 
-        orderRepositoryMock.Verify(repo => repo.GetOrderByOrderId(orderId), Times.Once);
+        orderRepositoryMock.Verify(repo => repo.GetOrderWithProductVersionsById(orderId), Times.Once);
     }
 
     [Fact]
@@ -474,6 +475,7 @@ public sealed class OrderServiceTests
         var guidValidationResult = new ValidationResult();
         var statusTransitionValidationResult = new ValidationResult();
         var existingOrder = BuildOrder(orderId, Guid.NewGuid(), OrderStatus.Created);
+        var productVersions = BuildProductVersions(existingOrder);
 
         var orderRepositoryMock = new Mock<IOrderRepository>(MockBehavior.Strict);
         var productVersionRepositoryMock = new Mock<IProductVersionRepository>(MockBehavior.Strict);
@@ -491,8 +493,8 @@ public sealed class OrderServiceTests
 
         orderRepositoryMock
             .InSequence(sequence)
-            .Setup(repo => repo.GetOrderByOrderId(orderId))
-            .ReturnsAsync(existingOrder);
+            .Setup(repo => repo.GetOrderWithProductVersionsById(orderId))
+            .ReturnsAsync((existingOrder, productVersions));
 
         updateOrderValidationPolicyMock
             .InSequence(sequence)
@@ -522,13 +524,15 @@ public sealed class OrderServiceTests
 
         // Assert
         guidValidationPolicyMock.Verify(policy => policy.Validate(orderId), Times.Once);
-        orderRepositoryMock.Verify(repo => repo.GetOrderByOrderId(orderId), Times.Once);
+        orderRepositoryMock.Verify(repo => repo.GetOrderWithProductVersionsById(orderId), Times.Once);
         updateOrderValidationPolicyMock.Verify(policy => policy.Validate(It.IsAny<(Order order, OrderStatus newStatus)>()), Times.Once);
         orderRepositoryMock.Verify(repo => repo.UpdateOrder(It.IsAny<Order>()), Times.Once);
         orderValidationPolicyMock.Verify(policy => policy.Validate(It.IsAny<Order>()), Times.Never);
 
         response.Id.ShouldBe(orderId);
         response.Status.ShouldBe(OrderStatus.Paid.ToString());
+        response.Lines.Count.ShouldBe(existingOrder.Lines.Count);
+        response.Lines.Single().ProductVersion.Id.ShouldBe(productVersions.Single().Id);
     }
 
     [Fact]
@@ -538,6 +542,7 @@ public sealed class OrderServiceTests
         var orderId = Guid.NewGuid();
         var request = new UpdateOrderStatusRequestDto { Status = "Cancelled" };
         var existingOrder = BuildOrder(orderId, Guid.NewGuid(), OrderStatus.Paid);
+        var productVersions = BuildProductVersions(existingOrder);
 
         var guidValidationResult = new ValidationResult();
         var invalidTransitionResult = new ValidationResult();
@@ -564,8 +569,8 @@ public sealed class OrderServiceTests
 
         orderRepositoryMock
             .InSequence(sequence)
-            .Setup(repo => repo.GetOrderByOrderId(orderId))
-            .ReturnsAsync(existingOrder);
+            .Setup(repo => repo.GetOrderWithProductVersionsById(orderId))
+            .ReturnsAsync((existingOrder, productVersions));
 
         updateOrderValidationPolicyMock
             .InSequence(sequence)
@@ -596,6 +601,7 @@ public sealed class OrderServiceTests
         var orderId = Guid.NewGuid();
         var request = new UpdateOrderStatusRequestDto { Status = "WrongStatus" };
         var existingOrder = BuildOrder(orderId, Guid.NewGuid(), OrderStatus.Created);
+        var productVersions = BuildProductVersions(existingOrder);
         var guidValidationResult = new ValidationResult();
 
         var orderRepositoryMock = new Mock<IOrderRepository>(MockBehavior.Strict);
@@ -614,8 +620,8 @@ public sealed class OrderServiceTests
 
         orderRepositoryMock
             .InSequence(sequence)
-            .Setup(repo => repo.GetOrderByOrderId(orderId))
-            .ReturnsAsync(existingOrder);
+            .Setup(repo => repo.GetOrderWithProductVersionsById(orderId))
+            .ReturnsAsync((existingOrder, productVersions));
 
         var sut = new OrderService(
             orderRepositoryMock.Object,
@@ -665,5 +671,20 @@ public sealed class OrderServiceTests
             DateTime.UtcNow.AddDays(-1),
             DateTime.UtcNow.AddHours(-1),
             status);
+    }
+
+    private static IReadOnlyCollection<ProductVersion> BuildProductVersions(Order order)
+    {
+        return order.Lines
+            .Select(line => ProductVersion.Rehydrate(
+                line.ProductVersionId,
+                true,
+                DateTime.UtcNow.AddDays(-1),
+                null,
+                Guid.NewGuid(),
+                new Money(10m, "USD"),
+                "Test product",
+                "Test brand"))
+            .ToList();
     }
 }
