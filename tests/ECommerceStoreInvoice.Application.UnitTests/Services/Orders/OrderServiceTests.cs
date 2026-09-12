@@ -290,6 +290,11 @@ public sealed class OrderServiceTests
         var clientId = Guid.NewGuid();
         var guidValidationResult = new ValidationResult();
         var orders = BuildOrders(clientId);
+        var ordersWithProductVersions = orders
+            .Select(order => (
+                Order: order,
+                ProductVersions: BuildProductVersions(order)))
+            .ToList();
 
         var orderRepositoryMock = new Mock<IOrderRepository>(MockBehavior.Strict);
         var productVersionRepositoryMock = new Mock<IProductVersionRepository>(MockBehavior.Strict);
@@ -307,8 +312,8 @@ public sealed class OrderServiceTests
 
         orderRepositoryMock
             .InSequence(sequence)
-            .Setup(repo => repo.GetOrdersByClientId(clientId))
-            .ReturnsAsync(orders);
+            .Setup(repo => repo.GetOrdersWithProductVersionsByClientId(clientId))
+            .ReturnsAsync(ordersWithProductVersions);
 
         var sut = new OrderService(
             orderRepositoryMock.Object,
@@ -326,8 +331,22 @@ public sealed class OrderServiceTests
         response.Count.ShouldBe(orders.Count);
         response.Select(x => x.Id).ShouldBe(orders.Select(x => x.Id), ignoreOrder: true);
 
+        foreach (var (order, productVersions) in ordersWithProductVersions)
+        {
+            var orderResponse = response.Single(x => x.Id == order.Id);
+            var productVersion = productVersions.Single();
+            var orderLine = order.Lines.Single();
+
+            orderResponse.Lines.Count.ShouldBe(order.Lines.Count);
+            orderResponse.Lines.Single().ProductVersionId.ShouldBe(productVersion.Id);
+            orderResponse.Lines.Single().ProductVersion.Id.ShouldBe(productVersion.Id);
+            orderResponse.Lines.Single().LineTotalAmount.ShouldBe(productVersion.Price.Amount * orderLine.Quantity);
+            orderResponse.TotalAmount.ShouldBe(productVersion.Price.Amount * orderLine.Quantity);
+            orderResponse.TotalCurrency.ShouldBe(productVersion.Price.Currency);
+        }
+
         guidValidationPolicyMock.Verify(policy => policy.Validate(clientId), Times.Once);
-        orderRepositoryMock.Verify(repo => repo.GetOrdersByClientId(clientId), Times.Once);
+        orderRepositoryMock.Verify(repo => repo.GetOrdersWithProductVersionsByClientId(clientId), Times.Once);
         orderValidationPolicyMock.Verify(policy => policy.Validate(It.IsAny<Order>()), Times.Never);
         updateOrderValidationPolicyMock.Verify(policy => policy.Validate(It.IsAny<(Order order, OrderStatus newStatus)>()), Times.Never);
     }
@@ -370,7 +389,7 @@ public sealed class OrderServiceTests
         // Act / Assert
         await Should.ThrowAsync<ValidationException>(() => sut.GetOrdersByClientId(clientId));
 
-        orderRepositoryMock.Verify(repo => repo.GetOrdersByClientId(It.IsAny<Guid>()), Times.Never);
+        orderRepositoryMock.Verify(repo => repo.GetOrdersWithProductVersionsByClientId(It.IsAny<Guid>()), Times.Never);
     }
 
     [Fact]
