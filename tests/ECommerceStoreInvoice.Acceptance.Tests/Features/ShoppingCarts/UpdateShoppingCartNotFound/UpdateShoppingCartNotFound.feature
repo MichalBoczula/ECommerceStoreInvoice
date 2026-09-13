@@ -6,9 +6,9 @@ Feature: Update shopping cart not found
       | Field    | Value         |
       | ClientId | <generatedId> |
     And I have an update shopping cart request for a non-existing shopping cart
-      | ProductId                            | Name   | Brand | UnitPriceAmount | UnitPriceCurrency | Quantity |
-      | 11111111-1111-1111-1111-111111111111 | Phone  | Apple | 999.99          | usd               | 1        |
-      | 22222222-2222-2222-2222-222222222222 | Watch  | Apple | 399.99          | usd               | 2        |
+      | ProductId                            | Quantity |
+      | 11111111-1111-1111-1111-111111111111 | 1        |
+      | 22222222-2222-2222-2222-222222222222 | 2        |
     When I submit the update shopping cart request for a non-existing shopping cart
       | Field    | Value                       |
       | Method   | PUT                         |
