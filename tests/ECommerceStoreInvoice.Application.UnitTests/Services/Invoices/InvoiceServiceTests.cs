@@ -1,366 +1,351 @@
-// using Microsoft.Extensions.Logging;
-// using ECommerceStoreInvoice.Application.Services.Abstract.ClientDataVersions;
-// using ECommerceStoreInvoice.Application.Services.Abstract.Invoices;
-// using ECommerceStoreInvoice.Application.Services.Concrete.Invoices;
-// using ECommerceStoreInvoice.Application.Common.ResponsesDto.ClientDataVersions;
-// using ECommerceStoreInvoice.Domain.AggregatesModel.Common.Enums;
-// using ECommerceStoreInvoice.Domain.AggregatesModel.Common.ValueObjects;
-// using ECommerceStoreInvoice.Domain.AggregatesModel.InvoiceAggregate;
-// using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate;
-// using ECommerceStoreInvoice.Domain.AggregatesModel.InvoiceAggregate.Repositories;
-// using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate.Repositories;
-// using ECommerceStoreInvoice.Domain.Validation.Abstract;
-// using ECommerceStoreInvoice.Domain.Validation.Common;
-// using Moq;
-// using Shouldly;
+using Microsoft.Extensions.Logging;
+using ECommerceStoreInvoice.Application.Services.Abstract.ClientDataVersions;
+using ECommerceStoreInvoice.Application.Services.Abstract.Invoices;
+using ECommerceStoreInvoice.Application.Services.Concrete.Invoices;
+using ECommerceStoreInvoice.Application.Common.ResponsesDto.ClientDataVersions;
+using ECommerceStoreInvoice.Domain.AggregatesModel.Common.Enums;
+using ECommerceStoreInvoice.Domain.AggregatesModel.InvoiceAggregate;
+using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate;
+using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate.ValueObjects;
+using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate;
+using ECommerceStoreInvoice.Domain.AggregatesModel.InvoiceAggregate.Repositories;
+using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate.Repositories;
+using ECommerceStoreInvoice.Domain.Validation.Abstract;
+using ECommerceStoreInvoice.Domain.Validation.Common;
+using Moq;
+using Shouldly;
 
-// namespace ECommerceStoreInvoice.Application.UnitTests.Services.Invoices;
+namespace ECommerceStoreInvoice.Application.UnitTests.Services.Invoices;
 
-// public sealed class InvoiceServiceTests
-// {
-//     [Fact]
-//     public async Task CreateInvoiceForOrder_WhenClientIdValidationFails_ShouldThrowValidationExceptionAndStopFlow()
-//     {
-//         var clientId = Guid.Empty;
-//         var orderId = Guid.NewGuid();
+public sealed class InvoiceServiceTests
+{
+    [Fact]
+    public async Task CreateInvoiceForOrder_WhenClientIdValidationFails_ShouldThrowValidationExceptionAndStopFlow()
+    {
+        var clientId = Guid.Empty;
+        var orderId = Guid.NewGuid();
 
-//         var invalidResult = new ValidationResult();
-//         invalidResult.AddValidationError(new ValidationError
-//         {
-//             Entity = nameof(Guid),
-//             Name = "clientId",
-//             Message = "ClientId cannot be empty"
-//         });
+        var invalidResult = new ValidationResult();
+        invalidResult.AddValidationError(new ValidationError
+        {
+            Entity = nameof(Guid),
+            Name = "clientId",
+            Message = "ClientId cannot be empty"
+        });
 
-//         var invoiceRepositoryMock = new Mock<IInvoiceRepository>(MockBehavior.Strict);
-//         var orderRepositoryMock = new Mock<IOrderRepository>(MockBehavior.Strict);
-//         var clientDataVersionServiceMock = new Mock<IClientDataVersionService>(MockBehavior.Strict);
-//         var invoicePdfServiceMock = new Mock<IInvoicePdfService>(MockBehavior.Strict);
-//         var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
-//         var invoiceStatusValidationPolicyMock = new Mock<IValidationPolicy<InvoiceOrderStatusValidationContext>>(MockBehavior.Strict);
+        var invoiceRepositoryMock = new Mock<IInvoiceRepository>(MockBehavior.Strict);
+        var orderRepositoryMock = new Mock<IOrderRepository>(MockBehavior.Strict);
+        var clientDataVersionServiceMock = new Mock<IClientDataVersionService>(MockBehavior.Strict);
+        var invoicePdfServiceMock = new Mock<IInvoicePdfService>(MockBehavior.Strict);
+        var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
+        var invoiceStatusValidationPolicyMock = new Mock<IValidationPolicy<InvoiceOrderStatusValidationContext>>(MockBehavior.Strict);
+        var loggerMock = new Mock<ILogger<InvoiceService>>(MockBehavior.Loose);
 
-//         var loggerMock = new Mock<ILogger<IInvoiceService>>(MockBehavior.Loose);
+        guidValidationPolicyMock
+            .Setup(policy => policy.Validate(clientId))
+            .ReturnsAsync(invalidResult);
 
-//         guidValidationPolicyMock
-//             .Setup(policy => policy.Validate(clientId))
-//             .ReturnsAsync(invalidResult);
+        var sut = new InvoiceService(
+            invoiceRepositoryMock.Object,
+            orderRepositoryMock.Object,
+            clientDataVersionServiceMock.Object,
+            invoicePdfServiceMock.Object,
+            guidValidationPolicyMock.Object,
+            invoiceStatusValidationPolicyMock.Object,
+            loggerMock.Object);
 
-//         var sut = new InvoiceService(
-//             invoiceRepositoryMock.Object,
-//             orderRepositoryMock.Object,
-//             clientDataVersionServiceMock.Object,
-//             invoicePdfServiceMock.Object,
-//             guidValidationPolicyMock.Object,
-//             invoiceStatusValidationPolicyMock.Object,
-//             loggerMock.Object);
+        await Should.ThrowAsync<ValidationException>(() => sut.CreateInvoiceForOrder(clientId, orderId));
 
-//         await Should.ThrowAsync<ValidationException>(() => sut.CreateInvoiceForOrder(clientId, orderId));
+        guidValidationPolicyMock.Verify(policy => policy.Validate(clientId), Times.Once);
+        guidValidationPolicyMock.Verify(policy => policy.Validate(orderId), Times.Never);
+        orderRepositoryMock.Verify(repo => repo.GetOrderWithProductVersionsById(It.IsAny<Guid>()), Times.Never);
+    }
 
-//         guidValidationPolicyMock.Verify(policy => policy.Validate(clientId), Times.Once);
-//         guidValidationPolicyMock.Verify(policy => policy.Validate(orderId), Times.Never);
-//         orderRepositoryMock.Verify(repo => repo.GetOrderByOrderId(It.IsAny<Guid>()), Times.Never);
-//     }
+    [Fact]
+    public async Task CreateInvoiceForOrder_WhenOrderIdValidationFails_ShouldThrowValidationExceptionAndStopFlow()
+    {
+        var clientId = Guid.NewGuid();
+        var orderId = Guid.Empty;
 
-//     [Fact]
-//     public async Task CreateInvoiceForOrder_WhenOrderIdValidationFails_ShouldThrowValidationExceptionAndStopFlow()
-//     {
-//         var clientId = Guid.NewGuid();
-//         var orderId = Guid.Empty;
+        var validResult = new ValidationResult();
+        var invalidResult = new ValidationResult();
+        invalidResult.AddValidationError(new ValidationError
+        {
+            Entity = nameof(Guid),
+            Name = "orderId",
+            Message = "OrderId cannot be empty"
+        });
 
-//         var validResult = new ValidationResult();
-//         var invalidResult = new ValidationResult();
-//         invalidResult.AddValidationError(new ValidationError
-//         {
-//             Entity = nameof(Guid),
-//             Name = "orderId",
-//             Message = "OrderId cannot be empty"
-//         });
+        var invoiceRepositoryMock = new Mock<IInvoiceRepository>(MockBehavior.Strict);
+        var orderRepositoryMock = new Mock<IOrderRepository>(MockBehavior.Strict);
+        var clientDataVersionServiceMock = new Mock<IClientDataVersionService>(MockBehavior.Strict);
+        var invoicePdfServiceMock = new Mock<IInvoicePdfService>(MockBehavior.Strict);
+        var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
+        var invoiceStatusValidationPolicyMock = new Mock<IValidationPolicy<InvoiceOrderStatusValidationContext>>(MockBehavior.Strict);
+        var loggerMock = new Mock<ILogger<InvoiceService>>(MockBehavior.Loose);
 
-//         var invoiceRepositoryMock = new Mock<IInvoiceRepository>(MockBehavior.Strict);
-//         var orderRepositoryMock = new Mock<IOrderRepository>(MockBehavior.Strict);
-//         var clientDataVersionServiceMock = new Mock<IClientDataVersionService>(MockBehavior.Strict);
-//         var invoicePdfServiceMock = new Mock<IInvoicePdfService>(MockBehavior.Strict);
-//         var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
-//         var invoiceStatusValidationPolicyMock = new Mock<IValidationPolicy<InvoiceOrderStatusValidationContext>>(MockBehavior.Strict);
-//         var loggerMock = new Mock<ILogger<IInvoiceService>>(MockBehavior.Loose);
+        var sequence = new MockSequence();
+        guidValidationPolicyMock
+            .InSequence(sequence)
+            .Setup(policy => policy.Validate(clientId))
+            .ReturnsAsync(validResult);
 
-//         var sequence = new MockSequence();
-//         guidValidationPolicyMock
-//             .InSequence(sequence)
-//             .Setup(policy => policy.Validate(clientId))
-//             .ReturnsAsync(validResult);
+        guidValidationPolicyMock
+            .InSequence(sequence)
+            .Setup(policy => policy.Validate(orderId))
+            .ReturnsAsync(invalidResult);
 
-//         guidValidationPolicyMock
-//             .InSequence(sequence)
-//             .Setup(policy => policy.Validate(orderId))
-//             .ReturnsAsync(invalidResult);
+        var sut = new InvoiceService(
+            invoiceRepositoryMock.Object,
+            orderRepositoryMock.Object,
+            clientDataVersionServiceMock.Object,
+            invoicePdfServiceMock.Object,
+            guidValidationPolicyMock.Object,
+            invoiceStatusValidationPolicyMock.Object,
+            loggerMock.Object);
 
-//         var sut = new InvoiceService(
-//             invoiceRepositoryMock.Object,
-//             orderRepositoryMock.Object,
-//             clientDataVersionServiceMock.Object,
-//             invoicePdfServiceMock.Object,
-//             guidValidationPolicyMock.Object,
-//             invoiceStatusValidationPolicyMock.Object,
-//             loggerMock.Object);
+        await Should.ThrowAsync<ValidationException>(() => sut.CreateInvoiceForOrder(clientId, orderId));
 
-//         await Should.ThrowAsync<ValidationException>(() => sut.CreateInvoiceForOrder(clientId, orderId));
+        guidValidationPolicyMock.Verify(policy => policy.Validate(clientId), Times.Once);
+        guidValidationPolicyMock.Verify(policy => policy.Validate(orderId), Times.Once);
+        orderRepositoryMock.Verify(repo => repo.GetOrderWithProductVersionsById(It.IsAny<Guid>()), Times.Never);
+    }
 
-//         guidValidationPolicyMock.Verify(policy => policy.Validate(clientId), Times.Once);
-//         guidValidationPolicyMock.Verify(policy => policy.Validate(orderId), Times.Once);
-//         orderRepositoryMock.Verify(repo => repo.GetOrderByOrderId(It.IsAny<Guid>()), Times.Never);
-//     }
+    [Fact]
+    public async Task GetInvoiceById_WhenInvoiceIdValidationFails_ShouldThrowValidationExceptionAndNotLoadInvoice()
+    {
+        var invoiceId = Guid.Empty;
 
-//     [Fact]
-//     public async Task GetInvoiceById_WhenInvoiceIdValidationFails_ShouldThrowValidationExceptionAndNotLoadInvoice()
-//     {
-//         var invoiceId = Guid.Empty;
+        var invalidResult = new ValidationResult();
+        invalidResult.AddValidationError(new ValidationError
+        {
+            Entity = nameof(Guid),
+            Name = "invoiceId",
+            Message = "InvoiceId cannot be empty"
+        });
 
-//         var invalidResult = new ValidationResult();
-//         invalidResult.AddValidationError(new ValidationError
-//         {
-//             Entity = nameof(Guid),
-//             Name = "invoiceId",
-//             Message = "InvoiceId cannot be empty"
-//         });
+        var invoiceRepositoryMock = new Mock<IInvoiceRepository>(MockBehavior.Strict);
+        var orderRepositoryMock = new Mock<IOrderRepository>(MockBehavior.Strict);
+        var clientDataVersionServiceMock = new Mock<IClientDataVersionService>(MockBehavior.Strict);
+        var invoicePdfServiceMock = new Mock<IInvoicePdfService>(MockBehavior.Strict);
+        var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
+        var invoiceStatusValidationPolicyMock = new Mock<IValidationPolicy<InvoiceOrderStatusValidationContext>>(MockBehavior.Strict);
+        var loggerMock = new Mock<ILogger<InvoiceService>>(MockBehavior.Loose);
 
-//         var invoiceRepositoryMock = new Mock<IInvoiceRepository>(MockBehavior.Strict);
-//         var orderRepositoryMock = new Mock<IOrderRepository>(MockBehavior.Strict);
-//         var clientDataVersionServiceMock = new Mock<IClientDataVersionService>(MockBehavior.Strict);
-//         var invoicePdfServiceMock = new Mock<IInvoicePdfService>(MockBehavior.Strict);
-//         var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
-//         var invoiceStatusValidationPolicyMock = new Mock<IValidationPolicy<InvoiceOrderStatusValidationContext>>(MockBehavior.Strict);
-//         var loggerMock = new Mock<ILogger<IInvoiceService>>(MockBehavior.Loose);
+        guidValidationPolicyMock
+            .Setup(policy => policy.Validate(invoiceId))
+            .ReturnsAsync(invalidResult);
 
-//         guidValidationPolicyMock
-//             .Setup(policy => policy.Validate(invoiceId))
-//             .ReturnsAsync(invalidResult);
+        var sut = new InvoiceService(
+            invoiceRepositoryMock.Object,
+            orderRepositoryMock.Object,
+            clientDataVersionServiceMock.Object,
+            invoicePdfServiceMock.Object,
+            guidValidationPolicyMock.Object,
+            invoiceStatusValidationPolicyMock.Object,
+            loggerMock.Object);
 
-//         var sut = new InvoiceService(
-//             invoiceRepositoryMock.Object,
-//             orderRepositoryMock.Object,
-//             clientDataVersionServiceMock.Object,
-//             invoicePdfServiceMock.Object,
-//             guidValidationPolicyMock.Object,
-//             invoiceStatusValidationPolicyMock.Object,
-//             loggerMock.Object);
+        await Should.ThrowAsync<ValidationException>(() => sut.GetInvoiceById(invoiceId));
 
-//         await Should.ThrowAsync<ValidationException>(() => sut.GetInvoiceById(invoiceId));
+        guidValidationPolicyMock.Verify(policy => policy.Validate(invoiceId), Times.Once);
+        invoiceRepositoryMock.Verify(repo => repo.GetInvoiceById(It.IsAny<Guid>()), Times.Never);
+    }
 
-//         guidValidationPolicyMock.Verify(policy => policy.Validate(invoiceId), Times.Once);
-//         invoiceRepositoryMock.Verify(repo => repo.GetInvoiceById(It.IsAny<Guid>()), Times.Never);
-//     }
+    [Fact]
+    public async Task CreateInvoiceForOrder_WhenInvoiceAlreadyExists_ShouldThrowResourceAlreadyExistsExceptionAndSkipPdfGeneration()
+    {
+        var clientId = Guid.NewGuid();
+        var orderId = Guid.NewGuid();
 
-//     [Fact]
-//     public async Task CreateInvoiceForOrder_WhenInvoiceAlreadyExists_ShouldThrowResourceAlreadyExistsExceptionAndSkipPdfGeneration()
-//     {
-//         var clientId = Guid.NewGuid();
-//         var orderId = Guid.NewGuid();
+        var validResult = new ValidationResult();
+        var existingOrder = Order.Rehydrate(
+            orderId,
+            clientId,
+            [],
+            DateTime.UtcNow.AddMinutes(-10),
+            DateTime.UtcNow,
+            OrderStatus.Paid);
 
-//         var validResult = new ValidationResult();
-//         var existingOrder = Order.Rehydrate(
-//             orderId,
-//             clientId,
-//             [],
-//             DateTime.UtcNow.AddMinutes(-10),
-//             DateTime.UtcNow,
-//             OrderStatus.Paid,
-//             new Money(0m, "USD"));
-//         var existingInvoice = Invoice.Rehydrate(
-//             Guid.NewGuid(),
-//             orderId,
-//             Guid.NewGuid(),
-//             "file:///invoices/existing.pdf",
-//             DateTime.UtcNow.AddMinutes(-5));
+        IReadOnlyCollection<ProductVersion> productVersions = [];
 
-//         var invoiceRepositoryMock = new Mock<IInvoiceRepository>(MockBehavior.Strict);
-//         var orderRepositoryMock = new Mock<IOrderRepository>(MockBehavior.Strict);
-//         var clientDataVersionServiceMock = new Mock<IClientDataVersionService>(MockBehavior.Strict);
-//         var invoicePdfServiceMock = new Mock<IInvoicePdfService>(MockBehavior.Strict);
-//         var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
-//         var invoiceStatusValidationPolicyMock = new Mock<IValidationPolicy<InvoiceOrderStatusValidationContext>>(MockBehavior.Strict);
-//         var loggerMock = new Mock<ILogger<IInvoiceService>>(MockBehavior.Loose);
+        var existingInvoice = Invoice.Rehydrate(
+            Guid.NewGuid(),
+            orderId,
+            Guid.NewGuid(),
+            "file:///invoices/existing.pdf",
+            DateTime.UtcNow.AddMinutes(-5));
 
-//         var sequence = new MockSequence();
-//         guidValidationPolicyMock
-//             .InSequence(sequence)
-//             .Setup(policy => policy.Validate(clientId))
-//             .ReturnsAsync(validResult);
+        var invoiceRepositoryMock = new Mock<IInvoiceRepository>(MockBehavior.Strict);
+        var orderRepositoryMock = new Mock<IOrderRepository>(MockBehavior.Strict);
+        var clientDataVersionServiceMock = new Mock<IClientDataVersionService>(MockBehavior.Strict);
+        var invoicePdfServiceMock = new Mock<IInvoicePdfService>(MockBehavior.Strict);
+        var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
+        var invoiceStatusValidationPolicyMock = new Mock<IValidationPolicy<InvoiceOrderStatusValidationContext>>(MockBehavior.Strict);
+        var loggerMock = new Mock<ILogger<InvoiceService>>(MockBehavior.Loose);
 
-//         guidValidationPolicyMock
-//             .InSequence(sequence)
-//             .Setup(policy => policy.Validate(orderId))
-//             .ReturnsAsync(validResult);
+        var sequence = new MockSequence();
+        guidValidationPolicyMock
+            .InSequence(sequence)
+            .Setup(policy => policy.Validate(clientId))
+            .ReturnsAsync(validResult);
 
-//         orderRepositoryMock
-//             .InSequence(sequence)
-//             .Setup(repo => repo.GetOrderByOrderId(orderId))
-//             .ReturnsAsync(existingOrder);
+        guidValidationPolicyMock
+            .InSequence(sequence)
+            .Setup(policy => policy.Validate(orderId))
+            .ReturnsAsync(validResult);
 
-//         invoiceRepositoryMock
-//             .InSequence(sequence)
-//             .Setup(repo => repo.GetInvoiceByOrderId(orderId))
-//             .ReturnsAsync(existingInvoice);
+        orderRepositoryMock
+            .InSequence(sequence)
+            .Setup(repo => repo.GetOrderWithProductVersionsById(orderId))
+            .ReturnsAsync((existingOrder, productVersions));
 
-//         var sut = new InvoiceService(
-//             invoiceRepositoryMock.Object,
-//             orderRepositoryMock.Object,
-//             clientDataVersionServiceMock.Object,
-//             invoicePdfServiceMock.Object,
-//             guidValidationPolicyMock.Object,
-//             invoiceStatusValidationPolicyMock.Object,
-//             loggerMock.Object);
+        invoiceRepositoryMock
+            .InSequence(sequence)
+            .Setup(repo => repo.GetInvoiceByOrderId(orderId))
+            .ReturnsAsync(existingInvoice);
 
-//         await Should.ThrowAsync<ResourceAlreadyExistsException>(() => sut.CreateInvoiceForOrder(clientId, orderId));
+        var sut = new InvoiceService(
+            invoiceRepositoryMock.Object,
+            orderRepositoryMock.Object,
+            clientDataVersionServiceMock.Object,
+            invoicePdfServiceMock.Object,
+            guidValidationPolicyMock.Object,
+            invoiceStatusValidationPolicyMock.Object,
+            loggerMock.Object);
 
-//         guidValidationPolicyMock.Verify(policy => policy.Validate(clientId), Times.Once);
-//         guidValidationPolicyMock.Verify(policy => policy.Validate(orderId), Times.Once);
-//         orderRepositoryMock.Verify(repo => repo.GetOrderByOrderId(orderId), Times.Once);
-//         invoiceRepositoryMock.Verify(repo => repo.GetInvoiceByOrderId(orderId), Times.Once);
-//         invoiceStatusValidationPolicyMock.Verify(policy => policy.Validate(It.IsAny<InvoiceOrderStatusValidationContext>()), Times.Never);
-//         clientDataVersionServiceMock.Verify(service => service.GetByClientId(It.IsAny<Guid>()), Times.Never);
-//         invoicePdfServiceMock.Verify(service => service.GenerateInvoicePdf(It.IsAny<Order>(), It.IsAny<ClientDataVersionResponseDto?>()), Times.Never);
-//         invoiceRepositoryMock.Verify(repo => repo.CreateInvoice(It.IsAny<Invoice>()), Times.Never);
-//     }
+        await Should.ThrowAsync<ResourceAlreadyExistsException>(() => sut.CreateInvoiceForOrder(clientId, orderId));
 
-//     [Fact]
-//     public async Task CreateInvoiceForOrder_WhenRequestIsValid_ShouldCreateInvoiceAndReturnResponse()
-//     {
-//         var clientId = Guid.NewGuid();
-//         var orderId = Guid.NewGuid();
-//         var clientDataVersionId = Guid.NewGuid();
-//         var storageUrl = "file:///invoices/generated.pdf";
+        guidValidationPolicyMock.Verify(policy => policy.Validate(clientId), Times.Once);
+        guidValidationPolicyMock.Verify(policy => policy.Validate(orderId), Times.Once);
+        orderRepositoryMock.Verify(repo => repo.GetOrderWithProductVersionsById(orderId), Times.Once);
+        invoiceRepositoryMock.Verify(repo => repo.GetInvoiceByOrderId(orderId), Times.Once);
+        invoiceStatusValidationPolicyMock.Verify(policy => policy.Validate(It.IsAny<InvoiceOrderStatusValidationContext>()), Times.Never);
+        clientDataVersionServiceMock.Verify(service => service.GetByClientId(It.IsAny<Guid>()), Times.Never);
+        invoicePdfServiceMock.Verify(service => service.GenerateInvoicePdf(It.IsAny<Order>(), It.IsAny<IReadOnlyCollection<ProductVersion>>(), It.IsAny<ClientDataVersionResponseDto?>()), Times.Never);
+        invoiceRepositoryMock.Verify(repo => repo.CreateInvoice(It.IsAny<Invoice>()), Times.Never);
+    }
 
-//         var guidValidationResult = new ValidationResult();
-//         var orderStatusValidationResult = new ValidationResult();
-//         var order = Order.Rehydrate(
-//             orderId,
-//             clientId,
-//             [],
-//             DateTime.UtcNow.AddHours(-1),
-//             DateTime.UtcNow,
-//             OrderStatus.Paid,
-//             new Money(0m, "USD"));
-//         var clientDataVersion = new ClientDataVersionResponseDto
-//         {
-//             Id = clientDataVersionId,
-//             ClientId = clientId,
-//             ClientName = "John Doe",
-//             PostalCode = "00-000",
-//             City = "Warsaw",
-//             Street = "Main",
-//             BuildingNumber = "1",
-//             ApartmentNumber = "2",
-//             PhoneNumber = "123456789",
-//             PhonePrefix = "+48",
-//             AddressEmail = "john@example.com",
-//             CreatedAt = DateTime.UtcNow.AddDays(-1)
-//         };
+    [Fact]
+    public async Task CreateInvoiceForOrder_WhenRequestIsValid_ShouldCreateInvoiceAndReturnResponse()
+    {
+        var clientId = Guid.NewGuid();
+        var orderId = Guid.NewGuid();
+        var clientDataVersionId = Guid.NewGuid();
+        var storageUrl = "file:///invoices/generated.pdf";
 
-//         var createdInvoice = Invoice.Rehydrate(
-//             Guid.NewGuid(),
-//             orderId,
-//             clientDataVersionId,
-//             storageUrl,
-//             DateTime.UtcNow);
+        var guidValidationResult = new ValidationResult();
+        var orderStatusValidationResult = new ValidationResult();
+        var order = Order.Rehydrate(
+            orderId,
+            clientId,
+            [],
+            DateTime.UtcNow.AddHours(-1),
+            DateTime.UtcNow,
+            OrderStatus.Paid);
 
-//         var invoiceRepositoryMock = new Mock<IInvoiceRepository>(MockBehavior.Strict);
-//         var orderRepositoryMock = new Mock<IOrderRepository>(MockBehavior.Strict);
-//         var clientDataVersionServiceMock = new Mock<IClientDataVersionService>(MockBehavior.Strict);
-//         var invoicePdfServiceMock = new Mock<IInvoicePdfService>(MockBehavior.Strict);
-//         var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
-//         var invoiceStatusValidationPolicyMock = new Mock<IValidationPolicy<InvoiceOrderStatusValidationContext>>(MockBehavior.Strict);
+        IReadOnlyCollection<ProductVersion> productVersions = [];
 
-//         var loggerMock = new Mock<ILogger<IInvoiceService>>(MockBehavior.Loose);
+        var clientDataVersion = new ClientDataVersionResponseDto
+        {
+            Id = clientDataVersionId,
+            ClientId = clientId,
+            ClientName = "John Doe",
+            PostalCode = "00-000",
+            City = "Warsaw",
+            Street = "Main",
+            BuildingNumber = "1",
+            ApartmentNumber = "2",
+            PhoneNumber = "123456789",
+            PhonePrefix = "+48",
+            AddressEmail = "john@example.com",
+            CreatedAt = DateTime.UtcNow.AddDays(-1)
+        };
 
-//         var sequence = new MockSequence();
+        var createdInvoice = Invoice.Rehydrate(
+            Guid.NewGuid(),
+            orderId,
+            clientDataVersionId,
+            storageUrl,
+            DateTime.UtcNow);
 
-//         guidValidationPolicyMock
-//             .InSequence(sequence)
-//             .Setup(policy => policy.Validate(clientId))
-//             .ReturnsAsync(guidValidationResult);
+        var invoiceRepositoryMock = new Mock<IInvoiceRepository>(MockBehavior.Strict);
+        var orderRepositoryMock = new Mock<IOrderRepository>(MockBehavior.Strict);
+        var clientDataVersionServiceMock = new Mock<IClientDataVersionService>(MockBehavior.Strict);
+        var invoicePdfServiceMock = new Mock<IInvoicePdfService>(MockBehavior.Strict);
+        var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
+        var invoiceStatusValidationPolicyMock = new Mock<IValidationPolicy<InvoiceOrderStatusValidationContext>>(MockBehavior.Strict);
+        var loggerMock = new Mock<ILogger<InvoiceService>>(MockBehavior.Loose);
 
-//         guidValidationPolicyMock
-//             .InSequence(sequence)
-//             .Setup(policy => policy.Validate(orderId))
-//             .ReturnsAsync(guidValidationResult);
+        var sequence = new MockSequence();
 
-//         orderRepositoryMock
-//             .InSequence(sequence)
-//             .Setup(repo => repo.GetOrderByOrderId(orderId))
-//             .ReturnsAsync(order);
+        guidValidationPolicyMock
+            .InSequence(sequence)
+            .Setup(policy => policy.Validate(clientId))
+            .ReturnsAsync(guidValidationResult);
 
-//         invoiceRepositoryMock
-//             .InSequence(sequence)
-//             .Setup(repo => repo.GetInvoiceByOrderId(orderId))
-//             .ReturnsAsync((Invoice?)null);
+        guidValidationPolicyMock
+            .InSequence(sequence)
+            .Setup(policy => policy.Validate(orderId))
+            .ReturnsAsync(guidValidationResult);
 
-//         invoiceStatusValidationPolicyMock
-//             .InSequence(sequence)
-//             .Setup(policy => policy.Validate(It.Is<InvoiceOrderStatusValidationContext>(context => context.Order == order)))
-//             .ReturnsAsync(orderStatusValidationResult);
+        orderRepositoryMock
+            .InSequence(sequence)
+            .Setup(repo => repo.GetOrderWithProductVersionsById(orderId))
+            .ReturnsAsync((order, productVersions));
 
-//         clientDataVersionServiceMock
-//             .InSequence(sequence)
-//             .Setup(service => service.GetByClientId(clientId))
-//             .ReturnsAsync(clientDataVersion);
+        invoiceRepositoryMock
+            .InSequence(sequence)
+            .Setup(repo => repo.GetInvoiceByOrderId(orderId))
+            .ReturnsAsync((Invoice?)null);
 
-//         invoicePdfServiceMock
-//             .InSequence(sequence)
-//             .Setup(service => service.GenerateInvoicePdf(order, clientDataVersion))
-//             .ReturnsAsync(storageUrl);
+        invoiceStatusValidationPolicyMock
+            .InSequence(sequence)
+            .Setup(policy => policy.Validate(It.Is<InvoiceOrderStatusValidationContext>(context => context.Order == order)))
+            .ReturnsAsync(orderStatusValidationResult);
 
-//         invoiceRepositoryMock
-//             .InSequence(sequence)
-//             .Setup(repo => repo.CreateInvoice(It.Is<Invoice>(invoice =>
-//                 invoice.OrderId == orderId &&
-//                 invoice.ClientDataVersionId == clientDataVersionId &&
-//                 invoice.StorageUrl == storageUrl)))
-//             .ReturnsAsync(createdInvoice);
+        clientDataVersionServiceMock
+            .InSequence(sequence)
+            .Setup(service => service.GetByClientId(clientId))
+            .ReturnsAsync(clientDataVersion);
 
-//         var sut = new InvoiceService(
-//             invoiceRepositoryMock.Object,
-//             orderRepositoryMock.Object,
-//             clientDataVersionServiceMock.Object,
-//             invoicePdfServiceMock.Object,
-//             guidValidationPolicyMock.Object,
-//             invoiceStatusValidationPolicyMock.Object,
-//             loggerMock.Object);
+        invoicePdfServiceMock
+            .InSequence(sequence)
+            .Setup(service => service.GenerateInvoicePdf(order, productVersions, clientDataVersion))
+            .ReturnsAsync(storageUrl);
 
-//         var response = await sut.CreateInvoiceForOrder(clientId, orderId);
+        invoiceRepositoryMock
+            .InSequence(sequence)
+            .Setup(repo => repo.CreateInvoice(It.Is<Invoice>(invoice =>
+                invoice.OrderId == orderId &&
+                invoice.ClientDataVersionId == clientDataVersionId &&
+                invoice.StorageUrl == storageUrl)))
+            .ReturnsAsync(createdInvoice);
 
-//         guidValidationPolicyMock.Verify(policy => policy.Validate(clientId), Times.Once);
-//         guidValidationPolicyMock.Verify(policy => policy.Validate(orderId), Times.Once);
-//         orderRepositoryMock.Verify(repo => repo.GetOrderByOrderId(orderId), Times.Once);
-//         invoiceRepositoryMock.Verify(repo => repo.GetInvoiceByOrderId(orderId), Times.Once);
-//         invoiceStatusValidationPolicyMock.Verify(policy => policy.Validate(It.IsAny<InvoiceOrderStatusValidationContext>()), Times.Once);
-//         clientDataVersionServiceMock.Verify(service => service.GetByClientId(clientId), Times.Once);
-//         invoicePdfServiceMock.Verify(service => service.GenerateInvoicePdf(order, clientDataVersion), Times.Once);
-//         invoiceRepositoryMock.Verify(repo => repo.CreateInvoice(It.IsAny<Invoice>()), Times.Once);
+        var sut = new InvoiceService(
+            invoiceRepositoryMock.Object,
+            orderRepositoryMock.Object,
+            clientDataVersionServiceMock.Object,
+            invoicePdfServiceMock.Object,
+            guidValidationPolicyMock.Object,
+            invoiceStatusValidationPolicyMock.Object,
+            loggerMock.Object);
 
-//         loggerMock.Verify(
-//             x => x.Log(
-//                 LogLevel.Information,
-//                 It.IsAny<EventId>(),
-//                 It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Initiating invoice generation flow")),
-//                 It.IsAny<Exception>(),
-//                 It.Is<Func<It.IsAnyType, Exception?, string>>((v, t) => true)),
-//             Times.Once);
+        var response = await sut.CreateInvoiceForOrder(clientId, orderId);
 
-//         loggerMock.Verify(
-//             x => x.Log(
-//                 LogLevel.Information,
-//                 It.IsAny<EventId>(),
-//                 It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Successfully completed invoice generation")),
-//                 It.IsAny<Exception>(),
-//                 It.Is<Func<It.IsAnyType, Exception?, string>>((v, t) => true)),
-//             Times.Once);
+        guidValidationPolicyMock.Verify(policy => policy.Validate(clientId), Times.Once);
+        guidValidationPolicyMock.Verify(policy => policy.Validate(orderId), Times.Once);
+        orderRepositoryMock.Verify(repo => repo.GetOrderWithProductVersionsById(orderId), Times.Once);
+        invoiceRepositoryMock.Verify(repo => repo.GetInvoiceByOrderId(orderId), Times.Once);
+        invoiceStatusValidationPolicyMock.Verify(policy => policy.Validate(It.IsAny<InvoiceOrderStatusValidationContext>()), Times.Once);
+        clientDataVersionServiceMock.Verify(service => service.GetByClientId(clientId), Times.Once);
+        invoicePdfServiceMock.Verify(service => service.GenerateInvoicePdf(order, productVersions, clientDataVersion), Times.Once);
+        invoiceRepositoryMock.Verify(repo => repo.CreateInvoice(It.IsAny<Invoice>()), Times.Once);
 
-//         response.ShouldNotBeNull();
-//         response.Id.ShouldBe(createdInvoice.Id);
-//         response.OrderId.ShouldBe(orderId);
-//         response.ClietDataVersionId.ShouldBe(clientDataVersionId);
-//         response.StorageUrl.ShouldBe(storageUrl);
-//         response.CreatedAt.ShouldBe(createdInvoice.CreatedAt);
-//     }
-// }
+        response.ShouldNotBeNull();
+        response.Id.ShouldBe(createdInvoice.Id);
+        response.OrderId.ShouldBe(orderId);
+        response.ClietDataVersionId.ShouldBe(clientDataVersionId);
+        response.StorageUrl.ShouldBe(storageUrl);
+        response.CreatedAt.ShouldBe(createdInvoice.CreatedAt);
+    }
+}
