@@ -1,10 +1,10 @@
 using ECommerceStoreInvoice.Application.Common.FlowDescriptors;
 using ECommerceStoreInvoice.Application.Common.ResponsesDto.Orders;
 using ECommerceStoreInvoice.Application.Mapping;
-using ECommerceStoreInvoice.Domain.AggregatesModel.Common.ValueObjects;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate.Repositories;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate;
+using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate.ExternalServices;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate.Repositories;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.Repositories;
@@ -47,22 +47,31 @@ namespace ECommerceStoreInvoice.Application.Descriptors.Orders
             }
         }
 
-        [FlowStep(order: 5, bpmnId: "CreateProductVersions")]
-        public async Task<IReadOnlyCollection<ProductVersion>> CreateProductVersions(
+        [FlowStep(order: 5, bpmnId: "LoadProductSnapshots")]
+        public async Task<IReadOnlyCollection<ProductVersion>> LoadProductSnapshots(
             ShoppingCart shoppingCart,
-            IProductVersionRepository productVersionRepository)
+            IProductServiceClient productServiceClient,
+            IValidationPolicy<ProductVersion> productVersionValidationPolicy)
         {
-            var tasks = shoppingCart.Lines
-                .Select(line =>
-                    productVersionRepository.CreateProductVersion(
-                        new ProductVersion(
-                            line.ProductId,
-                            new Money(),
-                            "line.Name",
-                            "line.Brand")))
-                .ToArray();
+            var requestedIds = shoppingCart.Lines.Select(line => line.ProductId).Distinct().ToArray();
+            var externalProducts = await productServiceClient.GetProductsByIds(requestedIds);
+            var productsById = externalProducts.ToDictionary(product => product.ProductId);
+            var versions = new List<ProductVersion>();
 
-            return await Task.WhenAll(tasks);
+            foreach (var line in shoppingCart.Lines)
+            {
+                if (!productsById.TryGetValue(line.ProductId, out var product))
+                    throw new ResourceNotFoundException(nameof(ExternalProductSnapshot), line.ProductId, nameof(ProductVersion));
+
+                var version = new ProductVersion(product.ProductId, product.Price, product.Name, product.Brand);
+                var result = await productVersionValidationPolicy.Validate(version);
+                if (!result.IsValid)
+                    throw new ValidationException(result);
+
+                versions.Add(version);
+            }
+
+            return versions;
         }
 
         [FlowStep(order: 6, bpmnId: "MapOrderDomain")]
@@ -86,25 +95,33 @@ namespace ECommerceStoreInvoice.Application.Descriptors.Orders
             }
         }
 
-        [FlowStep(order: 9, bpmnId: "SaveOrder")]
+        [FlowStep(order: 9, bpmnId: "SaveProductVersions")]
+        public async Task<IReadOnlyCollection<ProductVersion>> SaveProductVersions(
+            IReadOnlyCollection<ProductVersion> productVersions,
+            IProductVersionRepository productVersionRepository)
+        {
+            return await productVersionRepository.CreateProductVersions(productVersions);
+        }
+
+        [FlowStep(order: 10, bpmnId: "SaveOrder")]
         public async Task<Order> SaveOrder(Order order, IOrderRepository orderRepository)
         {
             return await orderRepository.CreateOrder(order);
         }
 
-        [FlowStep(order: 10, bpmnId: "ClearShoppingCart")]
+        [FlowStep(order: 11, bpmnId: "ClearShoppingCart")]
         public void ClearShoppingCart(ShoppingCart shoppingCart)
         {
             shoppingCart.Clear();
         }
 
-        [FlowStep(order: 11, bpmnId: "SaveShoppingCart")]
+        [FlowStep(order: 12, bpmnId: "SaveShoppingCart")]
         public async Task SaveShoppingCart(ShoppingCart shoppingCart, IShoppingCartRepository shoppingCartRepository)
         {
             await shoppingCartRepository.UpdateShoppingCart(shoppingCart);
         }
 
-        [FlowStep(order: 12, bpmnId: "MapOrderResponse")]
+        [FlowStep(order: 13, bpmnId: "MapOrderResponse")]
         public OrderResponseDto MapToResponse(Order order, IReadOnlyCollection<ProductVersion> productVersions)
         {
             var productVersionDtos = productVersions
