@@ -24,6 +24,8 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Invoices
         private string? _cachedLineTemplate;
 
         public async Task<string> GenerateInvoicePdf(
+            Guid invoiceId,
+            Guid attemptId,
             Order order,
             IReadOnlyCollection<ProductVersion> productVersions,
             ClientDataVersionResponseDto? clientDataVersion)
@@ -43,8 +45,8 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Invoices
             var withStoreData = ApplyStoreTokens(withClientData);
             var withTotals = ApplyTotalsTokens(withStoreData, subtotal, tax, grandTotal, currency);
 
-            var invoiceHtml = ApplyFinalTokens(withTotals, order.Id);
-            var invoicePath = GetInvoicePdfPath(order.Id);
+            var invoiceHtml = ApplyFinalTokens(withTotals, invoiceId);
+            var invoicePath = GetInvoicePdfPath(invoiceId, attemptId);
 
             var page = await _browser!.NewPageAsync();
             try
@@ -255,6 +257,19 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Invoices
             var directory = GetInvoicesDirectoryPath();
             Directory.CreateDirectory(directory);
             return Path.Combine(directory, $"{orderId}.pdf");
+        }
+
+        internal string GetInvoicePdfPath(Guid invoiceId, Guid attemptId)
+        {
+            var directory = GetInvoicesDirectoryPath();
+            Directory.CreateDirectory(directory);
+            return Path.Combine(directory, $"{invoiceId:N}-{attemptId:N}.pdf");
+        }
+
+        public Task DeleteGeneratedPdf(Guid invoiceId, Guid attemptId)
+        {
+            File.Delete(GetInvoicePdfPath(invoiceId, attemptId));
+            return Task.CompletedTask;
         }
 
         internal string GetInvoicesDirectoryPath() => Path.Combine(ResolveSolutionRoot(), "Invoices");

@@ -48,7 +48,7 @@ namespace ECommerceStoreInvoice.Performance.Benchmarks.Invoices.Application
         [Benchmark]
         public async Task GenerateInvoicePdf_FullFlow()
         {
-            await _service.GenerateInvoicePdf(_order, _productVersions, _client);
+            await _service.GenerateInvoicePdf(Guid.NewGuid(), Guid.NewGuid(), _order, _productVersions, _client);
         }
 
         [GlobalCleanup]

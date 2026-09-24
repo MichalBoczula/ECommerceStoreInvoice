@@ -17,5 +17,9 @@ namespace ECommerceStoreInvoice.Infrastructure.Persistence.Invoices
 
         public required string StorageUrl { get; init; }
         public required DateTime CreatedAt { get; init; }
+        // Missing on older records: they are already completed invoices.
+        public string GenerationStatus { get; init; } = "Completed";
+        public string? GenerationAttemptId { get; init; }
+        public DateTime? GenerationLeaseUntil { get; init; }
     }
 }

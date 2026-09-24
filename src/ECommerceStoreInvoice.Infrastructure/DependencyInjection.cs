@@ -32,6 +32,7 @@ namespace ECommerceStoreInvoice.Infrastructure
 
             services.AddScoped<IProductVersionRepository, ProductVersionRepository>();
             services.AddScoped<IInvoiceRepository, InvoiceRepository>();
+            services.AddScoped<IInvoiceGenerationRepository, InvoiceGenerationRepository>();
             services.AddScoped<IShoppingCartRepository, ShoppingCartRepository>();
             services.AddScoped<IOrderRepository, OrderRepository>();
             services.AddScoped<IClientDataVersionRepository, ClientDataVersionRepository>();

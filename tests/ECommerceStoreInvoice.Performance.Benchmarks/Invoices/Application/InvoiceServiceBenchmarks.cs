@@ -28,6 +28,7 @@ namespace ECommerceStoreInvoice.Performance.Benchmarks.Invoices.Application
 
         // Mocks
         private readonly Mock<IInvoiceRepository> _invoiceRepoMock = new();
+        private readonly Mock<IInvoiceGenerationRepository> _generationRepoMock = new();
         private readonly Mock<IOrderRepository> _orderRepoMock = new();
         private readonly Mock<IClientDataVersionService> _clientServiceMock = new();
         private readonly Mock<IInvoicePdfService> _pdfServiceMock = new();
@@ -65,11 +66,16 @@ namespace ECommerceStoreInvoice.Performance.Benchmarks.Invoices.Application
 
             _invoiceRepoMock.Setup(x => x.GetInvoiceByOrderId(_orderId)).ReturnsAsync((Invoice?)null);
             _invoiceRepoMock.Setup(x => x.GetInvoiceById(_invoiceId)).ReturnsAsync(_sampleInvoice);
-            _invoiceRepoMock.Setup(x => x.CreateInvoice(It.IsAny<Invoice>())).ReturnsAsync(_sampleInvoice);
+            _generationRepoMock.Setup(x => x.TryClaimAsync(It.IsAny<Invoice>(), It.IsAny<Guid>()))
+                .ReturnsAsync((Invoice invoice, Guid attemptId) => new InvoiceGenerationClaim(invoice.Id, invoice.OrderId, invoice.ClientDataVersionId, attemptId));
+            _generationRepoMock.Setup(x => x.CompleteAsync(It.IsAny<InvoiceGenerationClaim>(), It.IsAny<string>()))
+                .ReturnsAsync(_sampleInvoice);
 
             _clientServiceMock.Setup(x => x.GetByClientId(_clientId)).ReturnsAsync(_clientResponse);
             _pdfServiceMock
                 .Setup(x => x.GenerateInvoicePdf(
+                    It.IsAny<Guid>(),
+                    It.IsAny<Guid>(),
                     It.IsAny<Order>(),
                     It.IsAny<IReadOnlyCollection<ProductVersion>>(),
                     It.IsAny<ClientDataVersionResponseDto?>()))
@@ -80,6 +86,7 @@ namespace ECommerceStoreInvoice.Performance.Benchmarks.Invoices.Application
             services.AddScoped<IInvoiceService, InvoiceService>();
 
             services.AddSingleton(_invoiceRepoMock.Object);
+            services.AddSingleton(_generationRepoMock.Object);
             services.AddSingleton(_orderRepoMock.Object);
             services.AddSingleton(_clientServiceMock.Object);
             services.AddSingleton(_pdfServiceMock.Object);
