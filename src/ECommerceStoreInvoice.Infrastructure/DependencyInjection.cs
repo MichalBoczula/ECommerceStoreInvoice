@@ -10,6 +10,8 @@ using ECommerceStoreInvoice.Infrastructure.Context;
 using ECommerceStoreInvoice.Infrastructure.Repositories;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using MongoDB.Driver;
 
 namespace ECommerceStoreInvoice.Infrastructure
 {
@@ -22,8 +24,11 @@ namespace ECommerceStoreInvoice.Infrastructure
             services.Configure<MongoDbSettings>(
                 configuration.GetSection(MongoDbSettings.SectionName));
 
-            services.AddSingleton<MongoDbContext>();
+            services.AddSingleton<IMongoClient>(provider =>
+                new MongoClient(provider.GetRequiredService<IOptions<MongoDbSettings>>().Value.ConnectionString));
+            services.AddScoped<MongoDbContext>();
             services.AddScoped<MongoInitializer>();
+            services.AddScoped<IOrderWriteTransaction, MongoOrderWriteTransaction>();
 
             services.AddScoped<IProductVersionRepository, ProductVersionRepository>();
             services.AddScoped<IInvoiceRepository, InvoiceRepository>();

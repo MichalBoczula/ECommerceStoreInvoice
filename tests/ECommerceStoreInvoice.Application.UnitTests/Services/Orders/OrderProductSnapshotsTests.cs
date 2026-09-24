@@ -78,6 +78,9 @@ public sealed class OrderProductSnapshotsTests
         response.TotalCurrency.ShouldBe("USD");
         cart.Lines.ShouldBeEmpty();
         setup.Orders.Verify(x => x.CreateOrder(It.IsAny<Order>()), Times.Once);
+        setup.Transaction.Verify(x => x.BeginAsync(It.IsAny<CancellationToken>()), Times.Once);
+        setup.Transaction.Verify(x => x.CommitAsync(It.IsAny<CancellationToken>()), Times.Once);
+        setup.Transaction.Verify(x => x.RollbackAsync(), Times.Never);
     }
 
     [Fact]
@@ -141,6 +144,27 @@ public sealed class OrderProductSnapshotsTests
         cart.Lines.Count.ShouldBe(1);
     }
 
+    [Fact]
+    public async Task CreateOrder_WhenCartWriteFails_RollsBackOrderTransaction()
+    {
+        var clientId = Guid.NewGuid();
+        var productId = Guid.NewGuid();
+        var setup = new Setup(Cart(clientId, (productId, 1)));
+        setup.Products.Setup(x => x.GetProductsByIds(It.IsAny<IEnumerable<Guid>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync([new ExternalProductSnapshot(productId, "Phone", "Brand", new Money(10m, "USD"))]);
+        setup.Versions.Setup(x => x.CreateProductVersions(It.IsAny<IReadOnlyCollection<ProductVersion>>()))
+            .ReturnsAsync((IReadOnlyCollection<ProductVersion> versions) => versions);
+        setup.Orders.Setup(x => x.CreateOrder(It.IsAny<Order>())).ReturnsAsync((Order order) => order);
+        setup.Carts.Setup(x => x.UpdateShoppingCart(It.IsAny<ShoppingCart>()))
+            .ThrowsAsync(new InvalidOperationException("Cart write failed"));
+
+        await Should.ThrowAsync<InvalidOperationException>(() => setup.Service.CreateOrder(clientId));
+
+        setup.Transaction.Verify(x => x.BeginAsync(It.IsAny<CancellationToken>()), Times.Once);
+        setup.Transaction.Verify(x => x.CommitAsync(It.IsAny<CancellationToken>()), Times.Never);
+        setup.Transaction.Verify(x => x.RollbackAsync(), Times.Once);
+    }
+
     private static ShoppingCart Cart(Guid clientId, params (Guid Id, int Quantity)[] items)
     {
         var cart = new ShoppingCart(clientId);
@@ -153,6 +177,7 @@ public sealed class OrderProductSnapshotsTests
         public Mock<IProductServiceClient> Products { get; } = new();
         public Mock<IProductVersionRepository> Versions { get; } = new();
         public Mock<IOrderRepository> Orders { get; } = new();
+        public Mock<IOrderWriteTransaction> Transaction { get; } = new();
         public Mock<IShoppingCartRepository> Carts { get; } = new();
         public Mock<IValidationPolicy<ProductVersion>> ProductPolicy { get; } = new();
         public Mock<IValidationPolicy<Order>> OrderPolicy { get; } = new();
@@ -167,14 +192,18 @@ public sealed class OrderProductSnapshotsTests
             OrderPolicy.Setup(x => x.Validate(It.IsAny<Order>())).ReturnsAsync(new ValidationResult());
             ProductPolicy.Setup(x => x.Validate(It.IsAny<ProductVersion>())).ReturnsAsync(new ValidationResult());
             Carts.Setup(x => x.GetShoppingCartByClientId(cart.ClientId)).ReturnsAsync(cart);
+            Transaction.Setup(x => x.BeginAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+            Transaction.Setup(x => x.CommitAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+            Transaction.Setup(x => x.RollbackAsync()).Returns(Task.CompletedTask);
 
             Service = new OrderService(
-                Orders.Object, Versions.Object, Carts.Object, guidPolicy.Object, OrderPolicy.Object,
+                Orders.Object, Transaction.Object, Versions.Object, Carts.Object, guidPolicy.Object, OrderPolicy.Object,
                 UpdateOrderPolicy.Object, Logger.Object, Products.Object, ProductPolicy.Object);
         }
 
         public void AssertNoWrites()
         {
+            Transaction.Verify(x => x.BeginAsync(It.IsAny<CancellationToken>()), Times.Never);
             Versions.Verify(x => x.CreateProductVersions(It.IsAny<IReadOnlyCollection<ProductVersion>>()), Times.Never);
             Orders.Verify(x => x.CreateOrder(It.IsAny<Order>()), Times.Never);
             Carts.Verify(x => x.UpdateShoppingCart(It.IsAny<ShoppingCart>()), Times.Never);

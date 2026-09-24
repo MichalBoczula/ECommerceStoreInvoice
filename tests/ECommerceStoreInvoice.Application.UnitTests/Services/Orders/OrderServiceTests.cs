@@ -58,6 +58,7 @@ public sealed class OrderServiceTests
             OrderStatus.Created);
 
         var orderRepositoryMock = new Mock<IOrderRepository>(MockBehavior.Strict);
+        var orderWriteTransactionMock = new Mock<IOrderWriteTransaction>(MockBehavior.Strict);
         var productVersionRepositoryMock = new Mock<IProductVersionRepository>(MockBehavior.Strict);
         var shoppingCartRepositoryMock = new Mock<IShoppingCartRepository>(MockBehavior.Strict);
         var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
@@ -108,6 +109,7 @@ public sealed class OrderServiceTests
 
         var sut = new OrderService(
             orderRepositoryMock.Object,
+            orderWriteTransactionMock.Object,
             productVersionRepositoryMock.Object,
             shoppingCartRepositoryMock.Object,
             guidValidationPolicyMock.Object,
@@ -151,6 +153,7 @@ public sealed class OrderServiceTests
         });
 
         var orderRepositoryMock = new Mock<IOrderRepository>(MockBehavior.Strict);
+        var orderWriteTransactionMock = new Mock<IOrderWriteTransaction>(MockBehavior.Strict);
         var productVersionRepositoryMock = new Mock<IProductVersionRepository>(MockBehavior.Strict);
         var shoppingCartRepositoryMock = new Mock<IShoppingCartRepository>(MockBehavior.Strict);
         var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
@@ -166,6 +169,7 @@ public sealed class OrderServiceTests
 
         var sut = new OrderService(
             orderRepositoryMock.Object,
+            orderWriteTransactionMock.Object,
             productVersionRepositoryMock.Object,
             shoppingCartRepositoryMock.Object,
             guidValidationPolicyMock.Object,
@@ -193,6 +197,7 @@ public sealed class OrderServiceTests
         var guidValidationResult = new ValidationResult();
 
         var orderRepositoryMock = new Mock<IOrderRepository>(MockBehavior.Strict);
+        var orderWriteTransactionMock = new Mock<IOrderWriteTransaction>(MockBehavior.Strict);
         var productVersionRepositoryMock = new Mock<IProductVersionRepository>(MockBehavior.Strict);
         var shoppingCartRepositoryMock = new Mock<IShoppingCartRepository>(MockBehavior.Strict);
         var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
@@ -215,6 +220,7 @@ public sealed class OrderServiceTests
 
         var sut = new OrderService(
             orderRepositoryMock.Object,
+            orderWriteTransactionMock.Object,
             productVersionRepositoryMock.Object,
             shoppingCartRepositoryMock.Object,
             guidValidationPolicyMock.Object,
@@ -250,6 +256,7 @@ public sealed class OrderServiceTests
         });
 
         var orderRepositoryMock = new Mock<IOrderRepository>(MockBehavior.Strict);
+        var orderWriteTransactionMock = new Mock<IOrderWriteTransaction>(MockBehavior.Strict);
         var productVersionRepositoryMock = new Mock<IProductVersionRepository>(MockBehavior.Strict);
         var shoppingCartRepositoryMock = new Mock<IShoppingCartRepository>(MockBehavior.Strict);
         var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
@@ -284,6 +291,7 @@ public sealed class OrderServiceTests
 
         var sut = new OrderService(
             orderRepositoryMock.Object,
+            orderWriteTransactionMock.Object,
             productVersionRepositoryMock.Object,
             shoppingCartRepositoryMock.Object,
             guidValidationPolicyMock.Object,
@@ -314,6 +322,7 @@ public sealed class OrderServiceTests
             .ToList();
 
         var orderRepositoryMock = new Mock<IOrderRepository>(MockBehavior.Strict);
+        var orderWriteTransactionMock = new Mock<IOrderWriteTransaction>(MockBehavior.Strict);
         var productVersionRepositoryMock = new Mock<IProductVersionRepository>(MockBehavior.Strict);
         var shoppingCartRepositoryMock = new Mock<IShoppingCartRepository>(MockBehavior.Strict);
         var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
@@ -336,6 +345,7 @@ public sealed class OrderServiceTests
 
         var sut = new OrderService(
             orderRepositoryMock.Object,
+            orderWriteTransactionMock.Object,
             productVersionRepositoryMock.Object,
             shoppingCartRepositoryMock.Object,
             guidValidationPolicyMock.Object,
@@ -387,6 +397,7 @@ public sealed class OrderServiceTests
         });
 
         var orderRepositoryMock = new Mock<IOrderRepository>(MockBehavior.Strict);
+        var orderWriteTransactionMock = new Mock<IOrderWriteTransaction>(MockBehavior.Strict);
         var productVersionRepositoryMock = new Mock<IProductVersionRepository>(MockBehavior.Strict);
         var shoppingCartRepositoryMock = new Mock<IShoppingCartRepository>(MockBehavior.Strict);
         var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
@@ -402,6 +413,7 @@ public sealed class OrderServiceTests
 
         var sut = new OrderService(
             orderRepositoryMock.Object,
+            orderWriteTransactionMock.Object,
             productVersionRepositoryMock.Object,
             shoppingCartRepositoryMock.Object,
             guidValidationPolicyMock.Object,
@@ -428,6 +440,7 @@ public sealed class OrderServiceTests
         var productVersions = BuildProductVersions(order);
 
         var orderRepositoryMock = new Mock<IOrderRepository>(MockBehavior.Strict);
+        var orderWriteTransactionMock = new Mock<IOrderWriteTransaction>(MockBehavior.Strict);
         var productVersionRepositoryMock = new Mock<IProductVersionRepository>(MockBehavior.Strict);
         var shoppingCartRepositoryMock = new Mock<IShoppingCartRepository>(MockBehavior.Strict);
         var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
@@ -450,6 +463,7 @@ public sealed class OrderServiceTests
 
         var sut = new OrderService(
             orderRepositoryMock.Object,
+            orderWriteTransactionMock.Object,
             productVersionRepositoryMock.Object,
             shoppingCartRepositoryMock.Object,
             guidValidationPolicyMock.Object,
@@ -480,6 +494,7 @@ public sealed class OrderServiceTests
         var guidValidationResult = new ValidationResult();
 
         var orderRepositoryMock = new Mock<IOrderRepository>(MockBehavior.Strict);
+        var orderWriteTransactionMock = new Mock<IOrderWriteTransaction>(MockBehavior.Strict);
         var productVersionRepositoryMock = new Mock<IProductVersionRepository>(MockBehavior.Strict);
         var shoppingCartRepositoryMock = new Mock<IShoppingCartRepository>(MockBehavior.Strict);
         var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
@@ -502,6 +517,7 @@ public sealed class OrderServiceTests
 
         var sut = new OrderService(
             orderRepositoryMock.Object,
+            orderWriteTransactionMock.Object,
             productVersionRepositoryMock.Object,
             shoppingCartRepositoryMock.Object,
             guidValidationPolicyMock.Object,
@@ -530,6 +546,7 @@ public sealed class OrderServiceTests
         var productVersions = BuildProductVersions(existingOrder);
 
         var orderRepositoryMock = new Mock<IOrderRepository>(MockBehavior.Strict);
+        var orderWriteTransactionMock = new Mock<IOrderWriteTransaction>(MockBehavior.Strict);
         var productVersionRepositoryMock = new Mock<IProductVersionRepository>(MockBehavior.Strict);
         var shoppingCartRepositoryMock = new Mock<IShoppingCartRepository>(MockBehavior.Strict);
         var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
@@ -566,6 +583,7 @@ public sealed class OrderServiceTests
 
         var sut = new OrderService(
             orderRepositoryMock.Object,
+            orderWriteTransactionMock.Object,
             productVersionRepositoryMock.Object,
             shoppingCartRepositoryMock.Object,
             guidValidationPolicyMock.Object,
@@ -610,6 +628,7 @@ public sealed class OrderServiceTests
         });
 
         var orderRepositoryMock = new Mock<IOrderRepository>(MockBehavior.Strict);
+        var orderWriteTransactionMock = new Mock<IOrderWriteTransaction>(MockBehavior.Strict);
         var productVersionRepositoryMock = new Mock<IProductVersionRepository>(MockBehavior.Strict);
         var shoppingCartRepositoryMock = new Mock<IShoppingCartRepository>(MockBehavior.Strict);
         var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
@@ -639,6 +658,7 @@ public sealed class OrderServiceTests
 
         var sut = new OrderService(
             orderRepositoryMock.Object,
+            orderWriteTransactionMock.Object,
             productVersionRepositoryMock.Object,
             shoppingCartRepositoryMock.Object,
             guidValidationPolicyMock.Object,
@@ -665,6 +685,7 @@ public sealed class OrderServiceTests
         var guidValidationResult = new ValidationResult();
 
         var orderRepositoryMock = new Mock<IOrderRepository>(MockBehavior.Strict);
+        var orderWriteTransactionMock = new Mock<IOrderWriteTransaction>(MockBehavior.Strict);
         var productVersionRepositoryMock = new Mock<IProductVersionRepository>(MockBehavior.Strict);
         var shoppingCartRepositoryMock = new Mock<IShoppingCartRepository>(MockBehavior.Strict);
         var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
@@ -687,6 +708,7 @@ public sealed class OrderServiceTests
 
         var sut = new OrderService(
             orderRepositoryMock.Object,
+            orderWriteTransactionMock.Object,
             productVersionRepositoryMock.Object,
             shoppingCartRepositoryMock.Object,
             guidValidationPolicyMock.Object,

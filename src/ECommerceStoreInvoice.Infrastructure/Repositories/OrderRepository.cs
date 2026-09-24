@@ -16,7 +16,10 @@ namespace ECommerceStoreInvoice.Infrastructure.Repositories
         public async Task<Order> CreateOrder(Order order)
         {
             var document = OrderMapping.MapToDocument(order);
-            await _context.Orders.InsertOneAsync(document);
+            if (_context.CurrentSession is { } session)
+                await _context.Orders.InsertOneAsync(session, document);
+            else
+                await _context.Orders.InsertOneAsync(document);
             return order;
         }
 
