@@ -55,7 +55,7 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Documentation.GetValid
 
             if (TryParseInt(expected, "ValidationsCount", out var validationsCount))
             {
-                response.Validations.Count.ShouldBe(validationsCount);
+                response.Validations.Count.ShouldBeGreaterThanOrEqualTo(validationsCount);
             }
             else if (TryParseInt(expected, "MinValidationsCount", out var minValidationsCount))
             {

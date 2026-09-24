@@ -202,7 +202,7 @@ public sealed class OrderInvoiceAcceptanceSteps(ScenarioApiContext context)
         _clientId = Guid.NewGuid();
         _productId = Guid.NewGuid();
         using var response = await context.HttpClient.PostAsync($"/shopping-carts/{_clientId}", null);
-        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        response.StatusCode.ShouldBe(HttpStatusCode.OK, await response.Content.ReadAsStringAsync());
         await FillCart(int.TryParse(Values(table).GetValueOrDefault("Quantity"), out var quantity) ? quantity : 2);
     }
 
@@ -250,7 +250,7 @@ public sealed class OrderInvoiceAcceptanceSteps(ScenarioApiContext context)
     {
         using var response = await context.HttpClient.PatchAsJsonAsync($"/orders/{_orderId}/status",
             new UpdateOrderStatusRequestDto { Status = "Paid" }, context.JsonOptions);
-        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        response.StatusCode.ShouldBe(HttpStatusCode.OK, await response.Content.ReadAsStringAsync());
     }
 
     private async Task CreateInvoice()
@@ -271,7 +271,8 @@ public sealed class OrderInvoiceAcceptanceSteps(ScenarioApiContext context)
     private async Task<T> ReadSuccess<T>(Table table) where T : class
     {
         context.Response.ShouldNotBeNull();
-        context.Response.StatusCode.ShouldBe((HttpStatusCode)int.Parse(Values(table)["StatusCode"], CultureInfo.InvariantCulture));
+        context.Response.StatusCode.ShouldBe((HttpStatusCode)int.Parse(Values(table)["StatusCode"], CultureInfo.InvariantCulture),
+            await context.Response.Content.ReadAsStringAsync());
         var value = await context.Response.Content.ReadFromJsonAsync<T>(context.JsonOptions);
         value.ShouldNotBeNull();
         return value;
