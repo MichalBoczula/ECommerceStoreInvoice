@@ -6,6 +6,8 @@ using ECommerceStoreInvoice.Application.Services.Abstract.Orders;
 using ECommerceStoreInvoice.Domain.AggregatesModel.Common.Enums;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate.Repositories;
+using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate;
+using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate.ExternalServices;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate.Repositories;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.Repositories;
 using ECommerceStoreInvoice.Domain.Validation.Abstract;
@@ -19,7 +21,9 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Orders
         IValidationPolicy<Guid> guidValidationPolicy,
         IValidationPolicy<Order> orderValidationPolicy,
         IValidationPolicy<(Order order, OrderStatus newStatus)> updateOrderValidationPolicy,
-        ILogger<OrderService> logger)
+        ILogger<OrderService> logger,
+        IProductServiceClient productServiceClient,
+        IValidationPolicy<ProductVersion> productVersionValidationPolicy)
         : IOrderService
     {
         public async Task<OrderResponseDto> CreateOrder(Guid clientId)
@@ -34,12 +38,19 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Orders
             var shoppingCart = await descriptor.LoadShoppingCart(clientId, shoppingCartRepository);
             descriptor.ThrowNotFoundExceptionIfShoppingCartMissing(clientId, shoppingCart);
 
-            var productVersions = await descriptor.CreateProductVersions(shoppingCart!, productVersionRepository);
+            var requestedIds = descriptor.GetRequestedProductIds(shoppingCart!);
+            var externalProducts = await descriptor.FetchExternalProducts(requestedIds, productServiceClient);
+            descriptor.ThrowNotFoundExceptionIfProductMissing(requestedIds, externalProducts);
+
+            var productVersions = descriptor.CreateProductSnapshots(shoppingCart!, externalProducts);
+            var productValidationResults = await descriptor.ValidateProductSnapshots(productVersions, productVersionValidationPolicy);
+            descriptor.ThrowValidationExceptionIfProductSnapshotInvalid(productValidationResults);
 
             var order = descriptor.MapToDomain(shoppingCart!, productVersions);
             validationResult = await descriptor.ValidateOrder(order, orderValidationPolicy);
             descriptor.ThrowValidationExceptionIfOrderInvalid(validationResult);
 
+            await descriptor.SaveProductVersions(productVersions, productVersionRepository);
             var createdOrder = await descriptor.SaveOrder(order, orderRepository);
             descriptor.ClearShoppingCart(shoppingCart!);
             await descriptor.SaveShoppingCart(shoppingCart!, shoppingCartRepository);
