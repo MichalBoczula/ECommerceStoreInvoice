@@ -64,6 +64,8 @@ public sealed class OrderServiceTests
         var orderValidationPolicyMock = new Mock<IValidationPolicy<Order>>(MockBehavior.Strict);
         var updateOrderValidationPolicyMock = new Mock<IValidationPolicy<(Order order, OrderStatus newStatus)>>(MockBehavior.Strict);
         var loggerMock = new Mock<ILogger<OrderService>>(MockBehavior.Loose);
+        var productServiceClientMock = new Mock<IProductServiceClient>(MockBehavior.Strict);
+        var productVersionValidationPolicyMock = new Mock<IValidationPolicy<ProductVersion>>(MockBehavior.Strict);
 
         var sequence = new MockSequence();
         guidValidationPolicyMock
@@ -112,8 +114,8 @@ public sealed class OrderServiceTests
             orderValidationPolicyMock.Object,
             updateOrderValidationPolicyMock.Object,
             loggerMock.Object,
-            Mock.Of<IProductServiceClient>(),
-            Mock.Of<IValidationPolicy<ProductVersion>>());
+            productServiceClientMock.Object,
+            productVersionValidationPolicyMock.Object);
 
         // Act
         var response = await sut.CreateOrder(clientId);
@@ -155,6 +157,8 @@ public sealed class OrderServiceTests
         var orderValidationPolicyMock = new Mock<IValidationPolicy<Order>>(MockBehavior.Strict);
         var updateOrderValidationPolicyMock = new Mock<IValidationPolicy<(Order order, OrderStatus newStatus)>>(MockBehavior.Strict);
         var loggerMock = new Mock<ILogger<OrderService>>(MockBehavior.Loose);
+        var productServiceClientMock = new Mock<IProductServiceClient>(MockBehavior.Strict);
+        var productVersionValidationPolicyMock = new Mock<IValidationPolicy<ProductVersion>>(MockBehavior.Strict);
 
         guidValidationPolicyMock
             .Setup(policy => policy.Validate(clientId))
@@ -168,8 +172,8 @@ public sealed class OrderServiceTests
             orderValidationPolicyMock.Object,
             updateOrderValidationPolicyMock.Object,
             loggerMock.Object,
-            Mock.Of<IProductServiceClient>(),
-            Mock.Of<IValidationPolicy<ProductVersion>>());
+            productServiceClientMock.Object,
+            productVersionValidationPolicyMock.Object);
 
         // Act / Assert
         await Should.ThrowAsync<ValidationException>(() => sut.CreateOrder(clientId));
@@ -195,6 +199,8 @@ public sealed class OrderServiceTests
         var orderValidationPolicyMock = new Mock<IValidationPolicy<Order>>(MockBehavior.Strict);
         var updateOrderValidationPolicyMock = new Mock<IValidationPolicy<(Order order, OrderStatus newStatus)>>(MockBehavior.Strict);
         var loggerMock = new Mock<ILogger<OrderService>>(MockBehavior.Loose);
+        var productServiceClientMock = new Mock<IProductServiceClient>(MockBehavior.Strict);
+        var productVersionValidationPolicyMock = new Mock<IValidationPolicy<ProductVersion>>(MockBehavior.Strict);
 
         var sequence = new MockSequence();
         guidValidationPolicyMock
@@ -215,8 +221,8 @@ public sealed class OrderServiceTests
             orderValidationPolicyMock.Object,
             updateOrderValidationPolicyMock.Object,
             loggerMock.Object,
-            Mock.Of<IProductServiceClient>(),
-            Mock.Of<IValidationPolicy<ProductVersion>>());
+            productServiceClientMock.Object,
+            productVersionValidationPolicyMock.Object);
 
         // Act / Assert
         await Should.ThrowAsync<ResourceNotFoundException>(() => sut.CreateOrder(clientId));
@@ -250,6 +256,8 @@ public sealed class OrderServiceTests
         var orderValidationPolicyMock = new Mock<IValidationPolicy<Order>>(MockBehavior.Strict);
         var updateOrderValidationPolicyMock = new Mock<IValidationPolicy<(Order order, OrderStatus newStatus)>>(MockBehavior.Strict);
         var loggerMock = new Mock<ILogger<OrderService>>(MockBehavior.Loose);
+        var productServiceClientMock = new Mock<IProductServiceClient>(MockBehavior.Strict);
+        var productVersionValidationPolicyMock = new Mock<IValidationPolicy<ProductVersion>>(MockBehavior.Strict);
 
         var sequence = new MockSequence();
         guidValidationPolicyMock
@@ -282,8 +290,8 @@ public sealed class OrderServiceTests
             orderValidationPolicyMock.Object,
             updateOrderValidationPolicyMock.Object,
             loggerMock.Object,
-            Mock.Of<IProductServiceClient>(),
-            Mock.Of<IValidationPolicy<ProductVersion>>());
+            productServiceClientMock.Object,
+            productVersionValidationPolicyMock.Object);
 
         // Act / Assert
         await Should.ThrowAsync<ValidationException>(() => sut.CreateOrder(clientId));
@@ -312,6 +320,8 @@ public sealed class OrderServiceTests
         var orderValidationPolicyMock = new Mock<IValidationPolicy<Order>>(MockBehavior.Strict);
         var updateOrderValidationPolicyMock = new Mock<IValidationPolicy<(Order order, OrderStatus newStatus)>>(MockBehavior.Strict);
         var loggerMock = new Mock<ILogger<OrderService>>(MockBehavior.Loose);
+        var productServiceClientMock = new Mock<IProductServiceClient>(MockBehavior.Strict);
+        var productVersionValidationPolicyMock = new Mock<IValidationPolicy<ProductVersion>>(MockBehavior.Strict);
 
         var sequence = new MockSequence();
         guidValidationPolicyMock
@@ -332,8 +342,8 @@ public sealed class OrderServiceTests
             orderValidationPolicyMock.Object,
             updateOrderValidationPolicyMock.Object,
             loggerMock.Object,
-            Mock.Of<IProductServiceClient>(),
-            Mock.Of<IValidationPolicy<ProductVersion>>());
+            productServiceClientMock.Object,
+            productVersionValidationPolicyMock.Object);
 
         // Act
         var response = await sut.GetOrdersByClientId(clientId);
@@ -383,6 +393,8 @@ public sealed class OrderServiceTests
         var orderValidationPolicyMock = new Mock<IValidationPolicy<Order>>(MockBehavior.Strict);
         var updateOrderValidationPolicyMock = new Mock<IValidationPolicy<(Order order, OrderStatus newStatus)>>(MockBehavior.Strict);
         var loggerMock = new Mock<ILogger<OrderService>>(MockBehavior.Loose);
+        var productServiceClientMock = new Mock<IProductServiceClient>(MockBehavior.Strict);
+        var productVersionValidationPolicyMock = new Mock<IValidationPolicy<ProductVersion>>(MockBehavior.Strict);
 
         guidValidationPolicyMock
             .Setup(policy => policy.Validate(clientId))
@@ -396,8 +408,8 @@ public sealed class OrderServiceTests
             orderValidationPolicyMock.Object,
             updateOrderValidationPolicyMock.Object,
             loggerMock.Object,
-            Mock.Of<IProductServiceClient>(),
-            Mock.Of<IValidationPolicy<ProductVersion>>());
+            productServiceClientMock.Object,
+            productVersionValidationPolicyMock.Object);
 
         // Act / Assert
         await Should.ThrowAsync<ValidationException>(() => sut.GetOrdersByClientId(clientId));
@@ -422,6 +434,8 @@ public sealed class OrderServiceTests
         var orderValidationPolicyMock = new Mock<IValidationPolicy<Order>>(MockBehavior.Strict);
         var updateOrderValidationPolicyMock = new Mock<IValidationPolicy<(Order order, OrderStatus newStatus)>>(MockBehavior.Strict);
         var loggerMock = new Mock<ILogger<OrderService>>(MockBehavior.Loose);
+        var productServiceClientMock = new Mock<IProductServiceClient>(MockBehavior.Strict);
+        var productVersionValidationPolicyMock = new Mock<IValidationPolicy<ProductVersion>>(MockBehavior.Strict);
 
         var sequence = new MockSequence();
         guidValidationPolicyMock
@@ -442,8 +456,8 @@ public sealed class OrderServiceTests
             orderValidationPolicyMock.Object,
             updateOrderValidationPolicyMock.Object,
             loggerMock.Object,
-            Mock.Of<IProductServiceClient>(),
-            Mock.Of<IValidationPolicy<ProductVersion>>());
+            productServiceClientMock.Object,
+            productVersionValidationPolicyMock.Object);
 
         // Act
         var response = await sut.GetOrderByOrderId(orderId);
@@ -472,6 +486,8 @@ public sealed class OrderServiceTests
         var orderValidationPolicyMock = new Mock<IValidationPolicy<Order>>(MockBehavior.Strict);
         var updateOrderValidationPolicyMock = new Mock<IValidationPolicy<(Order order, OrderStatus newStatus)>>(MockBehavior.Strict);
         var loggerMock = new Mock<ILogger<OrderService>>(MockBehavior.Loose);
+        var productServiceClientMock = new Mock<IProductServiceClient>(MockBehavior.Strict);
+        var productVersionValidationPolicyMock = new Mock<IValidationPolicy<ProductVersion>>(MockBehavior.Strict);
 
         var sequence = new MockSequence();
         guidValidationPolicyMock
@@ -492,8 +508,8 @@ public sealed class OrderServiceTests
             orderValidationPolicyMock.Object,
             updateOrderValidationPolicyMock.Object,
             loggerMock.Object,
-            Mock.Of<IProductServiceClient>(),
-            Mock.Of<IValidationPolicy<ProductVersion>>());
+            productServiceClientMock.Object,
+            productVersionValidationPolicyMock.Object);
 
         // Act / Assert
         await Should.ThrowAsync<ResourceNotFoundException>(() => sut.GetOrderByOrderId(orderId));
@@ -520,6 +536,8 @@ public sealed class OrderServiceTests
         var orderValidationPolicyMock = new Mock<IValidationPolicy<Order>>(MockBehavior.Strict);
         var updateOrderValidationPolicyMock = new Mock<IValidationPolicy<(Order order, OrderStatus newStatus)>>(MockBehavior.Strict);
         var loggerMock = new Mock<ILogger<OrderService>>(MockBehavior.Loose);
+        var productServiceClientMock = new Mock<IProductServiceClient>(MockBehavior.Strict);
+        var productVersionValidationPolicyMock = new Mock<IValidationPolicy<ProductVersion>>(MockBehavior.Strict);
 
         var sequence = new MockSequence();
         guidValidationPolicyMock
@@ -554,8 +572,8 @@ public sealed class OrderServiceTests
             orderValidationPolicyMock.Object,
             updateOrderValidationPolicyMock.Object,
             loggerMock.Object,
-            Mock.Of<IProductServiceClient>(),
-            Mock.Of<IValidationPolicy<ProductVersion>>());
+            productServiceClientMock.Object,
+            productVersionValidationPolicyMock.Object);
 
         // Act
         var response = await sut.UpdateOrderStatus(orderId, request);
@@ -598,6 +616,8 @@ public sealed class OrderServiceTests
         var orderValidationPolicyMock = new Mock<IValidationPolicy<Order>>(MockBehavior.Strict);
         var updateOrderValidationPolicyMock = new Mock<IValidationPolicy<(Order order, OrderStatus newStatus)>>(MockBehavior.Strict);
         var loggerMock = new Mock<ILogger<OrderService>>(MockBehavior.Loose);
+        var productServiceClientMock = new Mock<IProductServiceClient>(MockBehavior.Strict);
+        var productVersionValidationPolicyMock = new Mock<IValidationPolicy<ProductVersion>>(MockBehavior.Strict);
 
         var sequence = new MockSequence();
         guidValidationPolicyMock
@@ -625,8 +645,8 @@ public sealed class OrderServiceTests
             orderValidationPolicyMock.Object,
             updateOrderValidationPolicyMock.Object,
             loggerMock.Object,
-            Mock.Of<IProductServiceClient>(),
-            Mock.Of<IValidationPolicy<ProductVersion>>());
+            productServiceClientMock.Object,
+            productVersionValidationPolicyMock.Object);
 
         // Act / Assert
         await Should.ThrowAsync<ValidationException>(() => sut.UpdateOrderStatus(orderId, request));
@@ -651,6 +671,8 @@ public sealed class OrderServiceTests
         var orderValidationPolicyMock = new Mock<IValidationPolicy<Order>>(MockBehavior.Strict);
         var updateOrderValidationPolicyMock = new Mock<IValidationPolicy<(Order order, OrderStatus newStatus)>>(MockBehavior.Strict);
         var loggerMock = new Mock<ILogger<OrderService>>(MockBehavior.Loose);
+        var productServiceClientMock = new Mock<IProductServiceClient>(MockBehavior.Strict);
+        var productVersionValidationPolicyMock = new Mock<IValidationPolicy<ProductVersion>>(MockBehavior.Strict);
 
         var sequence = new MockSequence();
         guidValidationPolicyMock
@@ -671,8 +693,8 @@ public sealed class OrderServiceTests
             orderValidationPolicyMock.Object,
             updateOrderValidationPolicyMock.Object,
             loggerMock.Object,
-            Mock.Of<IProductServiceClient>(),
-            Mock.Of<IValidationPolicy<ProductVersion>>());
+            productServiceClientMock.Object,
+            productVersionValidationPolicyMock.Object);
 
         // Act / Assert
         await Should.ThrowAsync<ValidationException>(() => sut.UpdateOrderStatus(orderId, request));

@@ -47,46 +47,75 @@ namespace ECommerceStoreInvoice.Application.Descriptors.Orders
             }
         }
 
-        [FlowStep(order: 5, bpmnId: "LoadProductSnapshots")]
-        public async Task<IReadOnlyCollection<ProductVersion>> LoadProductSnapshots(
-            ShoppingCart shoppingCart,
-            IProductServiceClient productServiceClient,
-            IValidationPolicy<ProductVersion> productVersionValidationPolicy)
+        [FlowStep(order: 5, bpmnId: "GetRequestedProductIds")]
+        public IReadOnlyCollection<Guid> GetRequestedProductIds(ShoppingCart shoppingCart)
         {
-            var requestedIds = shoppingCart.Lines.Select(line => line.ProductId).Distinct().ToArray();
-            var externalProducts = await productServiceClient.GetProductsByIds(requestedIds);
-            var productsById = externalProducts.ToDictionary(product => product.ProductId);
-            var versions = new List<ProductVersion>();
-
-            foreach (var line in shoppingCart.Lines)
-            {
-                if (!productsById.TryGetValue(line.ProductId, out var product))
-                    throw new ResourceNotFoundException(nameof(ExternalProductSnapshot), line.ProductId, nameof(ProductVersion));
-
-                var version = new ProductVersion(product.ProductId, product.Price, product.Name, product.Brand);
-                var result = await productVersionValidationPolicy.Validate(version);
-                if (!result.IsValid)
-                    throw new ValidationException(result);
-
-                versions.Add(version);
-            }
-
-            return versions;
+            return shoppingCart.Lines.Select(line => line.ProductId).Distinct().ToArray();
         }
 
-        [FlowStep(order: 6, bpmnId: "MapOrderDomain")]
+        [FlowStep(order: 6, bpmnId: "FetchExternalProducts")]
+        public async Task<IReadOnlyCollection<ExternalProductSnapshot>> FetchExternalProducts(
+            IReadOnlyCollection<Guid> requestedIds, IProductServiceClient productServiceClient)
+        {
+            return await productServiceClient.GetProductsByIds(requestedIds);
+        }
+
+        [FlowStep(order: 7, bpmnId: "EnsureAllProductsExist")]
+        public void ThrowNotFoundExceptionIfProductMissing(
+            IReadOnlyCollection<Guid> requestedIds, IReadOnlyCollection<ExternalProductSnapshot> externalProducts)
+        {
+            var foundIds = externalProducts.Select(product => product.ProductId).ToHashSet();
+            var missingId = requestedIds.FirstOrDefault(id => !foundIds.Contains(id));
+            if (missingId != Guid.Empty)
+                throw new ResourceNotFoundException(nameof(FetchExternalProducts), missingId, nameof(ExternalProductSnapshot));
+        }
+
+        [FlowStep(order: 8, bpmnId: "CreateProductSnapshots")]
+        public IReadOnlyCollection<ProductVersion> CreateProductSnapshots(
+            ShoppingCart shoppingCart, IReadOnlyCollection<ExternalProductSnapshot> externalProducts)
+        {
+            var productsById = externalProducts.ToDictionary(product => product.ProductId);
+            return shoppingCart.Lines.Select(line =>
+            {
+                var product = productsById[line.ProductId];
+                return new ProductVersion(product.ProductId, product.Price, product.Name, product.Brand);
+            }).ToList();
+        }
+
+        [FlowStep(order: 9, bpmnId: "ValidateProductSnapshots")]
+        public async Task<IReadOnlyCollection<ValidationResult>> ValidateProductSnapshots(
+            IReadOnlyCollection<ProductVersion> productVersions,
+            IValidationPolicy<ProductVersion> productVersionValidationPolicy)
+        {
+            var results = new List<ValidationResult>();
+            foreach (var version in productVersions)
+                results.Add(await productVersionValidationPolicy.Validate(version));
+
+            return results;
+        }
+
+        [FlowStep(order: 10, bpmnId: "EnsureProductSnapshotsValid")]
+        public void ThrowValidationExceptionIfProductSnapshotInvalid(
+            IReadOnlyCollection<ValidationResult> validationResults)
+        {
+            var firstInvalid = validationResults.FirstOrDefault(result => !result.IsValid);
+            if (firstInvalid is not null)
+                throw new ValidationException(firstInvalid);
+        }
+
+        [FlowStep(order: 11, bpmnId: "MapOrderDomain")]
         public Order MapToDomain(ShoppingCart shoppingCart, IReadOnlyCollection<ProductVersion> productVersions)
         {
             return MappingConfig.MapToDomain(shoppingCart, productVersions);
         }
 
-        [FlowStep(order: 7, bpmnId: "ValidateOrder")]
+        [FlowStep(order: 12, bpmnId: "ValidateOrder")]
         public async Task<ValidationResult> ValidateOrder(Order order, IValidationPolicy<Order> orderValidationPolicy)
         {
             return await orderValidationPolicy.Validate(order);
         }
 
-        [FlowStep(order: 8, bpmnId: "IsOrderValid")]
+        [FlowStep(order: 13, bpmnId: "IsOrderValid")]
         public void ThrowValidationExceptionIfOrderInvalid(ValidationResult validationResult)
         {
             if (!validationResult.IsValid)
@@ -95,7 +124,7 @@ namespace ECommerceStoreInvoice.Application.Descriptors.Orders
             }
         }
 
-        [FlowStep(order: 9, bpmnId: "SaveProductVersions")]
+        [FlowStep(order: 14, bpmnId: "SaveProductVersions")]
         public async Task<IReadOnlyCollection<ProductVersion>> SaveProductVersions(
             IReadOnlyCollection<ProductVersion> productVersions,
             IProductVersionRepository productVersionRepository)
@@ -103,25 +132,25 @@ namespace ECommerceStoreInvoice.Application.Descriptors.Orders
             return await productVersionRepository.CreateProductVersions(productVersions);
         }
 
-        [FlowStep(order: 10, bpmnId: "SaveOrder")]
+        [FlowStep(order: 15, bpmnId: "SaveOrder")]
         public async Task<Order> SaveOrder(Order order, IOrderRepository orderRepository)
         {
             return await orderRepository.CreateOrder(order);
         }
 
-        [FlowStep(order: 11, bpmnId: "ClearShoppingCart")]
+        [FlowStep(order: 16, bpmnId: "ClearShoppingCart")]
         public void ClearShoppingCart(ShoppingCart shoppingCart)
         {
             shoppingCart.Clear();
         }
 
-        [FlowStep(order: 12, bpmnId: "SaveShoppingCart")]
+        [FlowStep(order: 17, bpmnId: "SaveShoppingCart")]
         public async Task SaveShoppingCart(ShoppingCart shoppingCart, IShoppingCartRepository shoppingCartRepository)
         {
             await shoppingCartRepository.UpdateShoppingCart(shoppingCart);
         }
 
-        [FlowStep(order: 13, bpmnId: "MapOrderResponse")]
+        [FlowStep(order: 18, bpmnId: "MapOrderResponse")]
         public OrderResponseDto MapToResponse(Order order, IReadOnlyCollection<ProductVersion> productVersions)
         {
             var productVersionDtos = productVersions

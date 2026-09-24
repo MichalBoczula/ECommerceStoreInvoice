@@ -20,6 +20,24 @@ namespace ECommerceStoreInvoice.Application.UnitTests.Services.Orders;
 public sealed class OrderProductSnapshotsTests
 {
     [Fact]
+    public void CreateOrderFlow_DescribesFetchCreateAndValidationAsSeparateSteps()
+    {
+        var flow = new OrderDescriptorService().GetCreateOrderDescriptor();
+        var names = flow.Steps.Select(step => step.StepName).ToList();
+
+        names.Skip(4).Take(6).ShouldBe(new[]
+        {
+            "GetRequestedProductIds",
+            "FetchExternalProducts",
+            "ThrowNotFoundExceptionIfProductMissing",
+            "CreateProductSnapshots",
+            "ValidateProductSnapshots",
+            "ThrowValidationExceptionIfProductSnapshotInvalid"
+        });
+        flow.Steps.Select(step => step.Order).ShouldBe(Enumerable.Range(1, flow.Steps.Count));
+    }
+
+    [Fact]
     public async Task CreateOrder_UsesProductsSnapshotsInCartOrderAndPersistsTheirRealPrices()
     {
         var clientId = Guid.NewGuid();
@@ -138,6 +156,8 @@ public sealed class OrderProductSnapshotsTests
         public Mock<IShoppingCartRepository> Carts { get; } = new();
         public Mock<IValidationPolicy<ProductVersion>> ProductPolicy { get; } = new();
         public Mock<IValidationPolicy<Order>> OrderPolicy { get; } = new();
+        public Mock<IValidationPolicy<(Order order, OrderStatus newStatus)>> UpdateOrderPolicy { get; } = new();
+        public Mock<ILogger<OrderService>> Logger { get; } = new();
         public OrderService Service { get; }
 
         public Setup(ShoppingCart cart)
@@ -150,8 +170,7 @@ public sealed class OrderProductSnapshotsTests
 
             Service = new OrderService(
                 Orders.Object, Versions.Object, Carts.Object, guidPolicy.Object, OrderPolicy.Object,
-                Mock.Of<IValidationPolicy<(Order order, OrderStatus newStatus)>>(),
-                Mock.Of<ILogger<OrderService>>(), Products.Object, ProductPolicy.Object);
+                UpdateOrderPolicy.Object, Logger.Object, Products.Object, ProductPolicy.Object);
         }
 
         public void AssertNoWrites()

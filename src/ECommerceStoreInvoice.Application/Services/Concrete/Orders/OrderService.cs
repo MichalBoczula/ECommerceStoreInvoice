@@ -38,7 +38,13 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Orders
             var shoppingCart = await descriptor.LoadShoppingCart(clientId, shoppingCartRepository);
             descriptor.ThrowNotFoundExceptionIfShoppingCartMissing(clientId, shoppingCart);
 
-            var productVersions = await descriptor.LoadProductSnapshots(shoppingCart!, productServiceClient, productVersionValidationPolicy);
+            var requestedIds = descriptor.GetRequestedProductIds(shoppingCart!);
+            var externalProducts = await descriptor.FetchExternalProducts(requestedIds, productServiceClient);
+            descriptor.ThrowNotFoundExceptionIfProductMissing(requestedIds, externalProducts);
+
+            var productVersions = descriptor.CreateProductSnapshots(shoppingCart!, externalProducts);
+            var productValidationResults = await descriptor.ValidateProductSnapshots(productVersions, productVersionValidationPolicy);
+            descriptor.ThrowValidationExceptionIfProductSnapshotInvalid(productValidationResults);
 
             var order = descriptor.MapToDomain(shoppingCart!, productVersions);
             validationResult = await descriptor.ValidateOrder(order, orderValidationPolicy);
