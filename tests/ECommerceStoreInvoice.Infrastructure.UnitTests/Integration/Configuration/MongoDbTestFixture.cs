@@ -6,6 +6,7 @@ namespace ECommerceStoreInvoice.Infrastructure.UnitTests.Integration.Configurati
     {
         private readonly MongoDbContainer _mongoDbContainer =
             new MongoDbBuilder("mongo:8.0")
+                .WithReplicaSet()
                 .Build();
 
         public string ConnectionString => _mongoDbContainer.GetConnectionString();

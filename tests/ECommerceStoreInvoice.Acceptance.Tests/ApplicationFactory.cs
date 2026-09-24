@@ -3,7 +3,6 @@ using System.Reflection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Testcontainers.MongoDb;
 
 namespace ECommerceStoreInvoice.Acceptance.Tests;
@@ -13,7 +12,6 @@ public class ApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
     private const string Database = "IntegrationTestDb";
     private const string Username = "root";
     private const string Password = "yourStrong(!)Password";
-    private const ushort MongoPort = 27017;
 
     private static readonly SemaphoreSlim PlaywrightInstallSemaphore = new(1, 1);
     private static bool _playwrightInstalled;
@@ -26,6 +24,7 @@ public class ApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
         _mongoContainer = new MongoDbBuilder("mongo:8.0")
             .WithUsername(Username)
             .WithPassword(Password)
+            .WithReplicaSet()
             .Build();
     }
 
@@ -41,19 +40,6 @@ public class ApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
         builder.UseSetting("MongoDbSettings:InvoicesCollectionName", "invoices");
         builder.UseSetting("MongoDbSettings:ClientDataVersionsCollectionName", "clientDataVersions");
 
-        builder.ConfigureServices(services =>
-        {
-            var infrastructureAssembly = AppDomain.CurrentDomain
-                .GetAssemblies()
-                .FirstOrDefault(a => a.GetName().Name == "ECommerceStoreInvoice.Infrastructure")
-                ?? Assembly.Load("ECommerceStoreInvoice.Infrastructure");
-
-            var mongoDbContextType = infrastructureAssembly.GetType("ECommerceStoreInvoice.Infrastructure.Context.MongoDbContext")
-                ?? throw new InvalidOperationException("Could not resolve MongoDbContext type.");
-
-            services.RemoveAll(mongoDbContextType);
-            services.AddSingleton(mongoDbContextType, provider => ActivatorUtilities.CreateInstance(provider, mongoDbContextType));
-        });
     }
 
     public async Task InitializeAsync()
@@ -62,9 +48,7 @@ public class ApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
 
         await _mongoContainer.StartAsync();
 
-        var host = _mongoContainer.Hostname;
-        var port = _mongoContainer.GetMappedPublicPort(MongoPort);
-        _connectionString = $"mongodb://{Username}:{Password}@{host}:{port}/{Database}?authSource=admin";
+        _connectionString = _mongoContainer.GetConnectionString();
 
         using var scope = Services.CreateScope();
 

@@ -124,7 +124,13 @@ namespace ECommerceStoreInvoice.Application.Descriptors.Orders
             }
         }
 
-        [FlowStep(order: 14, bpmnId: "SaveProductVersions")]
+        [FlowStep(order: 14, bpmnId: "BeginOrderWriteTransaction")]
+        public async Task BeginOrderWriteTransaction(IOrderWriteTransaction transaction)
+        {
+            await transaction.BeginAsync();
+        }
+
+        [FlowStep(order: 15, bpmnId: "SaveProductVersions")]
         public async Task<IReadOnlyCollection<ProductVersion>> SaveProductVersions(
             IReadOnlyCollection<ProductVersion> productVersions,
             IProductVersionRepository productVersionRepository)
@@ -132,25 +138,37 @@ namespace ECommerceStoreInvoice.Application.Descriptors.Orders
             return await productVersionRepository.CreateProductVersions(productVersions);
         }
 
-        [FlowStep(order: 15, bpmnId: "SaveOrder")]
+        [FlowStep(order: 16, bpmnId: "SaveOrder")]
         public async Task<Order> SaveOrder(Order order, IOrderRepository orderRepository)
         {
             return await orderRepository.CreateOrder(order);
         }
 
-        [FlowStep(order: 16, bpmnId: "ClearShoppingCart")]
+        [FlowStep(order: 17, bpmnId: "ClearShoppingCart")]
         public void ClearShoppingCart(ShoppingCart shoppingCart)
         {
             shoppingCart.Clear();
         }
 
-        [FlowStep(order: 17, bpmnId: "SaveShoppingCart")]
+        [FlowStep(order: 18, bpmnId: "SaveShoppingCart")]
         public async Task SaveShoppingCart(ShoppingCart shoppingCart, IShoppingCartRepository shoppingCartRepository)
         {
             await shoppingCartRepository.UpdateShoppingCart(shoppingCart);
         }
 
-        [FlowStep(order: 18, bpmnId: "MapOrderResponse")]
+        [FlowStep(order: 19, bpmnId: "CommitOrderWriteTransaction")]
+        public async Task CommitOrderWriteTransaction(IOrderWriteTransaction transaction)
+        {
+            await transaction.CommitAsync();
+        }
+
+        [FlowStep(order: 20, bpmnId: "RollbackOrderWriteTransactionOnFailure")]
+        public async Task RollbackOrderWriteTransactionOnFailure(IOrderWriteTransaction transaction)
+        {
+            await transaction.RollbackAsync();
+        }
+
+        [FlowStep(order: 21, bpmnId: "MapOrderResponse")]
         public OrderResponseDto MapToResponse(Order order, IReadOnlyCollection<ProductVersion> productVersions)
         {
             var productVersionDtos = productVersions

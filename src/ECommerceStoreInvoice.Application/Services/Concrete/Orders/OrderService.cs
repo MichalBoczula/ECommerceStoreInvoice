@@ -16,6 +16,7 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Orders
 {
     internal sealed class OrderService(
         IOrderRepository orderRepository,
+        IOrderWriteTransaction orderWriteTransaction,
         IProductVersionRepository productVersionRepository,
         IShoppingCartRepository shoppingCartRepository,
         IValidationPolicy<Guid> guidValidationPolicy,
@@ -50,10 +51,21 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Orders
             validationResult = await descriptor.ValidateOrder(order, orderValidationPolicy);
             descriptor.ThrowValidationExceptionIfOrderInvalid(validationResult);
 
-            await descriptor.SaveProductVersions(productVersions, productVersionRepository);
-            var createdOrder = await descriptor.SaveOrder(order, orderRepository);
-            descriptor.ClearShoppingCart(shoppingCart!);
-            await descriptor.SaveShoppingCart(shoppingCart!, shoppingCartRepository);
+            await descriptor.BeginOrderWriteTransaction(orderWriteTransaction);
+            Order createdOrder;
+            try
+            {
+                await descriptor.SaveProductVersions(productVersions, productVersionRepository);
+                createdOrder = await descriptor.SaveOrder(order, orderRepository);
+                descriptor.ClearShoppingCart(shoppingCart!);
+                await descriptor.SaveShoppingCart(shoppingCart!, shoppingCartRepository);
+                await descriptor.CommitOrderWriteTransaction(orderWriteTransaction);
+            }
+            catch
+            {
+                await descriptor.RollbackOrderWriteTransactionOnFailure(orderWriteTransaction);
+                throw;
+            }
 
             logger.LogInformation("Successfully completed order creation. OrderId: {OrderId} for ClientId: {ClientId}", createdOrder.Id, clientId);
 

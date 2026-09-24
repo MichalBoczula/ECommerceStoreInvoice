@@ -13,8 +13,15 @@ namespace ECommerceStoreInvoice.Infrastructure.Context
     {
         private readonly IMongoDatabase _database;
         private readonly MongoDbSettings _settings;
+        internal IClientSessionHandle? CurrentSession { get; set; }
+        internal IMongoClient Client { get; }
 
         public MongoDbContext(IOptions<MongoDbSettings> options)
+            : this(options, new MongoClient(options.Value.ConnectionString))
+        {
+        }
+
+        public MongoDbContext(IOptions<MongoDbSettings> options, IMongoClient client)
         {
             _settings = options.Value;
 
@@ -39,7 +46,7 @@ namespace ECommerceStoreInvoice.Infrastructure.Context
             if (string.IsNullOrWhiteSpace(_settings.ClientDataVersionsCollectionName))
                 throw new InvalidOperationException("MongoDbSettings.ClientDataVersionsCollectionName is not configured.");
 
-            var client = new MongoClient(_settings.ConnectionString);
+            Client = client;
             _database = client.GetDatabase(_settings.DatabaseName);
         }
 

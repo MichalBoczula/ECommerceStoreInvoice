@@ -35,9 +35,11 @@ namespace ECommerceStoreInvoice.Infrastructure.Repositories
         {
             var shoppingCartDocument = ShoppingCartMapping.MapToDocument(shoppingCart);
 
-            var result = await _context.ShoppingCarts.ReplaceOneAsync(
-                x => x.Id == shoppingCartDocument.Id,
-                shoppingCartDocument);
+            var result = _context.CurrentSession is { } session
+                ? await _context.ShoppingCarts.ReplaceOneAsync(
+                    session, x => x.Id == shoppingCartDocument.Id, shoppingCartDocument)
+                : await _context.ShoppingCarts.ReplaceOneAsync(
+                    x => x.Id == shoppingCartDocument.Id, shoppingCartDocument);
 
             if (result.MatchedCount == 0)
                 throw new InvalidOperationException($"Shopping cart with id '{shoppingCart.Id}' was not found.");

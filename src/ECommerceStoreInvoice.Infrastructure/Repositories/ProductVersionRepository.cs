@@ -27,7 +27,10 @@ namespace ECommerceStoreInvoice.Infrastructure.Repositories
 
             var documents = productVersions.Select(ProductVersionMapping.MapToDocument).ToList();
 
-            await _context.ProductVersions.InsertManyAsync(documents);
+            if (_context.CurrentSession is { } session)
+                await _context.ProductVersions.InsertManyAsync(session, documents);
+            else
+                await _context.ProductVersions.InsertManyAsync(documents);
 
             return productVersions;
         }
