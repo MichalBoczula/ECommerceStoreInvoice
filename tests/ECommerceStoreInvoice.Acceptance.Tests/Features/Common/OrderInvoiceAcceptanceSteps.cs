@@ -268,7 +268,7 @@ public sealed class OrderInvoiceAcceptanceSteps(ScenarioApiContext context)
     private async Task SendGet(string route) =>
         context.Response = await context.HttpClient.GetAsync(route);
 
-    private async Task<T> ReadSuccess<T>(Table table)
+    private async Task<T> ReadSuccess<T>(Table table) where T : class
     {
         context.Response.ShouldNotBeNull();
         context.Response.StatusCode.ShouldBe((HttpStatusCode)int.Parse(Values(table)["StatusCode"], CultureInfo.InvariantCulture));
