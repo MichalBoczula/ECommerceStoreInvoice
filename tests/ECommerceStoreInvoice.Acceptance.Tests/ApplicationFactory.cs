@@ -3,6 +3,10 @@ using System.Reflection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.AspNetCore.TestHost;
+using ECommerceStoreInvoice.Domain.AggregatesModel.Common.ValueObjects;
+using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate.ExternalServices;
 using Testcontainers.MongoDb;
 
 namespace ECommerceStoreInvoice.Acceptance.Tests;
@@ -40,6 +44,20 @@ public class ApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
         builder.UseSetting("MongoDbSettings:InvoicesCollectionName", "invoices");
         builder.UseSetting("MongoDbSettings:ClientDataVersionsCollectionName", "clientDataVersions");
 
+        builder.ConfigureTestServices(services =>
+        {
+            services.RemoveAll<IProductServiceClient>();
+            services.AddScoped<IProductServiceClient, ScenarioProductServiceClient>();
+        });
+
+    }
+
+    public sealed class ScenarioProductServiceClient : IProductServiceClient
+    {
+        public Task<IReadOnlyCollection<ExternalProductSnapshot>> GetProductsByIds(
+            IEnumerable<Guid> productIds, CancellationToken cancellationToken = default) =>
+            Task.FromResult<IReadOnlyCollection<ExternalProductSnapshot>>(
+                productIds.Select(id => new ExternalProductSnapshot(id, "Laptop", "Lenovo", new Money(999.99m, "USD"))).ToArray());
     }
 
     public async Task InitializeAsync()
