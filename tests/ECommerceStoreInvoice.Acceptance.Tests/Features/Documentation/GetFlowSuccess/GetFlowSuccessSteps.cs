@@ -23,10 +23,10 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Documentation.GetFlowS
         {
             AllureJson.AttachObject(
                 "Flow documentation request",
-                new { Method = "GET", Path = "/documentation/flows" },
+                new { Method = "GET", Path = "/orders-documentation/flows" },
                 _apiContext.JsonOptions);
 
-            _apiContext.Response = await _apiContext.HttpClient.GetAsync("/documentation/flows");
+            _apiContext.Response = await _apiContext.HttpClient.GetAsync("/orders-documentation/flows");
 
             var body = await _apiContext.Response.Content.ReadAsStringAsync();
             AllureJson.AttachRawJson($"Response JSON ({(int)_apiContext.Response.StatusCode})", body);

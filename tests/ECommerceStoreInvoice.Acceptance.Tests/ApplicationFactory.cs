@@ -3,52 +3,68 @@ using System.Reflection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.AspNetCore.TestHost;
+using ECommerceStoreInvoice.Domain.AggregatesModel.Common.ValueObjects;
+using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate.ExternalServices;
 using Testcontainers.MongoDb;
+using MongoDB.Driver;
 
 namespace ECommerceStoreInvoice.Acceptance.Tests;
 
 public class ApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
 {
-    private const string Database = "IntegrationTestDb";
     private const string Username = "root";
     private const string Password = "yourStrong(!)Password";
 
     private static readonly SemaphoreSlim PlaywrightInstallSemaphore = new(1, 1);
     private static bool _playwrightInstalled;
 
-    private readonly MongoDbContainer _mongoContainer;
-    private string _connectionString = string.Empty;
+    private static readonly MongoDbContainer SharedMongoContainer = new MongoDbBuilder("mongo:8.0")
+        .WithUsername(Username)
+        .WithPassword(Password)
+        .WithReplicaSet()
+        .Build();
+    private static readonly Lazy<Task> StartMongo = new(() => SharedMongoContainer.StartAsync());
 
-    public ApplicationFactory()
-    {
-        _mongoContainer = new MongoDbBuilder("mongo:8.0")
-            .WithUsername(Username)
-            .WithPassword(Password)
-            .WithReplicaSet()
-            .Build();
-    }
+    private readonly string _database = $"IntegrationTestDb_{Guid.NewGuid():N}";
+    private string _connectionString = string.Empty;
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment("Testing");
 
         builder.UseSetting("MongoDbSettings:ConnectionString", _connectionString);
-        builder.UseSetting("MongoDbSettings:DatabaseName", Database);
+        builder.UseSetting("MongoDbSettings:DatabaseName", _database);
         builder.UseSetting("MongoDbSettings:ShoppingCartsCollectionName", "shoppingCarts");
         builder.UseSetting("MongoDbSettings:OrdersCollectionName", "orders");
         builder.UseSetting("MongoDbSettings:ProductVersionsCollectionName", "productVersions");
         builder.UseSetting("MongoDbSettings:InvoicesCollectionName", "invoices");
         builder.UseSetting("MongoDbSettings:ClientDataVersionsCollectionName", "clientDataVersions");
 
+        builder.ConfigureTestServices(services =>
+        {
+            services.RemoveAll<IProductServiceClient>();
+            services.AddScoped<IProductServiceClient, ScenarioProductServiceClient>();
+        });
+
+    }
+
+    public sealed class ScenarioProductServiceClient : IProductServiceClient
+    {
+        public Task<IReadOnlyCollection<ExternalProductSnapshot>> GetProductsByIds(
+            IEnumerable<Guid> productIds, CancellationToken cancellationToken = default) =>
+            Task.FromResult<IReadOnlyCollection<ExternalProductSnapshot>>(
+                productIds.Select(id => new ExternalProductSnapshot(id, "Laptop", "Lenovo", new Money(999.99m, "USD"))).ToArray());
     }
 
     public async Task InitializeAsync()
     {
         await EnsurePlaywrightInstalledAsync();
 
-        await _mongoContainer.StartAsync();
+        await StartMongo.Value;
 
-        _connectionString = _mongoContainer.GetConnectionString();
+        _connectionString = SharedMongoContainer.GetConnectionString();
 
         using var scope = Services.CreateScope();
 
@@ -79,7 +95,9 @@ public class ApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
 
     public new async Task DisposeAsync()
     {
-        await _mongoContainer.DisposeAsync();
+        base.Dispose();
+        if (!string.IsNullOrEmpty(_connectionString))
+            await new MongoClient(_connectionString).DropDatabaseAsync(_database);
     }
 
     private static async Task EnsurePlaywrightInstalledAsync()

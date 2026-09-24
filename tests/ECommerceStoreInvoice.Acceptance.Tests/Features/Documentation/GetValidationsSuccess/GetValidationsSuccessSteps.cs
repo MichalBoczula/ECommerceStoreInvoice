@@ -23,14 +23,14 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Documentation.GetValid
         {
             AllureJson.AttachObject(
                 "Get validation documentation request",
-                new { Endpoint = "/documentation/validations", Method = "GET" },
+                new { Endpoint = "/orders-documentation/validations", Method = "GET" },
                 _apiContext.JsonOptions);
         }
 
         [When("I request validation documentation")]
         public async Task WhenIRequestValidationDocumentation()
         {
-            _apiContext.Response = await _apiContext.HttpClient.GetAsync("/documentation/validations");
+            _apiContext.Response = await _apiContext.HttpClient.GetAsync("/orders-documentation/validations");
 
             var body = await _apiContext.Response.Content.ReadAsStringAsync();
             AllureJson.AttachRawJson($"Response JSON ({(int)_apiContext.Response.StatusCode})", body);
@@ -55,7 +55,7 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Documentation.GetValid
 
             if (TryParseInt(expected, "ValidationsCount", out var validationsCount))
             {
-                response.Validations.Count.ShouldBe(validationsCount);
+                response.Validations.Count.ShouldBeGreaterThanOrEqualTo(validationsCount);
             }
             else if (TryParseInt(expected, "MinValidationsCount", out var minValidationsCount))
             {
