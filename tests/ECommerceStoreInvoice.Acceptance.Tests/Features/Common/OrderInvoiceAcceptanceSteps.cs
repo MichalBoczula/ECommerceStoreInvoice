@@ -19,6 +19,8 @@ public sealed class OrderInvoiceAcceptanceSteps(ScenarioApiContext context)
     private Guid _clientId;
     private Guid _orderId;
     private Guid _invoiceId;
+    // From ProductsCatalog's SeedMobilePhone1 migration.
+    private static readonly Guid SeededProductId = Guid.Parse("0f62c3e1-8e3e-4b1f-9d74-3d6e2ff2c6d2");
     private Guid _productId;
 
     [Given("I have a valid shopping cart for order creation")]
@@ -275,7 +277,7 @@ public sealed class OrderInvoiceAcceptanceSteps(ScenarioApiContext context)
     private async Task CreateCart(Table table)
     {
         _clientId = Guid.NewGuid();
-        _productId = Guid.NewGuid();
+        _productId = SeededProductId;
         using var response = await context.HttpClient.PostAsync($"/shopping-carts/{_clientId}", null);
         response.StatusCode.ShouldBe(HttpStatusCode.OK, await response.Content.ReadAsStringAsync());
         await FillCart(int.TryParse(Values(table).GetValueOrDefault("Quantity"), out var quantity) ? quantity : 2);
