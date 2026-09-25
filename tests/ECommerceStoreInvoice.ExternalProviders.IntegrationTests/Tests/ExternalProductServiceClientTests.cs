@@ -1,74 +1,34 @@
-using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate.ExternalServices;
 using ECommerceStoreInvoice.ExternalProviders.IntegrationTests.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
 
-namespace ECommerceStoreInvoice.ExternalProviders.IntegrationTests.Tests
+namespace ECommerceStoreInvoice.ExternalProviders.IntegrationTests.Tests;
+
+public sealed class ExternalProductServiceClientTests(ExternalProvidersApplicationFactory factory)
+    : IClassFixture<ExternalProvidersApplicationFactory>
 {
-    public sealed class ExternalProductServiceClientTests : IClassFixture<ExternalProvidersApplicationFactory>
+    [Fact]
+    public async Task EmptyIdsDoNotCallProducts()
     {
-        private readonly ExternalProvidersApplicationFactory _factory;
+        var result = await factory.CreateClient().GetProductsByIds([]);
+        result.ShouldBeEmpty();
+    }
 
-        public ExternalProductServiceClientTests(ExternalProvidersApplicationFactory factory)
-        {
-            _factory = factory;
-        }
+    [Fact]
+    public async Task MissingProductsReturnEmptyCollectionFromHttp404()
+    {
+        var result = await factory.CreateClient().GetProductsByIds([Guid.NewGuid()]);
+        result.ShouldBeEmpty();
+    }
 
-        [Fact]
-        public async Task GetProductsByIds_WhenListIsEmpty_ShouldReturnEmptyCollectionWithoutCallingApi()
-        {
-            // Arrange
-            using var scope = _factory.Services.CreateScope();
-            var sut = scope.ServiceProvider.GetRequiredService<IProductServiceClient>();
-
-            // Act
-            var result = await sut.GetProductsByIds([]);
-
-            // Assert
-            result.ShouldNotBeNull();
-            result.ShouldBeEmpty();
-        }
-
-        [Fact]
-        public async Task GetProductsByIds_WhenProductsDoNotExist_ShouldReturnEmptyCollection()
-        {
-            // Arrange
-            using var scope = _factory.Services.CreateScope();
-            var sut = scope.ServiceProvider.GetRequiredService<IProductServiceClient>();
-
-            var nonExistentId = Guid.NewGuid();
-
-            // Act
-            var result = await sut.GetProductsByIds([nonExistentId]);
-
-            // Assert
-            result.ShouldNotBeNull();
-            result.ShouldBeEmpty();
-        }
-
-        [Fact]
-        public async Task GetProductsByIds_WhenProductsExist_ShouldReturnMappedDomainSnapshots()
-        {
-            // Arrange
-            using var scope = _factory.Services.CreateScope();
-            var sut = scope.ServiceProvider.GetRequiredService<IProductServiceClient>();
-
-            // Using existing mobile phone ID
-            var existingProductId = Guid.Parse("0f62c3e1-8e3e-4b1f-9d74-3d6e2ff2c6d2");
-
-            // Act
-            var result = await sut.GetProductsByIds([existingProductId]);
-
-            // Assert
-            result.ShouldNotBeNull();
-            result.ShouldNotBeEmpty();
-
-            var snapshot = result.First(p => p.ProductId == existingProductId);
-            snapshot.ProductId.ShouldBe(existingProductId);
-            snapshot.Name.ShouldNotBeNullOrWhiteSpace();
-            snapshot.Brand.ShouldNotBeNullOrWhiteSpace();
-            snapshot.Price.Amount.ShouldBeGreaterThan(0);
-            snapshot.Price.Currency.ShouldNotBeNullOrWhiteSpace();
-        }
+    [Fact]
+    public async Task ExistingProductIsMappedFromActualHttpResponse()
+    {
+        var result = await factory.CreateClient().GetProductsByIds([ExternalProvidersApplicationFactory.ExistingProductId]);
+        var snapshot = result.Single();
+        snapshot.ProductId.ShouldBe(ExternalProvidersApplicationFactory.ExistingProductId);
+        snapshot.Name.ShouldBe("iPhone 15");
+        snapshot.Brand.ShouldBe("Apple");
+        snapshot.Price.Amount.ShouldBe(4500.50m);
+        snapshot.Price.Currency.ShouldBe("PLN");
     }
 }
