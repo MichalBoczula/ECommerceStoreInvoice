@@ -165,6 +165,81 @@ public sealed class OrderProductSnapshotsTests
         setup.Transaction.Verify(x => x.RollbackAsync(), Times.Once);
     }
 
+    [Fact]
+    public async Task CreateOrder_WhenProductsIsUnavailable_DoesNotStartTransactionOrChangeCart()
+    {
+        var clientId = Guid.NewGuid();
+        var productId = Guid.NewGuid();
+        var cart = Cart(clientId, (productId, 2));
+        var setup = new Setup(cart);
+        var failure = new HttpRequestException("Products unavailable");
+        setup.Products.Setup(x => x.GetProductsByIds(It.IsAny<IEnumerable<Guid>>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(failure);
+
+        var thrown = await Should.ThrowAsync<HttpRequestException>(() => setup.Service.CreateOrder(clientId));
+
+        Assert.Same(failure, thrown);
+        setup.AssertNoWrites();
+        cart.Lines.Single().ProductId.ShouldBe(productId);
+        cart.Lines.Single().Quantity.ShouldBe(2);
+    }
+
+    [Theory]
+    [InlineData("Snapshots")]
+    [InlineData("Order")]
+    [InlineData("Commit")]
+    public async Task CreateOrder_WhenTransactionStepFails_RollsBackAndDoesNotContinue(string failingStep)
+    {
+        var clientId = Guid.NewGuid();
+        var productId = Guid.NewGuid();
+        var cart = Cart(clientId, (productId, 2));
+        var setup = new Setup(cart);
+        var failure = new InvalidOperationException($"{failingStep} failed");
+        setup.Products.Setup(x => x.GetProductsByIds(It.IsAny<IEnumerable<Guid>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync([new ExternalProductSnapshot(productId, "Phone", "Brand", new Money(10m, "USD"))]);
+        setup.Versions.Setup(x => x.CreateProductVersions(It.IsAny<IReadOnlyCollection<ProductVersion>>()))
+            .ReturnsAsync((IReadOnlyCollection<ProductVersion> versions) => versions);
+        setup.Orders.Setup(x => x.CreateOrder(It.IsAny<Order>()))
+            .ReturnsAsync((Order order) => order);
+        setup.Carts.Setup(x => x.UpdateShoppingCart(It.IsAny<ShoppingCart>()))
+            .ReturnsAsync((ShoppingCart shoppingCart) => shoppingCart);
+
+        switch (failingStep)
+        {
+            case "Snapshots":
+                setup.Versions.Setup(x => x.CreateProductVersions(It.IsAny<IReadOnlyCollection<ProductVersion>>()))
+                    .ThrowsAsync(failure);
+                break;
+            case "Order":
+                setup.Orders.Setup(x => x.CreateOrder(It.IsAny<Order>())).ThrowsAsync(failure);
+                break;
+            case "Commit":
+                setup.Transaction.Setup(x => x.CommitAsync(It.IsAny<CancellationToken>())).ThrowsAsync(failure);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(failingStep));
+        }
+
+        var thrown = await Should.ThrowAsync<InvalidOperationException>(() => setup.Service.CreateOrder(clientId));
+
+        Assert.Same(failure, thrown);
+        setup.Transaction.Verify(x => x.BeginAsync(It.IsAny<CancellationToken>()), Times.Once);
+        setup.Transaction.Verify(x => x.RollbackAsync(), Times.Once);
+        setup.Versions.Verify(x => x.CreateProductVersions(It.IsAny<IReadOnlyCollection<ProductVersion>>()), Times.Once);
+        setup.Orders.Verify(x => x.CreateOrder(It.IsAny<Order>()),
+            failingStep == "Snapshots" ? Times.Never : Times.Once);
+        setup.Carts.Verify(x => x.UpdateShoppingCart(It.IsAny<ShoppingCart>()),
+            failingStep == "Commit" ? Times.Once : Times.Never);
+        setup.Transaction.Verify(x => x.CommitAsync(It.IsAny<CancellationToken>()),
+            failingStep == "Commit" ? Times.Once : Times.Never);
+
+        if (failingStep != "Commit")
+        {
+            cart.Lines.Single().ProductId.ShouldBe(productId);
+            cart.Lines.Single().Quantity.ShouldBe(2);
+        }
+    }
+
     private static ShoppingCart Cart(Guid clientId, params (Guid Id, int Quantity)[] items)
     {
         var cart = new ShoppingCart(clientId);
