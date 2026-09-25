@@ -1,4 +1,5 @@
 using System.Globalization;
+using MongoDB.Bson;
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
@@ -20,6 +21,7 @@ public sealed class OrderInvoiceAcceptanceSteps(ScenarioApiContext context)
     private Guid _clientId;
     private Guid _orderId;
     private Guid _invoiceId;
+    private HttpResponseMessage[]? _concurrentInvoiceResponses;
     // From ProductsCatalog's SeedMobilePhone1 migration.
     private static readonly Guid SeededProductId = Guid.Parse("0f62c3e1-8e3e-4b1f-9d74-3d6e2ff2c6d2");
     private Guid _productId;
@@ -148,6 +150,84 @@ public sealed class OrderInvoiceAcceptanceSteps(ScenarioApiContext context)
         json.RootElement.GetProperty("status").GetInt32().ShouldBe(status);
         using var order = await context.HttpClient.GetAsync($"/orders/{_orderId}");
         order.StatusCode.ShouldBe(HttpStatusCode.OK);
+    }
+
+    [When("I concurrently request two invoices for the current order")]
+    public async Task WhenConcurrentInvoicesRequested()
+    {
+        _concurrentInvoiceResponses = await Task.WhenAll(
+            context.HttpClient.PostAsync($"/invoices/{_clientId}/{_orderId}", null),
+            context.HttpClient.PostAsync($"/invoices/{_clientId}/{_orderId}", null));
+    }
+
+    [Then("PDF failure returns 500 and leaves a retryable reservation")]
+    public async Task ThenPdfFailureLeavesReservation()
+    {
+        context.Response.ShouldNotBeNull();
+        context.Response.StatusCode.ShouldBe(HttpStatusCode.InternalServerError);
+        context.Response.Content.Headers.ContentType?.MediaType.ShouldBe("application/problem+json");
+
+        var documents = await context.Factory.GetInvoiceDocumentsAsync(_orderId);
+        documents.Count.ShouldBe(1);
+        documents.Single()["GenerationStatus"].AsString.ShouldBe("Failed");
+        _invoiceId = documents.Single()["_id"].AsBsonBinaryData.ToGuid(GuidRepresentation.Standard);
+
+        using var hidden = await context.HttpClient.GetAsync($"/invoices/{_invoiceId}");
+        hidden.StatusCode.ShouldBe(HttpStatusCode.NotFound);
+    }
+
+    [Then("retry completes the same invoice and its PDF is available")]
+    public async Task ThenRetryCompletesInvoice()
+    {
+        context.Response.ShouldNotBeNull();
+        context.Response.StatusCode.ShouldBe(HttpStatusCode.OK, await context.Response.Content.ReadAsStringAsync());
+        var invoice = await context.Response.Content.ReadFromJsonAsync<InvoiceResponseDto>(context.JsonOptions);
+        invoice.ShouldNotBeNull();
+        invoice.Id.ShouldBe(_invoiceId);
+        invoice.OrderId.ShouldBe(_orderId);
+        AssertPdfExists(invoice.StorageUrl);
+
+        var documents = await context.Factory.GetInvoiceDocumentsAsync(_orderId);
+        documents.Count.ShouldBe(1);
+        documents.Single()["GenerationStatus"].AsString.ShouldBe("Completed");
+        documents.Single()["_id"].AsBsonBinaryData.ToGuid(GuidRepresentation.Standard).ShouldBe(invoice.Id);
+    }
+
+    [Then("one invoice is completed and its PDF is available")]
+    public async Task ThenOneInvoiceIsCompleted()
+    {
+        _concurrentInvoiceResponses.ShouldNotBeNull();
+        try
+        {
+            var successes = _concurrentInvoiceResponses.Where(response => response.StatusCode == HttpStatusCode.OK).ToArray();
+            successes.Length.ShouldBe(1);
+            var conflict = _concurrentInvoiceResponses.Single(response => response.StatusCode != HttpStatusCode.OK);
+            conflict.StatusCode.ShouldBe(HttpStatusCode.Conflict);
+            conflict.Content.Headers.ContentType?.MediaType.ShouldBe("application/problem+json");
+
+            var invoice = await successes.Single().Content.ReadFromJsonAsync<InvoiceResponseDto>(context.JsonOptions);
+            invoice.ShouldNotBeNull();
+            invoice.OrderId.ShouldBe(_orderId);
+            AssertPdfExists(invoice.StorageUrl);
+
+            var documents = await context.Factory.GetInvoiceDocumentsAsync(_orderId);
+            documents.Count.ShouldBe(1);
+            documents.Single()["GenerationStatus"].AsString.ShouldBe("Completed");
+            documents.Single()["_id"].AsBsonBinaryData.ToGuid(GuidRepresentation.Standard).ShouldBe(invoice.Id);
+        }
+        finally
+        {
+            foreach (var response in _concurrentInvoiceResponses)
+                response.Dispose();
+        }
+    }
+
+    private static void AssertPdfExists(string storageUrl)
+    {
+        var uri = new Uri(storageUrl);
+        uri.IsFile.ShouldBeTrue();
+        File.Exists(uri.LocalPath).ShouldBeTrue();
+        new FileInfo(uri.LocalPath).Length.ShouldBeGreaterThan(0);
     }
 
     [Given("the get invoice by id request is documented as")]
