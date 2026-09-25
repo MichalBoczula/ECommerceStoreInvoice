@@ -35,7 +35,7 @@ public class ApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
 
     public ApplicationFactory() : this(false) { }
 
-    public ApplicationFactory(bool useProductCatalog) => _useProductCatalog = useProductCatalog;
+    internal ApplicationFactory(bool useProductCatalog) => _useProductCatalog = useProductCatalog;
 
     public static async Task DisposeSharedProductsAsync()
     {
