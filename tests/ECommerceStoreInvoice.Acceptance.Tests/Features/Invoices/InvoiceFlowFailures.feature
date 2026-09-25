@@ -19,3 +19,10 @@ Feature: Invoice creation rules
     Given I have a paid order without client data
     When I request an invoice for the current order
     Then invoice creation fails with status 404
+
+  Scenario: An empty client identifier is invalid
+    Given I have a paid order for invoice creation
+      | Field    | Value |
+      | Quantity | 2     |
+    When an empty client id requests an invoice for the order
+    Then invoice creation fails with status 400

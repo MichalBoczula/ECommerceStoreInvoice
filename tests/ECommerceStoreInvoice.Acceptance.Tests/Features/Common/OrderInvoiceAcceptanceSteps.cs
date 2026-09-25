@@ -96,6 +96,9 @@ public sealed class OrderInvoiceAcceptanceSteps(ScenarioApiContext context)
     [When("a different client requests an invoice for the order")]
     public Task WhenAnotherClientRequestsInvoice() => SendPost($"/invoices/{Guid.NewGuid()}/{_orderId}");
 
+    [When("an empty client id requests an invoice for the order")]
+    public Task WhenEmptyClientRequestsInvoice() => SendPost($"/invoices/{Guid.Empty}/{_orderId}");
+
     [Then("the order status response is 200 with status {string}")]
     public async Task ThenOrderStatusUpdated(string expectedStatus)
     {
