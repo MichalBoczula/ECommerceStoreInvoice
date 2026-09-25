@@ -2,6 +2,7 @@ using System.Net;
 using System.Text.Json;
 using ECommerceStoreInvoice.Infrastructure.ApiClients.Concret.Products;
 using ECommerceStoreInvoice.Infrastructure.ApiClients.Products;
+using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate.ExternalServices;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -46,7 +47,7 @@ public sealed class ExternalProvidersApplicationFactory : IDisposable
         _client.BaseAddress = new Uri("http://localhost");
     }
 
-    public ExternalProductServiceClient CreateClient()
+    public IProductServiceClient CreateClient()
     {
         var adapter = new HttpClientRequestAdapter(new AnonymousAuthenticationProvider(), httpClient: _client)
         {
