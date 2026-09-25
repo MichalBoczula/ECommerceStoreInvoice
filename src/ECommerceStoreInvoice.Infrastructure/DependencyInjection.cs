@@ -25,7 +25,16 @@ namespace ECommerceStoreInvoice.Infrastructure
                 configuration.GetSection(MongoDbSettings.SectionName));
 
             services.AddSingleton<IMongoClient>(provider =>
-                new MongoClient(provider.GetRequiredService<IOptions<MongoDbSettings>>().Value.ConnectionString));
+            {
+                var connectionString = provider.GetRequiredService<IOptions<MongoDbSettings>>().Value.ConnectionString;
+                if (string.IsNullOrWhiteSpace(connectionString) ||
+                    !(connectionString.StartsWith("mongodb://", StringComparison.OrdinalIgnoreCase) ||
+                      connectionString.StartsWith("mongodb+srv://", StringComparison.OrdinalIgnoreCase)))
+                    throw new InvalidOperationException(
+                        "MongoDbSettings:ConnectionString must be configured with a mongodb:// or mongodb+srv:// URI.");
+
+                return new MongoClient(connectionString);
+            });
             services.AddScoped<MongoDbContext>();
             services.AddScoped<MongoInitializer>();
             services.AddScoped<IOrderWriteTransaction, MongoOrderWriteTransaction>();

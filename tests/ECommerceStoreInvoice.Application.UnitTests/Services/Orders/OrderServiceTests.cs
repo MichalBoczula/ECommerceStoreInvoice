@@ -1,4 +1,4 @@
-﻿using ECommerceStoreInvoice.Application.Common.RequestsDto.Orders;
+using ECommerceStoreInvoice.Application.Common.RequestsDto.Orders;
 using ECommerceStoreInvoice.Application.Services.Concrete.Orders;
 using ECommerceStoreInvoice.Domain.AggregatesModel.Common.Enums;
 using ECommerceStoreInvoice.Domain.AggregatesModel.Common.ValueObjects;
@@ -21,121 +21,60 @@ namespace ECommerceStoreInvoice.Application.UnitTests.Services.Orders;
 
 public sealed class OrderServiceTests
 {
-    [Fact(Skip = "Order require reimplementation")]
-    public async Task CreateOrder_WhenRequestIsValid_ShouldValidatePersistClearCartAndReturnResponse()
+    [Fact]
+    public async Task CreateOrder_WhenRequestIsValid_ShouldPersistSnapshotsAndOrderInTransactionAndClearCart()
     {
-        // Arrange
         var clientId = Guid.NewGuid();
-        var shoppingCart = BuildShoppingCart(clientId);
-        var expectedCreatedProductVersions = shoppingCart.Lines.Count;
-        var guidValidationResult = new ValidationResult();
-        var orderValidationResult = new ValidationResult();
-
-        ProductVersion CreateProductVersionFromLine(ShoppingCartLine line) =>
-            ProductVersion.Rehydrate(
-                Guid.NewGuid(),
-                true,
-                DateTime.UtcNow,
-                null,
-                line.ProductId,
-                new Money(),
-                "",
-                "");
-
-        var createdProductVersions = shoppingCart.Lines
-            .Select(CreateProductVersionFromLine)
-            .ToList();
-
-        var createdOrder = Order.Rehydrate(
-            Guid.NewGuid(),
-            clientId,
-            [
-                .. createdProductVersions.Zip(shoppingCart.Lines, (productVersion, line) =>
-                    new OrderLine(productVersion.Id, line.Quantity))
-            ],
-            DateTime.UtcNow.AddMinutes(-1),
-            DateTime.UtcNow,
-            OrderStatus.Created);
-
-        var orderRepositoryMock = new Mock<IOrderRepository>(MockBehavior.Strict);
-        var orderWriteTransactionMock = new Mock<IOrderWriteTransaction>(MockBehavior.Strict);
-        var productVersionRepositoryMock = new Mock<IProductVersionRepository>(MockBehavior.Strict);
-        var shoppingCartRepositoryMock = new Mock<IShoppingCartRepository>(MockBehavior.Strict);
-        var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
-        var orderValidationPolicyMock = new Mock<IValidationPolicy<Order>>(MockBehavior.Strict);
-        var updateOrderValidationPolicyMock = new Mock<IValidationPolicy<(Order order, OrderStatus newStatus)>>(MockBehavior.Strict);
+        var cart = BuildShoppingCart(clientId);
+        var products = cart.Lines.Select(line => new ExternalProductSnapshot(
+            line.ProductId, "Laptop", "Brand", new Money(10m, "USD"))).ToArray();
+        var invoiceOrderMock = new Mock<IOrderRepository>(MockBehavior.Strict);
+        var transactionMock = new Mock<IOrderWriteTransaction>(MockBehavior.Strict);
+        var versionsMock = new Mock<IProductVersionRepository>(MockBehavior.Strict);
+        var cartsMock = new Mock<IShoppingCartRepository>(MockBehavior.Strict);
+        var guidMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
+        var orderPolicyMock = new Mock<IValidationPolicy<Order>>(MockBehavior.Strict);
+        var updatePolicyMock = new Mock<IValidationPolicy<(Order order, OrderStatus newStatus)>>(MockBehavior.Strict);
+        var productMock = new Mock<IProductServiceClient>(MockBehavior.Strict);
+        var versionPolicyMock = new Mock<IValidationPolicy<ProductVersion>>(MockBehavior.Strict);
         var loggerMock = new Mock<ILogger<OrderService>>(MockBehavior.Loose);
-        var productServiceClientMock = new Mock<IProductServiceClient>(MockBehavior.Strict);
-        var productVersionValidationPolicyMock = new Mock<IValidationPolicy<ProductVersion>>(MockBehavior.Strict);
-
         var sequence = new MockSequence();
-        guidValidationPolicyMock
-            .InSequence(sequence)
-            .Setup(policy => policy.Validate(clientId))
-            .ReturnsAsync(guidValidationResult);
 
-        shoppingCartRepositoryMock
-            .InSequence(sequence)
-            .Setup(repo => repo.GetShoppingCartByClientId(clientId))
-            .ReturnsAsync(shoppingCart);
+        guidMock.Setup(policy => policy.Validate(clientId)).ReturnsAsync(new ValidationResult());
+        cartsMock.Setup(repo => repo.GetShoppingCartByClientId(clientId)).ReturnsAsync(cart);
+        productMock.Setup(client => client.GetProductsByIds(It.IsAny<IEnumerable<Guid>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(products);
+        versionPolicyMock.Setup(policy => policy.Validate(It.IsAny<ProductVersion>()))
+            .ReturnsAsync(new ValidationResult());
+        orderPolicyMock.Setup(policy => policy.Validate(It.IsAny<Order>()))
+            .ReturnsAsync(new ValidationResult());
+        transactionMock.InSequence(sequence).Setup(t => t.BeginAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+        versionsMock.InSequence(sequence)
+            .Setup(repo => repo.CreateProductVersions(It.IsAny<IReadOnlyCollection<ProductVersion>>()))
+            .ReturnsAsync((IReadOnlyCollection<ProductVersion> versions) => versions);
+        invoiceOrderMock.InSequence(sequence).Setup(repo => repo.CreateOrder(It.IsAny<Order>()))
+            .ReturnsAsync((Order order) => order);
+        cartsMock.InSequence(sequence).Setup(repo => repo.UpdateShoppingCart(It.IsAny<ShoppingCart>()))
+            .ReturnsAsync((ShoppingCart updated) => updated);
+        transactionMock.InSequence(sequence).Setup(t => t.CommitAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
 
-        foreach (var line in shoppingCart.Lines)
-        {
-            var productVersion = createdProductVersions.Single(p => p.ProductId == line.ProductId);
-            productVersionRepositoryMock
-                .Setup(repo => repo.CreateProductVersion(It.Is<ProductVersion>(pv =>
-                    pv.ProductId == line.ProductId)))
-                .ReturnsAsync(productVersion);
-        }
+        var sut = new OrderService(invoiceOrderMock.Object, transactionMock.Object, versionsMock.Object,
+            cartsMock.Object, guidMock.Object, orderPolicyMock.Object, updatePolicyMock.Object,
+            loggerMock.Object, productMock.Object, versionPolicyMock.Object);
 
-        orderValidationPolicyMock
-            .InSequence(sequence)
-            .Setup(policy => policy.Validate(It.Is<Order>(order =>
-                order.ClientId == clientId &&
-                order.Lines.Count == shoppingCart.Lines.Count)))
-            .ReturnsAsync(orderValidationResult);
-
-        orderRepositoryMock
-            .InSequence(sequence)
-            .Setup(repo => repo.CreateOrder(It.IsAny<Order>()))
-            .ReturnsAsync(createdOrder);
-
-        shoppingCartRepositoryMock
-            .InSequence(sequence)
-            .Setup(repo => repo.UpdateShoppingCart(It.Is<ShoppingCart>(cart =>
-                cart.ClientId == clientId &&
-                cart.Lines.Count == 0)))
-            .ReturnsAsync((ShoppingCart cart) => cart);
-
-        var sut = new OrderService(
-            orderRepositoryMock.Object,
-            orderWriteTransactionMock.Object,
-            productVersionRepositoryMock.Object,
-            shoppingCartRepositoryMock.Object,
-            guidValidationPolicyMock.Object,
-            orderValidationPolicyMock.Object,
-            updateOrderValidationPolicyMock.Object,
-            loggerMock.Object,
-            productServiceClientMock.Object,
-            productVersionValidationPolicyMock.Object);
-
-        // Act
         var response = await sut.CreateOrder(clientId);
 
-        // Assert
-        guidValidationPolicyMock.Verify(policy => policy.Validate(clientId), Times.Once);
-        shoppingCartRepositoryMock.Verify(repo => repo.GetShoppingCartByClientId(clientId), Times.Once);
-        productVersionRepositoryMock.Verify(repo => repo.CreateProductVersion(It.IsAny<ProductVersion>()), Times.Exactly(expectedCreatedProductVersions));
-        orderValidationPolicyMock.Verify(policy => policy.Validate(It.IsAny<Order>()), Times.Once);
-        orderRepositoryMock.Verify(repo => repo.CreateOrder(It.IsAny<Order>()), Times.Once);
-        shoppingCartRepositoryMock.Verify(repo => repo.UpdateShoppingCart(It.IsAny<ShoppingCart>()), Times.Once);
-        updateOrderValidationPolicyMock.Verify(policy => policy.Validate(It.IsAny<(Order order, OrderStatus newStatus)>()), Times.Never);
-
-        response.ShouldNotBeNull();
-        response.Id.ShouldBe(createdOrder.Id);
         response.ClientId.ShouldBe(clientId);
-        response.Status.ShouldBe(OrderStatus.Created.ToString());
-        response.Lines.Count.ShouldBe(createdOrder.Lines.Count);
+        response.Status.ShouldBe("Created");
+        response.TotalAmount.ShouldBe(30m);
+        response.Lines.Count.ShouldBe(2);
+        cart.Lines.ShouldBeEmpty();
+        transactionMock.Verify(t => t.BeginAsync(It.IsAny<CancellationToken>()), Times.Once);
+        transactionMock.Verify(t => t.CommitAsync(It.IsAny<CancellationToken>()), Times.Once);
+        transactionMock.Verify(t => t.RollbackAsync(), Times.Never);
+        versionsMock.Verify(repo => repo.CreateProductVersions(It.Is<IReadOnlyCollection<ProductVersion>>(versions => versions.Count == 2)), Times.Once);
+        invoiceOrderMock.Verify(repo => repo.CreateOrder(It.Is<Order>(order => order.Lines.Count == 2)), Times.Once);
+        cartsMock.Verify(repo => repo.UpdateShoppingCart(It.Is<ShoppingCart>(updated => updated.Lines.Count == 0)), Times.Once);
     }
 
     [Fact]
@@ -239,73 +178,48 @@ public sealed class OrderServiceTests
         shoppingCartRepositoryMock.Verify(repo => repo.UpdateShoppingCart(It.IsAny<ShoppingCart>()), Times.Never);
     }
 
-    [Fact(Skip = "Order require reimplementation")]
-    public async Task CreateOrder_WhenOrderValidationFails_ShouldThrowValidationExceptionAndNotPersistOrClearCart()
+    [Fact]
+    public async Task CreateOrder_WhenOrderValidationFails_ShouldNotBeginTransactionOrClearCart()
     {
-        // Arrange
         var clientId = Guid.NewGuid();
-        var shoppingCart = BuildShoppingCart(clientId);
-        var guidValidationResult = new ValidationResult();
-
-        var invalidOrderValidationResult = new ValidationResult();
-        invalidOrderValidationResult.AddValidationError(new ValidationError
+        var cart = BuildShoppingCart(clientId);
+        var products = cart.Lines.Select(line => new ExternalProductSnapshot(
+            line.ProductId, "Laptop", "Brand", new Money(10m, "USD"))).ToArray();
+        var invalid = new ValidationResult();
+        invalid.AddValidationError(new ValidationError
         {
-            Entity = nameof(Order),
-            Name = nameof(Order.Lines),
-            Message = "Order must contain lines"
+            Entity = nameof(Order), Name = nameof(Order.Lines), Message = "Invalid order"
         });
-
-        var orderRepositoryMock = new Mock<IOrderRepository>(MockBehavior.Strict);
-        var orderWriteTransactionMock = new Mock<IOrderWriteTransaction>(MockBehavior.Strict);
-        var productVersionRepositoryMock = new Mock<IProductVersionRepository>(MockBehavior.Strict);
-        var shoppingCartRepositoryMock = new Mock<IShoppingCartRepository>(MockBehavior.Strict);
-        var guidValidationPolicyMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
-        var orderValidationPolicyMock = new Mock<IValidationPolicy<Order>>(MockBehavior.Strict);
-        var updateOrderValidationPolicyMock = new Mock<IValidationPolicy<(Order order, OrderStatus newStatus)>>(MockBehavior.Strict);
+        var ordersMock = new Mock<IOrderRepository>(MockBehavior.Strict);
+        var transactionMock = new Mock<IOrderWriteTransaction>(MockBehavior.Strict);
+        var versionsMock = new Mock<IProductVersionRepository>(MockBehavior.Strict);
+        var cartsMock = new Mock<IShoppingCartRepository>(MockBehavior.Strict);
+        var guidMock = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
+        var orderPolicyMock = new Mock<IValidationPolicy<Order>>(MockBehavior.Strict);
+        var updatePolicyMock = new Mock<IValidationPolicy<(Order order, OrderStatus newStatus)>>(MockBehavior.Strict);
+        var productMock = new Mock<IProductServiceClient>(MockBehavior.Strict);
+        var versionPolicyMock = new Mock<IValidationPolicy<ProductVersion>>(MockBehavior.Strict);
         var loggerMock = new Mock<ILogger<OrderService>>(MockBehavior.Loose);
-        var productServiceClientMock = new Mock<IProductServiceClient>(MockBehavior.Strict);
-        var productVersionValidationPolicyMock = new Mock<IValidationPolicy<ProductVersion>>(MockBehavior.Strict);
 
-        var sequence = new MockSequence();
-        guidValidationPolicyMock
-            .InSequence(sequence)
-            .Setup(policy => policy.Validate(clientId))
-            .ReturnsAsync(guidValidationResult);
+        guidMock.Setup(policy => policy.Validate(clientId)).ReturnsAsync(new ValidationResult());
+        cartsMock.Setup(repo => repo.GetShoppingCartByClientId(clientId)).ReturnsAsync(cart);
+        productMock.Setup(client => client.GetProductsByIds(It.IsAny<IEnumerable<Guid>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(products);
+        versionPolicyMock.Setup(policy => policy.Validate(It.IsAny<ProductVersion>()))
+            .ReturnsAsync(new ValidationResult());
+        orderPolicyMock.Setup(policy => policy.Validate(It.IsAny<Order>())).ReturnsAsync(invalid);
 
-        shoppingCartRepositoryMock
-            .InSequence(sequence)
-            .Setup(repo => repo.GetShoppingCartByClientId(clientId))
-            .ReturnsAsync(shoppingCart);
+        var sut = new OrderService(ordersMock.Object, transactionMock.Object, versionsMock.Object,
+            cartsMock.Object, guidMock.Object, orderPolicyMock.Object, updatePolicyMock.Object,
+            loggerMock.Object, productMock.Object, versionPolicyMock.Object);
 
-        foreach (var line in shoppingCart.Lines)
-        {
-            productVersionRepositoryMock
-                .Setup(repo => repo.CreateProductVersion(It.Is<ProductVersion>(pv => pv.ProductId == line.ProductId)))
-                .ReturnsAsync(new ProductVersion(line.ProductId, new Money(), "", ""));
-        }
-
-        orderValidationPolicyMock
-            .InSequence(sequence)
-            .Setup(policy => policy.Validate(It.IsAny<Order>()))
-            .ReturnsAsync(invalidOrderValidationResult);
-
-        var sut = new OrderService(
-            orderRepositoryMock.Object,
-            orderWriteTransactionMock.Object,
-            productVersionRepositoryMock.Object,
-            shoppingCartRepositoryMock.Object,
-            guidValidationPolicyMock.Object,
-            orderValidationPolicyMock.Object,
-            updateOrderValidationPolicyMock.Object,
-            loggerMock.Object,
-            productServiceClientMock.Object,
-            productVersionValidationPolicyMock.Object);
-
-        // Act / Assert
         await Should.ThrowAsync<ValidationException>(() => sut.CreateOrder(clientId));
 
-        orderRepositoryMock.Verify(repo => repo.CreateOrder(It.IsAny<Order>()), Times.Never);
-        shoppingCartRepositoryMock.Verify(repo => repo.UpdateShoppingCart(It.IsAny<ShoppingCart>()), Times.Never);
+        cart.Lines.Count.ShouldBe(2);
+        transactionMock.Verify(t => t.BeginAsync(It.IsAny<CancellationToken>()), Times.Never);
+        versionsMock.Verify(repo => repo.CreateProductVersions(It.IsAny<IReadOnlyCollection<ProductVersion>>()), Times.Never);
+        ordersMock.Verify(repo => repo.CreateOrder(It.IsAny<Order>()), Times.Never);
+        cartsMock.Verify(repo => repo.UpdateShoppingCart(It.IsAny<ShoppingCart>()), Times.Never);
     }
 
     [Fact]

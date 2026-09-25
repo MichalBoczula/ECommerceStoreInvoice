@@ -8,12 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- WebApplicationFactory -->
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.0" />
-    
-    <!-- Testcontainers -->
-    <PackageReference Include="Testcontainers" Version="4.11.0" />
-    <PackageReference Include="Testcontainers.MsSql" Version="4.11.0" />
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="10.0.1" />
     
     <!-- Testing Framework & Assertions -->
     <PackageReference Include="Shouldly" Version="4.3.0" />

@@ -1,68 +1,64 @@
+using System.Net;
+using System.Text.Json;
+using ECommerceStoreInvoice.Infrastructure.ApiClients.Concret.Products;
+using ECommerceStoreInvoice.Infrastructure.ApiClients.Products;
+using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate.ExternalServices;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc.Testing;
-using DotNet.Testcontainers.Builders;
-using DotNet.Testcontainers.Containers;
-using DotNet.Testcontainers.Networks;
-using DotNet.Testcontainers.Images;
-using Testcontainers.MsSql;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.TestHost;
+using Microsoft.Kiota.Abstractions.Authentication;
+using Microsoft.Kiota.Http.HttpClientLibrary;
 
-namespace ECommerceStoreInvoice.ExternalProviders.IntegrationTests.Configuration
+namespace ECommerceStoreInvoice.ExternalProviders.IntegrationTests.Configuration;
+
+// Real Kiota HTTP serialization against an isolated in-process Products endpoint.
+// No locally built Products image or SQL Server is required for this contract test.
+public sealed class ExternalProvidersApplicationFactory : IDisposable
 {
-    public class ExternalProvidersApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
+    public static readonly Guid ExistingProductId = Guid.Parse("0f62c3e1-8e3e-4b1f-9d74-3d6e2ff2c6d2");
+    private readonly TestServer _server;
+    private readonly HttpClient _client;
+
+    public ExternalProvidersApplicationFactory()
     {
-        private readonly INetwork _network;
-        private readonly MsSqlContainer _dbContainer;
-        private readonly IContainer _apiContainer;
-
-        private string _productApiBaseUrl = string.Empty;
-
-        public ExternalProvidersApplicationFactory()
+        _server = new TestServer(new WebHostBuilder().Configure(app => app.Run(async context =>
         {
-            _network = new NetworkBuilder()
-                .WithName(Guid.NewGuid().ToString("D"))
-                .Build();
+            if (context.Request.Method != "POST" || context.Request.Path != "/mobile-phones/by-ids")
+            {
+                context.Response.StatusCode = (int)HttpStatusCode.NotFound;
+                return;
+            }
 
-            _dbContainer = new MsSqlBuilder("mcr.microsoft.com/mssql/server:2022-latest")
-                .WithNetwork(_network)
-                .WithNetworkAliases("product-db")
-                .WithPassword("YourStrong@Password123!")
-                .Build();
+            var ids = await JsonSerializer.DeserializeAsync<Guid[]>(context.Request.Body);
+            if (ids is null || !ids.Contains(ExistingProductId))
+            {
+                context.Response.StatusCode = (int)HttpStatusCode.NotFound;
+                context.Response.ContentType = "application/problem+json";
+                await context.Response.WriteAsync("{\"title\":\"Not found\",\"status\":404}");
+                return;
+            }
 
-            _apiContainer = new ContainerBuilder("product-catalog-api:latest")
-                .WithImagePullPolicy(PullPolicy.Never)
-                .WithNetwork(_network)
-                .WithPortBinding(8080, true)
-                .WithEnvironment("ASPNETCORE_ENVIRONMENT", "Development")
-                .WithEnvironment("ASPNETCORE_URLS", "http://+:8080")
-                .WithEnvironment("ConnectionStrings__ProductCatalogDb", "Server=product-db;Database=ProductsDb;User Id=sa;Password=YourStrong@Password123!;TrustServerCertificate=True")
-                .WithWaitStrategy(Wait.ForUnixContainer().UntilInternalTcpPortIsAvailable(8080))
-                .Build();
-        }
+            context.Response.ContentType = "application/json";
+            await context.Response.WriteAsync($"[{{\"id\":\"{ExistingProductId}\",\"name\":\"iPhone 15\",\"brand\":\"Apple\",\"price\":{{\"amount\":4500.50,\"currency\":\"PLN\"}}}}]");
+        })));
 
-        protected override void ConfigureWebHost(IWebHostBuilder builder)
+        _client = _server.CreateClient();
+        _client.BaseAddress = new Uri("http://localhost");
+    }
+
+    public IProductServiceClient CreateClient()
+    {
+        var adapter = new HttpClientRequestAdapter(new AnonymousAuthenticationProvider(), httpClient: _client)
         {
-            builder.UseEnvironment("Testing");
+            BaseUrl = _client.BaseAddress!.ToString().TrimEnd('/')
+        };
+        return new ExternalProductServiceClient(new ProductApiClient(adapter));
+    }
 
-            builder.UseSetting("ExternalServices:ProductApiBaseUrl", _productApiBaseUrl);
-        }
-
-        public async Task InitializeAsync()
-        {
-            await _network.CreateAsync();
-            await _dbContainer.StartAsync();
-            await _apiContainer.StartAsync();
-
-            var host = _apiContainer.Hostname;
-            var port = _apiContainer.GetMappedPublicPort(8080);
-
-            _productApiBaseUrl = $"http://{host}:{port}";
-        }
-
-        public new async Task DisposeAsync()
-        {
-            await _apiContainer.DisposeAsync();
-            await _dbContainer.DisposeAsync();
-            await _network.DeleteAsync();
-        }
+    public void Dispose()
+    {
+        _client.Dispose();
+        _server.Dispose();
     }
 }
