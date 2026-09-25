@@ -1,4 +1,4 @@
-﻿using ECommerceStoreInvoice.API.Configuration.Common;
+using ECommerceStoreInvoice.API.Configuration.Common;
 using ECommerceStoreInvoice.Application.Common.RequestsDto.Orders;
 using ECommerceStoreInvoice.Application.Common.ResponsesDto.Orders;
 using ECommerceStoreInvoice.Application.Services.Abstract.Orders;
@@ -30,9 +30,9 @@ namespace ECommerceStoreInvoice.API.Endpoints
            .WithDescription("Creates a new order based on the current shopping cart for the provided client.")
            .WithName("CreateOrder")
            .Produces<OrderResponseDto>(StatusCodes.Status200OK)
-           .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest)
-           .Produces<NotFoundProblemDetails>(StatusCodes.Status404NotFound)
-           .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
+           .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")
+           .Produces<NotFoundProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")
+           .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, "application/problem+json");
 
             group.MapPatch("/{orderId:guid}/status", async (
                 Guid orderId,
@@ -47,9 +47,9 @@ namespace ECommerceStoreInvoice.API.Endpoints
            .WithDescription("Updates order status while enforcing allowed status transitions.")
            .WithName("UpdateOrderStatus")
            .Produces<OrderResponseDto>(StatusCodes.Status200OK)
-           .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest)
-           .Produces<NotFoundProblemDetails>(StatusCodes.Status404NotFound)
-           .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
+           .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")
+           .Produces<NotFoundProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")
+           .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, "application/problem+json");
         }
 
         private static void MapOrdersQueries(IEndpointRouteBuilder group)
@@ -64,8 +64,8 @@ namespace ECommerceStoreInvoice.API.Endpoints
             .WithDescription("Returns all orders assigned to the provided client identifier.")
             .WithName("GetOrdersByClientId")
             .Produces<IReadOnlyCollection<OrderResponseDto>>(StatusCodes.Status200OK)
-            .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest)
-            .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
+            .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")
+            .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, "application/problem+json");
 
             group.MapGet("/{orderId:guid}", async (Guid orderId, IOrderService orderService) =>
             {
@@ -77,9 +77,9 @@ namespace ECommerceStoreInvoice.API.Endpoints
             .WithDescription("Returns the order when the Id exists; 404 otherwise.")
             .WithName("GetOrderById")
             .Produces<OrderResponseDto>(StatusCodes.Status200OK)
-            .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest)
-            .Produces<NotFoundProblemDetails>(StatusCodes.Status404NotFound)
-            .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
+            .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")
+            .Produces<NotFoundProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")
+            .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, "application/problem+json");
         }
     }
 }

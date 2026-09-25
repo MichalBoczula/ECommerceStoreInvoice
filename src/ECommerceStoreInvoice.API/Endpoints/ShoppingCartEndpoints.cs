@@ -1,4 +1,4 @@
-﻿using ECommerceStoreInvoice.API.Configuration.Common;
+using ECommerceStoreInvoice.API.Configuration.Common;
 using ECommerceStoreInvoice.Application.Common.RequestsDto.ShoppingCarts;
 using ECommerceStoreInvoice.Application.Common.ResponsesDto.ShoppingCarts;
 using ECommerceStoreInvoice.Application.Services.Abstract.ShoppingCarts;
@@ -29,8 +29,9 @@ namespace ECommerceStoreInvoice.API.Endpoints
             .WithDescription("Returns the shopping cart assigned to the provided client identifier when it exists; 404 otherwise.")
             .WithName("GetShoppingCartByClientId")
             .Produces<ShoppingCartResponseDto>(StatusCodes.Status200OK)
-            .Produces<NotFoundProblemDetails>(StatusCodes.Status404NotFound)
-            .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
+            .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")
+            .Produces<NotFoundProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")
+            .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, "application/problem+json");
         }
 
         private static void MapShoppingCartCommands(IEndpointRouteBuilder group)
@@ -45,8 +46,9 @@ namespace ECommerceStoreInvoice.API.Endpoints
             .WithDescription("Creates a new shopping cart for the provided client identifier.")
             .WithName("CreateShoppingCart")
             .Produces<ShoppingCartResponseDto>(StatusCodes.Status200OK)
-            .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest)
-            .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
+            .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")
+            .Produces<ConflictProblemDetails>(StatusCodes.Status409Conflict, "application/problem+json")
+            .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, "application/problem+json");
 
             group.MapPut("/{clientId:guid}", async (
                 Guid clientId,
@@ -61,9 +63,9 @@ namespace ECommerceStoreInvoice.API.Endpoints
             .WithDescription("Updates shopping cart lines for the provided client identifier.")
             .WithName("UpdateShoppingCart")
             .Produces<ShoppingCartResponseDto>(StatusCodes.Status200OK)
-            .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest)
-            .Produces<NotFoundProblemDetails>(StatusCodes.Status404NotFound)
-            .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
+            .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")
+            .Produces<NotFoundProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")
+            .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, "application/problem+json");
         }
     }
 }

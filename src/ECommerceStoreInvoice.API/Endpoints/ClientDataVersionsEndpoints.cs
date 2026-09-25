@@ -29,9 +29,9 @@ namespace ECommerceStoreInvoice.API.Endpoints
             .WithDescription("Returns the most recent client data version for the provided client id; 404 otherwise.")
             .WithName("GetClientDataVersionByClientId")
             .Produces<ClientDataVersionResponseDto>(StatusCodes.Status200OK)
-            .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest)
-            .Produces<NotFoundProblemDetails>(StatusCodes.Status404NotFound)
-            .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
+            .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")
+            .Produces<NotFoundProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")
+            .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, "application/problem+json");
         }
 
         private static void MapClientDataVersionCommands(IEndpointRouteBuilder group)
@@ -49,8 +49,8 @@ namespace ECommerceStoreInvoice.API.Endpoints
             .WithDescription("Creates a new client data version for the provided client identifier.")
             .WithName("CreateClientDataVersion")
             .Produces<ClientDataVersionResponseDto>(StatusCodes.Status200OK)
-            .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest)
-            .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
+            .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")
+            .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, "application/problem+json");
         }
     }
 }

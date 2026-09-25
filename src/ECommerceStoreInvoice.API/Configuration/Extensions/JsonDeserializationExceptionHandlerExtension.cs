@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
@@ -40,7 +40,7 @@ namespace ECommerceStoreInvoice.API.Configuration.Extensions
                 {
                     ["traceId"] = context.TraceIdentifier
                 }
-            }, cancellationToken);
+            }, options: null, contentType: "application/problem+json", cancellationToken);
         }
 
         private static (string TypeName, IReadOnlyCollection<string> MissingProperties) ExtractMissingInformation(string? message)

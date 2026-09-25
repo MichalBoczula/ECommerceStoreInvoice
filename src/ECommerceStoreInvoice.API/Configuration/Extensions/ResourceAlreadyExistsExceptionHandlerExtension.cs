@@ -1,4 +1,4 @@
-﻿using ECommerceStoreInvoice.API.Configuration.Common;
+using ECommerceStoreInvoice.API.Configuration.Common;
 using ECommerceStoreInvoice.Domain.Validation.Common;
 
 namespace ECommerceStoreInvoice.API.Configuration.Extensions
@@ -30,7 +30,7 @@ namespace ECommerceStoreInvoice.API.Configuration.Extensions
                 Type = "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.8",
                 Instance = context.Request.Path,
                 TraceId = context.TraceIdentifier
-            }, cancellationToken);
+            }, options: null, contentType: "application/problem+json", cancellationToken);
         }
     }
 }

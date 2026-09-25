@@ -18,6 +18,7 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Common
         {
             _factory = new ApplicationFactory();
             await _factory.InitializeAsync();
+            _apiContext.Factory = _factory;
             _apiContext.HttpClient = _factory.CreateClient();
         }
 

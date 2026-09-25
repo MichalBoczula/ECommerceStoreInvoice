@@ -1,4 +1,4 @@
-﻿using ECommerceStoreInvoice.API.Configuration.Common;
+using ECommerceStoreInvoice.API.Configuration.Common;
 using ECommerceStoreInvoice.Domain.Validation.Common;
 
 namespace ECommerceStoreInvoice.API.Configuration.Extensions;
@@ -32,6 +32,6 @@ public static class NotFoundExceptionHandlerExtension
             Type = "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.4",
             Instance = context.Request.Path,
             TraceId = context.TraceIdentifier
-        }, cancellationToken);
+        }, options: null, contentType: "application/problem+json", cancellationToken);
     }
 }

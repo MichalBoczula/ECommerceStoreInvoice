@@ -69,6 +69,81 @@ public sealed class OrderInvoiceAcceptanceSteps(ScenarioApiContext context)
         await CreateInvoice();
     }
 
+    [Given("I have an order id that does not exist")]
+    public void GivenMissingOrderForStatusUpdate() => _orderId = Guid.NewGuid();
+
+    [Given("I have an empty order id for status update")]
+    public void GivenEmptyOrderForStatusUpdate() => _orderId = Guid.Empty;
+
+    [Given("I have a paid order without client data")]
+    public async Task GivenPaidOrderWithoutClientData()
+    {
+        var table = new Table("Field", "Value");
+        table.AddRow("Quantity", "2");
+        await CreateCart(table);
+        await CreateOrder();
+        await MarkOrderPaid();
+    }
+
+    [When("I change the order status to {string}")]
+    public async Task WhenOrderStatusChanges(string status) =>
+        context.Response = await context.HttpClient.PatchAsJsonAsync($"/orders/{_orderId}/status",
+            new UpdateOrderStatusRequestDto { Status = status }, context.JsonOptions);
+
+    [When("I request an invoice for the current order")]
+    public Task WhenInvoiceRequestedForCurrentOrder() => SendPost($"/invoices/{_clientId}/{_orderId}");
+
+    [When("a different client requests an invoice for the order")]
+    public Task WhenAnotherClientRequestsInvoice() => SendPost($"/invoices/{Guid.NewGuid()}/{_orderId}");
+
+    [When("an empty client id requests an invoice for the order")]
+    public Task WhenEmptyClientRequestsInvoice() => SendPost($"/invoices/{Guid.Empty}/{_orderId}");
+
+    [Then("the order status response is 200 with status {string}")]
+    public async Task ThenOrderStatusUpdated(string expectedStatus)
+    {
+        context.Response.ShouldNotBeNull();
+        context.Response.StatusCode.ShouldBe(HttpStatusCode.OK, await context.Response.Content.ReadAsStringAsync());
+        var order = await context.Response.Content.ReadFromJsonAsync<OrderResponseDto>(context.JsonOptions);
+        order.ShouldNotBeNull();
+        order.Id.ShouldBe(_orderId);
+        order.Status.ShouldBe(expectedStatus);
+        using var stored = await context.HttpClient.GetAsync($"/orders/{_orderId}");
+        stored.StatusCode.ShouldBe(HttpStatusCode.OK);
+        (await stored.Content.ReadFromJsonAsync<OrderResponseDto>(context.JsonOptions))!.Status.ShouldBe(expectedStatus);
+    }
+
+    [Then("the order status response is {int}")]
+    public async Task ThenOrderStatusFails(int status)
+    {
+        context.Response.ShouldNotBeNull();
+        context.Response.StatusCode.ShouldBe((HttpStatusCode)status);
+        context.Response.Content.Headers.ContentType?.MediaType.ShouldBe("application/problem+json");
+        using var json = JsonDocument.Parse(await context.Response.Content.ReadAsStringAsync());
+        json.RootElement.GetProperty("status").GetInt32().ShouldBe(status);
+    }
+
+    [Then("the order status response is {int} and the stored status is {string}")]
+    public async Task ThenOrderStatusFailsAndIsNotSaved(int status, string expectedStatus)
+    {
+        await ThenOrderStatusFails(status);
+        using var stored = await context.HttpClient.GetAsync($"/orders/{_orderId}");
+        stored.StatusCode.ShouldBe(HttpStatusCode.OK);
+        (await stored.Content.ReadFromJsonAsync<OrderResponseDto>(context.JsonOptions))!.Status.ShouldBe(expectedStatus);
+    }
+
+    [Then("invoice creation fails with status {int}")]
+    public async Task ThenInvoiceCreationFails(int status)
+    {
+        context.Response.ShouldNotBeNull();
+        context.Response.StatusCode.ShouldBe((HttpStatusCode)status);
+        context.Response.Content.Headers.ContentType?.MediaType.ShouldBe("application/problem+json");
+        using var json = JsonDocument.Parse(await context.Response.Content.ReadAsStringAsync());
+        json.RootElement.GetProperty("status").GetInt32().ShouldBe(status);
+        using var order = await context.HttpClient.GetAsync($"/orders/{_orderId}");
+        order.StatusCode.ShouldBe(HttpStatusCode.OK);
+    }
+
     [Given("the get invoice by id request is documented as")]
     public void GivenGetInvoiceRequest(Table table)
     {
