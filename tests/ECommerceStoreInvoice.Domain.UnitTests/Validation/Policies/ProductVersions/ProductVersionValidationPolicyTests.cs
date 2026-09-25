@@ -24,15 +24,17 @@ namespace ECommerceStoreInvoice.Domain.UnitTests.Validation.Policies.ProductVers
             result.GetValidationErrors().ShouldContain(e => e.Name == "ProductVersionPriceValidationRule");
             result.GetValidationErrors().ShouldContain(e => e.Name == "ProductVersionStringsValidationRule" && e.Message == "Name cannot be null or whitespace.");
             result.GetValidationErrors().ShouldContain(e => e.Name == "ProductVersionStringsValidationRule" && e.Message == "Brand cannot be null or whitespace.");
-            result.GetValidationErrors().ShouldContain(e => e.Name == "ProductVersionStringsValidationRule" && e.Message == "Price currency must be USD.");
+            result.GetValidationErrors().ShouldContain(e => e.Name == "ProductVersionStringsValidationRule" && e.Message == "Price currency must be USD or PLN.");
         }
 
-        [Fact]
-        public async Task Validate_ProductVersionIsValid_ShouldReturnNoErrors()
+        [Theory]
+        [InlineData("USD")]
+        [InlineData("PLN")]
+        public async Task Validate_ProductVersionIsValid_ShouldReturnNoErrors(string currency)
         {
             // Arrange
             var policy = new ProductVersionValidationPolicy();
-            var productVersion = new ProductVersion(Guid.NewGuid(), new Money(15.99m, "USD"), "Keyboard", "Logi");
+            var productVersion = new ProductVersion(Guid.NewGuid(), new Money(15.99m, currency), "Keyboard", "Logi");
 
             // Act
             var result = await policy.Validate(productVersion);

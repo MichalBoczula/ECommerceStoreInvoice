@@ -33,7 +33,9 @@ public class ApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
     private readonly bool _useProductCatalog;
     private string? _productCatalogBaseUrl;
 
-    public ApplicationFactory(bool useProductCatalog = false) => _useProductCatalog = useProductCatalog;
+    public ApplicationFactory() : this(false) { }
+
+    public ApplicationFactory(bool useProductCatalog) => _useProductCatalog = useProductCatalog;
 
     public static async Task DisposeSharedProductsAsync()
     {
@@ -48,7 +50,7 @@ public class ApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
     {
         builder.UseEnvironment("Testing");
         if (_useProductCatalog)
-            builder.UseSetting("ExternalServices:ProductCatalog:BaseUrl", _productCatalogBaseUrl);
+            builder.UseSetting("ExternalServices:ProductCatalog:BaseUrl", _productCatalogBaseUrl!);
 
         builder.UseSetting("MongoDbSettings:ConnectionString", _connectionString);
         builder.UseSetting("MongoDbSettings:DatabaseName", _database);

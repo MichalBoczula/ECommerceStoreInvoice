@@ -342,7 +342,7 @@ public sealed class OrderInvoiceAcceptanceSteps(ScenarioApiContext context)
     private async Task CreateOrder()
     {
         using var response = await context.HttpClient.PostAsync($"/orders/{_clientId}", null);
-        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        response.StatusCode.ShouldBe(HttpStatusCode.OK, await response.Content.ReadAsStringAsync());
         var order = await response.Content.ReadFromJsonAsync<OrderResponseDto>(context.JsonOptions);
         order.ShouldNotBeNull();
         _orderId = order.Id;
