@@ -409,4 +409,60 @@ public sealed class InvoiceServiceTests
         pdfServiceMock.Verify(x => x.DeleteGeneratedPdf(claim.InvoiceId, claim.AttemptId), Times.Once);
         generationRepositoryMock.Verify(x => x.CompleteAsync(It.IsAny<InvoiceGenerationClaim>(), It.IsAny<string>()), Times.Never);
     }
+    [Fact]
+    public async Task CreateInvoiceForOrder_WhenCompletionCommitsButAcknowledgementIsLost_ShouldReturnSavedInvoice()
+    {
+        var clientId = Guid.NewGuid();
+        var orderId = Guid.NewGuid();
+        var order = Order.Rehydrate(orderId, clientId, [], DateTime.UtcNow, null, OrderStatus.Paid);
+        var clientData = new ClientDataVersionResponseDto
+        {
+            Id = Guid.NewGuid(), ClientId = clientId, ClientName = "Test Client", PostalCode = "00-000",
+            City = "Warsaw", Street = "Main", BuildingNumber = "1", ApartmentNumber = "",
+            PhoneNumber = "123456789", PhonePrefix = "+48", AddressEmail = "test@example.com",
+            CreatedAt = DateTime.UtcNow
+        };
+        var claim = new InvoiceGenerationClaim(Guid.NewGuid(), orderId, clientData.Id, Guid.NewGuid());
+        const string storageUrl = "file:///invoices/committed.pdf";
+        var committed = false;
+        var savedInvoice = Invoice.Rehydrate(claim.InvoiceId, orderId, clientData.Id, storageUrl, DateTime.UtcNow);
+
+        var invoices = new Mock<IInvoiceRepository>(MockBehavior.Strict);
+        invoices.SetupSequence(x => x.GetInvoiceByOrderId(orderId))
+            .ReturnsAsync((Invoice?)null)
+            .ReturnsAsync(savedInvoice);
+        var generation = new Mock<IInvoiceGenerationRepository>(MockBehavior.Strict);
+        generation.Setup(x => x.TryClaimAsync(It.IsAny<Invoice>(), It.IsAny<Guid>())).ReturnsAsync(claim);
+        generation.Setup(x => x.CompleteAsync(claim, storageUrl)).Returns(() =>
+        {
+            committed = true;
+            return Task.FromException<Invoice>(new IOException("Completion committed but the acknowledgement was lost."));
+        });
+        generation.Setup(x => x.ReleaseAsync(claim)).Returns(Task.CompletedTask);
+        var orders = new Mock<IOrderRepository>(MockBehavior.Strict);
+        orders.Setup(x => x.GetOrderWithProductVersionsById(orderId))
+            .ReturnsAsync((order, (IReadOnlyCollection<ProductVersion>)[]));
+        var clients = new Mock<IClientDataVersionService>(MockBehavior.Strict);
+        clients.Setup(x => x.GetByClientId(clientId)).ReturnsAsync(clientData);
+        var pdf = new Mock<IInvoicePdfService>(MockBehavior.Strict);
+        pdf.Setup(x => x.GenerateInvoicePdf(claim.InvoiceId, claim.AttemptId, order,
+            It.IsAny<IReadOnlyCollection<ProductVersion>>(), clientData)).ReturnsAsync(storageUrl);
+        var guidPolicy = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
+        guidPolicy.Setup(x => x.Validate(It.IsAny<Guid>())).ReturnsAsync(new ValidationResult());
+        var statusPolicy = new Mock<IValidationPolicy<InvoiceOrderStatusValidationContext>>(MockBehavior.Strict);
+        statusPolicy.Setup(x => x.Validate(It.IsAny<InvoiceOrderStatusValidationContext>()))
+            .ReturnsAsync(new ValidationResult());
+
+        var sut = new InvoiceService(invoices.Object, generation.Object, orders.Object, clients.Object,
+            pdf.Object, guidPolicy.Object, statusPolicy.Object, Mock.Of<ILogger<InvoiceService>>());
+
+        var result = await sut.CreateInvoiceForOrder(clientId, orderId);
+
+        committed.ShouldBeTrue();
+        result.Id.ShouldBe(claim.InvoiceId);
+        result.StorageUrl.ShouldBe(storageUrl);
+        generation.Verify(x => x.ReleaseAsync(claim), Times.Never);
+        pdf.Verify(x => x.DeleteGeneratedPdf(It.IsAny<Guid>(), It.IsAny<Guid>()), Times.Never);
+    }
+
 }

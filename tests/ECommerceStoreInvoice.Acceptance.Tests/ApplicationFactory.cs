@@ -2,6 +2,10 @@ using System.Diagnostics;
 using System.Reflection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.TestHost;
+using ECommerceStoreInvoice.Application.Services.Abstract.Invoices;
+using ECommerceStoreInvoice.Domain.AggregatesModel.InvoiceAggregate.Repositories;
+using MongoDB.Bson;
 using Microsoft.Extensions.DependencyInjection;
 using Testcontainers.MongoDb;
 using MongoDB.Driver;
@@ -31,11 +35,20 @@ public class ApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
     });
 
     private readonly bool _useProductCatalog;
+    private readonly bool _failPdfOnce;
+    private readonly bool _loseCompletionAckOnce;
+    private readonly CompletionAcknowledgementState _completionAckState = new();
+    private readonly PdfFailureState _pdfFailureState = new();
     private string? _productCatalogBaseUrl;
 
     public ApplicationFactory() : this(false) { }
 
-    internal ApplicationFactory(bool useProductCatalog) => _useProductCatalog = useProductCatalog;
+    internal ApplicationFactory(bool useProductCatalog, bool failPdfOnce = false, bool loseCompletionAckOnce = false)
+    {
+        _useProductCatalog = useProductCatalog;
+        _failPdfOnce = failPdfOnce;
+        _loseCompletionAckOnce = loseCompletionAckOnce;
+    }
 
     public static async Task DisposeSharedProductsAsync()
     {
@@ -59,6 +72,32 @@ public class ApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
         builder.UseSetting("MongoDbSettings:ProductVersionsCollectionName", "productVersions");
         builder.UseSetting("MongoDbSettings:InvoicesCollectionName", "invoices");
         builder.UseSetting("MongoDbSettings:ClientDataVersionsCollectionName", "clientDataVersions");
+
+        if (_loseCompletionAckOnce)
+        {
+            builder.ConfigureTestServices(services =>
+            {
+                var original = services.Last(descriptor => descriptor.ServiceType == typeof(IInvoiceGenerationRepository));
+                services.Remove(original);
+                services.AddScoped<IInvoiceGenerationRepository>(provider =>
+                    new LoseOnceInvoiceCompletionAcknowledgement(
+                        (IInvoiceGenerationRepository)ActivatorUtilities.CreateInstance(provider, original.ImplementationType!),
+                        _completionAckState));
+            });
+        }
+
+        if (_failPdfOnce)
+        {
+            builder.ConfigureTestServices(services =>
+            {
+                var original = services.Last(descriptor => descriptor.ServiceType == typeof(IInvoicePdfService));
+                services.Remove(original);
+                services.AddScoped<IInvoicePdfService>(provider =>
+                    new FailOnceInvoicePdfService(
+                        (IInvoicePdfService)ActivatorUtilities.CreateInstance(provider, original.ImplementationType!),
+                        _pdfFailureState));
+            });
+        }
 
     }
 
@@ -98,6 +137,15 @@ public class ApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
         }
 
         await initializationTask;
+    }
+
+    public async Task<List<BsonDocument>> GetInvoiceDocumentsAsync(Guid orderId)
+    {
+        var collection = new MongoClient(_connectionString).GetDatabase(_database)
+            .GetCollection<BsonDocument>("invoices");
+        var filter = Builders<BsonDocument>.Filter.Eq(
+            "OrderId", new BsonBinaryData(orderId, GuidRepresentation.Standard));
+        return await collection.Find(filter).ToListAsync();
     }
 
     public new async Task DisposeAsync()
