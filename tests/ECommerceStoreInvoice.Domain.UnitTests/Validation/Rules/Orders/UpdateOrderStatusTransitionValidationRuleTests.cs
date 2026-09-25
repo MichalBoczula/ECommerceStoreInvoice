@@ -29,8 +29,12 @@ namespace ECommerceStoreInvoice.Domain.UnitTests.Validation.Rules.Orders
 
         [Theory]
         [InlineData(OrderStatus.Created, OrderStatus.Created)]
+        [InlineData(OrderStatus.Paid, OrderStatus.Paid)]
         [InlineData(OrderStatus.Paid, OrderStatus.Cancelled)]
+        [InlineData(OrderStatus.Paid, OrderStatus.Created)]
+        [InlineData(OrderStatus.Cancelled, OrderStatus.Cancelled)]
         [InlineData(OrderStatus.Cancelled, OrderStatus.Paid)]
+        [InlineData(OrderStatus.Cancelled, OrderStatus.Created)]
         public async Task IsValid_WhenStatusTransitionIsNotAllowed_ShouldReturnValidationError(OrderStatus currentStatus, OrderStatus newStatus)
         {
             // Arrange
@@ -38,10 +42,14 @@ namespace ECommerceStoreInvoice.Domain.UnitTests.Validation.Rules.Orders
             var validationResult = new ValidationResult();
             var order = CreateOrderWithStatus(currentStatus);
 
+            var originalUpdatedAt = order.UpdatedAt;
+
             // Act
             await rule.IsValid((order, newStatus), validationResult);
 
             // Assert
+            order.Status.ShouldBe(currentStatus);
+            order.UpdatedAt.ShouldBe(originalUpdatedAt);
             validationResult.IsValid.ShouldBeFalse();
             validationResult.GetValidationErrors().Count.ShouldBe(1);
             validationResult.GetValidationErrors().First().Name.ShouldBe("UpdateOrderStatusTransitionValidationRule");
