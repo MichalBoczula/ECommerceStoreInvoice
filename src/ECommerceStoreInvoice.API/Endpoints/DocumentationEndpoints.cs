@@ -92,7 +92,7 @@ namespace ECommerceStoreInvoice.API.Endpoints
             .WithDescription("Returns flow descriptors mapped by descriptor name.")
             .WithName("GetFlowDocumentation")
             .Produces<FlowDescriptorsResponseDto>(StatusCodes.Status200OK)
-            .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
+            .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, "application/problem+json");
         }
 
         private static void MapValidationDocumentation(IEndpointRouteBuilder group)
@@ -118,7 +118,7 @@ namespace ECommerceStoreInvoice.API.Endpoints
             .WithDescription("Returns validation descriptors mapped by policy name.")
             .WithName("GetValidationDocumentation")
             .Produces<ValidationDescriptorsResponseDto>(StatusCodes.Status200OK)
-            .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
+            .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, "application/problem+json");
         }
     }
 }

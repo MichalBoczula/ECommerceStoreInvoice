@@ -1,4 +1,4 @@
-﻿using ECommerceStoreInvoice.API.Configuration.Common;
+using ECommerceStoreInvoice.API.Configuration.Common;
 using ECommerceStoreInvoice.Application.Common.ResponsesDto;
 using ECommerceStoreInvoice.Application.Services.Abstract.Invoices;
 using Microsoft.AspNetCore.Mvc;
@@ -29,10 +29,10 @@ namespace ECommerceStoreInvoice.API.Endpoints
            .WithDescription("Creates a new invoice when the client order exists and does not already have an invoice.")
            .WithName("CreateInvoiceForOrder")
            .Produces<InvoiceResponseDto>(StatusCodes.Status200OK)
-           .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest)
-           .Produces<NotFoundProblemDetails>(StatusCodes.Status404NotFound)
-           .Produces<ConflictProblemDetails>(StatusCodes.Status409Conflict)
-           .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
+           .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")
+           .Produces<NotFoundProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")
+           .Produces<ConflictProblemDetails>(StatusCodes.Status409Conflict, "application/problem+json")
+           .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, "application/problem+json");
         }
 
         private static void MapInvoicesQueries(IEndpointRouteBuilder group)
@@ -47,9 +47,9 @@ namespace ECommerceStoreInvoice.API.Endpoints
             .WithDescription("Returns the invoice when the Id exists; 404 otherwise.")
             .WithName("GetInvoiceById")
             .Produces<InvoiceResponseDto>(StatusCodes.Status200OK)
-            .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest)
-            .Produces<NotFoundProblemDetails>(StatusCodes.Status404NotFound)
-            .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
+            .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")
+            .Produces<NotFoundProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")
+            .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, "application/problem+json");
         }
     }
 }
