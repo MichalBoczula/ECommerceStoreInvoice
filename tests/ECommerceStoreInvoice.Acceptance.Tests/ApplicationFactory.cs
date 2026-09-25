@@ -3,10 +3,6 @@ using System.Reflection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.AspNetCore.TestHost;
-using ECommerceStoreInvoice.Domain.AggregatesModel.Common.ValueObjects;
-using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate.ExternalServices;
 using Testcontainers.MongoDb;
 using MongoDB.Driver;
 
@@ -27,12 +23,32 @@ public class ApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
         .Build();
     private static readonly Lazy<Task> StartMongo = new(() => SharedMongoContainer.StartAsync());
 
+    private static readonly Lazy<Task<ProductCatalogContainerFixture>> StartProducts = new(async () =>
+    {
+        var fixture = new ProductCatalogContainerFixture();
+        await fixture.InitializeAsync();
+        return fixture;
+    });
+
+    private readonly bool _useProductCatalog;
+    private string? _productCatalogBaseUrl;
+
+    public ApplicationFactory(bool useProductCatalog = false) => _useProductCatalog = useProductCatalog;
+
+    public static async Task DisposeSharedProductsAsync()
+    {
+        if (StartProducts.IsValueCreated && StartProducts.Value.IsCompletedSuccessfully)
+            await (await StartProducts.Value).DisposeAsync();
+    }
+
     private readonly string _database = $"IntegrationTestDb_{Guid.NewGuid():N}";
     private string _connectionString = string.Empty;
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment("Testing");
+        if (_useProductCatalog)
+            builder.UseSetting("ExternalServices:ProductCatalog:BaseUrl", _productCatalogBaseUrl);
 
         builder.UseSetting("MongoDbSettings:ConnectionString", _connectionString);
         builder.UseSetting("MongoDbSettings:DatabaseName", _database);
@@ -42,25 +58,14 @@ public class ApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
         builder.UseSetting("MongoDbSettings:InvoicesCollectionName", "invoices");
         builder.UseSetting("MongoDbSettings:ClientDataVersionsCollectionName", "clientDataVersions");
 
-        builder.ConfigureTestServices(services =>
-        {
-            services.RemoveAll<IProductServiceClient>();
-            services.AddScoped<IProductServiceClient, ScenarioProductServiceClient>();
-        });
-
-    }
-
-    public sealed class ScenarioProductServiceClient : IProductServiceClient
-    {
-        public Task<IReadOnlyCollection<ExternalProductSnapshot>> GetProductsByIds(
-            IEnumerable<Guid> productIds, CancellationToken cancellationToken = default) =>
-            Task.FromResult<IReadOnlyCollection<ExternalProductSnapshot>>(
-                productIds.Select(id => new ExternalProductSnapshot(id, "Laptop", "Lenovo", new Money(999.99m, "USD"))).ToArray());
     }
 
     public async Task InitializeAsync()
     {
         await EnsurePlaywrightInstalledAsync();
+
+        if (_useProductCatalog)
+            _productCatalogBaseUrl = (await StartProducts.Value).BaseAddress.ToString();
 
         await StartMongo.Value;
 
