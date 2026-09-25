@@ -129,7 +129,7 @@ public sealed class OrderInvoiceAcceptanceSteps(ScenarioApiContext context)
             var stored = await storedResponse.Content.ReadFromJsonAsync<OrderResponseDto>(context.JsonOptions);
             stored.ShouldNotBeNull();
             stored.Status.ShouldBe(winner.Status);
-            stored.UpdatedAt.ShouldBe(winner.UpdatedAt);
+            stored.UpdatedAt.ShouldBe(MongoPrecision(winner.UpdatedAt));
             stored.UpdatedAt.ShouldNotBeNull();
             stored.Lines.Single().Quantity.ShouldBe(2);
             stored.TotalAmount.ShouldBe(4998m);
@@ -160,10 +160,12 @@ public sealed class OrderInvoiceAcceptanceSteps(ScenarioApiContext context)
         order.ShouldNotBeNull();
         order.Id.ShouldBe(_orderId);
         order.Status.ShouldBe(expectedStatus);
-        _lastKnownOrderUpdate = order.UpdatedAt;
         using var stored = await context.HttpClient.GetAsync($"/orders/{_orderId}");
         stored.StatusCode.ShouldBe(HttpStatusCode.OK);
-        (await stored.Content.ReadFromJsonAsync<OrderResponseDto>(context.JsonOptions))!.Status.ShouldBe(expectedStatus);
+        var persisted = await stored.Content.ReadFromJsonAsync<OrderResponseDto>(context.JsonOptions);
+        persisted.ShouldNotBeNull();
+        persisted.Status.ShouldBe(expectedStatus);
+        _lastKnownOrderUpdate = persisted.UpdatedAt;
     }
 
     [Then("the order status response is {int}")]
@@ -459,6 +461,11 @@ public sealed class OrderInvoiceAcceptanceSteps(ScenarioApiContext context)
         invoice.StorageUrl.ShouldNotBeNullOrWhiteSpace();
         invoice.CreatedAt.ShouldNotBe(default);
     }
+
+    private static DateTime? MongoPrecision(DateTime? timestamp) =>
+        timestamp is { } value
+            ? new DateTime(value.Ticks - value.Ticks % TimeSpan.TicksPerMillisecond, value.Kind)
+            : null;
 
     private static Dictionary<string, string> Values(Table table) =>
         table.Rows.ToDictionary(row => row["Field"], row => row["Value"], StringComparer.OrdinalIgnoreCase);
