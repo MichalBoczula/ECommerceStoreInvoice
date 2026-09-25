@@ -56,15 +56,37 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Invoices
             // Completion can commit in Mongo even if the acknowledgement is lost. Keep the PDF
             // once completion has been attempted so a committed invoice never points to a deleted file.
             var completionAttempted = false;
+            string? generatedStorageUrl = null;
             Invoice createdInvoice;
             try
             {
-                var storageUrl = await descriptor.GenerateInvoicePdf(claim!, order, productVersions, clientDataVersion, invoicePdfService);
+                generatedStorageUrl = await descriptor.GenerateInvoicePdf(claim!, order, productVersions, clientDataVersion, invoicePdfService);
                 completionAttempted = true;
-                createdInvoice = await descriptor.CompleteInvoiceGeneration(claim!, storageUrl, generationRepository);
+                createdInvoice = await descriptor.CompleteInvoiceGeneration(claim!, generatedStorageUrl, generationRepository);
             }
-            catch
+            catch (Exception completionException)
             {
+                if (completionAttempted)
+                {
+                    try
+                    {
+                        var completed = await invoiceRepository.GetInvoiceByOrderId(orderId);
+                        if (completed is not null && completed.Id == claim!.InvoiceId &&
+                            completed.StorageUrl == generatedStorageUrl)
+                        {
+                            logger.LogWarning(completionException,
+                                "Invoice completion acknowledgement was lost for OrderId: {OrderId}; confirmed persisted invoice {InvoiceId}",
+                                orderId, completed.Id);
+                            return descriptor.MapToResponse(completed);
+                        }
+                    }
+                    catch (Exception lookupException)
+                    {
+                        logger.LogError(lookupException,
+                            "Could not confirm invoice completion for OrderId: {OrderId}", orderId);
+                    }
+                }
+
                 try
                 {
                     await descriptor.ReleaseFailedGeneration(claim!, generationRepository);
