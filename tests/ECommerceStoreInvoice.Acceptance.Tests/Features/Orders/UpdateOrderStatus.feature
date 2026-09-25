@@ -1,6 +1,7 @@
 Feature: Update order status
   Status changes are validated by the Order flow before they are persisted.
 
+  @products-api
   Scenario: A created order can become paid
     Given I have an existing order id with setup data
       | Field    | Value |
@@ -8,6 +9,7 @@ Feature: Update order status
     When I change the order status to "Paid"
     Then the order status response is 200 with status "Paid"
 
+  @products-api
   Scenario: An unknown status is rejected
     Given I have an existing order id with setup data
       | Field    | Value |

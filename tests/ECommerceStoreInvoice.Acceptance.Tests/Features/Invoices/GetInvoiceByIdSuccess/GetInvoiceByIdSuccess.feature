@@ -1,6 +1,7 @@
 @allure.description:Ensures_getting_invoice_by_id_returns_the_existing_invoice_payload.
 Feature: Get invoice by id
 
+  @products-api
   Scenario: Get invoice by id returns an existing invoice
     Given I have an existing invoice id
     And the get invoice by id request is documented as

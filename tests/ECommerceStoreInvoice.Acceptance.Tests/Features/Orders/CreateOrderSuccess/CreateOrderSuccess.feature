@@ -1,12 +1,13 @@
 Feature: Create order
 
+  @products-api
   Scenario: Create order returns created order
     Given I have a valid shopping cart for order creation
       | Field                | Value  |
-      | Name                 | Laptop |
-      | Brand                | Lenovo |
-      | UnitPriceAmount      | 999.99 |
-      | UnitPriceCurrency    | usd    |
+      | Name                 | Xiaomi POCO F7 12/512GB Black |
+      | Brand                | Xiaomi |
+      | UnitPriceAmount      | 2499.00 |
+      | UnitPriceCurrency    | PLN    |
       | Quantity             | 2      |
     When I submit the create order request
     Then the order is created successfully
@@ -15,14 +16,14 @@ Feature: Create order
       | HasId                      | true    |
       | HasClientId                | true    |
       | Status                     | Created |
-      | TotalAmount                | 1999.98 |
-      | TotalCurrency              | USD     |
+      | TotalAmount                | 4998.00 |
+      | TotalCurrency              | PLN     |
       | LinesCount                 | 1       |
       | FirstLineHasProductVersionId | true  |
-      | FirstLineName              | Laptop  |
-      | FirstLineBrand             | Lenovo  |
+      | FirstLineName              | Xiaomi POCO F7 12/512GB Black  |
+      | FirstLineBrand             | Xiaomi  |
       | FirstLineQuantity          | 2       |
-      | FirstLineUnitPriceAmount   | 999.99  |
-      | FirstLineUnitPriceCurrency | USD     |
-      | FirstLineTotalAmount       | 1999.98 |
-      | FirstLineTotalCurrency     | USD     |
+      | FirstLineUnitPriceAmount   | 2499.00  |
+      | FirstLineUnitPriceCurrency | PLN     |
+      | FirstLineTotalAmount       | 4998.00 |
+      | FirstLineTotalCurrency     | PLN     |
