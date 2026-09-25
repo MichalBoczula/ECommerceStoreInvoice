@@ -2,6 +2,7 @@
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate.Repositories;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate.ValueObjects;
+using ECommerceStoreInvoice.Domain.Validation.Common;
 using ECommerceStoreInvoice.Infrastructure.UnitTests.Integration.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
@@ -110,6 +111,60 @@ namespace ECommerceStoreInvoice.Infrastructure.UnitTests.Integration.Tests
             result.Lines.Single().Quantity.ShouldBe(4);
             result.Lines.Single().ProductVersionId.ShouldBe(order.Lines.Single().ProductVersionId);
             result.Status.ShouldBe(OrderStatus.Created);
+        }
+
+        [Fact]
+        public async Task UpdateOrder_ShouldPersistStatusAndTimestampWithOriginalLines()
+        {
+            await using var services = TestServiceProviderFactory.Create(
+                _fixture.ConnectionString, $"invoice-tests-{Guid.NewGuid():N}");
+            using var writeScope = services.CreateScope();
+            var writer = writeScope.ServiceProvider.GetRequiredService<IOrderRepository>();
+            var order = CreateOrder(Guid.NewGuid(), quantity: 4);
+            await writer.CreateOrder(order);
+            var originalVersionId = order.Lines.Single().ProductVersionId;
+
+            var loaded = (await writer.GetOrderByOrderId(order.Id))!;
+            loaded.ChangeStatus(OrderStatus.Paid);
+            await writer.UpdateOrder(loaded);
+
+            using var readScope = services.CreateScope();
+            var stored = (await readScope.ServiceProvider.GetRequiredService<IOrderRepository>()
+                .GetOrderByOrderId(order.Id))!;
+            stored.Status.ShouldBe(OrderStatus.Paid);
+            stored.UpdatedAt.ShouldNotBeNull();
+            stored.Lines.Single().ProductVersionId.ShouldBe(originalVersionId);
+            stored.Lines.Single().Quantity.ShouldBe(4);
+        }
+
+        [Fact]
+        public async Task UpdateOrder_WhenTwoReadersSawCreated_SecondWriteCannotOverwriteFirst()
+        {
+            await using var services = TestServiceProviderFactory.Create(
+                _fixture.ConnectionString, $"invoice-tests-{Guid.NewGuid():N}");
+            using var firstScope = services.CreateScope();
+            using var secondScope = services.CreateScope();
+            var first = firstScope.ServiceProvider.GetRequiredService<IOrderRepository>();
+            var second = secondScope.ServiceProvider.GetRequiredService<IOrderRepository>();
+            var order = CreateOrder(Guid.NewGuid(), quantity: 2);
+            await first.CreateOrder(order);
+
+            var firstCopy = (await first.GetOrderByOrderId(order.Id))!;
+            var secondCopy = (await second.GetOrderByOrderId(order.Id))!;
+            firstCopy.ChangeStatus(OrderStatus.Paid);
+            secondCopy.ChangeStatus(OrderStatus.Cancelled);
+
+            await first.UpdateOrder(firstCopy);
+            var conflict = await Should.ThrowAsync<OrderWriteConflictException>(
+                () => second.UpdateOrder(secondCopy));
+
+            conflict.OrderId.ShouldBe(order.Id);
+            using var readScope = services.CreateScope();
+            var stored = (await readScope.ServiceProvider.GetRequiredService<IOrderRepository>()
+                .GetOrderByOrderId(order.Id))!;
+            stored.Status.ShouldBe(OrderStatus.Paid);
+            stored.UpdatedAt.ShouldNotBeNull();
+            stored.Lines.Single().Quantity.ShouldBe(2);
         }
 
         private static Order CreateOrder(Guid clientId, int quantity)
