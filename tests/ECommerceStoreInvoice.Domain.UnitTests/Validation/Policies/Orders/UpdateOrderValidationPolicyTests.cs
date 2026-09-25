@@ -25,20 +25,28 @@ namespace ECommerceStoreInvoice.Domain.UnitTests.Validation.Policies.Orders
             result.GetValidationErrors().Count.ShouldBe(0);
         }
 
-        [Fact]
-        public async Task Validate_WhenStatusTransitionIsNotAllowed_ShouldReturnError()
+        [Theory]
+        [InlineData(OrderStatus.Paid, OrderStatus.Paid)]
+        [InlineData(OrderStatus.Cancelled, OrderStatus.Cancelled)]
+        [InlineData(OrderStatus.Paid, OrderStatus.Cancelled)]
+        [InlineData(OrderStatus.Cancelled, OrderStatus.Paid)]
+        public async Task Validate_WhenStatusTransitionIsNotAllowed_ShouldReturnErrorWithoutChangingOrder(
+            OrderStatus currentStatus, OrderStatus newStatus)
         {
             // Arrange
             var policy = new UpdateOrderValidationPolicy();
-            var order = CreateOrderWithStatus(OrderStatus.Paid);
+            var order = CreateOrderWithStatus(currentStatus);
+            var originalUpdatedAt = order.UpdatedAt;
 
             // Act
-            var result = await policy.Validate((order, OrderStatus.Cancelled));
+            var result = await policy.Validate((order, newStatus));
 
             // Assert
             result.IsValid.ShouldBeFalse();
             result.GetValidationErrors().Count.ShouldBe(1);
             result.GetValidationErrors().First().Name.ShouldBe("UpdateOrderStatusTransitionValidationRule");
+            order.Status.ShouldBe(currentStatus);
+            order.UpdatedAt.ShouldBe(originalUpdatedAt);
         }
 
         [Fact]
