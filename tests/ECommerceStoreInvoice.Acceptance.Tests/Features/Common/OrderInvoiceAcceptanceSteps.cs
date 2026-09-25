@@ -116,12 +116,12 @@ public sealed class OrderInvoiceAcceptanceSteps(ScenarioApiContext context)
             var successes = _concurrentStatusResponses.Where(response => response.StatusCode == HttpStatusCode.OK).ToArray();
             successes.Length.ShouldBe(1);
             var rejected = _concurrentStatusResponses.Single(response => response.StatusCode != HttpStatusCode.OK);
-            ((int)rejected.StatusCode).ShouldBeOneOf(400, 409);
+            (rejected.StatusCode is HttpStatusCode.BadRequest or HttpStatusCode.Conflict).ShouldBeTrue();
             rejected.Content.Headers.ContentType?.MediaType.ShouldBe("application/problem+json");
 
             var winner = await successes.Single().Content.ReadFromJsonAsync<OrderResponseDto>(context.JsonOptions);
             winner.ShouldNotBeNull();
-            winner.Status.ShouldBeOneOf("Paid", "Cancelled");
+            (winner.Status is "Paid" or "Cancelled").ShouldBeTrue();
 
             using var storedResponse = await context.HttpClient.GetAsync($"/orders/{_orderId}");
             storedResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
