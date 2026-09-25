@@ -20,6 +20,7 @@ public sealed class OrderInvoiceAcceptanceSteps(ScenarioApiContext context)
     private Guid _clientId;
     private Guid _orderId;
     private Guid _invoiceId;
+    private DateTime? _lastKnownOrderUpdate;
     private HttpResponseMessage[]? _concurrentStatusResponses;
     // From ProductsCatalog's SeedMobilePhone1 migration.
     private static readonly Guid SeededProductId = Guid.Parse("0f62c3e1-8e3e-4b1f-9d74-3d6e2ff2c6d2");
@@ -128,6 +129,8 @@ public sealed class OrderInvoiceAcceptanceSteps(ScenarioApiContext context)
             var stored = await storedResponse.Content.ReadFromJsonAsync<OrderResponseDto>(context.JsonOptions);
             stored.ShouldNotBeNull();
             stored.Status.ShouldBe(winner.Status);
+            stored.UpdatedAt.ShouldBe(winner.UpdatedAt);
+            stored.UpdatedAt.ShouldNotBeNull();
             stored.Lines.Single().Quantity.ShouldBe(2);
             stored.TotalAmount.ShouldBe(4998m);
             stored.TotalCurrency.ShouldBe("PLN");
@@ -157,6 +160,7 @@ public sealed class OrderInvoiceAcceptanceSteps(ScenarioApiContext context)
         order.ShouldNotBeNull();
         order.Id.ShouldBe(_orderId);
         order.Status.ShouldBe(expectedStatus);
+        _lastKnownOrderUpdate = order.UpdatedAt;
         using var stored = await context.HttpClient.GetAsync($"/orders/{_orderId}");
         stored.StatusCode.ShouldBe(HttpStatusCode.OK);
         (await stored.Content.ReadFromJsonAsync<OrderResponseDto>(context.JsonOptions))!.Status.ShouldBe(expectedStatus);
@@ -178,7 +182,12 @@ public sealed class OrderInvoiceAcceptanceSteps(ScenarioApiContext context)
         await ThenOrderStatusFails(status);
         using var stored = await context.HttpClient.GetAsync($"/orders/{_orderId}");
         stored.StatusCode.ShouldBe(HttpStatusCode.OK);
-        (await stored.Content.ReadFromJsonAsync<OrderResponseDto>(context.JsonOptions))!.Status.ShouldBe(expectedStatus);
+        var persisted = await stored.Content.ReadFromJsonAsync<OrderResponseDto>(context.JsonOptions);
+        persisted.ShouldNotBeNull();
+        persisted.Status.ShouldBe(expectedStatus);
+        persisted.UpdatedAt.ShouldBe(_lastKnownOrderUpdate);
+        persisted.TotalAmount.ShouldBe(4998m);
+        persisted.TotalCurrency.ShouldBe("PLN");
     }
 
     [Then("invoice creation fails with status {int}")]
@@ -389,6 +398,7 @@ public sealed class OrderInvoiceAcceptanceSteps(ScenarioApiContext context)
         var order = await response.Content.ReadFromJsonAsync<OrderResponseDto>(context.JsonOptions);
         order.ShouldNotBeNull();
         _orderId = order.Id;
+        _lastKnownOrderUpdate = order.UpdatedAt;
     }
 
     private async Task MarkOrderPaid()
