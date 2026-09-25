@@ -46,8 +46,10 @@ namespace ECommerceStoreInvoice.Domain.UnitTests.Domain.OrderAggregate
             order.UpdatedAt.ShouldBeNull();
         }
 
-        [Fact]
-        public void ChangeStatus_ShouldUpdateStatusAndSetUpdatedAt()
+        [Theory]
+        [InlineData(OrderStatus.Paid)]
+        [InlineData(OrderStatus.Cancelled)]
+        public void ChangeStatus_ShouldUpdateStatusAndSetUpdatedAt(OrderStatus newStatus)
         {
             // Arrange
             var order = new Order(
@@ -60,10 +62,10 @@ namespace ECommerceStoreInvoice.Domain.UnitTests.Domain.OrderAggregate
 
             // Act
             Thread.Sleep(1);
-            order.ChangeStatus(OrderStatus.Cancelled);
+            order.ChangeStatus(newStatus);
 
             // Assert
-            order.Status.ShouldBe(OrderStatus.Cancelled);
+            order.Status.ShouldBe(newStatus);
             order.UpdatedAt.ShouldNotBeNull();
             order.UpdatedAt.Value.ShouldBeGreaterThan(order.CreatedAt);
         }
