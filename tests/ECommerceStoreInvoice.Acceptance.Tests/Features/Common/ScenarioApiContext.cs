@@ -5,6 +5,7 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Common
 {
     public sealed class ScenarioApiContext
     {
+        public ApplicationFactory Factory { get; set; } = default!;
         public HttpClient HttpClient { get; set; } = default!;
         public HttpResponseMessage? Response { get; set; }
 

@@ -1,4 +1,4 @@
-﻿using ECommerceStoreInvoice.API.Configuration.Common;
+using ECommerceStoreInvoice.API.Configuration.Common;
 using ECommerceStoreInvoice.Application.Common.RequestsDto.ShoppingCarts;
 using ECommerceStoreInvoice.Application.Common.ResponsesDto.ShoppingCarts;
 using ECommerceStoreInvoice.Application.Services.Abstract.ShoppingCarts;
@@ -29,6 +29,7 @@ namespace ECommerceStoreInvoice.API.Endpoints
             .WithDescription("Returns the shopping cart assigned to the provided client identifier when it exists; 404 otherwise.")
             .WithName("GetShoppingCartByClientId")
             .Produces<ShoppingCartResponseDto>(StatusCodes.Status200OK)
+            .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest)
             .Produces<NotFoundProblemDetails>(StatusCodes.Status404NotFound)
             .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
         }
@@ -46,6 +47,7 @@ namespace ECommerceStoreInvoice.API.Endpoints
             .WithName("CreateShoppingCart")
             .Produces<ShoppingCartResponseDto>(StatusCodes.Status200OK)
             .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest)
+            .Produces<ConflictProblemDetails>(StatusCodes.Status409Conflict)
             .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
 
             group.MapPut("/{clientId:guid}", async (
