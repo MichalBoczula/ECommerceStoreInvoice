@@ -207,7 +207,7 @@ public sealed class OrderInvoiceAcceptanceSteps(ScenarioApiContext context)
         context.Response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
         context.Response.Content.Headers.ContentType?.MediaType.ShouldBe("application/problem+json");
 
-        using var cartResponse = await context.HttpClient.GetAsync($"/shopping-carts/{_clientId}");
+        using var cartResponse = await context.HttpClient.GetAsync($"/shopping-carts/client/{_clientId}");
         cartResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
         var cart = await cartResponse.Content.ReadFromJsonAsync<ShoppingCartResponseDto>(context.JsonOptions);
         cart.ShouldNotBeNull();
