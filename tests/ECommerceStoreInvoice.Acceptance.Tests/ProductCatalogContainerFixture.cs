@@ -6,11 +6,6 @@ using Testcontainers.MsSql;
 
 namespace ECommerceStoreInvoice.Acceptance.Tests;
 
-/// <summary>
-/// Starts the published Products API and its SQL Server dependency on a private Docker network.
-/// The existing acceptance scenarios still use ScenarioProductServiceClient; wiring Orders to
-/// this running API is a separate step.
-/// </summary>
 public sealed class ProductCatalogContainerFixture : IAsyncLifetime
 {
     private const string SqlPassword = "yourStrong(!)Password";
