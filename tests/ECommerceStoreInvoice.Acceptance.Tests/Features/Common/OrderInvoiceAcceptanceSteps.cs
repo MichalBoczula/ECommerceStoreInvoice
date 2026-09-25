@@ -20,6 +20,7 @@ public sealed class OrderInvoiceAcceptanceSteps(ScenarioApiContext context)
     private Guid _clientId;
     private Guid _orderId;
     private Guid _invoiceId;
+    private HttpResponseMessage[]? _concurrentStatusResponses;
     // From ProductsCatalog's SeedMobilePhone1 migration.
     private static readonly Guid SeededProductId = Guid.Parse("0f62c3e1-8e3e-4b1f-9d74-3d6e2ff2c6d2");
     private Guid _productId;
@@ -95,6 +96,48 @@ public sealed class OrderInvoiceAcceptanceSteps(ScenarioApiContext context)
     public async Task WhenOrderStatusChanges(string status) =>
         context.Response = await context.HttpClient.PatchAsJsonAsync($"/orders/{_orderId}/status",
             new UpdateOrderStatusRequestDto { Status = status }, context.JsonOptions);
+
+    [When("I concurrently change the order status to Paid and Cancelled")]
+    public async Task WhenConcurrentStatusChanges()
+    {
+        _concurrentStatusResponses = await Task.WhenAll(
+            context.HttpClient.PatchAsJsonAsync($"/orders/{_orderId}/status",
+                new UpdateOrderStatusRequestDto { Status = "Paid" }, context.JsonOptions),
+            context.HttpClient.PatchAsJsonAsync($"/orders/{_orderId}/status",
+                new UpdateOrderStatusRequestDto { Status = "Cancelled" }, context.JsonOptions));
+    }
+
+    [Then("exactly one status change succeeds and the stored order matches it")]
+    public async Task ThenOneStatusChangeWins()
+    {
+        _concurrentStatusResponses.ShouldNotBeNull();
+        try
+        {
+            var successes = _concurrentStatusResponses.Where(response => response.StatusCode == HttpStatusCode.OK).ToArray();
+            successes.Length.ShouldBe(1);
+            var rejected = _concurrentStatusResponses.Single(response => response.StatusCode != HttpStatusCode.OK);
+            ((int)rejected.StatusCode).ShouldBeOneOf(400, 409);
+            rejected.Content.Headers.ContentType?.MediaType.ShouldBe("application/problem+json");
+
+            var winner = await successes.Single().Content.ReadFromJsonAsync<OrderResponseDto>(context.JsonOptions);
+            winner.ShouldNotBeNull();
+            winner.Status.ShouldBeOneOf("Paid", "Cancelled");
+
+            using var storedResponse = await context.HttpClient.GetAsync($"/orders/{_orderId}");
+            storedResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
+            var stored = await storedResponse.Content.ReadFromJsonAsync<OrderResponseDto>(context.JsonOptions);
+            stored.ShouldNotBeNull();
+            stored.Status.ShouldBe(winner.Status);
+            stored.Lines.Single().Quantity.ShouldBe(2);
+            stored.TotalAmount.ShouldBe(4998m);
+            stored.TotalCurrency.ShouldBe("PLN");
+        }
+        finally
+        {
+            foreach (var response in _concurrentStatusResponses)
+                response.Dispose();
+        }
+    }
 
     [When("I request an invoice for the current order")]
     public Task WhenInvoiceRequestedForCurrentOrder() => SendPost($"/invoices/{_clientId}/{_orderId}");
