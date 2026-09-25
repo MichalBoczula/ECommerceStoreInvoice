@@ -1,4 +1,4 @@
-﻿using ECommerceStoreInvoice.API.Configuration.Common;
+using ECommerceStoreInvoice.API.Configuration.Common;
 using ECommerceStoreInvoice.Domain.Validation.Common;
 namespace ECommerceStoreInvoice.API.Configuration.Extensions
 {
@@ -28,7 +28,7 @@ namespace ECommerceStoreInvoice.API.Configuration.Extensions
                 Instance = context.Request.Path,
                 TraceId = context.TraceIdentifier,
                 Errors = validationException.ValidationResult.GetValidationErrors()
-            }, cancellationToken);
+            }, options: null, contentType: "application/problem+json", cancellationToken);
         }
     }
 }

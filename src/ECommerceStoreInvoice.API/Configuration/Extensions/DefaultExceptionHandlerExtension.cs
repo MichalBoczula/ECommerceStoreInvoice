@@ -30,7 +30,7 @@ namespace ECommerceStoreInvoice.API.Configuration.Extensions
                 {
                     ["traceId"] = context.TraceIdentifier
                 }
-            }, cancellationToken);
+            }, options: null, contentType: "application/problem+json", cancellationToken);
         }
     }
 }
