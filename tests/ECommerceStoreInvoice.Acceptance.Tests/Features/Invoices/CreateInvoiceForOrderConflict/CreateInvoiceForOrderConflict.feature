@@ -1,6 +1,7 @@
 @allure.description:Ensures_creating_invoice_for_order_when_invoice_already_exists_returns_conflict_problem_details.
 Feature: Create invoice for order conflict
 
+  @products-api
   Scenario: Create invoice for order returns conflict when invoice already exists
     Given I have an existing invoice for a paid order
       | Field            | Value             |
@@ -13,10 +14,10 @@ Feature: Create invoice for order conflict
       | PhoneNumber      | 123456789         |
       | PhonePrefix      | 48                |
       | AddressEmail     | john.doe@test.com |
-      | ProductName      | Laptop            |
-      | ProductBrand     | Lenovo            |
-      | UnitPriceAmount  | 999.99            |
-      | UnitPriceCurrency| usd               |
+      | ProductName      | Xiaomi POCO F7 12/512GB Black            |
+      | ProductBrand     | Xiaomi            |
+      | UnitPriceAmount  | 2499.00            |
+      | UnitPriceCurrency| PLN               |
       | Quantity         | 2                 |
       | OrderStatus      | Paid              |
     When I submit the duplicate create invoice for order request

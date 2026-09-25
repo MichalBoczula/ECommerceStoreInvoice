@@ -1,12 +1,13 @@
 Feature: Get order by id
 
+  @products-api
   Scenario: Get order by id returns an existing order
     Given I have an existing order id with setup data
       | Field            | Value  |
-      | ProductName      | Laptop |
-      | ProductBrand     | Lenovo |
-      | UnitPriceAmount  | 999.99 |
-      | UnitPriceCurrency| usd    |
+      | ProductName      | Xiaomi POCO F7 12/512GB Black |
+      | ProductBrand     | Xiaomi |
+      | UnitPriceAmount  | 2499.00 |
+      | UnitPriceCurrency| PLN    |
       | Quantity         | 2      |
     When I request order by id
     Then the order is returned successfully by id
@@ -15,14 +16,14 @@ Feature: Get order by id
       | HasId                      | true    |
       | HasClientId                | true    |
       | Status                     | Created |
-      | TotalAmount                | 1999.98 |
-      | TotalCurrency              | USD     |
+      | TotalAmount                | 4998.00 |
+      | TotalCurrency              | PLN     |
       | LinesCount                 | 1       |
       | FirstLineHasProductVersionId | true  |
-      | FirstLineName              | Laptop  |
-      | FirstLineBrand             | Lenovo  |
+      | FirstLineName              | Xiaomi POCO F7 12/512GB Black  |
+      | FirstLineBrand             | Xiaomi  |
       | FirstLineQuantity          | 2       |
-      | FirstLineUnitPriceAmount   | 999.99  |
-      | FirstLineUnitPriceCurrency | USD     |
-      | FirstLineTotalAmount       | 1999.98 |
-      | FirstLineTotalCurrency     | USD     |
+      | FirstLineUnitPriceAmount   | 2499.00  |
+      | FirstLineUnitPriceCurrency | PLN     |
+      | FirstLineTotalAmount       | 4998.00 |
+      | FirstLineTotalCurrency     | PLN     |

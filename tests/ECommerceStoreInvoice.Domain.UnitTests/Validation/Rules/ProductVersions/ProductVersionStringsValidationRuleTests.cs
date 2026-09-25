@@ -24,7 +24,18 @@ namespace ECommerceStoreInvoice.Domain.UnitTests.Validation.Rules.ProductVersion
             validationResult.GetValidationErrors().ShouldContain(e => e.Message == "Name cannot be null or whitespace.");
             validationResult.GetValidationErrors().ShouldContain(e => e.Message == "Brand cannot be null or whitespace.");
             validationResult.GetValidationErrors().ShouldContain(e => e.Message == "Price currency cannot be null or whitespace.");
-            validationResult.GetValidationErrors().ShouldContain(e => e.Message == "Price currency must be USD.");
+            validationResult.GetValidationErrors().ShouldContain(e => e.Message == "Price currency must be USD or PLN.");
+        }
+
+        [Theory]
+        [InlineData("USD")]
+        [InlineData("PLN")]
+        public async Task IsValid_SupportedCurrency_ShouldReturnNoErrors(string currency)
+        {
+            var rule = new ProductVersionStringsValidationRule();
+            var result = new ValidationResult();
+            await rule.IsValid(new ProductVersion(Guid.NewGuid(), new Money(20, currency), "Phone", "Brand"), result);
+            result.IsValid.ShouldBeTrue();
         }
 
         [Fact]
@@ -41,7 +52,7 @@ namespace ECommerceStoreInvoice.Domain.UnitTests.Validation.Rules.ProductVersion
             descriptors.ShouldContain(d => d.Message == "Name cannot be null or whitespace.");
             descriptors.ShouldContain(d => d.Message == "Brand cannot be null or whitespace.");
             descriptors.ShouldContain(d => d.Message == "Price currency cannot be null or whitespace.");
-            descriptors.ShouldContain(d => d.Message == "Price currency must be USD.");
+            descriptors.ShouldContain(d => d.Message == "Price currency must be USD or PLN.");
         }
     }
 }

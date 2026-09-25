@@ -8,6 +8,7 @@ using ECommerceStoreInvoice.Application.Common.RequestsDto.Orders;
 using ECommerceStoreInvoice.Application.Common.RequestsDto.ShoppingCarts;
 using ECommerceStoreInvoice.Application.Common.ResponsesDto;
 using ECommerceStoreInvoice.Application.Common.ResponsesDto.Orders;
+using ECommerceStoreInvoice.Application.Common.ResponsesDto.ShoppingCarts;
 using Reqnroll;
 using Shouldly;
 
@@ -19,10 +20,15 @@ public sealed class OrderInvoiceAcceptanceSteps(ScenarioApiContext context)
     private Guid _clientId;
     private Guid _orderId;
     private Guid _invoiceId;
+    // From ProductsCatalog's SeedMobilePhone1 migration.
+    private static readonly Guid SeededProductId = Guid.Parse("0f62c3e1-8e3e-4b1f-9d74-3d6e2ff2c6d2");
     private Guid _productId;
 
     [Given("I have a valid shopping cart for order creation")]
     public Task GivenValidCart(Table table) => CreateCart(table);
+
+    [Given("I have a shopping cart containing a product missing from the catalog")]
+    public Task GivenMissingProduct(Table table) => CreateCart(table, Guid.NewGuid());
 
     [Given("I have an existing order id with setup data")]
     public async Task GivenExistingOrderId(Table table)
@@ -194,6 +200,27 @@ public sealed class OrderInvoiceAcceptanceSteps(ScenarioApiContext context)
     [When("I request invoice by id for non-existing invoice")]
     public Task WhenGetMissingInvoice() => SendGet($"/invoices/{_invoiceId}");
 
+    [Then("order creation reports the missing product and leaves the cart untouched")]
+    public async Task ThenMissingProductLeavesCartIntact()
+    {
+        context.Response.ShouldNotBeNull();
+        context.Response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
+        context.Response.Content.Headers.ContentType?.MediaType.ShouldBe("application/problem+json");
+
+        using var cartResponse = await context.HttpClient.GetAsync($"/shopping-carts/client/{_clientId}");
+        cartResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
+        var cart = await cartResponse.Content.ReadFromJsonAsync<ShoppingCartResponseDto>(context.JsonOptions);
+        cart.ShouldNotBeNull();
+        cart.Lines.Single().ProductId.ShouldBe(_productId);
+        cart.Lines.Single().Quantity.ShouldBe(2);
+
+        using var ordersResponse = await context.HttpClient.GetAsync($"/orders/client/{_clientId}");
+        ordersResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
+        var orders = await ordersResponse.Content.ReadFromJsonAsync<List<OrderResponseDto>>(context.JsonOptions);
+        orders.ShouldNotBeNull();
+        orders.ShouldBeEmpty();
+    }
+
     [Then("the order is created successfully")]
     public async Task ThenOrderCreated(Table table)
     {
@@ -272,10 +299,10 @@ public sealed class OrderInvoiceAcceptanceSteps(ScenarioApiContext context)
         problem.TraceId.ShouldNotBeNullOrWhiteSpace();
     }
 
-    private async Task CreateCart(Table table)
+    private async Task CreateCart(Table table, Guid? productId = null)
     {
         _clientId = Guid.NewGuid();
-        _productId = Guid.NewGuid();
+        _productId = productId ?? SeededProductId;
         using var response = await context.HttpClient.PostAsync($"/shopping-carts/{_clientId}", null);
         response.StatusCode.ShouldBe(HttpStatusCode.OK, await response.Content.ReadAsStringAsync());
         await FillCart(int.TryParse(Values(table).GetValueOrDefault("Quantity"), out var quantity) ? quantity : 2);
@@ -315,7 +342,7 @@ public sealed class OrderInvoiceAcceptanceSteps(ScenarioApiContext context)
     private async Task CreateOrder()
     {
         using var response = await context.HttpClient.PostAsync($"/orders/{_clientId}", null);
-        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        response.StatusCode.ShouldBe(HttpStatusCode.OK, await response.Content.ReadAsStringAsync());
         var order = await response.Content.ReadFromJsonAsync<OrderResponseDto>(context.JsonOptions);
         order.ShouldNotBeNull();
         _orderId = order.Id;
