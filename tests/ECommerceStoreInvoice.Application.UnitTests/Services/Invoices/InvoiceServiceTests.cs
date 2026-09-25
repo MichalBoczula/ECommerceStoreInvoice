@@ -410,7 +410,7 @@ public sealed class InvoiceServiceTests
         generationRepositoryMock.Verify(x => x.CompleteAsync(It.IsAny<InvoiceGenerationClaim>(), It.IsAny<string>()), Times.Never);
     }
     [Fact]
-    public async Task CreateInvoiceForOrder_WhenCompletionCommitsButAcknowledgementIsLost_ShouldKeepPdf()
+    public async Task CreateInvoiceForOrder_WhenCompletionCommitsButAcknowledgementIsLost_ShouldReturnSavedInvoice()
     {
         var clientId = Guid.NewGuid();
         var orderId = Guid.NewGuid();
@@ -425,9 +425,12 @@ public sealed class InvoiceServiceTests
         var claim = new InvoiceGenerationClaim(Guid.NewGuid(), orderId, clientData.Id, Guid.NewGuid());
         const string storageUrl = "file:///invoices/committed.pdf";
         var committed = false;
+        var savedInvoice = Invoice.Rehydrate(claim.InvoiceId, orderId, clientData.Id, storageUrl, DateTime.UtcNow);
 
         var invoices = new Mock<IInvoiceRepository>(MockBehavior.Strict);
-        invoices.Setup(x => x.GetInvoiceByOrderId(orderId)).ReturnsAsync((Invoice?)null);
+        invoices.SetupSequence(x => x.GetInvoiceByOrderId(orderId))
+            .ReturnsAsync((Invoice?)null)
+            .ReturnsAsync(savedInvoice);
         var generation = new Mock<IInvoiceGenerationRepository>(MockBehavior.Strict);
         generation.Setup(x => x.TryClaimAsync(It.IsAny<Invoice>(), It.IsAny<Guid>())).ReturnsAsync(claim);
         generation.Setup(x => x.CompleteAsync(claim, storageUrl)).Returns(() =>
@@ -453,10 +456,12 @@ public sealed class InvoiceServiceTests
         var sut = new InvoiceService(invoices.Object, generation.Object, orders.Object, clients.Object,
             pdf.Object, guidPolicy.Object, statusPolicy.Object, Mock.Of<ILogger<InvoiceService>>());
 
-        await Should.ThrowAsync<IOException>(() => sut.CreateInvoiceForOrder(clientId, orderId));
+        var result = await sut.CreateInvoiceForOrder(clientId, orderId);
 
         committed.ShouldBeTrue();
-        generation.Verify(x => x.ReleaseAsync(claim), Times.Once);
+        result.Id.ShouldBe(claim.InvoiceId);
+        result.StorageUrl.ShouldBe(storageUrl);
+        generation.Verify(x => x.ReleaseAsync(claim), Times.Never);
         pdf.Verify(x => x.DeleteGeneratedPdf(It.IsAny<Guid>(), It.IsAny<Guid>()), Times.Never);
     }
 
