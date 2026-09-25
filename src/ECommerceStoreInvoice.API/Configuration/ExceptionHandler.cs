@@ -40,6 +40,9 @@ public sealed class ExceptionHandler : IExceptionHandler
                 ResourceAlreadyExistsExceptionHandlerExtension.HandleResourceAlreadyExistsException(
                     context, resourceAlreadyExistsException, _logger, cancellationToken),
 
+            OrderWriteConflictException orderWriteConflictException =>
+                context.HandleOrderWriteConflictException(orderWriteConflictException, _logger, cancellationToken),
+
             _ => DefaultExceptionHandlerExtension.HandleDefaultException(context, exception, _logger, cancellationToken)
         });
 
