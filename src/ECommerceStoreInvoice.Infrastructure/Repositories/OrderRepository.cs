@@ -1,4 +1,6 @@
-﻿using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate;
+﻿using ECommerceStoreInvoice.Domain.AggregatesModel.Common.Enums;
+using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate;
+using ECommerceStoreInvoice.Domain.Validation.Common;
 using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate.Repositories;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate;
 using ECommerceStoreInvoice.Infrastructure.Context;
@@ -26,7 +28,13 @@ namespace ECommerceStoreInvoice.Infrastructure.Repositories
         public async Task<Order> UpdateOrder(Order order)
         {
             var document = OrderMapping.MapToDocument(order);
-            await _context.Orders.ReplaceOneAsync(x => x.Id == order.Id, document);
+            var result = await _context.Orders.ReplaceOneAsync(
+                x => x.Id == order.Id && x.Status == OrderStatus.Created,
+                document);
+
+            if (result.MatchedCount == 0)
+                throw new OrderWriteConflictException(order.Id);
+
             return order;
         }
 
