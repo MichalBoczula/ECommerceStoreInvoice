@@ -193,6 +193,25 @@ public sealed class OrderInvoiceAcceptanceSteps(ScenarioApiContext context)
         documents.Single()["_id"].AsBsonBinaryData.ToGuid(GuidRepresentation.Standard).ShouldBe(invoice.Id);
     }
 
+    [Then("the completed invoice is returned after the acknowledgement is lost")]
+    public async Task ThenCompletionIsRecovered()
+    {
+        context.Response.ShouldNotBeNull();
+        context.Response.StatusCode.ShouldBe(HttpStatusCode.OK, await context.Response.Content.ReadAsStringAsync());
+        var invoice = await context.Response.Content.ReadFromJsonAsync<InvoiceResponseDto>(context.JsonOptions);
+        invoice.ShouldNotBeNull();
+        invoice.OrderId.ShouldBe(_orderId);
+        AssertPdfExists(invoice.StorageUrl);
+
+        var documents = await context.Factory.GetInvoiceDocumentsAsync(_orderId);
+        documents.Count.ShouldBe(1);
+        documents.Single()["GenerationStatus"].AsString.ShouldBe("Completed");
+        documents.Single()["_id"].AsBsonBinaryData.ToGuid(GuidRepresentation.Standard).ShouldBe(invoice.Id);
+
+        using var read = await context.HttpClient.GetAsync($"/invoices/{invoice.Id}");
+        read.StatusCode.ShouldBe(HttpStatusCode.OK);
+    }
+
     [Then("one invoice is completed and its PDF is available")]
     public async Task ThenOneInvoiceIsCompleted()
     {

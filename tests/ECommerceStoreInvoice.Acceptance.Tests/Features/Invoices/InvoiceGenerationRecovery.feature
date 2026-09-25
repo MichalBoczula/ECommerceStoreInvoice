@@ -18,3 +18,11 @@ Feature: Invoice generation is single-writer and retryable
       | Quantity | 2     |
     When I concurrently request two invoices for the current order
     Then one invoice is completed and its PDF is available
+
+  @products-api @completion-ack-lost
+  Scenario: Lost completion acknowledgement is recovered from Mongo
+    Given I have a paid order for invoice creation
+      | Field    | Value |
+      | Quantity | 2     |
+    When I request an invoice for the current order
+    Then the completed invoice is returned after the acknowledgement is lost

@@ -20,7 +20,8 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Common
         {
             _factory = new ApplicationFactory(
                 _scenarioContext.ScenarioInfo.Tags.Contains("products-api"),
-                _scenarioContext.ScenarioInfo.Tags.Contains("pdf-fails-once"));
+                _scenarioContext.ScenarioInfo.Tags.Contains("pdf-fails-once"),
+                _scenarioContext.ScenarioInfo.Tags.Contains("completion-ack-lost"));
             await _factory.InitializeAsync();
             _apiContext.Factory = _factory;
             _apiContext.HttpClient = _factory.CreateClient();
