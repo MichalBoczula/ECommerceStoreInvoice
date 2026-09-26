@@ -18,4 +18,16 @@ public class HealthEndpointTests : IClassFixture<ApplicationFactory>
 
         response.EnsureSuccessStatusCode();
     }
+
+    [Theory]
+    [InlineData("/health/live")]
+    [InlineData("/health/ready")]
+    public async Task GetHealthProbe_WhenMongoIsAvailable_ShouldReturnOk(string path)
+    {
+        using var client = _factory.CreateClient();
+
+        var response = await client.GetAsync(path);
+
+        response.EnsureSuccessStatusCode();
+    }
 }
