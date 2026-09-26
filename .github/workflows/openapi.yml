@@ -2,7 +2,7 @@ name: OpenAPI
 
 on:
   pull_request:
-    branches: [master, 'codex/invoice-*']
+    branches: [master]
   push:
     branches: [master]
 
