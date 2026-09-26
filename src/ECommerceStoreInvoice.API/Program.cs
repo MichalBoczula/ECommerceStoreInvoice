@@ -35,7 +35,8 @@ builder.Services.AddApplication();
 
 var app = builder.Build();
 
-await app.Services.InitializeInfrastructureAsync();
+if (!app.Environment.IsEnvironment("OpenApiExport"))
+    await app.Services.InitializeInfrastructureAsync();
 
 app.UseExceptionHandler();
 
