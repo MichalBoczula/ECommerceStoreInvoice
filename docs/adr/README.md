@@ -9,4 +9,4 @@ These records describe decisions implemented at the time they were written. A la
 | [0003](0003-invoice-pdf-and-recovery.md) | Accepted with limitation | Claim-based invoice generation and local PDF storage. |
 | [0004](0004-public-error-contract.md) | Accepted | Safe problem responses and status mapping. |
 | [0005](0005-generated-contract-documentation.md) | Accepted | Generated OpenAPI and source-linked flows/policies/scenarios. |
-| [0006](0006-ci-and-verification.md) | Accepted with follow-up | Required CI jobs and current coverage limitation. |
+| [0006](0006-ci-and-verification.md) | Accepted | Required CI jobs, coverage and verification. |
