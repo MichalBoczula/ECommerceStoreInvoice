@@ -167,6 +167,45 @@ namespace ECommerceStoreInvoice.Infrastructure.UnitTests.Integration.Tests
             stored.Lines.Single().Quantity.ShouldBe(2);
         }
 
+        [Fact]
+        public async Task GetOrderByOrderId_WhenMissing_ShouldReturnNull()
+        {
+            await using var services = TestServiceProviderFactory.Create(
+                _fixture.ConnectionString, $"invoice-tests-{Guid.NewGuid():N}");
+            var repository = services.GetRequiredService<IOrderRepository>();
+            await repository.CreateOrder(CreateOrder(Guid.NewGuid(), quantity: 2));
+
+            (await repository.GetOrderByOrderId(Guid.NewGuid())).ShouldBeNull();
+        }
+
+        [Fact]
+        public async Task GetOrdersByClientId_WhenOnlyOtherClientHasOrders_ShouldReturnEmpty()
+        {
+            await using var services = TestServiceProviderFactory.Create(
+                _fixture.ConnectionString, $"invoice-tests-{Guid.NewGuid():N}");
+            var repository = services.GetRequiredService<IOrderRepository>();
+            await repository.CreateOrder(CreateOrder(Guid.NewGuid(), quantity: 2));
+
+            var orders = await repository.GetOrdersByClientId(Guid.NewGuid());
+
+            orders.ShouldBeEmpty();
+        }
+
+        [Fact]
+        public async Task UpdateOrder_WhenOrderDoesNotExist_ShouldRejectWriteWithoutInserting()
+        {
+            await using var services = TestServiceProviderFactory.Create(
+                _fixture.ConnectionString, $"invoice-tests-{Guid.NewGuid():N}");
+            var repository = services.GetRequiredService<IOrderRepository>();
+            var missing = CreateOrder(Guid.NewGuid(), quantity: 2);
+            missing.ChangeStatus(OrderStatus.Paid);
+
+            var conflict = await Should.ThrowAsync<OrderWriteConflictException>(() => repository.UpdateOrder(missing));
+
+            conflict.OrderId.ShouldBe(missing.Id);
+            (await repository.GetOrderByOrderId(missing.Id)).ShouldBeNull();
+        }
+
         private static Order CreateOrder(Guid clientId, int quantity)
         {
             var lines = new List<OrderLine>

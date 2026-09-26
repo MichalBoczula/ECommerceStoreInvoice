@@ -162,5 +162,46 @@ namespace ECommerceStoreInvoice.Infrastructure.UnitTests.Integration.Tests
             result3.Id.ShouldBe(productVersion3.Id);
             result3.Name.ShouldBe("MacBook Air");
         }
+
+        [Fact]
+        public async Task CreateProductVersions_WhenEmpty_ShouldNotWriteAnyDocuments()
+        {
+            await using var services = TestServiceProviderFactory.Create(
+                _fixture.ConnectionString, $"invoice-tests-{Guid.NewGuid():N}");
+            var repository = services.GetRequiredService<IProductVersionRepository>();
+
+            var created = await repository.CreateProductVersions([]);
+            var loaded = await repository.GetProductVersionsByIds([]);
+
+            created.ShouldBeEmpty();
+            loaded.ShouldBeEmpty();
+        }
+
+        [Fact]
+        public async Task GetProductVersionsByIds_ShouldIgnoreDuplicateAndUnknownIds()
+        {
+            await using var services = TestServiceProviderFactory.Create(
+                _fixture.ConnectionString, $"invoice-tests-{Guid.NewGuid():N}");
+            var repository = services.GetRequiredService<IProductVersionRepository>();
+            var first = ProductVersion.Rehydrate(
+                Guid.NewGuid(), true, DateTime.UtcNow, null, Guid.NewGuid(),
+                new Money(42m, "PLN"), "First", "Brand A");
+            var second = ProductVersion.Rehydrate(
+                Guid.NewGuid(), true, DateTime.UtcNow, null, Guid.NewGuid(),
+                new Money(57m, "EUR"), "Second", "Brand B");
+            var unrelated = ProductVersion.Rehydrate(
+                Guid.NewGuid(), true, DateTime.UtcNow, null, Guid.NewGuid(),
+                new Money(10m, "USD"), "Unrelated", "Brand C");
+            await repository.CreateProductVersions([first, second, unrelated]);
+
+            var loaded = await repository.GetProductVersionsByIds(
+                [first.Id, first.Id, Guid.NewGuid(), second.Id]);
+
+            loaded.Count.ShouldBe(2);
+            loaded.Select(version => version.Id).ToHashSet()
+                .SetEquals(new[] { first.Id, second.Id }).ShouldBeTrue();
+            loaded.Single(version => version.Id == first.Id).Price.Amount.ShouldBe(42m);
+            loaded.Single(version => version.Id == second.Id).Price.Currency.ShouldBe("EUR");
+        }
     }
 }

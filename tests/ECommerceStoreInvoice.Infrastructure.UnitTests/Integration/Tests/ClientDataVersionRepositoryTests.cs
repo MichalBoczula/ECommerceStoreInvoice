@@ -137,5 +137,36 @@ namespace ECommerceStoreInvoice.Infrastructure.UnitTests.Integration.Tests
             // assert
             result.ShouldBeNull();
         }
+
+        [Fact]
+        public async Task GetByClientId_ShouldReturnLatestVersionForRequestedClient()
+        {
+            var databaseName = $"invoice-tests-{Guid.NewGuid():N}";
+            await using var services = TestServiceProviderFactory.Create(_fixture.ConnectionString, databaseName);
+            var repository = services.GetRequiredService<IClientDataVersionRepository>();
+            var clientId = Guid.NewGuid();
+            var older = CreateVersion(clientId, "Older", DateTime.UtcNow.AddDays(-2));
+            var latest = CreateVersion(clientId, "Latest", DateTime.UtcNow.AddDays(-1));
+            var otherClient = CreateVersion(Guid.NewGuid(), "Other", DateTime.UtcNow);
+            await repository.Create(latest);
+            await repository.Create(older);
+            await repository.Create(otherClient);
+
+            var loaded = await repository.GetByClientId(clientId);
+
+            loaded.ShouldNotBeNull();
+            loaded.Id.ShouldBe(latest.Id);
+            loaded.ClientName.ShouldBe("Latest");
+            var database = new MongoDB.Driver.MongoClient(_fixture.ConnectionString).GetDatabase(databaseName);
+            var count = await database.GetCollection<MongoDB.Bson.BsonDocument>("client-data-versions")
+                .CountDocumentsAsync(MongoDB.Driver.FilterDefinition<MongoDB.Bson.BsonDocument>.Empty);
+            count.ShouldBe(3);
+        }
+
+        private static ClientDataVersion CreateVersion(Guid clientId, string name, DateTime createdAt) =>
+            ClientDataVersion.Rehydrate(
+                Guid.NewGuid(), clientId, name,
+                new Address("00-001", "Warsaw", "Street", "1", null),
+                "123456789", "+48", "test@example.com", createdAt);
     }
 }

@@ -3,6 +3,8 @@ using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.Reposit
 using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.ValueObjects;
 using ECommerceStoreInvoice.Infrastructure.UnitTests.Integration.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using ECommerceStoreInvoice.Infrastructure.Configuration;
+using MongoDB.Driver;
 using Shouldly;
 
 namespace ECommerceStoreInvoice.Infrastructure.UnitTests.Integration.Tests
@@ -137,6 +139,46 @@ namespace ECommerceStoreInvoice.Infrastructure.UnitTests.Integration.Tests
             result.Lines.Count.ShouldBe(1);
             result.Lines.Single().ProductId.ShouldBe(newProductId);
             result.Lines.Single().Quantity.ShouldBe(5);
+        }
+
+        [Fact]
+        public async Task CreateShoppingCart_WhenClientAlreadyHasCart_ShouldKeepOriginal()
+        {
+            await using var services = TestServiceProviderFactory.Create(
+                _fixture.ConnectionString, $"invoice-tests-{Guid.NewGuid():N}");
+            await services.InitializeInfrastructureAsync();
+            var repository = services.GetRequiredService<IShoppingCartRepository>();
+            var clientId = Guid.NewGuid();
+            var original = CreateShoppingCart(clientId, quantity: 2);
+            await repository.CreateShoppingCart(original);
+
+            await Should.ThrowAsync<MongoWriteException>(() =>
+                repository.CreateShoppingCart(CreateShoppingCart(clientId, quantity: 9)));
+
+            var stored = (await repository.GetShoppingCartByClientId(clientId))!;
+            stored.Id.ShouldBe(original.Id);
+            stored.Lines.Single().Quantity.ShouldBe(2);
+        }
+
+        [Fact]
+        public async Task UpdateShoppingCart_WhenIdDoesNotExist_ShouldLeaveStoredCartIntact()
+        {
+            await using var services = TestServiceProviderFactory.Create(
+                _fixture.ConnectionString, $"invoice-tests-{Guid.NewGuid():N}");
+            var repository = services.GetRequiredService<IShoppingCartRepository>();
+            var clientId = Guid.NewGuid();
+            var original = CreateShoppingCart(clientId, quantity: 2);
+            await repository.CreateShoppingCart(original);
+            var unknown = ShoppingCart.Rehydrate(
+                Guid.NewGuid(), clientId, original.CreatedAt, DateTime.UtcNow,
+                [new ShoppingCartLine(Guid.NewGuid(), 9)]);
+
+            await Should.ThrowAsync<InvalidOperationException>(() => repository.UpdateShoppingCart(unknown));
+
+            var stored = (await repository.GetShoppingCartByClientId(clientId))!;
+            stored.Id.ShouldBe(original.Id);
+            stored.Lines.Single().ProductId.ShouldBe(original.Lines.Single().ProductId);
+            stored.Lines.Single().Quantity.ShouldBe(2);
         }
 
         private static ShoppingCart CreateShoppingCart(Guid clientId, int quantity)

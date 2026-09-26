@@ -17,6 +17,28 @@ namespace ECommerceStoreInvoice.Infrastructure.UnitTests.Integration.Tests;
 public sealed class OrderCheckoutTransactionTests(MongoDbTestFixture fixture) : IClassFixture<MongoDbTestFixture>
 {
     [Fact]
+    public async Task TransactionLifecycle_RejectsNestedBeginAndCommitWithoutAnActiveSession()
+    {
+        await using var services = TestServiceProviderFactory.Create(
+            fixture.ConnectionString, $"invoice-checkout-{Guid.NewGuid():N}");
+        using var scope = services.CreateScope();
+        var transaction = scope.ServiceProvider.GetRequiredService<IOrderWriteTransaction>();
+
+        await Should.ThrowAsync<InvalidOperationException>(() => transaction.CommitAsync());
+        await transaction.RollbackAsync();
+        await transaction.BeginAsync();
+        await Should.ThrowAsync<InvalidOperationException>(() => transaction.BeginAsync());
+        await transaction.RollbackAsync();
+        await transaction.BeginAsync();
+        var orders = scope.ServiceProvider.GetRequiredService<IOrderRepository>();
+        var order = new Order(Guid.NewGuid(), [new OrderLine(Guid.NewGuid(), 1)]);
+        await orders.CreateOrder(order);
+        await transaction.CommitAsync();
+        (await orders.GetOrderByOrderId(order.Id)).ShouldNotBeNull();
+        await Should.ThrowAsync<InvalidOperationException>(() => transaction.CommitAsync());
+    }
+
+    [Fact]
     public async Task CheckoutCommitsProductVersionOrderAndClearedCartTogether()
     {
         await using var services = TestServiceProviderFactory.Create(
