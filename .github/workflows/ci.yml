@@ -53,7 +53,7 @@ jobs:
           python3 scripts/test-architecture.py
           python3 scripts/check-architecture.py
           python3 scripts/check-operation-links.py
-      - name: Restore dependencies
+      - name: Restore and audit NuGet dependencies
         run: dotnet restore ECommerceStoreInvoice.slnx
       - name: Verify formatting
         env:
