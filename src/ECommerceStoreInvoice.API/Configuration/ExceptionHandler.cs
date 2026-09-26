@@ -28,7 +28,7 @@ public sealed class ExceptionHandler : IExceptionHandler
             ResourceNotFoundException notFoundException =>
                 context.HandleNotFoundException(notFoundException, _logger, cancellationToken),
 
-            BadHttpRequestException badHttpRequestException when badHttpRequestException.InnerException is JsonException =>
+            BadHttpRequestException badHttpRequestException when badHttpRequestException.StatusCode == StatusCodes.Status400BadRequest =>
                 JsonDeserializationExceptionHandlerExtension.HandleJsonDeserializationException(
                     context, badHttpRequestException, _logger, cancellationToken),
 

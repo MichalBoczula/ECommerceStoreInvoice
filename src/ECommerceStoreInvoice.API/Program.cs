@@ -18,6 +18,7 @@ builder.Host.UseSerilog((context, configuration) =>
 
 AddExternalProductsClient(builder);
 
+builder.Services.Configure<RouteHandlerOptions>(options => options.ThrowOnBadRequest = true);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
