@@ -92,6 +92,9 @@ jobs:
           'DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Include=[ECommerceStoreInvoice.Domain]*'
       - name: Enforce Domain coverage
         run: bash scripts/report-coverage.sh Domain ECommerceStoreInvoice.Domain 70
+      - name: Summarize Domain tests
+        if: always()
+        run: python3 scripts/summarize-trx.py Domain ./TestResults/Domain
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -123,6 +126,9 @@ jobs:
           'DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Include=[ECommerceStoreInvoice.Application]*'
       - name: Enforce Application coverage
         run: bash scripts/report-coverage.sh Application ECommerceStoreInvoice.Application 70
+      - name: Summarize Application tests
+        if: always()
+        run: python3 scripts/summarize-trx.py Application ./TestResults/Application
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -154,6 +160,9 @@ jobs:
           'DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Include=[ECommerceStoreInvoice.Infrastructure]*'
       - name: Report Infrastructure coverage
         run: bash scripts/report-coverage.sh Infrastructure ECommerceStoreInvoice.Infrastructure
+      - name: Summarize Infrastructure tests
+        if: always()
+        run: python3 scripts/summarize-trx.py Infrastructure ./TestResults/Infrastructure
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -181,6 +190,9 @@ jobs:
           dotnet test tests/ECommerceStoreInvoice.ExternalProviders.IntegrationTests/ECommerceStoreInvoice.ExternalProviders.IntegrationTests.csproj
           --configuration Release --logger 'trx;LogFileName=external-providers.trx'
           --results-directory ./TestResults/ExternalProviders
+      - name: Summarize ExternalProviders tests
+        if: always()
+        run: python3 scripts/summarize-trx.py ExternalProviders ./TestResults/ExternalProviders
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -202,6 +214,9 @@ jobs:
           dotnet test tests/ECommerceStoreInvoice.Acceptance.Tests/ECommerceStoreInvoice.Acceptance.Tests.csproj
           --configuration Release --logger 'trx;LogFileName=acceptance.trx'
           --results-directory ./TestResults/Acceptance
+      - name: Summarize Acceptance tests
+        if: always()
+        run: python3 scripts/summarize-trx.py Acceptance ./TestResults/Acceptance
       - uses: actions/upload-artifact@v4
         if: always()
         with:
