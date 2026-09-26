@@ -323,7 +323,7 @@ public sealed class OrderInvoiceAcceptanceSteps(ScenarioApiContext context)
     }
 
     [When("I submit the create order request")]
-    public Task WhenCreateOrder() => SendPost($"/orders/{_clientId}");
+    public Task WhenCreateOrder() => SendPost($"/orders/client/{_clientId}");
 
     [When("I request order by id")]
     public Task WhenGetOrderById() => SendGet($"/orders/{_orderId}");

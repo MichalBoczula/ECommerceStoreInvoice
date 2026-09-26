@@ -9,7 +9,7 @@ rm -f "$output"
 
 OPENAPI_EXPORT_PATH="$output" dotnet test \
   tests/ECommerceStoreInvoice.Acceptance.Tests/ECommerceStoreInvoice.Acceptance.Tests.csproj \
-  --configuration Release --no-restore \
+  --configuration Release \
   --filter 'FullyQualifiedName~OpenApiExportTests'
 
 test -s "$output"
