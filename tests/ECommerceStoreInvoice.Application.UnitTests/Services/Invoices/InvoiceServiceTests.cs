@@ -369,9 +369,17 @@ public sealed class InvoiceServiceTests
         var order = Order.Rehydrate(orderId, clientId, [], DateTime.UtcNow, DateTime.UtcNow, OrderStatus.Paid);
         var clientData = new ClientDataVersionResponseDto
         {
-            Id = Guid.NewGuid(), ClientId = clientId, ClientName = "Test Client", PostalCode = "00-000",
-            City = "Warsaw", Street = "Main", BuildingNumber = "1", ApartmentNumber = "",
-            PhoneNumber = "123456789", PhonePrefix = "+48", AddressEmail = "test@example.com",
+            Id = Guid.NewGuid(),
+            ClientId = clientId,
+            ClientName = "Test Client",
+            PostalCode = "00-000",
+            City = "Warsaw",
+            Street = "Main",
+            BuildingNumber = "1",
+            ApartmentNumber = "",
+            PhoneNumber = "123456789",
+            PhonePrefix = "+48",
+            AddressEmail = "test@example.com",
             CreatedAt = DateTime.UtcNow
         };
         var invoiceRepositoryMock = new Mock<IInvoiceRepository>(MockBehavior.Strict);
@@ -417,9 +425,17 @@ public sealed class InvoiceServiceTests
         var order = Order.Rehydrate(orderId, clientId, [], DateTime.UtcNow, null, OrderStatus.Paid);
         var clientData = new ClientDataVersionResponseDto
         {
-            Id = Guid.NewGuid(), ClientId = clientId, ClientName = "Test Client", PostalCode = "00-000",
-            City = "Warsaw", Street = "Main", BuildingNumber = "1", ApartmentNumber = "",
-            PhoneNumber = "123456789", PhonePrefix = "+48", AddressEmail = "test@example.com",
+            Id = Guid.NewGuid(),
+            ClientId = clientId,
+            ClientName = "Test Client",
+            PostalCode = "00-000",
+            City = "Warsaw",
+            Street = "Main",
+            BuildingNumber = "1",
+            ApartmentNumber = "",
+            PhoneNumber = "123456789",
+            PhonePrefix = "+48",
+            AddressEmail = "test@example.com",
             CreatedAt = DateTime.UtcNow
         };
         var claim = new InvoiceGenerationClaim(Guid.NewGuid(), orderId, clientData.Id, Guid.NewGuid());

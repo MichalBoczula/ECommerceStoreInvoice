@@ -188,7 +188,9 @@ public sealed class OrderServiceTests
         var invalid = new ValidationResult();
         invalid.AddValidationError(new ValidationError
         {
-            Entity = nameof(Order), Name = nameof(Order.Lines), Message = "Invalid order"
+            Entity = nameof(Order),
+            Name = nameof(Order.Lines),
+            Message = "Invalid order"
         });
         var ordersMock = new Mock<IOrderRepository>(MockBehavior.Strict);
         var transactionMock = new Mock<IOrderWriteTransaction>(MockBehavior.Strict);

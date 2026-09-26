@@ -9,7 +9,7 @@ python3 scripts/check-operation-links.py
 solution=ECommerceStoreInvoice.slnx
 dotnet restore "$solution"
 dotnet build "$solution" --configuration Release --no-restore
-dotnet format "$solution" --verify-no-changes --no-restore
+bash scripts/verify-format.sh
 
 results_dir="$PWD/artifacts/verification"
 mkdir -p "$results_dir"
