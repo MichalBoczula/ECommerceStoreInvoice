@@ -7,10 +7,12 @@ using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.Reposit
 using ECommerceStoreInvoice.Infrastructure.ApiClients.Concret.Products;
 using ECommerceStoreInvoice.Infrastructure.Configuration;
 using ECommerceStoreInvoice.Infrastructure.Context;
+using ECommerceStoreInvoice.Infrastructure.Health;
 using ECommerceStoreInvoice.Infrastructure.Repositories;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using MongoDB.Driver;
 
 namespace ECommerceStoreInvoice.Infrastructure
@@ -37,6 +39,11 @@ namespace ECommerceStoreInvoice.Infrastructure
             });
             services.AddScoped<MongoDbContext>();
             services.AddScoped<MongoInitializer>();
+            services.AddHealthChecks().AddCheck<MongoReadinessHealthCheck>(
+                "mongo-replica-set",
+                failureStatus: HealthStatus.Unhealthy,
+                tags: ["ready"],
+                timeout: TimeSpan.FromSeconds(5));
             services.AddScoped<IOrderWriteTransaction, MongoOrderWriteTransaction>();
 
             services.AddScoped<IProductVersionRepository, ProductVersionRepository>();

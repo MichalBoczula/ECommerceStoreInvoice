@@ -8,6 +8,8 @@ using ECommerceStoreInvoice.Infrastructure.ApiClients.Products;
 using Microsoft.Kiota.Abstractions.Authentication;
 using Microsoft.Kiota.Http.HttpClientLibrary;
 using Serilog;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,7 +24,8 @@ builder.Services.AddSwaggerGen(c =>
     c.SupportNonNullableReferenceTypes();
 });
 
-builder.Services.AddHealthChecks();
+builder.Services.AddHealthChecks()
+    .AddCheck("self", () => HealthCheckResult.Healthy(), tags: ["live"]);
 builder.Services.AddExceptionHandler<ExceptionHandler>();
 builder.Services.AddProblemDetails();
 builder.Services.AddDomain();
@@ -46,7 +49,16 @@ app.MapOrdersEndpoints();
 app.MapShoppingCartEndpoints();
 app.MapClientDataVersionsEndpoints();
 app.MapDocumentationEndpoints();
-app.MapHealthChecks("/health");
+var liveOptions = new HealthCheckOptions
+{
+    Predicate = registration => registration.Tags.Contains("live")
+};
+app.MapHealthChecks("/health", liveOptions);
+app.MapHealthChecks("/health/live", liveOptions);
+app.MapHealthChecks("/health/ready", new HealthCheckOptions
+{
+    Predicate = registration => registration.Tags.Contains("ready")
+});
 
 app.Run();
 
