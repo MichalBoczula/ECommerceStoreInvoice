@@ -1,6 +1,7 @@
-# ADR 0001: MongoDB documents and product snapshots
+# ADR-0001: MongoDB documents and product snapshots
 
-Status: Accepted (2026-09-26)
+- Status: Accepted
+- Date: 2026-09-26
 
 ## Context
 
@@ -17,3 +18,8 @@ Startup creates a unique cart `ClientId` index, a unique invoice `OrderId` index
 ProductsCatalog availability affects checkout, while order reads and invoice creation use persisted snapshots. The unique indexes prevent duplicate carts/invoices even under concurrent requests; application checks alone do not enforce uniqueness. This repository does not keep a separate order-history collection: `Order` holds the current status and timestamps, and client data versions are historical records in their own collection. Changing product snapshot fields or MongoDB document mappings requires migration and compatibility review.
 
 See `src/ECommerceStoreInvoice.Infrastructure/Configuration/MongoInitializer.cs`, `Repositories/OrderRepository.cs`, `Repositories/ClientDataVersionRepository.cs` and the corresponding Infrastructure integration tests.
+
+## Alternatives considered
+
+- Read products from ProductsCatalog on every order or invoice request: later catalog changes would alter the information recorded at checkout and make those reads depend on catalog availability.
+- Enforce cart and invoice uniqueness only in application code: concurrent requests could still create duplicates without database indexes.

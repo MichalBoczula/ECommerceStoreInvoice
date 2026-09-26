@@ -1,6 +1,7 @@
-# ADR 0003: Invoice claim, PDF generation and recovery
+# ADR-0003: Invoice claim, PDF generation and recovery
 
-Status: Accepted with limitation (2026-09-26)
+- Status: Accepted with limitation
+- Date: 2026-09-26
 
 ## Context
 
@@ -12,8 +13,14 @@ Generation reserves an invoice document keyed by unique `OrderId`. The reservati
 
 The PDF service renders HTML with Playwright Chromium and stores a file named with invoice and attempt IDs on the API instance's local disk. It returns a `file://` URL. On PDF failure the service releases the claim and tries to delete the attempt's file. If database completion throws after being attempted, it reads the invoice back: when the matching completed invoice and storage URL exist, it returns that result, preserving the file. If the outcome cannot be confirmed, it attempts to release the claim and preserves the file because completion may have committed.
 
-## Consequences and follow-up
+## Consequences
 
 The unique index guarantees at most one invoice document per order, while lease-based recovery permits another attempt after failure or expiry. A crash can leave an orphaned local PDF. More importantly, `file://` is an instance-local path: another API instance or an external consumer cannot rely on accessing it. Multi-instance deployment requires shared durable object storage, an accessible download contract and orphan cleanup before treating invoice files as available across instances. Readiness currently checks MongoDB, not PDF storage.
 
 See `InvoiceService`, `InvoiceGenerationRepository`, `InvoiceRepository`, `InvoicePdfService` and their integration/acceptance tests.
+
+## Alternatives considered
+
+- Generate the PDF before reserving an order in MongoDB: racing requests could both produce a file and attempt to create the invoice.
+- Treat every completion exception as a failed write: a lost acknowledgment after a committed update could cause an unnecessary retry or deletion of the completed file.
+- Keep `file://` storage for multiple API instances: an invoice read on another instance would not make the local file accessible; shared durable storage remains follow-up work.

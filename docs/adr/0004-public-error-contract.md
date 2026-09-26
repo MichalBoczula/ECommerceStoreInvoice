@@ -1,6 +1,7 @@
-# ADR 0004: Public HTTP error contract
+# ADR-0004: Public HTTP error contract
 
-Status: Accepted (2026-09-26)
+- Status: Accepted
+- Date: 2026-09-26
 
 ## Context
 
@@ -17,3 +18,8 @@ Route constraints such as `{orderId:guid}` are part of ASP.NET routing and can r
 Clients may branch on status and documented validation data; human-readable `Detail` text should not become a machine protocol. A repeat `Paid` is a validation `400`, while a concurrent replacement of an order that was `Created` on read is `409`. An unhandled server exception never sends its stack trace or internal message in the response. Acceptance tests verify the status, media type and body for exercised paths.
 
 See `src/ECommerceStoreInvoice.API/Configuration/ExceptionHandler.cs` and the handlers in `Configuration/Extensions`.
+
+## Alternatives considered
+
+- Return raw framework or exception messages: clients would receive unstable details and potentially sensitive server information.
+- Collapse validation, absence and concurrent conflicts into one status: consumers could not distinguish a bad request from a missing resource or stale write.
