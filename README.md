@@ -17,7 +17,7 @@ An invoice requires a paid order owned by the client and a client data version. 
 
 ## Prerequisites
 
-- .NET SDK 10, Docker with a running daemon and Docker Compose.
+- .NET SDK 10.0.100 or a newer .NET 10 feature band (selected by [`global.json`](global.json)), Docker with a running daemon and Docker Compose.
 - For full local verification: Bash, Python 3 and Node.js (the OpenAPI lint uses Redocly CLI through `npx`).
 - For local PDF generation outside the Docker image: PowerShell (`pwsh`) and a working Playwright Chromium installation path; the service invokes `playwright.ps1 install` on first use. The API Dockerfile installs these dependencies.
 - ProductsCatalog is needed to create an order. Acceptance tests start `mb0101/product-catalog-api:latest` and SQL Server 2022 with Testcontainers; the seeded catalog IDs are used by those tests. Shopping cart operations and order/invoice reads do not need a live ProductsCatalog request.

@@ -7,10 +7,11 @@ EXPOSE 8080
 EXPOSE 8081
 
 # Build stage
-FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0.100 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
+COPY ["global.json", "Directory.Build.props", "./"]
 COPY ["src/ECommerceStoreInvoice.API/ECommerceStoreInvoice.API.csproj", "src/ECommerceStoreInvoice.API/"]
 COPY ["src/ECommerceStoreInvoice.Application/ECommerceStoreInvoice.Application.csproj", "src/ECommerceStoreInvoice.Application/"]
 COPY ["src/ECommerceStoreInvoice.Domain/ECommerceStoreInvoice.Domain.csproj", "src/ECommerceStoreInvoice.Domain/"]

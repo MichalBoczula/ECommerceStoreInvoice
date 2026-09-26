@@ -24,4 +24,4 @@ Run the relevant focused suite during development. The full local check is:
 bash scripts/verify.sh
 ```
 
-It needs .NET 10, Bash, Python 3, Node.js, Docker and (for PDF acceptance tests) PowerShell/Playwright. CI's `.github/workflows/ci.yml` is the source of truth for required remote checks. In the PR, report the commands actually run, their outcomes, any unavailable checks, changed public contracts and remaining risks. See [Definition of Done](docs/definition-of-done.md).
+It needs .NET SDK 10.0.100 or a newer .NET 10 feature band (selected by `global.json`), Bash, Python 3, Node.js, Docker and (for PDF acceptance tests) PowerShell/Playwright. CI's `.github/workflows/ci.yml` is the source of truth for required remote checks. In the PR, report the commands actually run, their outcomes, any unavailable checks, changed public contracts and remaining risks. See [Definition of Done](docs/definition-of-done.md).
