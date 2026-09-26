@@ -96,6 +96,8 @@ The password in `docker-compose.yml` is a local development example; supply cred
 
 The host API listens at <http://localhost:5039> with the `http` profile. `ExternalServices:ProductCatalog:BaseUrl` defaults to `http://localhost:5000` in application settings; override it with `ExternalServices__ProductCatalog__BaseUrl` if ProductsCatalog listens elsewhere. The ProductsCatalog container and SQL Server are managed automatically by the acceptance tests, not by this Compose file. If running the API container from Compose, set the ProductsCatalog URL to a network-reachable address; `localhost` inside the API container points back to the API container.
 
+See [startup and failure behavior](docs/local-startup.md) for index initialization and the boundary between startup failure and readiness.
+
 ```bash
 curl -i http://localhost:5039/health/live
 curl -i http://localhost:5039/health/ready
@@ -124,6 +126,8 @@ The public route groups are `/shopping-carts`, `/orders`, `/invoices` and `/clie
 
 Validation and malformed JSON return `400`, missing resources `404`, duplicate invoices/carts and stale order writes `409`, and unexpected errors `500`. Business errors use `application/problem+json`; unexpected errors have a generic detail and a trace ID. Probe responses use the ASP.NET health-check format rather than the business problem contract. For the exact request/response DTOs and status declarations, use generated OpenAPI. Acceptance tests assert observed HTTP responses against the generated specification; this validates exercised responses and is not a proof of all possible runtime paths.
 
+See the [public error contract](docs/api-problem-contract.md) and [response scenario matrix](docs/acceptance-matrix.md) for mapped causes and actual acceptance evidence.
+
 ## Health checks
 
 | Route | Meaning |
@@ -133,6 +137,8 @@ Validation and malformed JSON return `400`, missing resources `404`, duplicate i
 | `/health` | Compatibility alias for liveness. |
 
 Use readiness for traffic routing and liveness for process checks. These probes do not test ProductsCatalog availability or PDF storage.
+
+See [health-check details](docs/health-checks.md) for failure behavior and the currently tested paths.
 
 ## Tests
 
@@ -161,6 +167,8 @@ CI on `master` and pull requests runs build/OpenAPI, five separate test suites w
 Checkout requires a reachable ProductsCatalog API and a MongoDB replica set capable of transactions. A temporary ProductsCatalog outage can prevent creating an order; existing order reads, status changes and invoice generation use persisted data. Startup initializes indexes and fails when MongoDB is unavailable.
 
 Invoice PDFs and their `file://` URLs are local to one API instance. Multiple replicas need shared durable storage and a downloadable public URL before invoice files can be served reliably across instances. The currency returned for an order is taken from the first snapshot line; resolve mixed-currency totals before a payment consumer treats it as one monetary amount.
+
+Operational references: [startup](docs/local-startup.md), [health probes](docs/health-checks.md), [public error contract](docs/api-problem-contract.md), and the [cause-to-response-to-scenario matrix](docs/acceptance-matrix.md). The matrix marks exercised responses and explicit gaps; keep it aligned with endpoint metadata and acceptance scenarios.
 
 ## Architecture decisions
 
