@@ -1,6 +1,6 @@
 # ADR 0006: CI gates and local verification
 
-Status: Accepted (2026-09-26; coverage added 2026-09-26)
+Status: Accepted (2026-09-26; Infrastructure threshold added 2026-09-26)
 
 ## Context
 
@@ -8,12 +8,12 @@ A green pull request must mean every required layer test and contract check pass
 
 ## Decision
 
-The workflow runs on PRs into and pushes to `master`. Build verifies architecture and operation links, restore, changed-file formatting, Release compilation and generated OpenAPI. Separate jobs run Domain, Application, Infrastructure, ExternalProviders and Acceptance tests with TRX artifacts and summaries. Domain and Application collect line coverage and each enforce a 70% minimum. Infrastructure coverage is reported without a numeric threshold. Gitleaks scans secrets; Dependency Review checks PR dependency changes. The quality gate requires every mandatory job to succeed. Only afterward does the workflow build an unpublished Docker image and scan high/critical vulnerabilities with Trivy. Compiler warnings remain visible and are not an automatic build blocker.
+The workflow runs on PRs into and pushes to `master`. Build verifies architecture and operation links, restore, changed-file formatting, Release compilation and generated OpenAPI. Separate jobs run Domain, Application, Infrastructure, ExternalProviders and Acceptance tests with TRX artifacts and summaries. Domain, Application and Infrastructure collect line coverage and each enforce a 70% minimum. Infrastructure's runsettings exclude only the generated Kiota Products client. A scope check ensures that repositories, readiness, initialization and the handwritten Products adapter remain in the report. Gitleaks scans secrets; Dependency Review checks PR dependency changes. The quality gate requires every mandatory job to succeed. Only afterward does the workflow build an unpublished Docker image and scan high/critical vulnerabilities with Trivy. Compiler warnings remain visible and are not an automatic build blocker.
 
 `scripts/verify.sh` is the broader local check: it verifies whole-solution formatting, runs all suites with the same coverage rules, exports/lints OpenAPI and builds the Docker image. Tests using Testcontainers require a Docker daemon. The checkout acceptance fixture launches MongoDB, SQL Server and `mb0101/product-catalog-api:latest`; a public Docker Hub image can be pulled without a personal access token.
 
 ## Consequences and follow-up
 
-The five test jobs are mandatory; a failed Infrastructure job or missing coverage report blocks the quality gate. The Infrastructure percentage is diagnostic, not a pass/fail threshold. CI's Docker image is scanned but not pushed to a registry. NuGet audit and SDK pinning remain separate CI follow-ups.
+The five test jobs are mandatory; a failed Infrastructure job, missing coverage report or percentage below 70% blocks the quality gate. The generated Kiota source is compiled and exercised by adapter and ExternalProviders tests but excluded from the Infrastructure percentage. Configuration and DI remain included. CI's Docker image is scanned but not pushed to a registry. NuGet audit and SDK pinning remain separate CI follow-ups.
 
 See `.github/workflows/ci.yml`, `scripts/verify.sh` and `scripts/validate-openapi.sh`.

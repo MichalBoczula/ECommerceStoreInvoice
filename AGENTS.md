@@ -14,7 +14,7 @@ Read [README.md](README.md), [Definition of Done](docs/definition-of-done.md) an
 - For each endpoint change, update DTOs, validation policy, executed flow descriptor, `.Produces`, generated OpenAPI and relevant acceptance scenarios together. Cover each distinct cause of an HTTP outcome and inspect MongoDB state after failed writes.
 - Put pure rule tests in Domain, use-case tests in Application, actual indexes and transactions in Infrastructure, ProductsCatalog protocol tests in ExternalProviders, and HTTP behavior in Acceptance. Use the existing Testcontainers fixtures for MongoDB, ProductsCatalog and SQL Server when needed.
 - Edit `.feature` source and step definitions; do not hand-edit generated `.feature.cs`. Export OpenAPI from the API and keep operation → flow → policy → scenario checks passing. Do not hand-maintain a second OpenAPI file.
-- Do not skip tests, add `continue-on-error`, or lower coverage or security checks to make a PR green. Ordinary compiler warnings are visible but are not a build blocker under the current CI. Domain and Application each require at least 70% line coverage; Infrastructure coverage is informational.
+- Do not skip tests, add `continue-on-error`, or lower coverage or security checks to make a PR green. Ordinary compiler warnings are visible but are not a build blocker under the current CI. Domain, Application and Infrastructure each require at least 70% line coverage. Infrastructure excludes only the generated Kiota client; keep configuration, DI and handwritten code in the measurement.
 
 ## Verification and handoff
 

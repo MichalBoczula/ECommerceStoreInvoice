@@ -20,6 +20,9 @@ for suite in Domain.UnitTests Application.UnitTests Infrastructure.UnitTests Ext
     Domain.UnitTests|Application.UnitTests|Infrastructure.UnitTests)
       collection=(--collect 'XPlat Code Coverage') ;;
   esac
+  if [[ "$suite" == Infrastructure.UnitTests ]]; then
+    collection+=(--settings tests/ECommerceStoreInvoice.Infrastructure.UnitTests/coverage.runsettings)
+  fi
   dotnet test "$project" --configuration Release --no-restore \
     --logger "trx;LogFileName=$suite.trx" --results-directory "$results_dir/$suite" \
     "${collection[@]}"
@@ -30,7 +33,8 @@ for suite in Domain.UnitTests Application.UnitTests Infrastructure.UnitTests Ext
     Application.UnitTests)
       bash scripts/report-coverage.sh "$results_dir/$suite" "$results_dir/application-coverage" ECommerceStoreInvoice.Application 70 ;;
     Infrastructure.UnitTests)
-      bash scripts/report-coverage.sh "$results_dir/$suite" "$results_dir/infrastructure-coverage" ECommerceStoreInvoice.Infrastructure ;;
+      python3 scripts/check-infrastructure-coverage.py "$results_dir/$suite"
+      bash scripts/report-coverage.sh "$results_dir/$suite" "$results_dir/infrastructure-coverage" ECommerceStoreInvoice.Infrastructure 70 ;;
   esac
 done
 
