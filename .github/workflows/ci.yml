@@ -87,13 +87,26 @@ jobs:
         run: >
           dotnet test tests/ECommerceStoreInvoice.Domain.UnitTests/ECommerceStoreInvoice.Domain.UnitTests.csproj
           --configuration Release --logger 'trx;LogFileName=domain.trx'
-          --results-directory ./TestResults/Domain
+          --results-directory ./TestResults/Domain --collect 'XPlat Code Coverage' --
+          'DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura'
+          'DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Include=[ECommerceStoreInvoice.Domain]*'
+      - name: Enforce Domain coverage
+        run: bash scripts/report-coverage.sh Domain ECommerceStoreInvoice.Domain 70
+      - name: Summarize Domain tests
+        if: always()
+        run: python3 scripts/summarize-trx.py Domain ./TestResults/Domain
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: domain-test-results
           path: ./TestResults/Domain/
           if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: domain-coverage-report
+          path: ./TestResults/CoverageReport/Domain/
+          if-no-files-found: warn
 
   application-unit-tests:
     runs-on: ubuntu-latest
@@ -108,13 +121,26 @@ jobs:
         run: >
           dotnet test tests/ECommerceStoreInvoice.Application.UnitTests/ECommerceStoreInvoice.Application.UnitTests.csproj
           --configuration Release --logger 'trx;LogFileName=application.trx'
-          --results-directory ./TestResults/Application
+          --results-directory ./TestResults/Application --collect 'XPlat Code Coverage' --
+          'DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura'
+          'DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Include=[ECommerceStoreInvoice.Application]*'
+      - name: Enforce Application coverage
+        run: bash scripts/report-coverage.sh Application ECommerceStoreInvoice.Application 70
+      - name: Summarize Application tests
+        if: always()
+        run: python3 scripts/summarize-trx.py Application ./TestResults/Application
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: application-test-results
           path: ./TestResults/Application/
           if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: application-coverage-report
+          path: ./TestResults/CoverageReport/Application/
+          if-no-files-found: warn
 
   infrastructure-tests:
     runs-on: ubuntu-latest
@@ -129,13 +155,26 @@ jobs:
         run: >
           dotnet test tests/ECommerceStoreInvoice.Infrastructure.UnitTests/ECommerceStoreInvoice.Infrastructure.UnitTests.csproj
           --configuration Release --logger 'trx;LogFileName=infrastructure.trx'
-          --results-directory ./TestResults/Infrastructure
+          --results-directory ./TestResults/Infrastructure --collect 'XPlat Code Coverage' --
+          'DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura'
+          'DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Include=[ECommerceStoreInvoice.Infrastructure]*'
+      - name: Report Infrastructure coverage
+        run: bash scripts/report-coverage.sh Infrastructure ECommerceStoreInvoice.Infrastructure
+      - name: Summarize Infrastructure tests
+        if: always()
+        run: python3 scripts/summarize-trx.py Infrastructure ./TestResults/Infrastructure
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: infrastructure-test-results
           path: ./TestResults/Infrastructure/
           if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: infrastructure-coverage-report
+          path: ./TestResults/CoverageReport/Infrastructure/
+          if-no-files-found: warn
 
   external-providers-tests:
     runs-on: ubuntu-latest
@@ -151,6 +190,9 @@ jobs:
           dotnet test tests/ECommerceStoreInvoice.ExternalProviders.IntegrationTests/ECommerceStoreInvoice.ExternalProviders.IntegrationTests.csproj
           --configuration Release --logger 'trx;LogFileName=external-providers.trx'
           --results-directory ./TestResults/ExternalProviders
+      - name: Summarize ExternalProviders tests
+        if: always()
+        run: python3 scripts/summarize-trx.py ExternalProviders ./TestResults/ExternalProviders
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -172,6 +214,9 @@ jobs:
           dotnet test tests/ECommerceStoreInvoice.Acceptance.Tests/ECommerceStoreInvoice.Acceptance.Tests.csproj
           --configuration Release --logger 'trx;LogFileName=acceptance.trx'
           --results-directory ./TestResults/Acceptance
+      - name: Summarize Acceptance tests
+        if: always()
+        run: python3 scripts/summarize-trx.py Acceptance ./TestResults/Acceptance
       - uses: actions/upload-artifact@v4
         if: always()
         with:
