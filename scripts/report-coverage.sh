@@ -8,6 +8,10 @@ minimum="${4:-}"
 summary_file="${5:-}"
 
 tool_dir="${REPORTGENERATOR_TOOL_DIR:-artifacts/verification/tools}"
+if [[ -z "$(find "$results_dir" -type f -name coverage.cobertura.xml -print -quit)" ]]; then
+  echo "Missing $assembly Cobertura coverage input in $results_dir" >&2
+  exit 1
+fi
 mkdir -p "$tool_dir"
 if [[ ! -x "$tool_dir/reportgenerator" ]]; then
   dotnet tool install dotnet-reportgenerator-globaltool --tool-path "$tool_dir" --version 5.4.7

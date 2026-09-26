@@ -148,7 +148,7 @@ Run from the repository root:
 bash scripts/verify.sh
 ```
 
-The script checks architecture and operation links, restores, builds, verifies formatting of all handwritten C# files (generated Reqnroll `.feature.cs` files are excluded), runs Domain, Application, Infrastructure, ExternalProviders and Acceptance suites, exports and lints generated OpenAPI, then builds the Docker image. Testcontainers require Docker; order scenarios start MongoDB, ProductsCatalog and SQL Server. Output is written under `artifacts/verification/`.
+The script checks architecture and operation links, restores, builds, verifies formatting of all handwritten C# files (generated Reqnroll `.feature.cs` files are excluded), runs Domain, Application, Infrastructure, ExternalProviders and Acceptance suites, exports and lints generated OpenAPI, then builds the Docker image. Testcontainers require Docker; order scenarios start MongoDB, ProductsCatalog and SQL Server. TRX files, coverage reports, the combined `summary.md` and generated OpenAPI use the shared layout in [local verification](docs/local-verification.md).
 
 For a focused Infrastructure run:
 
@@ -173,3 +173,4 @@ Operational references: [startup](docs/local-startup.md), [health probes](docs/h
 ## Architecture decisions
 
 The [ADR index](docs/adr/README.md) covers MongoDB snapshots, checkout and status writes, PDF recovery, public errors, generated contracts, CI and acceptance isolation. Contributors and coding agents should also read [`AGENTS.md`](AGENTS.md) and [Definition of Done](docs/definition-of-done.md).
+
