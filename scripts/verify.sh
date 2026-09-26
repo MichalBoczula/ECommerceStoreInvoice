@@ -4,6 +4,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 python3 scripts/test-architecture.py
 python3 scripts/check-architecture.py
+python3 scripts/check-operation-links.py
 
 solution=ECommerceStoreInvoice.slnx
 dotnet restore "$solution"
