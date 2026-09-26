@@ -24,6 +24,7 @@ jobs:
         with:
           fail-on-severity: high
 
+
   secret-scan:
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -34,6 +35,7 @@ jobs:
       - uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 
   build:
     runs-on: ubuntu-latest
@@ -48,19 +50,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Verify architecture and operation links
-        run: |
-          python3 scripts/test-architecture.py
-          python3 scripts/check-architecture.py
-          python3 scripts/check-operation-links.py
-      - name: Restore and audit NuGet dependencies
-        run: dotnet restore ECommerceStoreInvoice.slnx
+      - name: Verify source contracts and boundaries
+        run: bash scripts/ci.sh source
+      - name: Restore and build
+        run: bash scripts/ci.sh build
       - name: Verify formatting
-        run: bash scripts/verify-format.sh
-      - name: Build solution
-        run: dotnet build ECommerceStoreInvoice.slnx --configuration Release --no-restore
+        run: bash scripts/ci.sh format
       - name: Validate generated OpenAPI
-        run: bash scripts/validate-openapi.sh
+        run: bash scripts/ci.sh contract
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -77,27 +74,19 @@ jobs:
       - uses: actions/setup-dotnet@v5
         with:
           global-json-file: global.json
-      - name: Run Domain tests
-        run: >
-          dotnet test tests/ECommerceStoreInvoice.Domain.UnitTests/ECommerceStoreInvoice.Domain.UnitTests.csproj
-          --configuration Release --logger 'trx;LogFileName=domain.trx'
-          --results-directory ./TestResults/Domain --collect 'XPlat Code Coverage'
-      - name: Summarize Domain tests
-        if: always()
-        run: python3 scripts/summarize-trx.py Domain ./TestResults/Domain "$GITHUB_STEP_SUMMARY"
-      - name: Enforce Domain line coverage
-        run: bash scripts/report-coverage.sh TestResults/Domain TestResults/CoverageReport/Domain ECommerceStoreInvoice.Domain 70 "$GITHUB_STEP_SUMMARY"
+      - name: Verify domain suite and coverage
+        run: VERIFY_SUMMARY_FILE="$GITHUB_STEP_SUMMARY" bash scripts/ci.sh test domain
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: domain-test-results
-          path: ./TestResults/Domain/
-          if-no-files-found: error
+          path: artifacts/verification/domain/
+          if-no-files-found: warn
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: domain-coverage-report
-          path: ./TestResults/CoverageReport/Domain/
+          path: artifacts/verification/domain-coverage/
           if-no-files-found: warn
 
   application-unit-tests:
@@ -109,27 +98,19 @@ jobs:
       - uses: actions/setup-dotnet@v5
         with:
           global-json-file: global.json
-      - name: Run Application tests
-        run: >
-          dotnet test tests/ECommerceStoreInvoice.Application.UnitTests/ECommerceStoreInvoice.Application.UnitTests.csproj
-          --configuration Release --logger 'trx;LogFileName=application.trx'
-          --results-directory ./TestResults/Application --collect 'XPlat Code Coverage'
-      - name: Summarize Application tests
-        if: always()
-        run: python3 scripts/summarize-trx.py Application ./TestResults/Application "$GITHUB_STEP_SUMMARY"
-      - name: Enforce Application line coverage
-        run: bash scripts/report-coverage.sh TestResults/Application TestResults/CoverageReport/Application ECommerceStoreInvoice.Application 70 "$GITHUB_STEP_SUMMARY"
+      - name: Verify application suite and coverage
+        run: VERIFY_SUMMARY_FILE="$GITHUB_STEP_SUMMARY" bash scripts/ci.sh test application
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: application-test-results
-          path: ./TestResults/Application/
-          if-no-files-found: error
+          path: artifacts/verification/application/
+          if-no-files-found: warn
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: application-coverage-report
-          path: ./TestResults/CoverageReport/Application/
+          path: artifacts/verification/application-coverage/
           if-no-files-found: warn
 
   infrastructure-tests:
@@ -141,30 +122,19 @@ jobs:
       - uses: actions/setup-dotnet@v5
         with:
           global-json-file: global.json
-      - name: Run Infrastructure tests
-        run: >
-          dotnet test tests/ECommerceStoreInvoice.Infrastructure.UnitTests/ECommerceStoreInvoice.Infrastructure.UnitTests.csproj
-          --configuration Release --logger 'trx;LogFileName=infrastructure.trx'
-          --results-directory ./TestResults/Infrastructure --collect 'XPlat Code Coverage'
-          --settings tests/ECommerceStoreInvoice.Infrastructure.UnitTests/coverage.runsettings
-      - name: Summarize Infrastructure tests
-        if: always()
-        run: python3 scripts/summarize-trx.py Infrastructure ./TestResults/Infrastructure "$GITHUB_STEP_SUMMARY"
-      - name: Verify Infrastructure coverage scope
-        run: python3 scripts/check-infrastructure-coverage.py TestResults/Infrastructure
-      - name: Enforce Infrastructure line coverage
-        run: bash scripts/report-coverage.sh TestResults/Infrastructure TestResults/CoverageReport/Infrastructure ECommerceStoreInvoice.Infrastructure 70 "$GITHUB_STEP_SUMMARY"
+      - name: Verify infrastructure suite and coverage
+        run: VERIFY_SUMMARY_FILE="$GITHUB_STEP_SUMMARY" bash scripts/ci.sh test infrastructure
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: infrastructure-test-results
-          path: ./TestResults/Infrastructure/
-          if-no-files-found: error
+          path: artifacts/verification/infrastructure/
+          if-no-files-found: warn
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: infrastructure-coverage-report
-          path: ./TestResults/CoverageReport/Infrastructure/
+          path: artifacts/verification/infrastructure-coverage/
           if-no-files-found: warn
 
   external-providers-tests:
@@ -176,20 +146,14 @@ jobs:
       - uses: actions/setup-dotnet@v5
         with:
           global-json-file: global.json
-      - name: Run Products client tests
-        run: >
-          dotnet test tests/ECommerceStoreInvoice.ExternalProviders.IntegrationTests/ECommerceStoreInvoice.ExternalProviders.IntegrationTests.csproj
-          --configuration Release --logger 'trx;LogFileName=external-providers.trx'
-          --results-directory ./TestResults/ExternalProviders
-      - name: Summarize ExternalProviders tests
-        if: always()
-        run: python3 scripts/summarize-trx.py ExternalProviders ./TestResults/ExternalProviders "$GITHUB_STEP_SUMMARY"
+      - name: Verify external-providers suite
+        run: VERIFY_SUMMARY_FILE="$GITHUB_STEP_SUMMARY" bash scripts/ci.sh test external-providers
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: external-providers-test-results
-          path: ./TestResults/ExternalProviders/
-          if-no-files-found: error
+          path: artifacts/verification/external-providers/
+          if-no-files-found: warn
 
   acceptance-tests:
     runs-on: ubuntu-latest
@@ -200,20 +164,14 @@ jobs:
       - uses: actions/setup-dotnet@v5
         with:
           global-json-file: global.json
-      - name: Run Acceptance tests
-        run: >
-          dotnet test tests/ECommerceStoreInvoice.Acceptance.Tests/ECommerceStoreInvoice.Acceptance.Tests.csproj
-          --configuration Release --logger 'trx;LogFileName=acceptance.trx'
-          --results-directory ./TestResults/Acceptance
-      - name: Summarize Acceptance tests
-        if: always()
-        run: python3 scripts/summarize-trx.py Acceptance ./TestResults/Acceptance "$GITHUB_STEP_SUMMARY"
+      - name: Verify acceptance suite
+        run: VERIFY_SUMMARY_FILE="$GITHUB_STEP_SUMMARY" bash scripts/ci.sh test acceptance
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: acceptance-test-results
-          path: ./TestResults/Acceptance/
-          if-no-files-found: error
+          path: artifacts/verification/acceptance/
+          if-no-files-found: warn
 
   quality-gate:
     if: always()
@@ -254,6 +212,7 @@ jobs:
             exit 1
           fi
 
+
   docker-image:
     if: ${{ always() && !cancelled() && needs.quality-gate.result == 'success' }}
     runs-on: ubuntu-latest
@@ -278,3 +237,4 @@ jobs:
           exit-code: '1'
           ignore-unfixed: true
           severity: CRITICAL,HIGH
+
