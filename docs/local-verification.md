@@ -6,6 +6,14 @@ order: **Source checks**, **Restore and build**, **Format**, **Domain**,
 **Application**, **Infrastructure**, **ExternalProviders**, **Acceptance**,
 **OpenAPI**, **Docker**. ExternalProviders is specific to Invoices.
 
+`scripts/verify.sh` and the CI jobs call the same portable entry points in
+`scripts/ci.sh`: `source`, `build`, `format`, `contract`, and `test <suite>`.
+Each test invocation restores the solution in its own runner. Set
+`VERIFY_RESULTS_DIR` to change the artifact root and `VERIFY_SUMMARY_FILE`
+to append suite and coverage results to a chosen Markdown file. GitHub
+Actions supplies its step summary path and uploads the generated artifacts;
+the scripts contain the quality checks and failure rules.
+
 The ignored `artifacts/verification/` directory has the following layout:
 
 | Output | Path |
