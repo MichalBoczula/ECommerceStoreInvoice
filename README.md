@@ -69,7 +69,7 @@ For a focused Infrastructure run:
 dotnet test tests/ECommerceStoreInvoice.Infrastructure.UnitTests/ECommerceStoreInvoice.Infrastructure.UnitTests.csproj --configuration Release
 ```
 
-CI on `master` and pull requests runs build/OpenAPI, five separate test suites with TRX summaries, secret scanning, PR dependency review, a quality gate and an image build with Trivy scanning. Domain and Application each require at least 70% line coverage; Infrastructure produces an informational report without a numeric threshold. The same coverage checks run through `scripts/verify.sh`. Every required job must pass before the image job starts; the image is not published. See [CI ADR](docs/adr/0006-ci-and-verification.md) and [Definition of Done](docs/definition-of-done.md).
+CI on `master` and pull requests runs build/OpenAPI, five separate test suites with TRX summaries, secret scanning, PR dependency review, a quality gate and an image build with Trivy scanning. Domain, Application and Infrastructure each require at least 70% line coverage. Infrastructure excludes only the generated Kiota Products client through its [coverage settings](tests/ECommerceStoreInvoice.Infrastructure.UnitTests/coverage.runsettings); repository, mapping, health, configuration, DI and handwritten Products adapter code remain measured. The same checks run through `scripts/verify.sh`. Every required job must pass before the image job starts; the image is not published. See [CI ADR](docs/adr/0006-ci-and-verification.md) and [Definition of Done](docs/definition-of-done.md).
 
 ## Repository guidance
 

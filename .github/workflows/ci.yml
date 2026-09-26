@@ -152,11 +152,14 @@ jobs:
           dotnet test tests/ECommerceStoreInvoice.Infrastructure.UnitTests/ECommerceStoreInvoice.Infrastructure.UnitTests.csproj
           --configuration Release --logger 'trx;LogFileName=infrastructure.trx'
           --results-directory ./TestResults/Infrastructure --collect 'XPlat Code Coverage'
+          --settings tests/ECommerceStoreInvoice.Infrastructure.UnitTests/coverage.runsettings
       - name: Summarize Infrastructure tests
         if: always()
         run: python3 scripts/summarize-trx.py Infrastructure ./TestResults/Infrastructure "$GITHUB_STEP_SUMMARY"
-      - name: Report Infrastructure coverage without a threshold
-        run: bash scripts/report-coverage.sh TestResults/Infrastructure TestResults/CoverageReport/Infrastructure ECommerceStoreInvoice.Infrastructure '' "$GITHUB_STEP_SUMMARY"
+      - name: Verify Infrastructure coverage scope
+        run: python3 scripts/check-infrastructure-coverage.py TestResults/Infrastructure
+      - name: Enforce Infrastructure line coverage
+        run: bash scripts/report-coverage.sh TestResults/Infrastructure TestResults/CoverageReport/Infrastructure ECommerceStoreInvoice.Infrastructure 70 "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
