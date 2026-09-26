@@ -1,0 +1,236 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  dependency-review:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: high
+
+  secret-scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.100
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify architecture and operation links
+        run: |
+          python3 scripts/test-architecture.py
+          python3 scripts/check-architecture.py
+          python3 scripts/check-operation-links.py
+      - name: Restore dependencies
+        run: dotnet restore ECommerceStoreInvoice.slnx
+      - name: Verify formatting
+        run: dotnet format ECommerceStoreInvoice.slnx --verify-no-changes --no-restore
+      - name: Build solution
+        run: dotnet build ECommerceStoreInvoice.slnx --configuration Release --no-restore
+      - name: Validate generated OpenAPI
+        run: bash scripts/validate-openapi.sh
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: generated-openapi
+          path: artifacts/verification/openapi.json
+          if-no-files-found: warn
+
+  domain-unit-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.100
+      - name: Run Domain tests
+        run: >
+          dotnet test tests/ECommerceStoreInvoice.Domain.UnitTests/ECommerceStoreInvoice.Domain.UnitTests.csproj
+          --configuration Release --logger 'trx;LogFileName=domain.trx'
+          --results-directory ./TestResults/Domain
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: domain-test-results
+          path: ./TestResults/Domain/
+          if-no-files-found: error
+
+  application-unit-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.100
+      - name: Run Application tests
+        run: >
+          dotnet test tests/ECommerceStoreInvoice.Application.UnitTests/ECommerceStoreInvoice.Application.UnitTests.csproj
+          --configuration Release --logger 'trx;LogFileName=application.trx'
+          --results-directory ./TestResults/Application
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: application-test-results
+          path: ./TestResults/Application/
+          if-no-files-found: error
+
+  infrastructure-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.100
+      - name: Run Infrastructure tests
+        run: >
+          dotnet test tests/ECommerceStoreInvoice.Infrastructure.UnitTests/ECommerceStoreInvoice.Infrastructure.UnitTests.csproj
+          --configuration Release --logger 'trx;LogFileName=infrastructure.trx'
+          --results-directory ./TestResults/Infrastructure
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: infrastructure-test-results
+          path: ./TestResults/Infrastructure/
+          if-no-files-found: error
+
+  external-providers-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.100
+      - name: Run Products client tests
+        run: >
+          dotnet test tests/ECommerceStoreInvoice.ExternalProviders.IntegrationTests/ECommerceStoreInvoice.ExternalProviders.IntegrationTests.csproj
+          --configuration Release --logger 'trx;LogFileName=external-providers.trx'
+          --results-directory ./TestResults/ExternalProviders
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: external-providers-test-results
+          path: ./TestResults/ExternalProviders/
+          if-no-files-found: error
+
+  acceptance-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.100
+      - name: Run Acceptance tests
+        run: >
+          dotnet test tests/ECommerceStoreInvoice.Acceptance.Tests/ECommerceStoreInvoice.Acceptance.Tests.csproj
+          --configuration Release --logger 'trx;LogFileName=acceptance.trx'
+          --results-directory ./TestResults/Acceptance
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: acceptance-test-results
+          path: ./TestResults/Acceptance/
+          if-no-files-found: error
+
+  quality-gate:
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs:
+      - build
+      - domain-unit-tests
+      - application-unit-tests
+      - infrastructure-tests
+      - external-providers-tests
+      - acceptance-tests
+      - secret-scan
+      - dependency-review
+    steps:
+      - name: Require every mandatory job
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BUILD: ${{ needs.build.result }}
+          DOMAIN: ${{ needs.domain-unit-tests.result }}
+          APPLICATION: ${{ needs.application-unit-tests.result }}
+          INFRASTRUCTURE: ${{ needs.infrastructure-tests.result }}
+          EXTERNAL_PROVIDERS: ${{ needs.external-providers-tests.result }}
+          ACCEPTANCE: ${{ needs.acceptance-tests.result }}
+          SECRET_SCAN: ${{ needs.secret-scan.result }}
+          DEPENDENCY_REVIEW: ${{ needs.dependency-review.result }}
+        run: |
+          for job in BUILD DOMAIN APPLICATION INFRASTRUCTURE EXTERNAL_PROVIDERS ACCEPTANCE SECRET_SCAN; do
+            if [[ "${!job}" != success ]]; then
+              echo "$job must succeed; actual result: ${!job}" >&2
+              exit 1
+            fi
+          done
+          expected=success
+          if [[ "$EVENT_NAME" == push ]]; then expected=skipped; fi
+          if [[ "$DEPENDENCY_REVIEW" != "$expected" ]]; then
+            echo "Dependency Review must be $expected; actual result: $DEPENDENCY_REVIEW" >&2
+            exit 1
+          fi
+
+  docker-image:
+    if: ${{ always() && !cancelled() && needs.quality-gate.result == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: quality-gate
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Build image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./src/ECommerceStoreInvoice.API/Dockerfile
+          push: false
+          load: true
+          tags: ecommerce-store-invoice:ci
+      - name: Scan image
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: ecommerce-store-invoice:ci
+          format: table
+          exit-code: '1'
+          ignore-unfixed: true
+          severity: CRITICAL,HIGH
