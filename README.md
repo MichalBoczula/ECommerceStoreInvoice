@@ -164,4 +164,4 @@ Invoice PDFs and their `file://` URLs are local to one API instance. Multiple re
 
 ## Architecture decisions
 
-The [ADR index](docs/adr/README.md) covers MongoDB snapshots, checkout and status writes, PDF recovery, public errors, generated contracts and CI. Contributors and coding agents should also read [`AGENTS.md`](AGENTS.md) and [Definition of Done](docs/definition-of-done.md).
+The [ADR index](docs/adr/README.md) covers MongoDB snapshots, checkout and status writes, PDF recovery, public errors, generated contracts, CI and acceptance isolation. Contributors and coding agents should also read [`AGENTS.md`](AGENTS.md) and [Definition of Done](docs/definition-of-done.md).

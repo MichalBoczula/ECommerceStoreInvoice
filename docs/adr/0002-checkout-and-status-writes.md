@@ -1,6 +1,7 @@
-# ADR 0002: Checkout transaction and order status writes
+# ADR-0002: Checkout transaction and order status writes
 
-Status: Accepted (2026-09-26)
+- Status: Accepted
+- Date: 2026-09-26
 
 ## Context
 
@@ -17,3 +18,8 @@ The Domain rule permits `Created → Paid` and `Created → Cancelled`. A repeat
 ProductsCatalog is contacted before the transaction. Failure to retrieve a requested product prevents checkout from starting; transaction failure does not clear the cart or persist product snapshots/order. MongoDB transactions require a writable primary with sessions. A status change updates the current order document; there is no standalone immutable order-status event log.
 
 See `OrderService`, `MongoOrderWriteTransaction`, `OrderRepository`, Domain status validation and `OrderCheckoutTransactionTests`.
+
+## Alternatives considered
+
+- Write snapshots, order and cart separately without a transaction: an interrupted checkout could leave partial state.
+- Replace status without checking its persisted value: concurrent requests could overwrite the winning transition.

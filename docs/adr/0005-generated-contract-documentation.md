@@ -1,6 +1,7 @@
-# ADR 0005: Generated OpenAPI and source-linked documentation
+# ADR-0005: Generated OpenAPI and source-linked documentation
 
-Status: Accepted (2026-09-26)
+- Status: Accepted
+- Date: 2026-09-26
 
 ## Context
 
@@ -17,3 +18,8 @@ The canonical create-order route is `POST /orders/client/{clientId}`. The legacy
 Changing a route requires updating endpoint metadata, source flow/policy links and affected acceptance cases. The checks identify drift in the known operation inventory and exercised response shapes; they cannot prove every possible runtime exception has an acceptance scenario. The metadata, code and `.feature` source must be reviewed together.
 
 See `scripts/check-operation-links.py`, `scripts/validate-openapi.sh`, `scripts/check-openapi-contract.py` and `tests/ECommerceStoreInvoice.Acceptance.Tests/OpenApiExportTests.cs`.
+
+## Alternatives considered
+
+- Maintain a separate handwritten OpenAPI file: route and DTO changes could drift from the published contract.
+- Maintain operation-to-flow and scenario links in a manual table: those links could disagree with the executed service and `.feature` sources.
