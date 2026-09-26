@@ -116,9 +116,15 @@ public sealed class UnexpectedServerErrorsSteps(ScenarioApiContext context) : ID
             "UpdateOrderStatus" => await _client.PatchAsJsonAsync(_path, new UpdateOrderStatusRequestDto { Status = "Paid" }),
             "CreateClientDataVersion" => await _client.PostAsJsonAsync(_path, new CreateClientDataVersionRequestDto
             {
-                ClientName = "Example", PostalCode = "00-001", City = "Warsaw", Street = "Street",
-                BuildingNumber = "1", ApartmentNumber = "1", PhoneNumber = "123456789",
-                PhonePrefix = "48", AddressEmail = "example@example.com"
+                ClientName = "Example",
+                PostalCode = "00-001",
+                City = "Warsaw",
+                Street = "Street",
+                BuildingNumber = "1",
+                ApartmentNumber = "1",
+                PhoneNumber = "123456789",
+                PhonePrefix = "48",
+                AddressEmail = "example@example.com"
             }),
             _ => await _client.GetAsync(_path)
         };

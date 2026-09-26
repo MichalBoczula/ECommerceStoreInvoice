@@ -28,7 +28,7 @@ namespace ECommerceStoreInvoice.Performance.Benchmarks.ClientDataVersions.Domain
                 address,
                 "123456789",
                 "48",
-                "invalid-email"); 
+                "invalid-email");
         }
 
         public static ClientDataVersion CreateAllInvalid()
@@ -39,8 +39,8 @@ namespace ECommerceStoreInvoice.Performance.Benchmarks.ClientDataVersions.Domain
                 Guid.NewGuid(),
                 "John Doe",
                 address,
-                "-100",  
-                "prefix", 
+                "-100",
+                "prefix",
                 "bad@@email.com");
         }
     }

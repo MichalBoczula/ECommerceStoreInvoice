@@ -61,7 +61,7 @@ Run from the repository root:
 bash scripts/verify.sh
 ```
 
-The script checks architecture and operation links, restores, builds, verifies solution formatting, runs Domain, Application, Infrastructure, ExternalProviders and Acceptance suites, exports and lints generated OpenAPI, then builds the Docker image. Testcontainers require Docker; order scenarios start MongoDB, ProductsCatalog and SQL Server. Output is written under `artifacts/verification/`.
+The script checks architecture and operation links, restores, builds, verifies formatting of all handwritten C# files (generated Reqnroll `.feature.cs` files are excluded), runs Domain, Application, Infrastructure, ExternalProviders and Acceptance suites, exports and lints generated OpenAPI, then builds the Docker image. Testcontainers require Docker; order scenarios start MongoDB, ProductsCatalog and SQL Server. Output is written under `artifacts/verification/`.
 
 For a focused Infrastructure run:
 
