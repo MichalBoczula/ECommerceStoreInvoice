@@ -1,4 +1,5 @@
 using Reqnroll;
+using System.Text.Json;
 
 namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Common
 {
@@ -24,7 +25,9 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Common
                 _scenarioContext.ScenarioInfo.Tags.Contains("completion-ack-lost"));
             await _factory.InitializeAsync();
             _apiContext.Factory = _factory;
-            _apiContext.HttpClient = _factory.CreateClient();
+            using var swaggerClient = _factory.CreateClient();
+            var document = JsonDocument.Parse(await swaggerClient.GetStringAsync("/swagger/v1/swagger.json"));
+            _apiContext.HttpClient = _factory.CreateDefaultClient(new OpenApiResponseHandler(document));
         }
 
         [AfterTestRun]
