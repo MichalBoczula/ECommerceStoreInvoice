@@ -20,12 +20,10 @@ namespace ECommerceStoreInvoice.API.Endpoints
 
         private static void MapOrdersCommands(IEndpointRouteBuilder group)
         {
-            group.MapPost("/{clientId:guid}", async (Guid clientId, IOrderService orderService) =>
-            {
-                var order = await orderService.CreateOrder(clientId);
+            group.MapPost("/{clientId:guid}", CreateOrder)
+                .ExcludeFromDescription();
 
-                return Results.Ok(order);
-            })
+            group.MapPost("/client/{clientId:guid}", CreateOrder)
            .WithSummary("Create order.")
            .WithDescription("Creates a new order based on the current shopping cart for the provided client.")
            .WithName("CreateOrder")
@@ -51,6 +49,12 @@ namespace ECommerceStoreInvoice.API.Endpoints
            .Produces<NotFoundProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")
            .Produces<ConflictProblemDetails>(StatusCodes.Status409Conflict, "application/problem+json")
            .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, "application/problem+json");
+        }
+
+        private static async Task<IResult> CreateOrder(Guid clientId, IOrderService orderService)
+        {
+            var order = await orderService.CreateOrder(clientId);
+            return Results.Ok(order);
         }
 
         private static void MapOrdersQueries(IEndpointRouteBuilder group)
