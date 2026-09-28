@@ -13,3 +13,4 @@ Use repository-local, sequential ADR numbers. Each record has a title, `Status` 
 | [0005](0005-generated-contract-documentation.md) | Accepted | Generated OpenAPI and source-linked flows/policies/scenarios. |
 | [0006](0006-ci-and-verification.md) | Accepted | Required CI jobs, coverage and verification. |
 | [0007](0007-acceptance-isolation.md) | Accepted | Isolate MongoDB per scenario while reusing the MongoDB, ProductsCatalog and SQL Server containers. |
+| [0008](0008-publish-scanned-image.md) | Accepted | Publish the scanned Invoices image after the quality gate on `master`. |
