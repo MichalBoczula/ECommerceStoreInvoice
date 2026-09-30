@@ -1,4 +1,4 @@
-﻿using ECommerceStoreInvoice.Application.Common.ResponsesDto;
+using ECommerceStoreInvoice.Application.Common.ResponsesDto;
 
 namespace ECommerceStoreInvoice.Application.Services.Abstract.Invoices
 {
@@ -6,5 +6,6 @@ namespace ECommerceStoreInvoice.Application.Services.Abstract.Invoices
     {
         Task<InvoiceResponseDto> CreateInvoiceForOrder(Guid clientId, Guid orderId);
         Task<InvoiceResponseDto> GetInvoiceById(Guid invoiceId);
+        Task<InvoiceResponseDto> GetInvoiceByOrderId(Guid orderId);
     }
 }

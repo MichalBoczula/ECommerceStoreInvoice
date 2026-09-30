@@ -481,4 +481,44 @@ public sealed class InvoiceServiceTests
         pdf.Verify(x => x.DeleteGeneratedPdf(It.IsAny<Guid>(), It.IsAny<Guid>()), Times.Never);
     }
 
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task GetInvoiceByOrderId_UsesCompletedOnlyRepository(bool exists)
+    {
+        var orderId = Guid.NewGuid();
+        var repository = new Mock<IInvoiceRepository>(MockBehavior.Strict);
+        var policy = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
+        policy.Setup(x => x.Validate(orderId)).ReturnsAsync(new ValidationResult());
+        var invoice = exists ? Invoice.Rehydrate(Guid.NewGuid(), orderId, Guid.NewGuid(), "file:///test.pdf", DateTime.UtcNow) : null;
+        repository.Setup(x => x.GetInvoiceByOrderId(orderId)).ReturnsAsync(invoice);
+        var sut = new InvoiceService(repository.Object, Mock.Of<IInvoiceGenerationRepository>(),
+            Mock.Of<IOrderRepository>(), Mock.Of<IClientDataVersionService>(), Mock.Of<IInvoicePdfService>(),
+            policy.Object, Mock.Of<IValidationPolicy<InvoiceOrderStatusValidationContext>>(), Mock.Of<ILogger<InvoiceService>>());
+        if (exists)
+        {
+            var result = await sut.GetInvoiceByOrderId(orderId);
+            result.Id.ShouldBe(invoice!.Id);
+            result.OrderId.ShouldBe(orderId);
+        }
+        else await Should.ThrowAsync<ResourceNotFoundException>(() => sut.GetInvoiceByOrderId(orderId));
+        repository.Verify(x => x.GetInvoiceByOrderId(orderId), Times.Once);
+        repository.VerifyNoOtherCalls();
+    }
+
+    [Fact]
+    public async Task GetInvoiceByOrderId_RejectsInvalidIdBeforeLoading()
+    {
+        var repository = new Mock<IInvoiceRepository>(MockBehavior.Strict);
+        var policy = new Mock<IValidationPolicy<Guid>>(MockBehavior.Strict);
+        var invalid = new ValidationResult();
+        invalid.AddValidationError(new ValidationError { Entity = nameof(Guid), Name = "orderId", Message = "Empty order ID" });
+        policy.Setup(x => x.Validate(Guid.Empty)).ReturnsAsync(invalid);
+        var sut = new InvoiceService(repository.Object, Mock.Of<IInvoiceGenerationRepository>(),
+            Mock.Of<IOrderRepository>(), Mock.Of<IClientDataVersionService>(), Mock.Of<IInvoicePdfService>(),
+            policy.Object, Mock.Of<IValidationPolicy<InvoiceOrderStatusValidationContext>>(), Mock.Of<ILogger<InvoiceService>>());
+        await Should.ThrowAsync<ValidationException>(() => sut.GetInvoiceByOrderId(Guid.Empty));
+        repository.VerifyNoOtherCalls();
+    }
+
 }

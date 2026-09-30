@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 using ECommerceStoreInvoice.Application.Common.ResponsesDto;
 using ECommerceStoreInvoice.Application.Services.Abstract.ClientDataVersions;
 using ECommerceStoreInvoice.Application.Descriptors.Invoices;
@@ -114,6 +114,16 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Invoices
             logger.LogInformation("Successfully completed invoice generation. InvoiceId: {InvoiceId} mapped to OrderId: {OrderId}", createdInvoice.Id, orderId);
 
             return descriptor.MapToResponse(createdInvoice);
+        }
+
+        public async Task<InvoiceResponseDto> GetInvoiceByOrderId(Guid orderId)
+        {
+            var descriptor = new GetInvoiceByOrderIdDescriptor();
+            var validationResult = await descriptor.ValidateOrderId(orderId, guidValidationPolicy);
+            descriptor.ThrowValidationExceptionIfOrderIdInvalid(validationResult);
+            var invoice = await descriptor.LoadInvoiceByOrderId(orderId, invoiceRepository);
+            descriptor.ThrowNotFoundExceptionIfInvoiceMissing(orderId, invoice);
+            return descriptor.MapToResponse(invoice!);
         }
 
         public async Task<InvoiceResponseDto> GetInvoiceById(Guid invoiceId)

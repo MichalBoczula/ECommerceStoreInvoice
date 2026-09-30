@@ -139,6 +139,21 @@ public class ApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
         await initializationTask;
     }
 
+    public async Task SeedInvoiceLookupAsync(Guid invoiceId, Guid orderId, string state)
+    {
+        var collection = new MongoClient(_connectionString).GetDatabase(_database).GetCollection<BsonDocument>("invoices");
+        var document = new BsonDocument
+        {
+            ["_id"] = new BsonBinaryData(invoiceId, GuidRepresentation.Standard),
+            ["OrderId"] = new BsonBinaryData(orderId, GuidRepresentation.Standard),
+            ["ClientDataVersionId"] = new BsonBinaryData(Guid.NewGuid(), GuidRepresentation.Standard),
+            ["StorageUrl"] = "file:///invoices/lookup.pdf",
+            ["CreatedAt"] = DateTime.UtcNow
+        };
+        if (state != "legacy") document["GenerationStatus"] = state;
+        await collection.InsertOneAsync(document);
+    }
+
     public async Task<List<BsonDocument>> GetInvoiceDocumentsAsync(Guid orderId)
     {
         var collection = new MongoClient(_connectionString).GetDatabase(_database)

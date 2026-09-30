@@ -101,7 +101,7 @@ def generate():
                                "policies": linked_policies, "scenarios": scenarios(name),
                                "responses": sorted(responses)})
     names = [item["operationId"] for item in operations]
-    assert len(names) == len(set(names)) == 13, f"Unexpected operation inventory: {names}"
+    assert len(names) == len(set(names)) == 14, f"Unexpected operation inventory: {names}"
     return {"operations": operations}
 
 
