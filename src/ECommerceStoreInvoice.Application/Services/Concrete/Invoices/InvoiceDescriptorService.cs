@@ -12,6 +12,12 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Invoices
             return descriptor.Describe();
         }
 
+        public FlowDescriptor GetInvoiceByOrderIdDescriptor()
+        {
+            var descriptor = new GetInvoiceByOrderIdDescriptor();
+            return descriptor.Describe();
+        }
+
         public FlowDescriptor GetInvoiceByIdDescriptor()
         {
             var descriptor = new GetInvoiceByIdDescriptor();

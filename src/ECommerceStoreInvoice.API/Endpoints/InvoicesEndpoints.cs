@@ -37,6 +37,19 @@ namespace ECommerceStoreInvoice.API.Endpoints
 
         private static void MapInvoicesQueries(IEndpointRouteBuilder group)
         {
+            group.MapGet("/by-order/{orderId:guid}", async (Guid orderId, IInvoiceService invoiceService) =>
+            {
+                var invoice = await invoiceService.GetInvoiceByOrderId(orderId);
+                return Results.Ok(invoice);
+            })
+            .WithSummary("Get completed invoice by order Id.")
+            .WithDescription("Returns the completed invoice for an order; pending, failed and missing invoices return 404.")
+            .WithName("GetInvoiceByOrderId")
+            .Produces<InvoiceResponseDto>(StatusCodes.Status200OK)
+            .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")
+            .Produces<NotFoundProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")
+            .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, "application/problem+json");
+
             group.MapGet("/{invoiceId:guid}", async (Guid invoiceId, IInvoiceService invoiceService) =>
             {
                 var invoice = await invoiceService.GetInvoiceById(invoiceId);

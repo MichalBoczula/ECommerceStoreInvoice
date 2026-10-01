@@ -36,6 +36,7 @@ COPY --from=build /app/publish .
 
 # Install PowerShell, then install Playwright browsers + Linux deps
 RUN apt-get update \
+    && apt-get install -y --only-upgrade libssl3t64 openssl \
     && apt-get install -y --no-install-recommends wget apt-transport-https software-properties-common gnupg ca-certificates \
     && wget -q https://packages.microsoft.com/config/ubuntu/24.04/packages-microsoft-prod.deb \
     && dpkg -i packages-microsoft-prod.deb \

@@ -122,6 +122,8 @@ Stop the stack with `docker compose -f docker-compose.yml down`; add `--volumes`
 - Generated OpenAPI: <http://localhost:5039/swagger/v1/swagger.json> (or port `8080` with Compose).
 - Flow and policy descriptions: `/orders-documentation/flows` and `/orders-documentation/validations`.
 
+`GET /invoices/by-order/{orderId}` returns only a completed invoice (including legacy completed documents). Payments uses it to reconcile a lost creation response; incomplete reservations return `404`. Creation and lease behavior are unchanged.
+
 The public route groups are `/shopping-carts`, `/orders`, `/invoices` and `/client-data-versions`. `POST /orders/client/{clientId}` creates an order from a cart; the older `POST /orders/{clientId}` alias remains callable but is excluded from OpenAPI. `GET /orders/{orderId}` includes status, total amount, currency and snapshot-backed lines. Its total is a decimal amount in the product currency; do not treat it as integer minor units. The response mapping currently takes the first line's currency, so mixed-currency orders require a separate domain decision before a payment integration assumes a single currency.
 
 Validation and malformed JSON return `400`, missing resources `404`, duplicate invoices/carts and stale order writes `409`, and unexpected errors `500`. Business errors use `application/problem+json`; unexpected errors have a generic detail and a trace ID. Probe responses use the ASP.NET health-check format rather than the business problem contract. For the exact request/response DTOs and status declarations, use generated OpenAPI. Acceptance tests assert observed HTTP responses against the generated specification; this validates exercised responses and is not a proof of all possible runtime paths.
