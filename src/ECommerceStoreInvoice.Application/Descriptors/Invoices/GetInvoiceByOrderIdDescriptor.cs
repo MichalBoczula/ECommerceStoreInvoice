@@ -27,8 +27,8 @@ namespace ECommerceStoreInvoice.Application.Descriptors.Invoices
             }
         }
 
-        [FlowStep(order: 3, bpmnId: "LoadInvoiceById")]
-        public async Task<Invoice?> LoadInvoiceById(Guid orderId, IInvoiceRepository invoiceRepository)
+        [FlowStep(order: 3, bpmnId: "LoadInvoiceByOrderId")]
+        public async Task<Invoice?> LoadInvoiceByOrderId(Guid orderId, IInvoiceRepository invoiceRepository)
         {
             return await invoiceRepository.GetInvoiceByOrderId(orderId);
         }
@@ -38,7 +38,7 @@ namespace ECommerceStoreInvoice.Application.Descriptors.Invoices
         {
             if (invoice is null)
             {
-                throw new ResourceNotFoundException(nameof(LoadInvoiceById), orderId, nameof(Invoice));
+                throw new ResourceNotFoundException(nameof(LoadInvoiceByOrderId), orderId, nameof(Invoice));
             }
         }
 
