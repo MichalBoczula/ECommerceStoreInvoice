@@ -21,6 +21,23 @@ public sealed class OpenApiExportTests
 
         var exportPath = Environment.GetEnvironmentVariable("OPENAPI_EXPORT_PATH");
         if (!string.IsNullOrWhiteSpace(exportPath))
+        {
             await File.WriteAllTextAsync(exportPath, openApi);
+
+            var exportDirectory = Path.GetDirectoryName(Path.GetFullPath(exportPath))!;
+            foreach (var (route, fileName, collection) in new[]
+            {
+                ("/orders-documentation/flows", "flows.json", "flows"),
+                ("/orders-documentation/validations", "validation-policies.json", "validations")
+            })
+            {
+                using var documentationResponse = await client.GetAsync(route);
+                documentationResponse.EnsureSuccessStatusCode();
+                var documentation = await documentationResponse.Content.ReadAsStringAsync();
+                using var structured = JsonDocument.Parse(documentation);
+                Assert.NotEmpty(structured.RootElement.GetProperty(collection).EnumerateArray());
+                await File.WriteAllTextAsync(Path.Combine(exportDirectory, fileName), documentation);
+            }
+        }
     }
 }

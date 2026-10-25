@@ -14,3 +14,4 @@ Use repository-local, sequential ADR numbers. Each record has a title, `Status` 
 | [0006](0006-ci-and-verification.md) | Accepted | Required CI jobs, coverage and verification. |
 | [0007](0007-acceptance-isolation.md) | Accepted | Isolate MongoDB per scenario while reusing the MongoDB, ProductsCatalog and SQL Server containers. |
 | [0008](0008-publish-scanned-image.md) | Accepted | Publish the scanned Invoices image after the quality gate on `master`. |
+| [0009](0009-livedocs-source-publication.md) | Accepted | Package real Orders/Invoices BDD sources and archive them for LiveDocs. |

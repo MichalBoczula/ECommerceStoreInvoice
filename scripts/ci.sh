@@ -10,7 +10,8 @@ case "$command" in
   source)
     python3 scripts/test-architecture.py
     python3 scripts/check-architecture.py
-    python3 scripts/check-operation-links.py
+    mkdir -p "$results_dir"
+    python3 scripts/check-operation-links.py "$results_dir/operation-links.json"
     ;;
   build)
     dotnet restore ECommerceStoreInvoice.slnx
@@ -51,6 +52,7 @@ case "$command" in
         project=tests/ECommerceStoreInvoice.ExternalProviders.IntegrationTests/ECommerceStoreInvoice.ExternalProviders.IntegrationTests.csproj
         ;;
       acceptance)
+        rm -rf artifacts/allure-results/acceptance
         project=tests/ECommerceStoreInvoice.Acceptance.Tests/ECommerceStoreInvoice.Acceptance.Tests.csproj
         ;;
       *)
