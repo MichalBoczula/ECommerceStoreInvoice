@@ -21,7 +21,8 @@ public sealed class BlobInvoiceDocumentStorageTests : IAsyncLifetime
             .WithEnvironment("AZURITE_ACCOUNTS", $"invoicetest:{_key}")
             .WithCommand("azurite-blob", "--blobHost", "0.0.0.0", "--skipApiVersionCheck")
             .WithPortBinding(10000, true)
-            .WithWaitStrategy(Wait.ForUnixContainer().UntilMessageIsLogged("Azurite Blob service is successfully listening"))
+            .WithWaitStrategy(Wait.ForUnixContainer().UntilMessageIsLogged(
+                "Azurite Blob service successfully listens on", options => options.WithTimeout(TimeSpan.FromSeconds(60))))
             .Build();
         await _azurite.StartAsync();
         var connection = $"DefaultEndpointsProtocol=http;AccountName=invoicetest;AccountKey={_key};BlobEndpoint=http://{_azurite.Hostname}:{_azurite.GetMappedPublicPort(10000)}/invoicetest;";
