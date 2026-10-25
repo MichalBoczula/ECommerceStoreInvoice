@@ -29,7 +29,8 @@ internal sealed class OpenApiResponseHandler(JsonDocument document) : Delegating
         if (!operation.GetProperty("responses").TryGetProperty(status, out var declared))
             throw new InvalidOperationException($"Undeclared runtime status: {operation.GetProperty("operationId").GetString()} {status}");
 
-        var expected = (int)response.StatusCode >= 400 ? "application/problem+json" : "application/json";
+        var expected = (int)response.StatusCode >= 400 ? "application/problem+json" :
+            operation.GetProperty("operationId").GetString() == "DownloadInvoicePdf" ? "application/pdf" : "application/json";
         var actual = response.Content.Headers.ContentType?.MediaType;
         if (actual != expected || !declared.TryGetProperty("content", out var content) ||
             !content.TryGetProperty(expected, out var representation) ||
@@ -37,6 +38,12 @@ internal sealed class OpenApiResponseHandler(JsonDocument document) : Delegating
             throw new InvalidOperationException($"Response media or schema differs from OpenAPI: {request.Method} {path} {status} ({actual})");
 
         var bytes = await response.Content.ReadAsByteArrayAsync(cancellationToken);
+        if (expected == "application/pdf")
+        {
+            if (!bytes.AsSpan().StartsWith("%PDF-"u8))
+                throw new InvalidOperationException("Invoice download is not a PDF.");
+            return response;
+        }
         using var body = JsonDocument.Parse(bytes);
         Validate(schema, body.RootElement, document.RootElement.GetProperty("components").GetProperty("schemas"), path, 0);
         return response;

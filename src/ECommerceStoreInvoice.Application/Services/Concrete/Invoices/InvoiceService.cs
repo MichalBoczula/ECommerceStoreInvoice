@@ -126,6 +126,14 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Invoices
             return descriptor.MapToResponse(invoice!);
         }
 
+        public async Task<Stream> DownloadInvoicePdf(Guid invoiceId, CancellationToken cancellationToken = default)
+        {
+            var descriptor = new DownloadInvoicePdfDescriptor();
+            await descriptor.ValidateInvoiceId(invoiceId, guidValidationPolicy);
+            var invoice = await descriptor.LoadInvoice(invoiceId, invoiceRepository);
+            return await descriptor.OpenPdf(invoice, invoicePdfService, cancellationToken);
+        }
+
         public async Task<InvoiceResponseDto> GetInvoiceById(Guid invoiceId)
         {
             logger.LogDebug("Processing read request for InvoiceId: {InvoiceId}", invoiceId);

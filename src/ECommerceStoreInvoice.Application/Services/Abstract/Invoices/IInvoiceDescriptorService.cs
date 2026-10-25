@@ -7,5 +7,6 @@ namespace ECommerceStoreInvoice.Application.Services.Abstract.Invoices
         FlowDescriptor GetCreateInvoiceForOrderDescriptor();
         FlowDescriptor GetInvoiceByIdDescriptor();
         FlowDescriptor GetInvoiceByOrderIdDescriptor();
+        FlowDescriptor GetDownloadInvoicePdfDescriptor();
     }
 }

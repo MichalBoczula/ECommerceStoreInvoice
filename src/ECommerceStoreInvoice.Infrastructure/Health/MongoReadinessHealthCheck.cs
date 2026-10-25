@@ -20,13 +20,9 @@ internal sealed class MongoReadinessHealthCheck(
             var hello = await admin.RunCommandAsync<BsonDocument>(
                 new BsonDocument("hello", 1), cancellationToken: cancellationToken);
 
-            if (!hello.TryGetValue("setName", out var setName) || !setName.IsString ||
-                string.IsNullOrWhiteSpace(setName.AsString) ||
-                !hello.TryGetValue("isWritablePrimary", out var primary) || !primary.IsBoolean ||
-                !primary.AsBoolean ||
-                !hello.TryGetValue("logicalSessionTimeoutMinutes", out _))
+            if (!SupportsTransactionTopology(hello))
             {
-                return HealthCheckResult.Unhealthy("MongoDB replica set primary with sessions is unavailable.");
+                return HealthCheckResult.Unhealthy("MongoDB writable replica set or router with sessions is unavailable.");
             }
 
             await client.GetDatabase(options.Value.DatabaseName).RunCommandAsync<BsonDocument>(
@@ -41,5 +37,15 @@ internal sealed class MongoReadinessHealthCheck(
         {
             return HealthCheckResult.Unhealthy("MongoDB is unavailable for transactions.");
         }
+    }
+
+    internal static bool SupportsTransactionTopology(BsonDocument hello)
+    {
+        var replicaSet = hello.TryGetValue("setName", out var setName) && setName.IsString &&
+            !string.IsNullOrWhiteSpace(setName.AsString);
+        var router = hello.TryGetValue("msg", out var message) && message.IsString && message.AsString == "isdbgrid";
+        return (replicaSet || router) &&
+            hello.TryGetValue("isWritablePrimary", out var primary) && primary.IsBoolean && primary.AsBoolean &&
+            hello.TryGetValue("logicalSessionTimeoutMinutes", out var sessions) && sessions.IsNumeric && sessions.ToDouble() > 0;
     }
 }

@@ -14,6 +14,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using MongoDB.Driver;
+using Azure.Storage.Blobs;
+using ECommerceStoreInvoice.Infrastructure.Storage;
 
 namespace ECommerceStoreInvoice.Infrastructure
 {
@@ -23,6 +25,16 @@ namespace ECommerceStoreInvoice.Infrastructure
             this IServiceCollection services,
             IConfiguration configuration)
         {
+            var storageConnection = configuration["InvoiceStorage:ConnectionString"];
+            if (!string.IsNullOrWhiteSpace(storageConnection))
+            {
+                var containerName = configuration["InvoiceStorage:ContainerName"];
+                if (string.IsNullOrWhiteSpace(containerName))
+                    throw new InvalidOperationException("InvoiceStorage:ContainerName must be configured with Blob storage.");
+                services.AddSingleton<IInvoiceDocumentStorage>(
+                    new BlobInvoiceDocumentStorage(new BlobContainerClient(storageConnection, containerName)));
+            }
+
             services.Configure<MongoDbSettings>(
                 configuration.GetSection(MongoDbSettings.SectionName));
 

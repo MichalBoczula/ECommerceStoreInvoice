@@ -13,8 +13,11 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
 
+if (builder.Environment.IsProduction() && string.IsNullOrWhiteSpace(builder.Configuration["InvoiceStorage:ConnectionString"]))
+    throw new InvalidOperationException("InvoiceStorage:ConnectionString is required in Production for durable invoice PDFs.");
+
 builder.Host.UseSerilog((context, configuration) =>
-    configuration.ReadFrom.Configuration(context.Configuration));
+    configuration.ReadFrom.Configuration(context.Configuration).WriteTo.Console());
 
 AddExternalProductsClient(builder);
 

@@ -9,6 +9,7 @@ using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Shouldly;
+using ECommerceStoreInvoice.Domain.AggregatesModel.InvoiceAggregate.Repositories;
 
 namespace ECommerceStoreInvoice.Application.UnitTests.Services.Invoices;
 
@@ -17,6 +18,49 @@ public sealed class InvoicePdfServiceTests
     private readonly Mock<ILogger<InvoicePdfService>> _loggerMock = new();
 
     private InvoicePdfService CreateSut() => new(_loggerMock.Object);
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task BlobUploadAlwaysRemovesTemporaryPdf_AndPreservesUploadFailure(bool fail)
+    {
+        var path = Path.Combine(Path.GetTempPath(), $"invoice-{Guid.NewGuid():N}.pdf");
+        await File.WriteAllTextAsync(path, "%PDF-demo");
+        var storage = new Mock<IInvoiceDocumentStorage>();
+        if (fail)
+            storage.Setup(x => x.UploadAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<Stream>(), default))
+                .ThrowsAsync(new IOException("upload failed"));
+        else
+            storage.Setup(x => x.UploadAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<Stream>(), default))
+                .ReturnsAsync("https://account.blob.core.windows.net/invoices/demo.pdf");
+        var sut = new InvoicePdfService(_loggerMock.Object, storage.Object);
+        if (fail) await Should.ThrowAsync<IOException>(() => sut.StoreGeneratedPdf(Guid.NewGuid(), Guid.NewGuid(), path));
+        else (await sut.StoreGeneratedPdf(Guid.NewGuid(), Guid.NewGuid(), path)).ShouldStartWith("https://");
+        File.Exists(path).ShouldBeFalse();
+    }
+
+    [Fact]
+    public async Task BlobReadsAndFailedAttemptCleanupUseConfiguredStorage()
+    {
+        var storage = new Mock<IInvoiceDocumentStorage>();
+        var expected = new MemoryStream("%PDF-test"u8.ToArray());
+        storage.Setup(x => x.OpenReadAsync("https://account/invoices/test.pdf", default)).ReturnsAsync(expected);
+        var sut = new InvoicePdfService(_loggerMock.Object, storage.Object);
+        (await sut.OpenReadAsync("https://account/invoices/test.pdf")).ShouldBeSameAs(expected);
+        var invoice = Guid.NewGuid();
+        var attempt = Guid.NewGuid();
+        await sut.DeleteGeneratedPdf(invoice, attempt);
+        storage.Verify(x => x.DeleteAsync(invoice, attempt, default), Times.Once);
+    }
+
+    [Fact]
+    public async Task LocalDownloadRefusesFilesOutsideInvoiceDirectory()
+    {
+        var path = Path.Combine(Path.GetTempPath(), $"outside-invoice-{Guid.NewGuid():N}.pdf");
+        await File.WriteAllTextAsync(path, "%PDF-private");
+        try { (await CreateSut().OpenReadAsync(new Uri(path).AbsoluteUri)).ShouldBeNull(); }
+        finally { File.Delete(path); }
+    }
 
     [Fact]
     public void GetTemplatePath_ShouldReturnInvoiceTemplatePathUnderTemplatesDirectory()

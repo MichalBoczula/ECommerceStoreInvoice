@@ -5,11 +5,23 @@ using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using Moq;
 using Shouldly;
+using MongoDB.Bson;
 
 namespace ECommerceStoreInvoice.Infrastructure.UnitTests.Health;
 
 public class MongoReadinessHealthCheckTests
 {
+    [Theory]
+    [InlineData("{ setName: 'rs0', isWritablePrimary: true, logicalSessionTimeoutMinutes: 30 }", true)]
+    [InlineData("{ msg: 'isdbgrid', isWritablePrimary: true, logicalSessionTimeoutMinutes: 30 }", true)]
+    [InlineData("{ isWritablePrimary: true, logicalSessionTimeoutMinutes: 30 }", false)]
+    [InlineData("{ msg: 'isdbgrid', isWritablePrimary: false, logicalSessionTimeoutMinutes: 30 }", false)]
+    [InlineData("{ setName: 'rs0', isWritablePrimary: true }", false)]
+    [InlineData("{ msg: 'isdbgrid', isWritablePrimary: true, logicalSessionTimeoutMinutes: 0 }", false)]
+    [InlineData("{ msg: 'isdbgrid', isWritablePrimary: true, logicalSessionTimeoutMinutes: '30' }", false)]
+    public void TransactionTopologyRequiresWritableReplicaOrRouterAndSessions(string hello, bool expected) =>
+        MongoReadinessHealthCheck.SupportsTransactionTopology(BsonDocument.Parse(hello)).ShouldBe(expected);
+
     [Fact]
     public async Task CheckHealthAsync_WhenMongoIsUnavailable_ShouldReportUnhealthy()
     {
