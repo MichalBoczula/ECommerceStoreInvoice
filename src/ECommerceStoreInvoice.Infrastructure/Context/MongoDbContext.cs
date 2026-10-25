@@ -15,6 +15,7 @@ namespace ECommerceStoreInvoice.Infrastructure.Context
         private readonly MongoDbSettings _settings;
         internal IClientSessionHandle? CurrentSession { get; set; }
         internal IMongoClient Client { get; }
+        internal IMongoDatabase Database => _database;
 
         public MongoDbContext(IOptions<MongoDbSettings> options)
             : this(options, new MongoClient(options.Value.ConnectionString))

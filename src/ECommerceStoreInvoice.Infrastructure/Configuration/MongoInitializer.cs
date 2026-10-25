@@ -17,6 +17,12 @@ namespace ECommerceStoreInvoice.Infrastructure.Configuration
 
         public async Task InitializeAsync(CancellationToken cancellationToken = default)
         {
+            // Create checkout collections outside a transaction for hosted Mongo compatibility.
+            foreach (var name in new[] { _context.Orders.CollectionNamespace.CollectionName, _context.ProductVersions.CollectionNamespace.CollectionName })
+            {
+                try { await _context.Database.CreateCollectionAsync(name, cancellationToken: cancellationToken); }
+                catch (MongoCommandException exception) when (exception.Code == 48) { }
+            }
             await CreateShoppingCartIndexesAsync(cancellationToken);
             await CreateInvoiceIndexesAsync(cancellationToken);
             await CreateClientDataVersionIndexesAsync(cancellationToken);

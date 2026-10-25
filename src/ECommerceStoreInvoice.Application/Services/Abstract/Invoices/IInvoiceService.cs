@@ -7,5 +7,6 @@ namespace ECommerceStoreInvoice.Application.Services.Abstract.Invoices
         Task<InvoiceResponseDto> CreateInvoiceForOrder(Guid clientId, Guid orderId);
         Task<InvoiceResponseDto> GetInvoiceById(Guid invoiceId);
         Task<InvoiceResponseDto> GetInvoiceByOrderId(Guid orderId);
+        Task<Stream> DownloadInvoicePdf(Guid invoiceId, CancellationToken cancellationToken = default);
     }
 }

@@ -38,7 +38,7 @@ flowchart TD
 
 An order checkout loads the client's cart, fetches the selected products from ProductsCatalog, creates product version snapshots, then writes snapshots, the order and the cleared cart in one MongoDB transaction. A MongoDB replica set with a writable primary and sessions is required. The order status can move from `Created` to `Paid` or `Cancelled` once. Repeating `Paid` yields a validation `400`; a concurrent write against a stale `Created` order yields `409`.
 
-An invoice requires a paid order owned by the client and a client data version. Generation reserves a unique `OrderId` in MongoDB, writes a PDF, then marks the reservation completed. The PDF currently lives on the API instance's local filesystem and its response URL is `file://`; use shared durable storage before running multiple API instances. See [the ADR index](docs/adr/README.md) for the implemented decisions and limitations.
+An invoice requires a paid order owned by the client and a client data version. Generation reserves a unique `OrderId` in MongoDB, uploads its attempt PDF to private Azure Blob Storage, then marks the reservation completed. `GET /invoices/{invoiceId}/pdf` streams only completed invoice PDFs through the API. Local Development/Testing can retain instance-local `file://` storage when Blob settings are absent; Production requires Blob configuration. See [the ADR index](docs/adr/README.md) for recovery behavior and limitations.
 
 ## Technology stack
 
@@ -79,7 +79,7 @@ docs/
 
 - .NET SDK 10.0.100 or a newer .NET 10 feature band (selected by [`global.json`](global.json)), Docker with a running daemon and Docker Compose.
 - For full local verification: Bash, Python 3 and Node.js (the OpenAPI lint uses Redocly CLI through `npx`).
-- For local PDF generation outside the Docker image: PowerShell (`pwsh`) and a working Playwright Chromium installation path; the service invokes `playwright.ps1 install` on first use. The API Dockerfile installs these dependencies.
+- For local PDF generation outside the Docker image: install Chromium once after building, using `pwsh src/ECommerceStoreInvoice.API/bin/Debug/net10.0/playwright.ps1 install --with-deps chromium`. The API Dockerfile already installs Chromium and its dependencies. Invoice requests never install or download browsers.
 - ProductsCatalog is needed to create an order. Acceptance tests start `mb0101/product-catalog-api:latest` and SQL Server 2022 with Testcontainers; the seeded catalog IDs are used by those tests. Shopping cart operations and order/invoice reads do not need a live ProductsCatalog request.
 
 ### Run locally
@@ -124,6 +124,8 @@ Stop the stack with `docker compose -f docker-compose.yml down`; add `--volumes`
 
 `GET /invoices/by-order/{orderId}` returns only a completed invoice (including legacy completed documents). Payments uses it to reconcile a lost creation response; incomplete reservations return `404`. Creation and lease behavior are unchanged.
 
+`GET /invoices/{invoiceId}/pdf` returns `application/pdf` with an attachment filename and `Cache-Control: private, no-store`. Empty IDs return `400`; missing or incomplete invoices and missing PDFs return `404`; storage failures return the existing safe `500` problem contract. Consumers should use this endpoint instead of opening `StorageUrl` directly. Blob URLs in metadata contain no SAS token and the container remains private.
+
 The public route groups are `/shopping-carts`, `/orders`, `/invoices` and `/client-data-versions`. `POST /orders/client/{clientId}` creates an order from a cart; the older `POST /orders/{clientId}` alias remains callable but is excluded from OpenAPI. `GET /orders/{orderId}` includes status, total amount, currency and snapshot-backed lines. Its total is a decimal amount in the product currency; do not treat it as integer minor units. The response mapping currently takes the first line's currency, so mixed-currency orders require a separate domain decision before a payment integration assumes a single currency.
 
 Validation and malformed JSON return `400`, missing resources `404`, duplicate invoices/carts and stale order writes `409`, and unexpected errors `500`. Business errors use `application/problem+json`; unexpected errors have a generic detail and a trace ID. Probe responses use the ASP.NET health-check format rather than the business problem contract. For the exact request/response DTOs and status declarations, use generated OpenAPI. Acceptance tests assert observed HTTP responses against the generated specification; this validates exercised responses and is not a proof of all possible runtime paths.
@@ -135,7 +137,7 @@ See the [public error contract](docs/api-problem-contract.md) and [response scen
 | Route | Meaning |
 | --- | --- |
 | `/health/live` | Process liveness, independent of MongoDB. |
-| `/health/ready` | Writable MongoDB replica-set primary, sessions and database ping; returns `503` when transactional writes are unavailable. |
+| `/health/ready` | Writable MongoDB replica set or router, positive session support and database ping; returns `503` when unavailable. |
 | `/health` | Compatibility alias for liveness. |
 
 Use readiness for traffic routing and liveness for process checks. These probes do not test ProductsCatalog availability or PDF storage.
@@ -171,9 +173,23 @@ CI on `master` and pull requests runs build/OpenAPI, five separate test suites w
 
 ## Operations
 
-Checkout requires a reachable ProductsCatalog API and a MongoDB replica set capable of transactions. A temporary ProductsCatalog outage can prevent creating an order; existing order reads, status changes and invoice generation use persisted data. Startup initializes indexes and fails when MongoDB is unavailable.
+Checkout requires a reachable ProductsCatalog API and a MongoDB deployment capable of transactions. Readiness accepts a writable replica set or the `isdbgrid` router topology used by Azure DocumentDB. Startup creates checkout collections outside transactions, initializes indexes and fails if initialization fails. Hello/ping and native MongoDB tests do not prove every hosted-database transaction behavior; verify real checkout and rollback after deployment.
 
-Invoice PDFs and their `file://` URLs are local to one API instance. Multiple replicas need shared durable storage and a downloadable public URL before invoice files can be served reliably across instances. The currency returned for an order is taken from the first snapshot line; resolve mixed-currency totals before a payment consumer treats it as one monetary amount.
+For the Azure deployment, supply these existing-container settings as environment variables:
+
+```text
+MongoDbSettings__ConnectionString=<Mongo connection secret>
+MongoDbSettings__DatabaseName=ecommerce-store-invoice-db
+ExternalServices__ProductCatalog__BaseUrl=<Products API URL>
+InvoiceStorage__ConnectionString=<storage account connection secret>
+InvoiceStorage__ContainerName=invoices
+```
+
+Production fails startup without the Blob connection string. Terraform creates the private container; the application does not create or make containers public. PDFs use immutable invoice/attempt filenames and `application/pdf` content type. A failed upload prevents invoice completion, and failed attempts delete only their own Blob. After database completion is attempted, recovery preserves the Blob because MongoDB may have committed despite a lost acknowledgement. Orphan cleanup for abandoned attempts remains future work; no background cleanup job is introduced.
+
+The browser download path through the storefront is `/backend/invoices/{invoiceId}/pdf`; BFF already forwards `/invoices`. Web still needs a download button if one is desired in its existing invoice metadata screen. Local-mode `file://` PDFs are not shared or migrated automatically; a missing legacy file returns `404`.
+
+Before enabling real traffic, verify paid-order generation, private Blob upload and API download, then restart the ACA and download the same invoice again. Readiness checks MongoDB, not Blob permissions or Chromium rendering. The currency returned for an order is taken from the first snapshot line; mixed-currency totals remain a separate domain decision before payment integration.
 
 Operational references: [startup](docs/local-startup.md), [health probes](docs/health-checks.md), [public error contract](docs/api-problem-contract.md), and the [cause-to-response-to-scenario matrix](docs/acceptance-matrix.md). The matrix marks exercised responses and explicit gaps; keep it aligned with endpoint metadata and acceptance scenarios.
 

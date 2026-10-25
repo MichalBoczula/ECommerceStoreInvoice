@@ -20,12 +20,12 @@ public class ApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
     private static readonly SemaphoreSlim PlaywrightInstallSemaphore = new(1, 1);
     private static bool _playwrightInstalled;
 
-    private static readonly MongoDbContainer SharedMongoContainer = new MongoDbBuilder("mongo:8.0")
+    private static readonly Lazy<MongoDbContainer> SharedMongoContainer = new(() => new MongoDbBuilder("mongo:8.0")
         .WithUsername(Username)
         .WithPassword(Password)
         .WithReplicaSet()
-        .Build();
-    private static readonly Lazy<Task> StartMongo = new(() => SharedMongoContainer.StartAsync());
+        .Build());
+    private static readonly Lazy<Task> StartMongo = new(() => SharedMongoContainer.Value.StartAsync());
 
     private static readonly Lazy<Task<ProductCatalogContainerFixture>> StartProducts = new(async () =>
     {
@@ -37,17 +37,19 @@ public class ApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
     private readonly bool _useProductCatalog;
     private readonly bool _failPdfOnce;
     private readonly bool _loseCompletionAckOnce;
+    private readonly bool _failDownload;
     private readonly CompletionAcknowledgementState _completionAckState = new();
     private readonly PdfFailureState _pdfFailureState = new();
     private string? _productCatalogBaseUrl;
 
     public ApplicationFactory() : this(false) { }
 
-    internal ApplicationFactory(bool useProductCatalog, bool failPdfOnce = false, bool loseCompletionAckOnce = false)
+    internal ApplicationFactory(bool useProductCatalog, bool failPdfOnce = false, bool loseCompletionAckOnce = false, bool failDownload = false)
     {
         _useProductCatalog = useProductCatalog;
         _failPdfOnce = failPdfOnce;
         _loseCompletionAckOnce = loseCompletionAckOnce;
+        _failDownload = failDownload;
     }
 
     public static async Task DisposeSharedProductsAsync()
@@ -58,6 +60,7 @@ public class ApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
 
     private readonly string _database = $"IntegrationTestDb_{Guid.NewGuid():N}";
     private string _connectionString = string.Empty;
+    private readonly List<string> _downloadFiles = [];
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -86,7 +89,7 @@ public class ApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
             });
         }
 
-        if (_failPdfOnce)
+        if (_failPdfOnce || _failDownload)
         {
             builder.ConfigureTestServices(services =>
             {
@@ -95,7 +98,7 @@ public class ApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
                 services.AddScoped<IInvoicePdfService>(provider =>
                     new FailOnceInvoicePdfService(
                         (IInvoicePdfService)ActivatorUtilities.CreateInstance(provider, original.ImplementationType!),
-                        _pdfFailureState));
+                        _pdfFailureState, _failDownload));
             });
         }
 
@@ -110,7 +113,7 @@ public class ApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
 
         await StartMongo.Value;
 
-        _connectionString = SharedMongoContainer.GetConnectionString();
+        _connectionString = SharedMongoContainer.Value.GetConnectionString();
 
         using var scope = Services.CreateScope();
 
@@ -163,9 +166,36 @@ public class ApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
         return await collection.Find(filter).ToListAsync();
     }
 
+    public async Task SeedDownloadInvoiceAsync(Guid invoiceId, string state)
+    {
+        var root = new DirectoryInfo(AppContext.BaseDirectory);
+        while (root.Parent is not null && !File.Exists(Path.Combine(root.FullName, "ECommerceStoreInvoice.slnx")))
+            root = root.Parent;
+        var directory = Path.Combine(root.FullName, "Invoices");
+        Directory.CreateDirectory(directory);
+        var path = Path.Combine(directory, $"{invoiceId:N}-{Guid.NewGuid():N}.pdf");
+        if (state != "missing-file")
+        {
+            await File.WriteAllTextAsync(path, "%PDF-1.7\nDemo invoice\n%%EOF");
+            _downloadFiles.Add(path);
+        }
+        var document = new BsonDocument
+        {
+            ["_id"] = new BsonBinaryData(invoiceId, GuidRepresentation.Standard),
+            ["OrderId"] = new BsonBinaryData(Guid.NewGuid(), GuidRepresentation.Standard),
+            ["ClientDataVersionId"] = new BsonBinaryData(Guid.NewGuid(), GuidRepresentation.Standard),
+            ["StorageUrl"] = new Uri(path).AbsoluteUri,
+            ["CreatedAt"] = DateTime.UtcNow,
+            ["GenerationStatus"] = state == "missing-file" ? "Completed" : state
+        };
+        await new MongoClient(_connectionString).GetDatabase(_database)
+            .GetCollection<BsonDocument>("invoices").InsertOneAsync(document);
+    }
+
     public new async Task DisposeAsync()
     {
         base.Dispose();
+        foreach (var path in _downloadFiles) File.Delete(path);
         if (!string.IsNullOrEmpty(_connectionString))
             await new MongoClient(_connectionString).DropDatabaseAsync(_database);
     }

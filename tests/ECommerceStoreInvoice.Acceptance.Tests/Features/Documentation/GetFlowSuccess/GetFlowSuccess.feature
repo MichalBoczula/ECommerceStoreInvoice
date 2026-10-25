@@ -5,7 +5,7 @@ Feature: Get flow documentation
     Then the flow documentation is returned successfully
       | Field                             | Value |
       | StatusCode                        | 200   |
-      | FlowsCount                        | 14    |
+      | FlowsCount                        | 15    |
       | ContainsGetShoppingCartByClientIdDescriptor | true  |
       | ContainsGetCreateShoppingCartDescriptor     | true  |
       | ContainsGetCreateOrderDescriptor            | true  |

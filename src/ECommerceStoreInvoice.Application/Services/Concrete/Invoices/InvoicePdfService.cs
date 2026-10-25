@@ -7,16 +7,16 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Playwright;
 using System.Globalization;
 using System.Net;
-using System.Diagnostics;
+using ECommerceStoreInvoice.Domain.AggregatesModel.InvoiceAggregate.Repositories;
 
 namespace ECommerceStoreInvoice.Application.Services.Concrete.Invoices
 {
     internal sealed class InvoicePdfService(
-        ILogger<InvoicePdfService> logger) : IInvoicePdfService, IAsyncDisposable
+        ILogger<InvoicePdfService> logger,
+        IInvoiceDocumentStorage? storage = null) : IInvoicePdfService, IAsyncDisposable
     {
         private const decimal VatRate = 0.23m;
         private static readonly SemaphoreSlim _initializationLock = new(1, 1);
-        private static bool _playwrightInstalled;
 
         private IPlaywright? _playwright;
         private IBrowser? _browser;
@@ -64,9 +64,31 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Invoices
                 await page.CloseAsync();
             }
 
-            var invoiceUri = new Uri(invoicePath).AbsoluteUri;
-            logger.LogInformation("Successfully generated PDF for OrderId: {OrderId}. Output path: {InvoicePath}", order.Id, invoicePath);
-            return invoiceUri;
+            return await StoreGeneratedPdf(invoiceId, attemptId, invoicePath);
+        }
+
+        internal async Task<string> StoreGeneratedPdf(Guid invoiceId, Guid attemptId, string invoicePath)
+        {
+            if (storage is null) return new Uri(invoicePath).AbsoluteUri;
+            try
+            {
+                await using var content = File.OpenRead(invoicePath);
+                return await storage.UploadAsync(invoiceId, attemptId, content);
+            }
+            finally
+            {
+                File.Delete(invoicePath);
+            }
+        }
+
+        public async Task<Stream?> OpenReadAsync(string storageUrl, CancellationToken cancellationToken = default)
+        {
+            if (storage is not null) return await storage.OpenReadAsync(storageUrl, cancellationToken);
+            if (!Uri.TryCreate(storageUrl, UriKind.Absolute, out var uri) || !uri.IsFile) return null;
+            var path = Path.GetFullPath(uri.LocalPath);
+            var root = Path.GetFullPath(GetInvoicesDirectoryPath()) + Path.DirectorySeparatorChar;
+            if (!path.StartsWith(root, StringComparison.Ordinal) || Path.GetExtension(path) != ".pdf" || !File.Exists(path)) return null;
+            return File.OpenRead(path);
         }
 
         private async Task EnsureInitializedAsync()
@@ -78,7 +100,6 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Invoices
             {
                 if (_browser == null)
                 {
-                    await EnsurePlaywrightInstalledAsync();
                     _playwright = await Playwright.CreateAsync();
                     _browser = await _playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions { Headless = true });
                 }
@@ -93,45 +114,6 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Invoices
             {
                 _initializationLock.Release();
             }
-        }
-
-        private async Task EnsurePlaywrightInstalledAsync()
-        {
-            if (_playwrightInstalled) return;
-
-            var scriptPath = FindPlaywrightScriptPath();
-            var startInfo = new ProcessStartInfo
-            {
-                FileName = "pwsh",
-                Arguments = $"\"{scriptPath}\" install",
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
-            };
-
-            using var process = Process.Start(startInfo) ?? throw new InvalidOperationException("Failed to start Playwright installation.");
-            await process.WaitForExitAsync();
-
-            if (process.ExitCode != 0)
-            {
-                var error = await process.StandardError.ReadToEndAsync();
-                throw new InvalidOperationException($"Playwright installation failed: {error}");
-            }
-
-            _playwrightInstalled = true;
-        }
-
-        private string FindPlaywrightScriptPath()
-        {
-            var directory = new DirectoryInfo(AppContext.BaseDirectory);
-            while (directory is not null)
-            {
-                var path = Path.Combine(directory.FullName, "playwright.ps1");
-                if (File.Exists(path)) return path;
-                directory = directory.Parent;
-            }
-            throw new FileNotFoundException("Could not find playwright.ps1");
         }
 
         internal string GetTemplatePath() => Path.Combine(AppContext.BaseDirectory, "Templates", "InvoiceTemplate.html");
@@ -266,10 +248,10 @@ namespace ECommerceStoreInvoice.Application.Services.Concrete.Invoices
             return Path.Combine(directory, $"{invoiceId:N}-{attemptId:N}.pdf");
         }
 
-        public Task DeleteGeneratedPdf(Guid invoiceId, Guid attemptId)
+        public async Task DeleteGeneratedPdf(Guid invoiceId, Guid attemptId)
         {
+            if (storage is not null) await storage.DeleteAsync(invoiceId, attemptId);
             File.Delete(GetInvoicePdfPath(invoiceId, attemptId));
-            return Task.CompletedTask;
         }
 
         internal string GetInvoicesDirectoryPath() => Path.Combine(ResolveSolutionRoot(), "Invoices");

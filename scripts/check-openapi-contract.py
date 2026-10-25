@@ -36,7 +36,8 @@ def check(document):
         assert set(map(int, declared)) == set(item["responses"]), f"Response status drift: {name}"
         for status in item["responses"]:
             response = declared[str(status)]
-            media = "application/problem+json" if status >= 400 else "application/json"
+            media = "application/problem+json" if status >= 400 else (
+                "application/pdf" if name == "DownloadInvoicePdf" else "application/json")
             assert media in response.get("content", {}), f"Missing {media}: {name} {status}"
             assert response["content"][media].get("schema"), f"Missing response schema: {name} {status}"
     return len(expected)

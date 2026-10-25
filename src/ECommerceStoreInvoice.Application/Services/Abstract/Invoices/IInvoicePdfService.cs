@@ -13,5 +13,6 @@ namespace ECommerceStoreInvoice.Application.Services.Abstract.Invoices
             IReadOnlyCollection<ProductVersion> productVersions,
             ClientDataVersionResponseDto? clientDataVersion);
         Task DeleteGeneratedPdf(Guid invoiceId, Guid attemptId);
+        Task<Stream?> OpenReadAsync(string storageUrl, CancellationToken cancellationToken = default);
     }
 }

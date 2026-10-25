@@ -13,7 +13,7 @@ internal sealed class PdfFailureState
     public bool FailNextGeneration() => Interlocked.Exchange(ref _failuresRemaining, 0) == 1;
 }
 
-internal sealed class FailOnceInvoicePdfService(IInvoicePdfService inner, PdfFailureState state)
+internal sealed class FailOnceInvoicePdfService(IInvoicePdfService inner, PdfFailureState state, bool failDownload = false)
     : IInvoicePdfService, IAsyncDisposable
 {
     public Task<string> GenerateInvoicePdf(
@@ -23,7 +23,7 @@ internal sealed class FailOnceInvoicePdfService(IInvoicePdfService inner, PdfFai
         IReadOnlyCollection<ProductVersion> productVersions,
         ClientDataVersionResponseDto? clientDataVersion)
     {
-        if (state.FailNextGeneration())
+        if (!failDownload && state.FailNextGeneration())
             throw new IOException("Simulated PDF generation failure.");
 
         return inner.GenerateInvoicePdf(invoiceId, attemptId, order, productVersions, clientDataVersion);
@@ -31,6 +31,10 @@ internal sealed class FailOnceInvoicePdfService(IInvoicePdfService inner, PdfFai
 
     public Task DeleteGeneratedPdf(Guid invoiceId, Guid attemptId) =>
         inner.DeleteGeneratedPdf(invoiceId, attemptId);
+
+    public Task<Stream?> OpenReadAsync(string storageUrl, CancellationToken cancellationToken = default) =>
+        failDownload ? Task.FromException<Stream?>(new IOException("Simulated private PDF download failure."))
+        : inner.OpenReadAsync(storageUrl, cancellationToken);
 
     public async ValueTask DisposeAsync()
     {

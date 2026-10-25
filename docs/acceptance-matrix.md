@@ -21,6 +21,8 @@ This matrix tracks distinct **exercised causes** against business operations. Li
 
 ## Invoices
 
+`GET /invoices/{invoiceId}/pdf` covers completed PDF download (`200`, binary PDF with attachment/private caching), empty ID (`400`), missing/Generating/Failed invoice or missing file (`404`), and a storage failure (`500`, safe problem response). See [download scenarios](../tests/ECommerceStoreInvoice.Acceptance.Tests/Features/Invoices/DownloadInvoicePdf.feature). Real Blob protocol, private access, immutable attempt uploads, cleanup and storage-adapter replacement are exercised with Azurite in Infrastructure tests; deployed Azure verification remains separate.
+
 | Operation | Cause → response | Acceptance evidence |
 | --- | --- | --- |
 | `POST /invoices/{clientId}/{orderId}` | Paid order with client data → `200`; empty ID or unpaid order → `400`; missing order, another client's order or missing client data → `404`; duplicate invoice → `409` | [Success](../tests/ECommerceStoreInvoice.Acceptance.Tests/Features/Invoices/CreateInvoiceForOrderSuccess/CreateInvoiceForOrderSuccess.feature), [invalid ID](../tests/ECommerceStoreInvoice.Acceptance.Tests/Features/Invoices/CreateInvoiceForOrderValidationError/CreateInvoiceForOrderValidationError.feature), [rules](../tests/ECommerceStoreInvoice.Acceptance.Tests/Features/Invoices/InvoiceFlowFailures.feature), [missing order](../tests/ECommerceStoreInvoice.Acceptance.Tests/Features/Invoices/CreateInvoiceForOrderNotFound/CreateInvoiceForOrderNotFound.feature), [duplicate](../tests/ECommerceStoreInvoice.Acceptance.Tests/Features/Invoices/CreateInvoiceForOrderConflict/CreateInvoiceForOrderConflict.feature) |

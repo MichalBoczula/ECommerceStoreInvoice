@@ -30,6 +30,10 @@ namespace ECommerceStoreInvoice.Infrastructure.UnitTests.Integration.Tests
             // assert
             var client = new MongoClient(_fixture.ConnectionString);
             var database = client.GetDatabase(databaseName);
+            var collections = await (await database.ListCollectionNamesAsync()).ToListAsync();
+            collections.ShouldContain("orders");
+            collections.ShouldContain("product-versions");
+            await serviceProvider.InitializeInfrastructureAsync();
 
             var shoppingCartIndexes = await database
                 .GetCollection<object>("shopping-carts")

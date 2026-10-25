@@ -77,6 +77,10 @@ namespace ECommerceStoreInvoice.API.Endpoints
                         },
                         new Dictionary<string, FlowDescriptor>
                         {
+                            [nameof(invoiceDescriptor.GetDownloadInvoicePdfDescriptor)] = invoiceDescriptor.GetDownloadInvoicePdfDescriptor()
+                        },
+                        new Dictionary<string, FlowDescriptor>
+                        {
                             [nameof(invoiceDescriptor.GetCreateInvoiceForOrderDescriptor)] = invoiceDescriptor.GetCreateInvoiceForOrderDescriptor()
                         },
                         new Dictionary<string, FlowDescriptor>

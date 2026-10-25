@@ -37,6 +37,20 @@ namespace ECommerceStoreInvoice.API.Endpoints
 
         private static void MapInvoicesQueries(IEndpointRouteBuilder group)
         {
+            group.MapGet("/{invoiceId:guid}/pdf", async (Guid invoiceId, IInvoiceService invoiceService, HttpContext context) =>
+            {
+                var pdf = await invoiceService.DownloadInvoicePdf(invoiceId, context.RequestAborted);
+                context.Response.Headers.CacheControl = "private, no-store";
+                return Results.Stream(pdf, "application/pdf", $"invoice-{invoiceId:D}.pdf");
+            })
+            .WithSummary("Download a completed invoice PDF.")
+            .WithDescription("Streams a completed invoice's PDF from configured storage; incomplete invoices and missing files return 404.")
+            .WithName("DownloadInvoicePdf")
+            .Produces<Stream>(StatusCodes.Status200OK, "application/pdf")
+            .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")
+            .Produces<NotFoundProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")
+            .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, "application/problem+json");
+
             group.MapGet("/by-order/{orderId:guid}", async (Guid orderId, IInvoiceService invoiceService) =>
             {
                 var invoice = await invoiceService.GetInvoiceByOrderId(orderId);
