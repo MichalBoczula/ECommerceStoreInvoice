@@ -61,8 +61,12 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: generated-openapi
-          path: artifacts/verification/openapi.json
+          name: generated-contract
+          path: |
+            artifacts/verification/openapi.json
+            artifacts/verification/operation-links.json
+            artifacts/verification/flows.json
+            artifacts/verification/validation-policies.json
           if-no-files-found: warn
 
   domain-unit-tests:
@@ -175,6 +179,95 @@ jobs:
           path: artifacts/verification/acceptance/
           if-no-files-found: warn
 
+      - uses: actions/upload-artifact@v4
+        with:
+          name: acceptance-allure-results
+          path: artifacts/allure-results/acceptance/
+          if-no-files-found: error
+          retention-days: 7
+
+  documentation-bundle:
+    needs: [build, acceptance-tests]
+    uses: MichalBoczula/ECommerceStore.LiveDocs/.github/workflows/package-producer.yml@01631ab47e49c6f7411bfb9dbe1328c6e40e21fe
+    with:
+      tooling-ref: 01631ab47e49c6f7411bfb9dbe1328c6e40e21fe
+      project: invoices
+      features: tests/ECommerceStoreInvoice.Acceptance.Tests/Features
+
+  archive-documentation:
+    if: ${{ always() && !cancelled() && github.event_name == 'push' && github.ref == 'refs/heads/master' && needs.quality-gate.result == 'success' && needs.docker-image.result == 'success' }}
+    needs: [quality-gate, docker-image]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    env:
+      ACCOUNT: ${{ vars.LIVEDOCS_STORAGE_ACCOUNT || 'stecproductsdevmb261013' }}
+      DOC_VERSION: ${{ vars.LIVEDOCS_VERSION || 'v1' }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: documentation-bundle
+          path: artifacts
+      - name: Upload verified documentation bundle and receipt
+        shell: bash
+        env:
+          AZURE_STORAGE_SAS_TOKEN: ${{ secrets.LIVEDOCS_STORAGE_SAS_TOKEN }}
+          SOURCE_REPOSITORY: ${{ github.repository }}
+          SOURCE_COMMIT: ${{ github.sha }}
+          SOURCE_RUN_ID: ${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          test -n "$AZURE_STORAGE_SAS_TOKEN" || { echo 'Missing secret: LIVEDOCS_STORAGE_SAS_TOKEN' >&2; exit 1; }
+          [[ "$ACCOUNT" =~ ^[a-z0-9]{3,24}$ ]] || { echo 'Invalid LiveDocs storage account' >&2; exit 1; }
+          [[ "$DOC_VERSION" =~ ^v[1-9][0-9]*$ ]] || { echo 'Invalid LiveDocs version' >&2; exit 1; }
+
+          bundle=artifacts/documentation-bundle.zip
+          metadata="$RUNNER_TEMP/documentation-metadata.json"
+          unzip -p "$bundle" bundle.json > "$metadata"
+          jq -e --arg repository "$SOURCE_REPOSITORY" --arg commit "$SOURCE_COMMIT" --argjson run "$SOURCE_RUN_ID" \
+            '.schemaVersion == 1 and .project == "invoices" and .repository == $repository and .commitSha == $commit and .workflowRunId == $run and (.generatedAt | type == "string")' \
+            "$metadata" > /dev/null
+          digest=$(sha256sum "$bundle" | cut -d ' ' -f 1)
+          size=$(stat -c %s "$bundle")
+          bundle_name="reports/invoices/$SOURCE_COMMIT/$digest.zip"
+          receipt_name="candidates/$DOC_VERSION/invoices/$SOURCE_RUN_ID-$digest.json"
+          bundle_url="https://$ACCOUNT.blob.core.windows.net/livedocs/$bundle_name"
+          receipt=artifacts/documentation-reference.json
+          jq --arg version "$DOC_VERSION" --arg url "$bundle_url" --arg digest "$digest" --argjson size "$size" \
+            '{schemaVersion: 1, version: $version, reference: {project: .project, commitSha: .commitSha, generatedAt: .generatedAt, workflowRunId: .workflowRunId, artifact: {url: $url, sha256: $digest, sizeBytes: $size}}}' \
+            "$metadata" > "$receipt"
+
+          storage=(--account-name "$ACCOUNT" --container-name livedocs --sas-token "$AZURE_STORAGE_SAS_TOKEN" --only-show-errors)
+          upload_once() {
+            local file="$1" name="$2" content_type="$3" exists existing
+            exists=$(az storage blob exists "${storage[@]}" --name "$name" --query exists --output tsv)
+            case "$exists" in
+              true|True)
+                existing="$RUNNER_TEMP/existing-$(basename "$file")"
+                az storage blob download "${storage[@]}" --name "$name" --file "$existing" --overwrite true --output none
+                cmp --silent "$file" "$existing" || { echo "Immutable Blob has different bytes: $name" >&2; return 1; }
+                ;;
+              false|False)
+                az storage blob upload "${storage[@]}" --name "$name" --file "$file" --content-type "$content_type" \
+                  --overwrite false --if-none-match '*' --validate-content --output none
+                ;;
+              *) echo 'Unexpected Blob existence response' >&2; return 1 ;;
+            esac
+          }
+
+          upload_once "$bundle" "$bundle_name" application/zip
+          upload_once "$receipt" "$receipt_name" application/json
+          printf 'Orders/Invoices documentation archived.\n\nBundle: %s\n\nReceipt: https://%s.blob.core.windows.net/livedocs/%s\n' \
+            "$bundle_url" "$ACCOUNT" "$receipt_name" >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: documentation-reference
+          path: artifacts/documentation-reference.json
+          if-no-files-found: error
+          retention-days: 7
+          overwrite: true
+
   quality-gate:
     if: always()
     runs-on: ubuntu-latest
@@ -186,6 +279,7 @@ jobs:
       - infrastructure-tests
       - external-providers-tests
       - acceptance-tests
+      - documentation-bundle
       - secret-scan
       - dependency-review
     steps:
@@ -198,10 +292,11 @@ jobs:
           INFRASTRUCTURE: ${{ needs.infrastructure-tests.result }}
           EXTERNAL_PROVIDERS: ${{ needs.external-providers-tests.result }}
           ACCEPTANCE: ${{ needs.acceptance-tests.result }}
+          DOCUMENTATION: ${{ needs.documentation-bundle.result }}
           SECRET_SCAN: ${{ needs.secret-scan.result }}
           DEPENDENCY_REVIEW: ${{ needs.dependency-review.result }}
         run: |
-          for job in BUILD DOMAIN APPLICATION INFRASTRUCTURE EXTERNAL_PROVIDERS ACCEPTANCE SECRET_SCAN; do
+          for job in BUILD DOMAIN APPLICATION INFRASTRUCTURE EXTERNAL_PROVIDERS ACCEPTANCE DOCUMENTATION SECRET_SCAN; do
             if [[ "${!job}" != success ]]; then
               echo "$job must succeed; actual result: ${!job}" >&2
               exit 1

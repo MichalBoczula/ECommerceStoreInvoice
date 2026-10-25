@@ -16,6 +16,9 @@ Define routes, DTOs, validation, HTTP outcomes and acceptance scenarios together
 
 Application services execute flow descriptors, and Domain policies describe validation rules and possible errors. The API publishes them through `/orders-documentation/flows` and `/orders-documentation/validations`. The operation-link check connects routes to executed flows, policies and acceptance scenarios. Generated OpenAPI and link reports are verification artifacts; see [ADR-0005](docs/adr/0005-generated-contract-documentation.md).
 
+CI packages these generated sources with real Reqnroll/Allure results for the
+shared LiveDocs portal; see [BDD report publication](#bdd-reports-in-livedocs).
+
 ## Architecture
 
 ```mermaid
@@ -170,6 +173,45 @@ contract. `scripts/verify.sh` uses the same entry points locally. GitHub
 Actions owns job dependencies, artifact upload, secrets and image scanning.
 
 CI on `master` and pull requests runs build/OpenAPI, five separate test suites with TRX summaries, secret scanning, PR dependency review, a quality gate and an image build with Trivy scanning. Restore audits direct and transitive NuGet dependencies; high/critical findings (`NU1903`/`NU1904`) fail the build while ordinary compiler warnings remain visible. Domain, Application and Infrastructure each require at least 70% line coverage. Infrastructure excludes only the generated Kiota Products client through its [coverage settings](tests/ECommerceStoreInvoice.Infrastructure.UnitTests/coverage.runsettings); repository, mapping, health, configuration, DI and handwritten Products adapter code remain measured. The same checks run through `scripts/verify.sh`. Every required job must pass before the image job starts. Pull requests build and scan without publishing; after a successful quality gate and Trivy scan on a `master` push, CI publishes the same scanned image to `mb0101/ecommerce-store-invoice-api` with `latest` and full commit SHA tags. Docker Hub credentials come from the `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` GitHub Actions secrets. See [CI ADR](docs/adr/0006-ci-and-verification.md), [image publication ADR](docs/adr/0008-publish-scanned-image.md) and [Definition of Done](docs/definition-of-done.md).
+
+### BDD reports in LiveDocs
+
+The pipeline follows the Products and Users pattern. Both PRs and master builds
+package actual Allure results/attachments, feature sources, generated OpenAPI,
+flows, validation policies and operation links using the commit-pinned LiveDocs
+workflow. Successful bundle validation is required by the quality gate. All five
+test suites, separate coverage floors and existing security/image gates remain.
+
+After successful master image publication, CI uploads the source ZIP and receipt
+to the existing private **`stecproductsdevmb261013/livedocs`** container:
+
+- `reports/invoices/<source-commit>/<bundle-sha256>.zip`
+- `candidates/v1/invoices/<workflow-run-id>-<bundle-sha256>.json`
+
+Retries download existing objects and compare bytes; different content is refused.
+The `documentation-reference` Actions artifact contains the exact reference for
+LiveDocs. URLs contain no SAS. PRs never upload documentation to Azure.
+
+Add **`LIVEDOCS_STORAGE_SAS_TOKEN`** as a repository Actions secret in
+**ECommerceStoreInvoice**. Use the complete HTTPS-only container SAS query string,
+including every field and `sig`, with **read/create/write** permissions on
+`livedocs`. The same SAS used by Products and Users works. Keep it out of source,
+issues and image arguments. Optional variables are `LIVEDOCS_STORAGE_ACCOUNT`
+(default `stecproductsdevmb261013`) and `LIVEDOCS_VERSION` (default `v1`). There is
+no enable flag: missing credentials or upload failures fail the archive job.
+
+LiveDocs selects the archived receipt's `reference` under project `invoices` in its
+development v1 manifest. Its builder downloads and validates the bundle outside
+Docker and generates the report at `/livedoc/v1/invoices/allure/`, with BDD/API/flow
+sources at `/livedoc/v1/invoices/`. The report covers this service's shopping-cart,
+order and invoice scenarios alongside the existing Products and Users reports.
+
+A new LiveDocs image and Terraform digest update publish the snapshot. Uploads
+alone do not change running reports. Infrastructure stays in ECommerceStore.Terraform;
+no additional Azure resources, API runtime secrets or BFF changes are needed for
+documentation. The existing `invoices` Blob container continues storing business
+PDFs; `livedocs` stores CI documentation sources. See
+[ADR-0009](docs/adr/0009-livedocs-source-publication.md).
 
 ## Operations
 

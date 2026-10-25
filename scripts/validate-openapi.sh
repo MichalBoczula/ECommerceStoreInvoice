@@ -5,7 +5,7 @@ cd "$(dirname "$0")/.."
 output="${1:-artifacts/verification/openapi.json}"
 mkdir -p "$(dirname "$output")"
 output="$(cd "$(dirname "$output")" && pwd)/$(basename "$output")"
-rm -f "$output"
+rm -f "$output" "$(dirname "$output")/flows.json" "$(dirname "$output")/validation-policies.json"
 
 OPENAPI_EXPORT_PATH="$output" dotnet test \
   tests/ECommerceStoreInvoice.Acceptance.Tests/ECommerceStoreInvoice.Acceptance.Tests.csproj \
