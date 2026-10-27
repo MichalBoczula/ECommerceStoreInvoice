@@ -247,7 +247,7 @@ public sealed class HttpEvidenceTests
         foreach (var exchange in exchanges)
         {
             Assert.Equal(2, exchange.Count());
-            Assert.Single(exchange.Where(item => item.TryGetProperty("status", out _)));
+            Assert.Single(exchange, item => item.TryGetProperty("status", out _));
             Assert.Single(exchange.Select(item => item.GetProperty("path").GetString()).Distinct());
             Assert.All(exchange, item => Assert.Equal("When", item.GetProperty("stepPhase").GetString()));
         }
