@@ -1,8 +1,9 @@
-@allure.description:Ensures_creating_invoice_for_paid_order_returns_a_success_response_with_created_invoice_fields.
 Feature: Create invoice for order
 
   @products-api
+  @allure.label.scenarioId:INV01_CreateInvoiceForOrder_04
   Scenario: Create invoice for order returns created invoice
+    A paid order and client data version exist. Invoice creation returns generated invoice metadata linked to that order, client version and the available local test PDF.
     Given I have a paid order for invoice creation
       | Field                      | Value             |
       | ClientName                 | John Doe          |

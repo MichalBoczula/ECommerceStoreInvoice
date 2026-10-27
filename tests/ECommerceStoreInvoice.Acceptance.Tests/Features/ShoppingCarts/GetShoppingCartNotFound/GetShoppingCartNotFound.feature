@@ -1,6 +1,8 @@
 Feature: Get shopping cart not found
 
+  @allure.label.scenarioId:INV01_GetShoppingCartByClientId_02
   Scenario: Get shopping cart by client id returns problem details when shopping cart does not exist
+    The client identifier has no saved shopping cart. Reading it returns the expected safe not-found problem.
     Given I have a non-existing shopping cart request payload
       | Field      | Value                             |
       | Method     | GET                               |

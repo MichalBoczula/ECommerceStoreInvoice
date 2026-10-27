@@ -1,6 +1,8 @@
 Feature: Get client data version
 
+  @allure.label.scenarioId:INV01_GetClientDataVersionByClientId_02
   Scenario: Get client data version by client id returns latest client data version
+    A client has a stored data version created from the explicit contact and address fixture. Retrieval returns that version with its fields, identifiers and creation timestamp.
     Given I have an existing client data version for retrieval
       | Field           | Value            |
       | ClientName      | John Doe         |

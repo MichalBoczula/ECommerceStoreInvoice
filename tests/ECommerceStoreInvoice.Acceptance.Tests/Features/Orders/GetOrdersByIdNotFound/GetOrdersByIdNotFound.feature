@@ -1,7 +1,8 @@
-@allure.description:Ensures_getting_a_non_existing_order_by_id_returns_RFC7231_not_found_problem_details_with_request_context.
 Feature: Get order by id not found
 
+  @allure.label.scenarioId:INV01_GetOrderById_02
   Scenario: Get order by id returns problem details when order does not exist
+    The order identifier has no saved order. Retrieval returns the expected not-found problem.
     Given I have a non-existing order id for orders retrieval
       | Field   | Value                  |
       | OrderId | generated-non-existing |

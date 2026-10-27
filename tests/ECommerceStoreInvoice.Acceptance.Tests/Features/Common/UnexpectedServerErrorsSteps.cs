@@ -85,7 +85,7 @@ public sealed class UnexpectedServerErrorsSteps(ScenarioApiContext context) : ID
                     throw new ArgumentOutOfRangeException(nameof(operationId), operationId, "Unknown operation.");
             }
         }));
-        _client = _failingFactory.CreateClient();
+        _client = context.CreateClient(_failingFactory);
     }
 
     [When("I call the failing {string} endpoint")]

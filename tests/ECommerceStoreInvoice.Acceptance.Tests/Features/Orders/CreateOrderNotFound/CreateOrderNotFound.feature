@@ -1,7 +1,8 @@
-@allure.description:Ensures_creating_order_for_non_existing_client_returns_RFC7231_not_found_problem_details_with_request_context.
 Feature: Create order not found
 
+  @allure.label.scenarioId:INV01_CreateOrder_03
   Scenario: Create order returns problem details when client does not exist
+    The requested client has no shopping cart. Checkout returns the expected missing-cart problem.
     Given I have a non-existing client id for order creation
       | Field    | Value        |
       | ClientId | <generatedId> |

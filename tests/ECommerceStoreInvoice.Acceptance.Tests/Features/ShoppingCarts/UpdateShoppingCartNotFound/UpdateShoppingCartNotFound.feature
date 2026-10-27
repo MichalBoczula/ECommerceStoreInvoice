@@ -1,7 +1,8 @@
-@allure.description:Ensures_updating_a_non_existing_shopping_cart_returns_RFC7231_not_found_problem_details_with_request_context.
 Feature: Update shopping cart not found
 
+  @allure.label.scenarioId:INV01_UpdateShoppingCart_02
   Scenario: Update shopping cart returns problem details when shopping cart does not exist
+    The update targets a valid client identifier without a cart. It returns a missing-cart problem rather than creating a cart implicitly.
     Given I have a non-existing client id for shopping cart update
       | Field    | Value         |
       | ClientId | <generatedId> |

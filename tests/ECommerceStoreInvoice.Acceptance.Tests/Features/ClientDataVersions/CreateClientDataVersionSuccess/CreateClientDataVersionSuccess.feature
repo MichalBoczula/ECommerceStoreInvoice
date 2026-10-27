@@ -1,7 +1,8 @@
-@allure.description:Ensures_creating_client_data_version_returns_a_success_response_with_the_created_payload_fields.
 Feature: Create client data version
 
+  @allure.label.scenarioId:INV01_CreateClientDataVersion_01
   Scenario: Create client data version returns created client data version
+    A valid client sends the explicit contact and address fields in the table. Creation returns those values with a generated version identity and creation timestamp, retaining the requested client identifier.
     Given I have a valid client id for client data version creation
     And I have a valid create client data version request
       | Field           | Value             |

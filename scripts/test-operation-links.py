@@ -189,6 +189,25 @@ class EvidenceLinkTests(unittest.TestCase):
             with self.assertRaisesRegex(AssertionError, 'inventory differs'):
                 contract.check(document)
 
+    def test_missing_readable_description_is_rejected(self):
+        with self.assertRaisesRegex(AssertionError, 'readable scenario description'):
+            links.verify_case_identity({'description': [], 'tags': ['@allure.label.scenarioId:INV01_Example']}, None, 'INV01_Example')
+
+    def test_stale_runtime_identity_is_rejected(self):
+        with self.assertRaisesRegex(AssertionError, 'identity differs'):
+            links.verify_case_identity({'description': ['Intent'], 'tags': ['@allure.label.scenarioId:INV01_Stale']}, None, 'INV01_Example')
+
+    def test_ambiguous_tag_and_example_identity_is_rejected(self):
+        with self.assertRaisesRegex(AssertionError, 'exactly once'):
+            links.verify_case_identity({'description': ['Intent'], 'tags': ['@allure.label.scenarioId:INV01_Example']},
+                                       {'scenarioId': 'INV01_Example'}, 'INV01_Example')
+
+    def test_direct_or_fault_client_bypass_is_rejected(self):
+        for code in ['new HttpClient()', '_failingFactory.CreateClient()', 'factory.CreateDefaultClient(handler)']:
+            with self.subTest(code=code), self.assertRaisesRegex(AssertionError, 'bypasses shared'):
+                links.verify_client_source(code)
+        links.verify_client_source('context.CreateClient(factory); _apiContext.CreateClient(factory);')
+
 
 if __name__ == '__main__':
     unittest.main()

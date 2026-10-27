@@ -1,7 +1,8 @@
-@allure.description:Ensures_creating_invoice_for_order_with_invalid_order_id_returns_RFC7231_bad_request_problem_details_with_validation_errors.
 Feature: Create invoice for order validation error
 
+  @allure.label.scenarioId:INV01_CreateInvoiceForOrder_05
   Scenario: Create invoice for order returns problem details when order id validation fails
+    The client identifier is valid but the invoice request uses an all-zero order identifier. It returns the expected validation problem before invoice generation.
     Given I have invoice creation identifiers
       | Field    | Value                                |
       | ClientId | 11111111-1111-1111-1111-111111111111 |

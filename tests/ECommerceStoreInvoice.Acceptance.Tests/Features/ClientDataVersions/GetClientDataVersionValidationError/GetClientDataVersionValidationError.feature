@@ -1,7 +1,8 @@
-@allure.description:Ensures_getting_client_data_version_with_invalid_client_id_returns_RFC7231_bad_request_problem_details_with_validation_errors.
 Feature: Get client data version validation error
 
+  @allure.label.scenarioId:INV01_GetClientDataVersionByClientId_03
   Scenario: Get client data version by client id returns problem details when validation fails
+    The lookup request uses an all-zero client identifier. It returns the expected identifier validation problem.
     Given I have an invalid client data version request
       | Field    | Value                                |
       | ClientId | 00000000-0000-0000-0000-000000000000 |

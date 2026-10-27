@@ -15,9 +15,10 @@ place, while application deployment and selected LiveDocs refresh remain manual.
   declarations / 77 expanded cases and eight standalone checks. Validate all
   matrix examples and response pairs, record two existing gaps honestly, untrack
   generated code and pin the Products test image. See [baseline](bdd-01-baseline.md).
-- [ ] **INV-BDD-02 — Shared BDD evidence.** Readable scenario descriptions,
+- [x] **INV-BDD-02 — Shared BDD evidence.** Readable scenario descriptions,
   stable scenario/instance/exchange IDs and centralized truthful capture for all
   main, setup, failure, concurrent and supporting clients, including binary PDFs.
+  See [HTTP evidence and identity contract](bdd-02-http-evidence.md).
 - [ ] **INV-BDD-03 — Shopping carts.** Complete create/get/update profiles,
   exact persisted lines/timestamps, empty contents and other-client preservation.
 - [ ] **INV-BDD-04 — Checkout and product snapshots.** Multiple products,

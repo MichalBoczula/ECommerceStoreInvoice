@@ -1,7 +1,8 @@
-@allure.description:Ensures_getting_a_non_existing_client_data_version_returns_RFC7231_not_found_problem_details_with_request_context.
 Feature: Get client data version not found
 
+  @allure.label.scenarioId:INV01_GetClientDataVersionByClientId_01
   Scenario: Get client data version by client id returns problem details when client data version does not exist
+    The client identifier is valid but has no saved client data version. Retrieval returns the expected missing-resource problem.
     Given I have a non-existing client id for client data version retrieval
       | Field          | Value                                    |
       | Method         | GET                                      |

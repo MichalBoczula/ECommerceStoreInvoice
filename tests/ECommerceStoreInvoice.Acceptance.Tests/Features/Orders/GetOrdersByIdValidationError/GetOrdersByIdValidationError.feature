@@ -1,7 +1,8 @@
-@allure.description:Ensures_getting_order_by_id_with_invalid_order_id_returns_RFC7231_bad_request_problem_details_with_validation_errors.
 Feature: Get orders by id validation error
 
+  @allure.label.scenarioId:INV01_GetOrderById_04
   Scenario: Get order by id returns problem details when validation fails
+    The order lookup uses an all-zero identifier. It returns the expected identifier validation problem.
     Given I have an invalid get order by id request
       | Field   | Value                                |
       | OrderId | 00000000-0000-0000-0000-000000000000 |

@@ -155,7 +155,10 @@ work into small packages. [Task 1's baseline](docs/bdd-01-baseline.md) preserves
 eight standalone acceptance checks. The source gate now checks every matrix
 example and all 56 declared operation/status pairs: 54 have guaranteed scenario
 intent and two explicit gaps remain. These are source coverage links, not
-captured runtime exchange evidence; shared capture is task 2. Generated
+a claim of complete runtime cause coverage. [Task 2](docs/bdd-02-http-evidence.md)
+adds actual paired HTTP evidence, explicit IDs and readable descriptions for all
+77 BDD cases. The acceptance inventory is now **77 BDD + 26 standalone = 103**;
+the 18 additional recorder regressions are not Gherkin scenarios. Generated
 `.feature.cs` files are ignored build outputs, not maintained source.
 
 Run from the repository root:

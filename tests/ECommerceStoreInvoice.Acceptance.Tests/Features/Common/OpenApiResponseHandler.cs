@@ -95,10 +95,4 @@ internal sealed class OpenApiResponseHandler(JsonDocument document) : Delegating
         }
     }
 
-    protected override void Dispose(bool disposing)
-    {
-        if (disposing)
-            document.Dispose();
-        base.Dispose(disposing);
-    }
 }

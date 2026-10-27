@@ -1,7 +1,9 @@
 Feature: Create order
 
   @products-api
+  @allure.label.scenarioId:INV01_CreateOrder_04
   Scenario: Create order returns created order
+    A cart contains the seeded catalog product and explicit quantity. Checkout returns the generated order with snapshot-backed product details and the expected decimal line and order totals.
     Given I have a valid shopping cart for order creation
       | Field                | Value  |
       | Name                 | Xiaomi POCO F7 12/512GB Black |
