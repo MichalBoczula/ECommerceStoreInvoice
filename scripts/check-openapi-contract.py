@@ -21,12 +21,12 @@ def check(document):
     actual = {}
     for path, routes in document["paths"].items():
         for method, operation in routes.items():
-            if method not in {"get", "post", "put", "patch", "delete"}:
+            if method not in {"get", "post", "put", "patch", "delete", "head", "options", "trace"}:
                 continue
             name = operation.get("operationId")
-            if name:
-                assert name not in actual, f"Duplicate operationId: {name}"
-                actual[name] = (method.upper(), path, operation)
+            assert name, f"Missing OpenAPI operationId: {method} {path}"
+            assert name not in actual, f"Duplicate operationId: {name}"
+            actual[name] = (method.upper(), path, operation)
     assert set(actual) == {item["operationId"] for item in expected}, "OpenAPI operation inventory differs from endpoints"
     for item in expected:
         name = item["operationId"]

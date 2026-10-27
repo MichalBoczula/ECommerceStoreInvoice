@@ -1,0 +1,3 @@
+operationId	status	task	reason
+GetInvoiceByOrderId	500	INV-BDD-10	Declared safe 500 has no HTTP acceptance scenario; the shared failure outline predates this endpoint.
+UpdateOrderStatus	409	INV-BDD-11	Concurrent status test permits 400 or 409 depending on the read timing; a deterministic stale-write 409 case is still required.

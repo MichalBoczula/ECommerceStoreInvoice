@@ -1,0 +1,470 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "43af2ef1720b3b66b0a5f7392d5321b4de5b7d87",
+  "sourceRunId": 40214951632,
+  "features": 38,
+  "declarations": 52,
+  "expandedBddCases": 77,
+  "standaloneAcceptanceCases": 8,
+  "cases": [
+    {
+      "feature": "ClientDataVersions/CreateClientDataVersionSuccess/CreateClientDataVersionSuccess.feature",
+      "scenario": "Create client data version returns created client data version",
+      "example": null
+    },
+    {
+      "feature": "ClientDataVersions/CreateClientDataVersionValidationError/CreateClientDataVersionValidationError.feature",
+      "scenario": "Create client data version returns problem details when validation fails",
+      "example": null
+    },
+    {
+      "feature": "ClientDataVersions/GetClientDataVersionNotFound/GetClientDataVersionNotFound.feature",
+      "scenario": "Get client data version by client id returns problem details when client data version does not exist",
+      "example": null
+    },
+    {
+      "feature": "ClientDataVersions/GetClientDataVersionSuccess/GetClientDataVersionSuccess.feature",
+      "scenario": "Get client data version by client id returns latest client data version",
+      "example": null
+    },
+    {
+      "feature": "ClientDataVersions/GetClientDataVersionValidationError/GetClientDataVersionValidationError.feature",
+      "scenario": "Get client data version by client id returns problem details when validation fails",
+      "example": null
+    },
+    {
+      "feature": "Common/UnexpectedServerErrors.feature",
+      "scenario": "<operationId> returns a safe 500",
+      "example": {
+        "operationId": "GetShoppingCartByClientId"
+      }
+    },
+    {
+      "feature": "Common/UnexpectedServerErrors.feature",
+      "scenario": "<operationId> returns a safe 500",
+      "example": {
+        "operationId": "CreateShoppingCart"
+      }
+    },
+    {
+      "feature": "Common/UnexpectedServerErrors.feature",
+      "scenario": "<operationId> returns a safe 500",
+      "example": {
+        "operationId": "UpdateShoppingCart"
+      }
+    },
+    {
+      "feature": "Common/UnexpectedServerErrors.feature",
+      "scenario": "<operationId> returns a safe 500",
+      "example": {
+        "operationId": "GetOrderById"
+      }
+    },
+    {
+      "feature": "Common/UnexpectedServerErrors.feature",
+      "scenario": "<operationId> returns a safe 500",
+      "example": {
+        "operationId": "GetOrdersByClientId"
+      }
+    },
+    {
+      "feature": "Common/UnexpectedServerErrors.feature",
+      "scenario": "<operationId> returns a safe 500",
+      "example": {
+        "operationId": "CreateOrder"
+      }
+    },
+    {
+      "feature": "Common/UnexpectedServerErrors.feature",
+      "scenario": "<operationId> returns a safe 500",
+      "example": {
+        "operationId": "UpdateOrderStatus"
+      }
+    },
+    {
+      "feature": "Common/UnexpectedServerErrors.feature",
+      "scenario": "<operationId> returns a safe 500",
+      "example": {
+        "operationId": "GetInvoiceById"
+      }
+    },
+    {
+      "feature": "Common/UnexpectedServerErrors.feature",
+      "scenario": "<operationId> returns a safe 500",
+      "example": {
+        "operationId": "CreateInvoiceForOrder"
+      }
+    },
+    {
+      "feature": "Common/UnexpectedServerErrors.feature",
+      "scenario": "<operationId> returns a safe 500",
+      "example": {
+        "operationId": "GetClientDataVersionByClientId"
+      }
+    },
+    {
+      "feature": "Common/UnexpectedServerErrors.feature",
+      "scenario": "<operationId> returns a safe 500",
+      "example": {
+        "operationId": "CreateClientDataVersion"
+      }
+    },
+    {
+      "feature": "Common/UnexpectedServerErrors.feature",
+      "scenario": "<operationId> returns a safe 500",
+      "example": {
+        "operationId": "GetFlowDocumentation"
+      }
+    },
+    {
+      "feature": "Common/UnexpectedServerErrors.feature",
+      "scenario": "<operationId> returns a safe 500",
+      "example": {
+        "operationId": "GetValidationDocumentation"
+      }
+    },
+    {
+      "feature": "Documentation/GetFlowSuccess/GetFlowSuccess.feature",
+      "scenario": "Get flow documentation returns descriptors for all flows",
+      "example": null
+    },
+    {
+      "feature": "Documentation/GetValidationsSuccess/GetValidationsSuccess.feature",
+      "scenario": "Get validation documentation returns validation descriptors",
+      "example": null
+    },
+    {
+      "feature": "Invoices/CreateInvoiceForOrderConflict/CreateInvoiceForOrderConflict.feature",
+      "scenario": "Create invoice for order returns conflict when invoice already exists",
+      "example": null
+    },
+    {
+      "feature": "Invoices/CreateInvoiceForOrderNotFound/CreateInvoiceForOrderNotFound.feature",
+      "scenario": "Create invoice for order returns problem details when order does not exist",
+      "example": null
+    },
+    {
+      "feature": "Invoices/CreateInvoiceForOrderSuccess/CreateInvoiceForOrderSuccess.feature",
+      "scenario": "Create invoice for order returns created invoice",
+      "example": null
+    },
+    {
+      "feature": "Invoices/CreateInvoiceForOrderValidationError/CreateInvoiceForOrderValidationError.feature",
+      "scenario": "Create invoice for order returns problem details when order id validation fails",
+      "example": null
+    },
+    {
+      "feature": "Invoices/DownloadInvoicePdf.feature",
+      "scenario": "Only completed invoices with an available PDF can be downloaded",
+      "example": {
+        "state": "Completed",
+        "status": "200"
+      }
+    },
+    {
+      "feature": "Invoices/DownloadInvoicePdf.feature",
+      "scenario": "Only completed invoices with an available PDF can be downloaded",
+      "example": {
+        "state": "Generating",
+        "status": "404"
+      }
+    },
+    {
+      "feature": "Invoices/DownloadInvoicePdf.feature",
+      "scenario": "Only completed invoices with an available PDF can be downloaded",
+      "example": {
+        "state": "Failed",
+        "status": "404"
+      }
+    },
+    {
+      "feature": "Invoices/DownloadInvoicePdf.feature",
+      "scenario": "Only completed invoices with an available PDF can be downloaded",
+      "example": {
+        "state": "missing",
+        "status": "404"
+      }
+    },
+    {
+      "feature": "Invoices/DownloadInvoicePdf.feature",
+      "scenario": "Only completed invoices with an available PDF can be downloaded",
+      "example": {
+        "state": "missing-file",
+        "status": "404"
+      }
+    },
+    {
+      "feature": "Invoices/DownloadInvoicePdf.feature",
+      "scenario": "Only completed invoices with an available PDF can be downloaded",
+      "example": {
+        "state": "empty",
+        "status": "400"
+      }
+    },
+    {
+      "feature": "Invoices/DownloadInvoicePdf.feature",
+      "scenario": "Storage failure produces a safe error",
+      "example": null
+    },
+    {
+      "feature": "Invoices/GetInvoiceByIdNotFound/GetInvoiceByIdNotFound.feature",
+      "scenario": "Get invoice by id returns problem details when invoice does not exist",
+      "example": null
+    },
+    {
+      "feature": "Invoices/GetInvoiceByIdSuccess/GetInvoiceByIdSuccess.feature",
+      "scenario": "Get invoice by id returns an existing invoice",
+      "example": null
+    },
+    {
+      "feature": "Invoices/GetInvoiceByIdValidationError/GetInvoiceByIdValidationError.feature",
+      "scenario": "Get invoice by id returns problem details when validation fails",
+      "example": null
+    },
+    {
+      "feature": "Invoices/GetInvoiceByOrderId.feature",
+      "scenario": "Order lookup returns only completed invoices",
+      "example": {
+        "state": "Completed",
+        "status": "200"
+      }
+    },
+    {
+      "feature": "Invoices/GetInvoiceByOrderId.feature",
+      "scenario": "Order lookup returns only completed invoices",
+      "example": {
+        "state": "legacy",
+        "status": "200"
+      }
+    },
+    {
+      "feature": "Invoices/GetInvoiceByOrderId.feature",
+      "scenario": "Order lookup returns only completed invoices",
+      "example": {
+        "state": "Generating",
+        "status": "404"
+      }
+    },
+    {
+      "feature": "Invoices/GetInvoiceByOrderId.feature",
+      "scenario": "Order lookup returns only completed invoices",
+      "example": {
+        "state": "Failed",
+        "status": "404"
+      }
+    },
+    {
+      "feature": "Invoices/GetInvoiceByOrderId.feature",
+      "scenario": "Order lookup returns only completed invoices",
+      "example": {
+        "state": "missing",
+        "status": "404"
+      }
+    },
+    {
+      "feature": "Invoices/GetInvoiceByOrderId.feature",
+      "scenario": "Order lookup returns only completed invoices",
+      "example": {
+        "state": "empty",
+        "status": "400"
+      }
+    },
+    {
+      "feature": "Invoices/InvoiceFlowFailures.feature",
+      "scenario": "An order that has not been paid cannot be invoiced",
+      "example": null
+    },
+    {
+      "feature": "Invoices/InvoiceFlowFailures.feature",
+      "scenario": "Another client's order cannot be invoiced",
+      "example": null
+    },
+    {
+      "feature": "Invoices/InvoiceFlowFailures.feature",
+      "scenario": "A paid order without a client data version cannot be invoiced",
+      "example": null
+    },
+    {
+      "feature": "Invoices/InvoiceFlowFailures.feature",
+      "scenario": "An empty client identifier is invalid",
+      "example": null
+    },
+    {
+      "feature": "Invoices/InvoiceGenerationRecovery.feature",
+      "scenario": "A failed PDF generation can be retried for the same order",
+      "example": null
+    },
+    {
+      "feature": "Invoices/InvoiceGenerationRecovery.feature",
+      "scenario": "Concurrent invoice requests create one accessible PDF",
+      "example": null
+    },
+    {
+      "feature": "Invoices/InvoiceGenerationRecovery.feature",
+      "scenario": "Lost completion acknowledgement is recovered from Mongo",
+      "example": null
+    },
+    {
+      "feature": "Orders/CreateOrderMissingProduct.feature",
+      "scenario": "A missing product does not create an order or clear the cart",
+      "example": null
+    },
+    {
+      "feature": "Orders/CreateOrderNotFound/CreateOrderNotFound.feature",
+      "scenario": "Create order returns problem details when client does not exist",
+      "example": null
+    },
+    {
+      "feature": "Orders/CreateOrderSuccess/CreateOrderSuccess.feature",
+      "scenario": "Create order returns created order",
+      "example": null
+    },
+    {
+      "feature": "Orders/CreateOrderValidationError/CreateOrderValidationError.feature",
+      "scenario": "Create order returns problem details when validation fails",
+      "example": null
+    },
+    {
+      "feature": "Orders/GetOrdersByClientIdEmptySuccess/GetOrdersByClientIdEmptySuccess.feature",
+      "scenario": "Get orders by client id returns empty list when client has no orders",
+      "example": null
+    },
+    {
+      "feature": "Orders/GetOrdersByClientIdSuccess/GetOrdersByClientIdSuccess.feature",
+      "scenario": "Get orders by client id returns existing orders",
+      "example": null
+    },
+    {
+      "feature": "Orders/GetOrdersByClientIdValidationError/GetOrdersByClientIdValidationError.feature",
+      "scenario": "Get orders by client id returns problem details when validation fails",
+      "example": null
+    },
+    {
+      "feature": "Orders/GetOrdersByIdNotFound/GetOrdersByIdNotFound.feature",
+      "scenario": "Get order by id returns problem details when order does not exist",
+      "example": null
+    },
+    {
+      "feature": "Orders/GetOrdersByIdSuccess/GetOrdersByIdSuccess.feature",
+      "scenario": "Get order by id returns an existing order",
+      "example": null
+    },
+    {
+      "feature": "Orders/GetOrdersByIdValidationError/GetOrdersByIdValidationError.feature",
+      "scenario": "Get order by id returns problem details when validation fails",
+      "example": null
+    },
+    {
+      "feature": "Orders/UpdateOrderStatus.feature",
+      "scenario": "A created order can become paid",
+      "example": null
+    },
+    {
+      "feature": "Orders/UpdateOrderStatus.feature",
+      "scenario": "An unknown status is rejected",
+      "example": null
+    },
+    {
+      "feature": "Orders/UpdateOrderStatus.feature",
+      "scenario": "A missing order cannot be updated",
+      "example": null
+    },
+    {
+      "feature": "Orders/UpdateOrderStatus.feature",
+      "scenario": "An empty order id is invalid",
+      "example": null
+    },
+    {
+      "feature": "Orders/UpdateOrderStatus.feature",
+      "scenario": "A created order can become cancelled",
+      "example": null
+    },
+    {
+      "feature": "Orders/UpdateOrderStatus.feature",
+      "scenario": "A created order cannot be changed back to created",
+      "example": null
+    },
+    {
+      "feature": "Orders/UpdateOrderStatus.feature",
+      "scenario": "A terminal status cannot be changed",
+      "example": {
+        "current": "Paid",
+        "requested": "Paid"
+      }
+    },
+    {
+      "feature": "Orders/UpdateOrderStatus.feature",
+      "scenario": "A terminal status cannot be changed",
+      "example": {
+        "current": "Paid",
+        "requested": "Cancelled"
+      }
+    },
+    {
+      "feature": "Orders/UpdateOrderStatus.feature",
+      "scenario": "A terminal status cannot be changed",
+      "example": {
+        "current": "Cancelled",
+        "requested": "Paid"
+      }
+    },
+    {
+      "feature": "Orders/UpdateOrderStatus.feature",
+      "scenario": "A terminal status cannot be changed",
+      "example": {
+        "current": "Cancelled",
+        "requested": "Cancelled"
+      }
+    },
+    {
+      "feature": "Orders/UpdateOrderStatus.feature",
+      "scenario": "Concurrent status changes cannot both succeed",
+      "example": null
+    },
+    {
+      "feature": "ShoppingCarts/CreateShoppingCartSuccess/CreateShoppingCartSuccess.feature",
+      "scenario": "Create shopping cart returns created shopping cart",
+      "example": null
+    },
+    {
+      "feature": "ShoppingCarts/CreateShoppingCartValidationError/CreateShoppingCartValidationError.feature",
+      "scenario": "Create shopping cart returns problem details when validation fails",
+      "example": null
+    },
+    {
+      "feature": "ShoppingCarts/GetShoppingCartNotFound/GetShoppingCartNotFound.feature",
+      "scenario": "Get shopping cart by client id returns problem details when shopping cart does not exist",
+      "example": null
+    },
+    {
+      "feature": "ShoppingCarts/GetShoppingCartSuccess/GetShoppingCartSuccess.feature",
+      "scenario": "Get shopping cart by client id returns shopping cart",
+      "example": null
+    },
+    {
+      "feature": "ShoppingCarts/ShoppingCartFlowFailures.feature",
+      "scenario": "An empty client identifier is invalid when reading the cart",
+      "example": null
+    },
+    {
+      "feature": "ShoppingCarts/ShoppingCartFlowFailures.feature",
+      "scenario": "An existing shopping cart cannot be created twice",
+      "example": null
+    },
+    {
+      "feature": "ShoppingCarts/UpdateShoppingCartNotFound/UpdateShoppingCartNotFound.feature",
+      "scenario": "Update shopping cart returns problem details when shopping cart does not exist",
+      "example": null
+    },
+    {
+      "feature": "ShoppingCarts/UpdateShoppingCartSuccess/UpdateShoppingCartSuccess.feature",
+      "scenario": "Update shopping cart returns updated shopping cart",
+      "example": null
+    },
+    {
+      "feature": "ShoppingCarts/UpdateShoppingCartValidationError/UpdateShoppingCartValidationError.feature",
+      "scenario": "Update shopping cart returns problem details when validation fails",
+      "example": null
+    }
+  ]
+}

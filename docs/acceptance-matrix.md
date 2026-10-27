@@ -2,6 +2,12 @@
 
 This matrix tracks distinct **exercised causes** against business operations. Links point to `.feature` source or a direct xUnit HTTP test. A listed status does not mean every possible cause of that status is covered. For payload fields see the [public error contract](api-problem-contract.md). `POST /orders/client/{clientId}` is canonical; some scenarios call the supported `/orders/{clientId}` alias, which is excluded from generated OpenAPI.
 
+The machine-checked [case matrix](acceptance-matrix.tsv) links every current
+expanded BDD case, including shared failure and recovery features. The
+[baseline](bdd-01-baseline.md) preserves original behavioral examples. Explicit
+[coverage gaps](acceptance-gaps.tsv) distinguish absent or conditional evidence
+from guaranteed scenario intent; they must not be silently counted as coverage.
+
 ## Shopping carts
 
 | Operation | Cause → response | Acceptance evidence |
@@ -40,7 +46,7 @@ This matrix tracks distinct **exercised causes** against business operations. Li
 
 ## Shared failure and probe paths
 
-For each of the 13 named operations above, an **injected dependency exception** returns a generic `500` with trace ID and no internal message: [UnexpectedServerErrors.feature](../tests/ECommerceStoreInvoice.Acceptance.Tests/Features/Common/UnexpectedServerErrors.feature). These are injected failures, not evidence for every database, catalog or PDF failure mode. The common `CreateOrder` `500` case calls the legacy order route.
+For the 13 operations listed in the shared failure outline, an **injected dependency exception** returns a generic `500` with trace ID and no internal message: [UnexpectedServerErrors.feature](../tests/ECommerceStoreInvoice.Acceptance.Tests/Features/Common/UnexpectedServerErrors.feature). These are injected failures, not evidence for every database, catalog or PDF failure mode. DownloadInvoicePdf has its separate storage-failure case; GetInvoiceByOrderId still lacks its declared 500 case (INV-BDD-10). The concurrent status test permits 400 or 409, so a deterministic stale-write 409 remains INV-BDD-11 rather than guaranteed coverage. The common `CreateOrder` `500` case calls the legacy order route.
 
 The non-business `/health`, `/health/live` and `/health/ready` probes have successful `200` HTTP checks in [HealthEndpointTests.cs](../tests/ECommerceStoreInvoice.Acceptance.Tests/HealthEndpointTests.cs). MongoDB unavailability is covered at the health-check level in [MongoReadinessHealthCheckTests.cs](../tests/ECommerceStoreInvoice.Infrastructure.UnitTests/Health/MongoReadinessHealthCheckTests.cs), not as an HTTP `503` acceptance response. See [startup and health](health-checks.md).
 
