@@ -8,6 +8,8 @@ namespace ECommerceStoreInvoice.Acceptance.Tests;
 
 public sealed class ProductCatalogContainerFixture : IAsyncLifetime
 {
+    // ProductsCatalog 59e1d8f827fac1d1c87cd67eaef884d92a06d1a3, CI 40398686283.
+    private const string ProductCatalogImage = "docker.io/mb0101/product-catalog-api@sha256:01e6de37c57f108f843a7fad616b412b84b41c53f7d30e59b20b77889a3207cd";
     private const string SqlPassword = "yourStrong(!)Password";
     private const ushort SqlPort = 1433;
     private const ushort ApiPort = 8080;
@@ -29,7 +31,7 @@ public sealed class ProductCatalogContainerFixture : IAsyncLifetime
             .WithWaitStrategy(Wait.ForUnixContainer().UntilExternalTcpPortIsAvailable(SqlPort))
             .Build();
 
-        _api = new ContainerBuilder("mb0101/product-catalog-api:latest")
+        _api = new ContainerBuilder(ProductCatalogImage)
             .WithNetwork(_network)
             .WithPortBinding(ApiPort, true)
             .WithEnvironment("ASPNETCORE_URLS", "http://+:8080")

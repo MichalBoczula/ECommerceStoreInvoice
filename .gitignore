@@ -316,6 +316,9 @@ paket-files/
 __pycache__/
 *.pyc
 
+# Reqnroll regenerates these from .feature source during the build.
+*.feature.cs
+
 # Cake - Uncomment if you are using it
 # tools/**
 # !tools/packages.config

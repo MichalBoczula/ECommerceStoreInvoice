@@ -83,7 +83,7 @@ docs/
 - .NET SDK 10.0.100 or a newer .NET 10 feature band (selected by [`global.json`](global.json)), Docker with a running daemon and Docker Compose.
 - For full local verification: Bash, Python 3 and Node.js (the OpenAPI lint uses Redocly CLI through `npx`).
 - For local PDF generation outside the Docker image: install Chromium once after building, using `pwsh src/ECommerceStoreInvoice.API/bin/Debug/net10.0/playwright.ps1 install --with-deps chromium`. The API Dockerfile already installs Chromium and its dependencies. Invoice requests never install or download browsers.
-- ProductsCatalog is needed to create an order. Acceptance tests start `mb0101/product-catalog-api:latest` and SQL Server 2022 with Testcontainers; the seeded catalog IDs are used by those tests. Shopping cart operations and order/invoice reads do not need a live ProductsCatalog request.
+- ProductsCatalog is needed to create an order. Acceptance tests start the digest-pinned Products image in `ProductCatalogContainerFixture.cs` and SQL Server 2022 with Testcontainers; the seeded catalog IDs are used by those tests. Shopping cart operations and order/invoice reads do not need a live ProductsCatalog request.
 
 ### Run locally
 
@@ -148,6 +148,15 @@ Use readiness for traffic routing and liveness for process checks. These probes 
 See [health-check details](docs/health-checks.md) for failure behavior and the currently tested paths.
 
 ## Tests
+
+The [BDD backlog](docs/bdd-backlog.md) groups the Orders/Invoices documentation
+work into small packages. [Task 1's baseline](docs/bdd-01-baseline.md) preserves
+38 feature files, 52 declarations and all 77 original expanded BDD cases, plus
+eight standalone acceptance checks. The source gate now checks every matrix
+example and all 56 declared operation/status pairs: 54 have guaranteed scenario
+intent and two explicit gaps remain. These are source coverage links, not
+captured runtime exchange evidence; shared capture is task 2. Generated
+`.feature.cs` files are ignored build outputs, not maintained source.
 
 Run from the repository root:
 
