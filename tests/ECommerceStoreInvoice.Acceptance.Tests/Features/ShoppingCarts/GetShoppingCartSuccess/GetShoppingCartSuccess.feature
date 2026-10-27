@@ -1,6 +1,8 @@
 Feature: Get shopping cart
 
+  @allure.label.scenarioId:INV01_GetShoppingCartByClientId_03
   Scenario: Get shopping cart by client id returns shopping cart
+    A client has a shopping cart created during setup. Reading by client returns the expected cart identity, timestamps and line count.
     Given I have an existing shopping cart for retrieval
     And the get shopping cart request data is
       | Field    | Value                  |

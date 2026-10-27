@@ -1,7 +1,8 @@
-@allure.description:Ensures_creating_invoice_for_non_existing_order_returns_RFC7231_not_found_problem_details_with_request_context.
 Feature: Create invoice for order not found
 
+  @allure.label.scenarioId:INV01_CreateInvoiceForOrder_03
   Scenario: Create invoice for order returns problem details when order does not exist
+    The requested order identifier does not resolve to an order. Invoice creation returns the expected order not-found problem.
     Given I have an existing client and a non-existing order id for invoice creation
       | Field           | Value             |
       | ClientName      | John Doe          |

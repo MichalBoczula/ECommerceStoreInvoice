@@ -43,3 +43,14 @@ at least 70% line coverage. The Infrastructure runsettings exclude only the
 generated Kiota client, and the scope check validates the collected report.
 OpenAPI validation and Docker build must succeed. CI also runs dependency,
 secret and image vulnerability gates; `verify.sh` does not replace them.
+
+INV-BDD-02 adds shared HTTP evidence and 18 standalone recorder cases while
+retaining the 77 BDD cases and eight original standalone checks: 103 acceptance
+cases total. See [the evidence contract](bdd-02-http-evidence.md) for actual byte
+formats, PDF attachments, identity metadata and the Swagger-bootstrap exclusion.
+
+The Mongo Infrastructure/Acceptance jobs temporarily use `ubuntu-22.04` after
+repeat startup failures on the rolling Ubuntu 24 runner. Both scripts log the
+actual Docker kernel and Mongo image/CLI before the unchanged full suites;
+the CLI check does not replace a running replica set. See
+[the observed failure and compatibility limit](bdd-02-http-evidence.md#mongo-runner-compatibility).

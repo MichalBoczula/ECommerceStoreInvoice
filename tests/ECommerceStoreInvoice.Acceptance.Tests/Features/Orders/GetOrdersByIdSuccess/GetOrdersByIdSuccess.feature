@@ -1,7 +1,9 @@
 Feature: Get order by id
 
   @products-api
+  @allure.label.scenarioId:INV01_GetOrderById_03
   Scenario: Get order by id returns an existing order
+    Setup checks out a cart using the catalog product fixture. Retrieval returns the saved order identity, status, totals and snapshot-backed line.
     Given I have an existing order id with setup data
       | Field            | Value  |
       | ProductName      | Xiaomi POCO F7 12/512GB Black |

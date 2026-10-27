@@ -1,7 +1,8 @@
-@allure.description:Ensures_creating_client_data_version_with_invalid_data_returns_RFC7231_bad_request_problem_details_with_validation_errors.
 Feature: Create client data version validation error
 
+  @allure.label.scenarioId:INV01_CreateClientDataVersion_02
   Scenario: Create client data version returns problem details when validation fails
+    The client-data payload contains a phone number with nondigit characters. Creation returns the expected phone validation error and safe problem fields.
     Given I have a valid client id for client data version validation error
     And I have an invalid create client data version request with phone number validation error
       | Field           | Value             |

@@ -1,8 +1,9 @@
-@allure.description:Ensures_creating_invoice_for_order_when_invoice_already_exists_returns_conflict_problem_details.
 Feature: Create invoice for order conflict
 
   @products-api
+  @allure.label.scenarioId:INV01_CreateInvoiceForOrder_02
   Scenario: Create invoice for order returns conflict when invoice already exists
+    A paid order already has an invoice. Requesting another invoice for the same order returns the expected conflict problem.
     Given I have an existing invoice for a paid order
       | Field            | Value             |
       | ClientName       | John Doe          |

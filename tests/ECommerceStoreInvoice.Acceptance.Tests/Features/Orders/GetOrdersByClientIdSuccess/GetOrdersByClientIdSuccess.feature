@@ -1,7 +1,9 @@
 Feature: Get orders by client id
 
   @products-api
+  @allure.label.scenarioId:INV01_GetOrdersByClientId_03
   Scenario: Get orders by client id returns existing orders
+    Setup creates the requested number of orders for one client. Listing by that client returns the expected distinct orders, statuses, totals and product lines.
     Given I have existing orders for a client
       | Field             | Value  |
       | ProductName       | Xiaomi POCO F7 12/512GB Black |

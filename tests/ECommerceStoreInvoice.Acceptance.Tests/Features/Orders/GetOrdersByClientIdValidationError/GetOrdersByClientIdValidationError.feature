@@ -1,7 +1,8 @@
-@allure.description:Ensures_getting_orders_by_client_id_with_invalid_client_id_returns_RFC7231_bad_request_problem_details_with_validation_errors.
 Feature: Get orders by client id validation error
 
+  @allure.label.scenarioId:INV01_GetOrdersByClientId_04
   Scenario: Get orders by client id returns problem details when validation fails
+    The client order-list request uses an all-zero identifier. It returns the expected identifier validation problem.
     Given I have an invalid client id for orders retrieval
       | ClientId                             |
       | 00000000-0000-0000-0000-000000000000 |

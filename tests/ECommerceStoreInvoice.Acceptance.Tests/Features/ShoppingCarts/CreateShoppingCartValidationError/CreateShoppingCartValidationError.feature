@@ -1,6 +1,8 @@
 Feature: Create shopping cart validation error
 
+  @allure.label.scenarioId:INV01_CreateShoppingCart_03
   Scenario: Create shopping cart returns problem details when validation fails
+    The create request uses an all-zero client identifier. It returns the expected identifier validation problem.
     Given I have an invalid create shopping cart request payload
       | Field         | Value                      |
       | Method        | POST                       |

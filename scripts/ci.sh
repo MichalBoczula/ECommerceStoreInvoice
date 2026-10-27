@@ -6,6 +6,12 @@ command="${1:?Usage: scripts/ci.sh source|build|format|contract|test SUITE}"
 shift
 results_dir="${VERIFY_RESULTS_DIR:-$PWD/artifacts/verification}"
 
+prepare_mongo_image() {
+  docker info --format 'Mongo test Docker kernel: {{.KernelVersion}}'
+  docker pull mongo:8.0
+  docker run --rm --entrypoint mongosh mongo:8.0 --version
+}
+
 case "$command" in
   source)
     python3 scripts/test-architecture.py
@@ -43,6 +49,7 @@ case "$command" in
         test_args=(--collect 'XPlat Code Coverage')
         ;;
       infrastructure)
+        prepare_mongo_image
         project=tests/ECommerceStoreInvoice.Infrastructure.UnitTests/ECommerceStoreInvoice.Infrastructure.UnitTests.csproj
         assembly=ECommerceStoreInvoice.Infrastructure
         threshold=70
@@ -53,6 +60,7 @@ case "$command" in
         project=tests/ECommerceStoreInvoice.ExternalProviders.IntegrationTests/ECommerceStoreInvoice.ExternalProviders.IntegrationTests.csproj
         ;;
       acceptance)
+        prepare_mongo_image
         rm -rf artifacts/allure-results/acceptance
         project=tests/ECommerceStoreInvoice.Acceptance.Tests/ECommerceStoreInvoice.Acceptance.Tests.csproj
         ;;

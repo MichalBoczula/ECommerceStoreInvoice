@@ -1,7 +1,8 @@
-@allure.description:Ensures_updating_an_existing_shopping_cart_with_invalid_payload_returns_RFC7231_bad_request_problem_details_with_validation_errors.
 Feature: Update shopping cart validation error
 
+  @allure.label.scenarioId:INV01_UpdateShoppingCart_04
   Scenario: Update shopping cart returns problem details when validation fails
+    An existing cart receives a line with an invalid quantity. Updating the cart returns the expected quantity validation problem.
     Given I have an existing shopping cart for invalid update
     And update shopping cart request fields are documented
       | Field                      | Value                                |

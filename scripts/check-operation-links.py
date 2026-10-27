@@ -228,6 +228,39 @@ def verify_generation_sources():
     assert not tracked.strip(), 'Generated .feature.cs files must not be tracked'
 
 
+def verify_case_identity(item, example, expected):
+    assert item['description'], 'Missing readable scenario description'
+    prefix = '@allure.label.scenarioId:'
+    tags = [tag[len(prefix):] for tag in item['tags'] if tag.startswith(prefix)]
+    argument = (example or {}).get('scenarioId')
+    assert len(tags) + (argument is not None) == 1, 'Specify scenarioId exactly once'
+    actual = argument if argument is not None else tags[0]
+    assert actual == expected, 'Scenario evidence identity differs from the matrix'
+
+
+def verify_client_source(code):
+    receivers = re.findall(r'\b(\w+)\.Create(?:Default)?Client\s*\(', code)
+    assert all(receiver in {'context', '_apiContext'} for receiver in receivers) and not re.search(
+        r'new\s+HttpClient\s*\(', code), 'BDD client bypasses shared HTTP evidence'
+
+
+def verify_evidence_sources(rows):
+    expected = {case_key(dict(row, example=json.loads(row['example']))): row['scenarioId'] for row in rows}
+    for feature in FEATURES.rglob('*.feature'):
+        for title, item in scenarios(feature).items():
+            for example in (item['examples'] if item['outline'] else [None]):
+                case = dict(feature=feature.relative_to(FEATURES).as_posix(), scenario=title, example=example)
+                verify_case_identity(item, example, expected[case_key(case)])
+    for path in FEATURES.rglob('*.cs'):
+        if path.name.endswith('.feature.cs') or path.name in {'TestHooks.cs', 'ScenarioApiContext.cs'}:
+            continue
+        verify_client_source(source(path))
+    # The one direct hook client is the read-only contract bootstrap, before the checked pipeline exists.
+    hook = source(FEATURES / 'Common/TestHooks.cs')
+    direct = re.findall(r'\b(\w+)\.Create(?:Default)?Client\s*\(', hook)
+    assert direct.count('_factory') == 1 and all(receiver in {'_factory', '_apiContext'} for receiver in direct), 'Unexpected hook client bypass'
+
+
 
 def generate():
     verify_generation_sources()
@@ -264,6 +297,7 @@ def generate():
     names = [item["operationId"] for item in operations]
     assert names and len(names) == len(set(names)), f"Duplicate/empty operation inventory: {names}"
     rows, gaps, covered = verify_matrix(operations, cases)
+    verify_evidence_sources(rows)
     for operation in operations:
         linked = [row for row in rows if row['operationId'] == operation['operationId']]
         operation['scenarios'] = sorted({'tests/ECommerceStoreInvoice.Acceptance.Tests/Features/' + row['feature'] for row in linked})

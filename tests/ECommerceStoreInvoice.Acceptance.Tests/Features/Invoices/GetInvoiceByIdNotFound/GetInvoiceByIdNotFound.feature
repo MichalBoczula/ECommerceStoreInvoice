@@ -1,7 +1,8 @@
-@allure.description:Ensures_getting_a_non_existing_invoice_by_id_returns_RFC7231_not_found_problem_details_with_request_context.
 Feature: Get invoice by id not found
 
+  @allure.label.scenarioId:INV01_GetInvoiceById_02
   Scenario: Get invoice by id returns problem details when invoice does not exist
+    The invoice identifier has no saved completed invoice. Retrieval returns the expected not-found problem.
     Given I have a non-existing invoice id for invoices retrieval
       | Field           | Value                 |
       | Method          | GET                   |

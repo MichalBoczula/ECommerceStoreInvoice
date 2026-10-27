@@ -118,8 +118,8 @@ jobs:
           if-no-files-found: warn
 
   infrastructure-tests:
-    # MongoDB 8 requires a supported host kernel (SERVER-121912).
-    runs-on: ubuntu-24.04
+    # Use the Mongo-compatible runner validated by Users; record the actual kernel in ci.sh.
+    runs-on: ubuntu-22.04
     timeout-minutes: 45
     needs: build
     steps:
@@ -161,8 +161,8 @@ jobs:
           if-no-files-found: warn
 
   acceptance-tests:
-    # Match the supported kernel used by the real MongoDB integration suite.
-    runs-on: ubuntu-24.04
+    # Match the runner used by the real MongoDB integration suite.
+    runs-on: ubuntu-22.04
     timeout-minutes: 45
     needs: build
     steps:
