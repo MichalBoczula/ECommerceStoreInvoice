@@ -64,10 +64,66 @@ the real per-scenario database and existing shared replica set.
 fixed baseline and 15 operation links. Guaranteed status coverage remains 54/56;
 the same framework/concurrency gaps stay assigned to Tasks 10/11. `git diff
 --check` passes. Local .NET/Docker are unavailable; actual build, formatting,
-runtime suites, packaging and image checks will be verified through full CI.
+runtime suites, packaging and image checks use actual CI.
 
 Task 06 starts from merged Task 05 master
 `d4c3a036a569bdb5e7f850d9afaad956d91490f9`. No production source, API contract,
 policy, repository/index/transaction behavior, dependencies, CI/security/coverage
 gate or Azure configuration changes. Existing successful-master publication stays
 intact; selecting and deploying the new LiveDocs snapshot remains manual.
+
+
+## Verified implementation evidence
+
+Implementation `dbc6421f208456372a9ece5b6155d32793117734` passes full
+[CI 40725649880](https://github.com/MichalBoczula/ECommerceStoreInvoice/actions/runs/40725649880).
+Tested merge `7e009a45988ccea4e105652e52fb6cee8e587d90` has exactly the submitted
+tree `e8aae3aad311b3ceadac49e08c667752a5bdc6ca`. Release build, formatting,
+audited restore, generated OpenAPI, dependency/secret checks, packaging, quality
+gate, Docker build and high/critical image scan pass.
+
+| Suite | Passed, zero failures/skips | Line coverage |
+| --- | ---: | ---: |
+| Domain | 112 | 89.5% |
+| Application | 95 | 86.3% |
+| Infrastructure | 73 | 93.2% |
+| ExternalProviders | 3 | — |
+| Acceptance | 121 | — |
+
+All **404 tests** pass, with unchanged separate 70% coverage floors. Actual TRX
+preserves all previous 117 test members and adds exactly four BDD cases. The
+38 feature files now contain 65 declarations and 94 expanded cases; all prior
+90 scenario/instance identities and titles remain. The existing 22 source
+regressions and all 94 exact matrix links pass. Master CI 40723804985 also
+completed successfully after the Task 05 merge, including image/archive publication.
+
+The official outer Actions ZIP digests match independently downloaded bytes.
+The inner bundle is **2193617 bytes**, SHA-256
+`48806a35c96d8aa991d23f27befa989d66b930c3a23ade7f8808c23564701807`.
+All **2514 manifest entries** match their sizes/hashes and closed inventory;
+all 38 bundled features byte-match reviewed source. OpenAPI, flows and policy
+exports are unchanged. All 15 original operation profiles and previous 90 links
+remain exact; the operation projection adds only the four new cases.
+
+The independent state/HTTP audit checks all nine Task 06 cases and all 12 primary
+requests: six successful appends, three successful primary lookups and three
+rejections. Every append adds one complete version with a new identity and
+strictly later stored timestamp. All old versions and every document in the other
+four collections remain byte-for-field identical. Every read/rejection preserves
+the full populated database. The 72 supporting GETs verify 24 complete latest
+profiles and 48 complete historical invoice responses against raw stored state,
+including both owners and both lookup routes, with zero Products requests.
+The previous Task 05 full-state/response audit also passes unchanged.
+
+All 94 passed BDD results have **446 paired HTTP exchanges**: 441 API, three
+checkout-catalog and two fixture probes; phases are 62 Given / 109 When / 275 Then.
+All **2284 attachments** resolve without orphans: 1927 valid JSON, 354 CSV tables,
+two text files and one PDF. Captured byte counts/base64/SHA-256 match and the PDF
+attachment equals the actual captured response bytes.
+
+Pinned Allure **2.46.1** renders all 94 passed cases. Every rendered identity,
+title, description and attachment name/type/bytes matches raw results. Every
+case, attachment and entry asset resolves over local static HTTP. These are
+generated-report/resource checks, not browser-pixel or deployed ACA/Nginx claims.
+This audit snapshot is frozen to the implementation run; the documentation-only
+completion commit receives the normal full CI recheck.

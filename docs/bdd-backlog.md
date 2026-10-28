@@ -30,8 +30,9 @@ place, while application deployment and selected LiveDocs refresh remain manual.
   responses and stored state for valid and rejected transitions; preserve the
   distinction between terminal rejection and a stale-write conflict.
   Implementation and verification: [order reads and statuses](bdd-05-order-reads-status.md).
-- [ ] **INV-BDD-06 — Client data versions.** Multiple immutable versions,
+- [x] **INV-BDD-06 — Client data versions.** Multiple immutable versions,
   latest selection/client isolation and preservation of existing invoice references.
+  Implementation and verification: [client data versions](bdd-06-client-data-versions.md).
 - [ ] **INV-BDD-07 — Invoice generation and recovery.** Complete ownership,
   paid-order/client-version checks, reservations, duplicates, retries, hidden
   incomplete states and lost-acknowledgment evidence.
