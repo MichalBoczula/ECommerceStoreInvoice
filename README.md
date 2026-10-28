@@ -169,7 +169,9 @@ timestamp-based latest selection, isolation and historical invoice-reference evi
 reservation, attempt cleanup, retry and lost-acknowledgment evidence.
 [Task 8](docs/bdd-08-invoice-reads-pdfs.md) adds complete completed-only/legacy
 metadata, exact binary downloads and real private Blob adapter HTTP evidence.
-The current acceptance inventory is **106 BDD + 27 standalone = 133**; recorder
+[Task 9](docs/bdd-09-business-validation.md) adds isolated business-rule errors,
+accepted boundaries, complete safe problems and unchanged populated state.
+The current acceptance inventory is **202 BDD + 27 standalone = 229**; recorder
 regressions remain standalone checks. Generated `.feature.cs` files are ignored
 build outputs, not maintained source.
 
