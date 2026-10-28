@@ -26,7 +26,8 @@ and task-10/task-11 gaps remain. No standalone test is relabelled as BDD.
 Each of the 20 strengthened/new cases supplies explicit Gherkin fixture,
 request, profile/line or problem, and persistence tables. Expected profile and
 line values come from authored fixtures and tables, never from fallback response
-values. GUIDs resolve explicit order/client/snapshot keys. Full response DTOs
+values. GUIDs resolve explicit order/client/snapshot keys. Actual JSON includes every known order, line and snapshot field, including
+nullable UpdatedAt and DeactivatedAt. Full response DTOs
 are compared to independent fixture models; each nested snapshot retains its ID,
 ProductId, active/deactivation fields, timestamps, name, brand and complete money.
 Quantities and decimal line/order totals are checked independently. Inactive
@@ -84,10 +85,54 @@ full concurrent winning-state/rollback work.
 ## Verification and scope
 
 `bash scripts/ci.sh source` passes all 22 regressions, the fixed baseline and
-90 exact matrix links. `git diff --check` passes. .NET/Docker are unavailable
-locally; actual build/format, all five suites, generated OpenAPI, coverage,
-security, packaging and image checks run through full CI. The PR records actual
-runtime results and an independent bundle/TRX/rendered Allure audit.
+90 exact matrix links. `git diff --check` passes. .NET/Docker are unavailable locally; runtime verification
+uses actual CI.
+
+Implementation `2555b8ba9cc895eb72a6c11c5173bb5579b5f3af` passes full
+[CI 40713968816](https://github.com/MichalBoczula/ECommerceStoreInvoice/actions/runs/40713968816)
+through tested merge `7f80cf98eab892281d255eb78606060d4f3f8fe7`, whose tree
+exactly matches the submitted implementation. Release build, formatting, audited
+restore, generated OpenAPI, dependency/secret checks, packaging, quality gate,
+Docker build and high/critical image scan all pass with these suites:
+
+| Suite | Passed, zero failures/skips | Line coverage |
+| --- | ---: | ---: |
+| Domain | 112 | 89.5% |
+| Application | 95 | 86.3% |
+| Infrastructure | 73 | 93.2% |
+| ExternalProviders | 3 | — |
+| Acceptance | 117 | — |
+
+The independently downloaded outer Actions ZIP matches its official digest.
+The inner bundle is **1762147 bytes**, SHA-256
+`18068fbfdbed534b9c0af477dfb478a384bec39cc59c7445f253d5e5bd25aefd`.
+All **2052 manifest entries** have verified hashes/sizes and closed inventory;
+all 38 feature files byte-match the reviewed source. Actual TRX retains all
+prior 110 tests and adds only seven BDD cases. All 83 prior BDD scenario/instance
+identities and titles remain, including all original terminal Examples.
+
+The 90 passed BDD results contain **368 paired HTTP exchanges**: 363 API,
+three checkout-catalog and two fixture probes; phases are 63 Given / 102 When /
+203 Then. The task-5 audit independently checks all 20 cases, 26 primary
+requests, 159 complete supporting reads, 10 accepted transitions and 10 rejected
+transitions. Exact client ID sets, inactive snapshot/deactivation fields,
+nullable fields, quantities/prices/totals, timestamps and complete safe problems
+match actual responses and stored data. Accepted writes change only the target
+Status/UpdatedAt; every rejection and read preserves every field in all five
+populated collections, with zero catalog calls.
+
+All **1830 attachments** resolve without orphans: 1529 valid JSON, 298 CSV tables,
+two text files and one PDF. Exact body byte counts/base64/SHA-256 match; the PDF
+is byte-identical to its captured response. Pinned Allure **2.46.1** renders all
+90 passed cases. Every rendered title/description/identity and attachment
+name/type/bytes matches its raw result, and every case/attachment/entry asset
+resolves over local static HTTP. This verifies generated-report resources,
+not browser pixels or deployed ACA/Nginx.
+
+OpenAPI, flow/policy exports and original operation metadata remain unchanged;
+the operation projection adds only seven case links. The audit snapshot remains
+frozen to this implementation run; documentation-only completion updates retain
+its provenance.
 
 Task 5 starts from merged master `c2bade2346d746f92a8fd11bfbe26ff9fda5fd67`,
 whose CI 40704424202 passed after Task 03/04 merges. No production source,

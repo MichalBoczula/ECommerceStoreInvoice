@@ -26,7 +26,7 @@ place, while application deployment and selected LiveDocs refresh remain manual.
   complete prices/quantities/totals, one catalog fetch, immutable snapshots and
   successful coordinated writes/cleared cart evidence.
   Implementation and verification: [checkout and snapshots](bdd-04-checkout-snapshots.md).
-- [ ] **INV-BDD-05 — Order reads and statuses.** Complete get/list/isolation
+- [x] **INV-BDD-05 — Order reads and statuses.** Complete get/list/isolation
   responses and stored state for valid and rejected transitions; preserve the
   distinction between terminal rejection and a stale-write conflict.
   Implementation and verification: [order reads and statuses](bdd-05-order-reads-status.md).
