@@ -142,6 +142,15 @@ public class ApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
         await initializationTask;
     }
 
+    public Task<List<BsonDocument>> GetShoppingCartDocumentsAsync() =>
+        new MongoClient(_connectionString).GetDatabase(_database)
+            .GetCollection<BsonDocument>("shoppingCarts")
+            .Find(FilterDefinition<BsonDocument>.Empty).ToListAsync();
+
+    public Task SeedShoppingCartDocumentAsync(BsonDocument document) =>
+        new MongoClient(_connectionString).GetDatabase(_database)
+            .GetCollection<BsonDocument>("shoppingCarts").InsertOneAsync(document);
+
     public async Task SeedInvoiceLookupAsync(Guid invoiceId, Guid orderId, string state)
     {
         var collection = new MongoClient(_connectionString).GetDatabase(_database).GetCollection<BsonDocument>("invoices");

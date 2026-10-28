@@ -18,6 +18,14 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Common
         public void PublishEvidenceIdentity() => Evidence.PublishIdentity();
         public void FlushEvidence() => Evidence.Flush();
 
+        public void RecordEvidence(string name, object value) => Evidence.Record(name, new
+        {
+            service = "invoices",
+            scenarioId = Evidence.ScenarioId,
+            instanceId = Evidence.InstanceId,
+            value
+        });
+
         public HttpClient CreateClient(WebApplicationFactory<Program> factory)
             // Capture first so the actual response survives an outer contract failure.
             => factory.CreateDefaultClient(new OpenApiResponseHandler(OpenApiDocument), new HttpEvidenceHandler(Evidence));

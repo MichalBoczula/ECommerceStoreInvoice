@@ -21,6 +21,7 @@ place, while application deployment and selected LiveDocs refresh remain manual.
   See [HTTP evidence and identity contract](bdd-02-http-evidence.md).
 - [ ] **INV-BDD-03 — Shopping carts.** Complete create/get/update profiles,
   exact persisted lines/timestamps, empty contents and other-client preservation.
+  Implementation and verification: [shopping carts](bdd-03-shopping-carts.md).
 - [ ] **INV-BDD-04 — Checkout and product snapshots.** Multiple products,
   complete prices/quantities/totals, one catalog fetch, immutable snapshots and
   successful coordinated writes/cleared cart evidence.
