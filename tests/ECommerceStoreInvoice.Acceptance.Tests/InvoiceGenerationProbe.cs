@@ -54,7 +54,8 @@ internal sealed class InvoiceGenerationProbe(Action<string, object> record, Func
             value.StartedAt,
             value.CompletedAt,
             value.ExceptionType,
-            before = JsonSnapshot(value.Before), after = JsonSnapshot(value.After)
+            before = JsonSnapshot(value.Before),
+            after = JsonSnapshot(value.After)
         });
     }
     internal void ObservePdf(InvoicePdfObservation value)
