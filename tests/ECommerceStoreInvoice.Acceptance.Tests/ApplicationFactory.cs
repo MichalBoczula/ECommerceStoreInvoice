@@ -47,6 +47,7 @@ public class ApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
     private ProductCatalogContainerFixture? _ownedProducts;
     private int _catalogRequests;
     internal Func<DelegatingHandler>? CatalogEvidenceHandlerFactory { get; set; }
+    internal InvoiceGenerationProbe? InvoiceProbe { get; set; }
     internal int CatalogRequestCount => Volatile.Read(ref _catalogRequests);
     internal Uri ProductCatalogBaseAddress => new(_productCatalogBaseUrl ?? throw new InvalidOperationException("Products is not enabled."));
 
@@ -118,6 +119,23 @@ public class ApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
                     new FailOnceInvoicePdfService(
                         (IInvoicePdfService)ActivatorUtilities.CreateInstance(provider, original.ImplementationType!),
                         _pdfFailureState, _failDownload));
+            });
+        }
+
+        if (InvoiceProbe is not null)
+        {
+            builder.ConfigureTestServices(services =>
+            {
+                var repository = services.Last(descriptor => descriptor.ServiceType == typeof(IInvoiceGenerationRepository));
+                services.Remove(repository);
+                services.AddScoped<IInvoiceGenerationRepository>(provider => new ObservedInvoiceGenerationRepository(
+                    (IInvoiceGenerationRepository)(repository.ImplementationFactory?.Invoke(provider)
+                        ?? ActivatorUtilities.CreateInstance(provider, repository.ImplementationType!)), InvoiceProbe));
+                var pdf = services.Last(descriptor => descriptor.ServiceType == typeof(IInvoicePdfService));
+                services.Remove(pdf);
+                services.AddScoped<IInvoicePdfService>(provider => new ObservedInvoicePdfService(
+                    (IInvoicePdfService)(pdf.ImplementationFactory?.Invoke(provider)
+                        ?? ActivatorUtilities.CreateInstance(provider, pdf.ImplementationType!)), InvoiceProbe));
             });
         }
 
@@ -272,6 +290,7 @@ public class ApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
         try
         {
             base.Dispose();
+            InvoiceProbe?.CleanupFiles();
             foreach (var path in _downloadFiles) File.Delete(path);
             if (!string.IsNullOrEmpty(_connectionString))
                 await new MongoClient(_connectionString).DropDatabaseAsync(_database);

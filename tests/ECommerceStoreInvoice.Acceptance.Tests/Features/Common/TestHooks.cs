@@ -38,6 +38,12 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Common
                     _factory.CatalogEvidenceHandlerFactory = _apiContext.CreateOrderCatalogHandler;
                 else if (_scenarioContext.ScenarioInfo.Tags.Contains("client-version-evidence"))
                     _factory.CatalogEvidenceHandlerFactory = _apiContext.CreateClientVersionCatalogHandler;
+                if (_scenarioContext.ScenarioInfo.Tags.Contains("invoice-generation-evidence"))
+                {
+                    _factory.CatalogEvidenceHandlerFactory = _apiContext.CreateInvoiceCatalogHandler;
+                    _factory.InvoiceProbe = new InvoiceGenerationProbe(_apiContext.RecordEvidence, _factory.GetCheckoutDocumentsAsync,
+                        _scenarioContext.ScenarioInfo.Tags.Contains("invoice-hold-pdf"), _scenarioContext.ScenarioInfo.Tags.Contains("invoice-fails-after-write"));
+                }
                 await _factory.InitializeAsync();
                 _apiContext.Factory = _factory;
                 using var swaggerClient = _factory.CreateClient();
