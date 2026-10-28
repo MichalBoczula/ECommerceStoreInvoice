@@ -159,11 +159,11 @@ a claim of complete runtime cause coverage. [Task 2](docs/bdd-02-http-evidence.m
 adds actual paired HTTP evidence, explicit IDs and readable descriptions for all
 77 BDD cases and 18 recorder regressions. [Task 3](docs/bdd-03-shopping-carts.md)
 adds complete cart response/persistence evidence and four populated/empty/replacement
-cases. The acceptance inventory is **81 BDD + 26 standalone = 107**; recorder
+cases. [Task 4](docs/bdd-04-checkout-snapshots.md) adds complete checkout/snapshot
+state, actual catalog exchanges and isolated catalog-change/outage evidence.
+The current acceptance inventory is **83 BDD + 27 standalone = 110**; recorder
 regressions remain standalone checks. Generated `.feature.cs` files are ignored
-build outputs, not maintained source. [Task 4](docs/bdd-04-checkout-snapshots.md)
-adds complete checkout/snapshot state, actual catalog exchanges and isolated
-catalog-change/outage evidence: **83 BDD + 27 standalone = 110 acceptance cases**.
+build outputs, not maintained source.
 
 Run from the repository root:
 

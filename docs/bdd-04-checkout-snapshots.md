@@ -88,10 +88,53 @@ capture retains actual bytes/counts/hashes and real Given/When/Then phases.
 
 `bash scripts/ci.sh source` passes all 22 regressions and the protected baseline:
 15 operations, 83 expanded cases and the same two response-coverage gaps.
-`git diff --check` passes. Local .NET/Docker are unavailable; actual Release build,
-formatting, audited restore, all five suites, contracts, coverage, packaging,
-security and image verification run through the existing full CI. The PR records
-runtime results and an independent actual bundle/TRX/rendered-report audit.
+`git diff --check` passes. Local .NET/Docker are unavailable; runtime verification uses the existing CI.
+
+The implementation at `7730040eb31e174754475343c714424e36c2ff81` is verified by
+[CI 40699754304](https://github.com/MichalBoczula/ECommerceStoreInvoice/actions/runs/40699754304)
+through tested merge commit `6a30d54f52ae1b24582776a4a26ba37b80c2e579`.
+Its tree exactly matches the submitted implementation. Release build, formatting,
+audited restore, generated OpenAPI, dependency/secret checks, packaging, quality
+gate, Docker build and high/critical image scan pass, with all five suites:
+
+| Suite | Passed, zero failures/skips | Line coverage |
+| --- | ---: | ---: |
+| Domain | 112 | 89.5% |
+| Application | 95 | 86.3% |
+| Infrastructure | 73 | 93.2% |
+| ExternalProviders | 3 | — |
+| Acceptance | 110 | — |
+
+The independently downloaded bundle's outer ZIP digest matches the official
+Actions artifact metadata. The inner bundle is **956967 bytes**, SHA-256
+`ac28b98b6f8016287baf1f5e65556fc8f433d53128c17bb630039dbdaeb94392`.
+All **1167 manifest entries** have verified sizes/hashes and closed inventory;
+all 38 bundled feature files byte-match the reviewed source.
+
+Actual TRX retains all prior 107 cases and adds only two BDD cases and the one
+standalone recorder check. All 81 prior BDD scenario/instance identities and
+titles remain, including the original checkout. The 83 passed BDD results have
+**244 paired actual HTTP exchanges**: 239 API, three checkout-to-Products and
+two explicit catalog-fixture probes; phases are 95 Given / 93 When / 56 Then.
+Each checkout has exactly one actual outbound Products POST containing exactly
+the requested product IDs. The full response/saved snapshot/quantity/decimal
+price/line-total/order-total joins were independently checked. All five raw
+MongoDB collections remain exact across every supporting read and after catalog
+changes/outage; both initial and changed catalog values are actual HTTP data.
+
+All **959 attachments** resolve without orphans: 817 valid JSON, 139 CSV tables,
+one PDF and two text files. Every captured body byte count/base64/SHA-256 matches,
+and the PDF bytes equal its captured response. Pinned Allure **2.46.1** renders
+all 83 passed cases. Every rendered identity, title, description and attachment
+name/type/byte content matches its raw result; every case, attachment and entry
+asset resolves over local static HTTP. This verifies the generated report,
+not browser pixels or a deployed ACA/Nginx instance.
+
+OpenAPI, flow/policy exports and original operation metadata remain unchanged;
+the projection adds only two scenario links. The audit snapshot remains frozen
+to this implementation run; documentation-only completion updates retain its
+provenance. Task 04 builds on Task 03 PR #222 and is reviewed in PR #223; merge
+the dependency first while it remains open.
 
 No production source, public API, repository behavior, transaction boundaries,
 package, coverage/security gate or Azure resource changes. Mixed-currency checkout
