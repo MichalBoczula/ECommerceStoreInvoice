@@ -33,9 +33,10 @@ place, while application deployment and selected LiveDocs refresh remain manual.
 - [x] **INV-BDD-06 — Client data versions.** Multiple immutable versions,
   latest selection/client isolation and preservation of existing invoice references.
   Implementation and verification: [client data versions](bdd-06-client-data-versions.md).
-- [ ] **INV-BDD-07 — Invoice generation and recovery.** Complete ownership,
+- [x] **INV-BDD-07 — Invoice generation and recovery.** Complete ownership,
   paid-order/client-version checks, reservations, duplicates, retries, hidden
   incomplete states and lost-acknowledgment evidence.
+  Implementation and verification: [invoice generation and recovery](bdd-07-invoice-generation-recovery.md).
 - [ ] **INV-BDD-08 — Invoice reads and PDFs.** Complete by-ID/by-order metadata,
   legacy/completed-only behavior, binary download evidence/headers and truthful
   missing/storage failure state. Keep real Blob adapter checks distinct from local files.

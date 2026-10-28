@@ -22,8 +22,8 @@ client-version identities, the reservation timestamp and the current attempt's
 local PDF URL. Existing public `clietDataVersionId` spelling is preserved. Complete
 safe problem signatures distinguish missing orders/ownership, missing owner data,
 empty IDs, Created/Cancelled status, existing completed invoices and active claims.
-Reads/rejections preserve all populated state; successful generation may change
-only the correct invoice reservation. No Products API request is permitted.
+Reads and pre-generation rejections preserve all populated state; PDF failures
+and successful generation may change only the correct invoice reservation. No Products API request is permitted.
 
 ## Real write and attempt observations
 
@@ -86,3 +86,70 @@ Fixture storage URLs are labelled markers; generated PDFs are actual instance-lo
 test files, not shared Blob storage. Download headers, binary download failures,
 legacy metadata and real Blob adapter checks remain Task 08. Existing master
 publication stays intact; selected LiveDocs refresh and deployment remain manual.
+
+
+## Verified implementation evidence
+
+Implementation `e2e9fbc5474a39bfc3d0c390546b19b2cc7f385c` passes full
+[CI 40731854022](https://github.com/MichalBoczula/ECommerceStoreInvoice/actions/runs/40731854022).
+Tested merge `47f101f188671f44d6df84905af3a67d337dd611` exactly matches submitted
+tree `3a5f6d12768fc17234a83d70adbf63284c076c8e`. Release build, formatting,
+audited restore, generated OpenAPI, dependency/secret checks, packaging, quality
+gate, Docker build and high/critical image scan pass.
+
+| Suite | Passed, zero failures/skips | Line coverage |
+| --- | ---: | ---: |
+| Domain | 112 | 89.5% |
+| Application | 95 | 86.3% |
+| Infrastructure | 73 | 93.2% |
+| ExternalProviders | 3 | — |
+| Acceptance | 126 | — |
+
+All **409 tests** pass with unchanged separate 70% coverage floors. Actual TRX
+preserves all 121 previous acceptance members and adds exactly five BDD cases.
+All prior 94 BDD identities/titles and the fixed 77-case baseline survive. The
+38 features now contain 70 declarations and 99 expanded cases. Source checks
+pass 22 regressions and all 99 matrix links; the same two Task 10/11 gaps remain.
+Merged Task 06 master CI 40729322729 also passed, including image/archive publication.
+
+The independently downloaded outer Actions ZIPs match their official digests.
+The inner bundle is **2831025 bytes**, SHA-256
+`e8ce173a3e4b343484f811236ba51025a462e8441e7f53952dfe37e45b3f37fb`.
+All **3246 manifest entries** match hashes/sizes and closed inventory. All 38
+bundled features byte-match reviewed source. OpenAPI, flow/policy exports and
+all 15 original operation profiles stay unchanged; only five case links are added.
+
+The independent state/HTTP audit checks all **16 Task 07 cases**, **20 primary
+invoice requests**, the retry's actual client-version POST, **107 supporting
+reads** and two hidden reads while the winning reservation is held. It joins
+actual HTTP bodies to raw Mongo state and verifies all 22 repository exchanges:
+12 claims attempted, ten won, two lost, four reclaims, eight completions and two
+releases. Each exchange changes exactly its allowed fields; its complete before/
+after state forms an uninterrupted chain to the primary final state. Every other
+collection remains exact; reads and pre-generation rejections leave full state unchanged.
+
+All ten PDF attempts have complete saved order/product/client inputs checked.
+Four attempts use multiple products, including an inactive snapshot. Eight
+succeed; two fail. Both cleanup calls target the failed attempt IDs. One failure
+occurs before writing, while the other has an actual `%PDF-` file and hash before
+its verified deletion. A retry completes a different attempt using the same invoice
+ID and creation timestamp. The first retry also selects the version appended over
+HTTP. The lost-ack case records a committed Completed document plus the injected
+exception, and returns success without any release or deletion. Deterministic
+competition proves hidden live state, exact active-claim 409 and one complete winner.
+All generation and supporting operations make zero Products calls. Earlier Task
+05/06 complete state/response audits also pass unchanged.
+
+All 99 passed BDD cases have **513 paired HTTP exchanges**: 508 API, three
+checkout-catalog and two fixture probes; phases are 18 Given / 119 When / 376 Then.
+All **3006 attachments** resolve without orphans: 2509 valid JSON, 494 CSV tables,
+two text files and one PDF. Captured byte counts/base64/hashes match and the binary
+PDF attachment equals its actual HTTP response bytes. Task 07's additional generated
+files are independently observed real local PDFs; download evidence remains Task 08.
+
+Pinned Allure **2.46.1** renders all 99 passed cases. Every identity, title,
+description and attachment name/type/bytes matches raw results, and every case,
+attachment and entry asset resolves over local static HTTP. These generated-report
+checks do not claim browser pixels or deployed ACA/Nginx verification. The audit
+snapshot remains frozen to this implementation run; the documentation-only
+completion commit receives the normal full CI recheck.
