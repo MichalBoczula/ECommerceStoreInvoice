@@ -34,6 +34,8 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Common
 
         internal DelegatingHandler CreateOrderCatalogHandler() => new HttpEvidenceHandler(Evidence, "products", "order-catalog");
 
+        internal DelegatingHandler CreateClientVersionCatalogHandler() => new HttpEvidenceHandler(Evidence, "products", "client-version-catalog");
+
         public HttpClient CreateCatalogFixtureClient() => new(new HttpEvidenceHandler(Evidence, "products", "catalog-fixture")
         {
             InnerHandler = new HttpClientHandler()

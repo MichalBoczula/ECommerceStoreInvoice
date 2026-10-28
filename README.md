@@ -163,7 +163,9 @@ cases. [Task 4](docs/bdd-04-checkout-snapshots.md) adds complete checkout/snapsh
 state, actual catalog exchanges and isolated catalog-change/outage evidence.
 [Task 5](docs/bdd-05-order-reads-status.md) adds complete order reads, client
 filtering and exact populated state for accepted/rejected status changes.
-The current acceptance inventory is **90 BDD + 27 standalone = 117**; recorder
+[Task 6](docs/bdd-06-client-data-versions.md) adds immutable client-data histories,
+timestamp-based latest selection, isolation and historical invoice-reference evidence.
+The current acceptance inventory is **94 BDD + 27 standalone = 121**; recorder
 regressions remain standalone checks. Generated `.feature.cs` files are ignored
 build outputs, not maintained source.
 

@@ -36,6 +36,8 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Common
                     _factory.CatalogEvidenceHandlerFactory = _apiContext.CreateCheckoutCatalogHandler;
                 else if (_scenarioContext.ScenarioInfo.Tags.Contains("order-state-evidence"))
                     _factory.CatalogEvidenceHandlerFactory = _apiContext.CreateOrderCatalogHandler;
+                else if (_scenarioContext.ScenarioInfo.Tags.Contains("client-version-evidence"))
+                    _factory.CatalogEvidenceHandlerFactory = _apiContext.CreateClientVersionCatalogHandler;
                 await _factory.InitializeAsync();
                 _apiContext.Factory = _factory;
                 using var swaggerClient = _factory.CreateClient();
