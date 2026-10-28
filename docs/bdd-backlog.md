@@ -41,9 +41,10 @@ place, while application deployment and selected LiveDocs refresh remain manual.
   legacy/completed-only behavior, binary download evidence/headers and truthful
   missing/storage failure state. Keep real Blob adapter checks distinct from local files.
   Implementation and verification: [invoice reads and PDFs](bdd-08-invoice-reads-pdfs.md).
-- [ ] **INV-BDD-09 — Business validation.** Isolated invalid values and accepted
+- [x] **INV-BDD-09 — Business validation.** Isolated invalid values and accepted
   boundaries, exact safe errors, unchanged populated state and honest classification
   of HTTP-reachable versus standalone policies/rules.
+  Implementation and verification: [business validation](bdd-09-business-validation.md).
 - [ ] **INV-BDD-10 — Framework failures.** Raw malformed/missing/null/wrong-type
   requests, routing/method/media failures and complete safe problems without writes.
   Add the missing GetInvoiceByOrderId server-error case.
@@ -56,6 +57,8 @@ place, while application deployment and selected LiveDocs refresh remain manual.
 - [ ] **INV-BDD-13 — Request/response contracts.** Scalar types, required fields,
   nullability/formats/nesting, complete safe error shapes, typed descriptions/examples
   and PDF contracts derived from source, without a second handwritten OpenAPI.
+  Reconcile Task 09's observed nullable client name/address values with the current
+  non-null string schemas and the response checker's null-property gap.
 - [ ] **INV-BDD-14 — Flows, rules and RAG links.** Stable identities and authored
   conditions/effects/failures, operation-to-scenario/exchange joins, observed versus
   declared rules and reachable versus standalone documentation. No runtime tracing

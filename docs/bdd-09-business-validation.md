@@ -26,6 +26,13 @@ maximum and Unicode postal digits, optional null/blank values and permitted
 punctuation are accepted. ClientName currently has no domain validation; null,
 empty and blank names are explicitly documented as accepted behavior.
 
+These accepted null strings expose an existing DTO/OpenAPI mismatch: the generated
+request/response properties are required strings without nullable metadata. The
+current shared response checker skips null properties. This package independently
+asserts the actual null values and preserves current behavior; Task 13 must align
+contract nullability with the observed policy. Passing the current OpenAPI gate
+does not prove these nullable values are accurately described.
+
 Aggregation retains all eight ordered client errors, including repeated rule
 names. A separate null-postal/invalid-city case verifies the address rule's actual
 early return. It does not mislabel the unexecuted city check as successful.
@@ -33,7 +40,7 @@ early return. It does not mislabel the unexecuted city check as successful.
 Cart cases isolate empty product IDs, negative and Int32-minimum quantities. The
 original quantity-zero case now has exact complete evidence against a populated
 two-line cart. A repeated-error case retains both ID errors then both quantity
-errors. Int32 minimum positive 1/maximum, empty lines, duplicate product IDs and
+errors. Minimum positive 1 and Int32 maximum, empty lines, duplicate product IDs and
 unknown nonempty IDs document current acceptance without Products calls. No
 catalog existence, maximum-cart-total or duplicate-line rule is invented.
 
@@ -58,6 +65,8 @@ two populated carts (target initially has two lines), and two completed invoices
 that retain older client-version references. All five collections are populated.
 
 Raw complete documents are compared before/after primary and supporting requests.
+Fixture and expected BSON field layouts match the typed persistence documents;
+full BSON comparisons retain ordered lines and every original field.
 Rejections cannot alter any field, ordered line, timestamp or historical reference.
 Accepted client requests append exactly one new distinct version; accepted cart
 requests replace only target lines/UpdatedAt; accepted statuses change only target
@@ -67,7 +76,10 @@ request window; Mongo's millisecond storage precision is accounted for explicitl
 Nine complete supporting GETs inspect both carts, both clients' latest versions,
 all three orders with saved snapshot details/totals, and both historical invoices.
 Every field, JSON type/null and nested line must match independently constructed
-expectations. Supporting reads preserve all five collections. The actual named
+expectations. All nine expected profiles share one identified JSON attachment per
+scenario; each actual HTTP request and response retains its own shared-capture
+attachment. This keeps the complete evidence inside the existing 10,000-file
+LiveDocs manifest limit without changing the schema or filtering exchanges. Supporting reads preserve all five collections. The actual named
 Products HttpClient has the shared recorder and request counter installed; every
 case requires zero attempted catalog requests.
 
@@ -100,8 +112,73 @@ now explicitly mutates an original frozen example, rather than assuming the firs
 current outline is original when a new feature sorts earlier. The guard itself
 and its baseline are unchanged. `git diff --check` passes.
 
-Local .NET/Docker are unavailable. Full build/format/OpenAPI, all five runtime
-suites, coverage, package/security/image checks and independent final artifact/
-Allure audits must pass before this package is marked complete. Task 08 PR 227
+Local .NET/Docker are unavailable. Runtime verification uses actual CI; the
+completed implementation and artifact audit are recorded below. Task 08 PR 227
 was merged as master c0220519e7f738ea802f026af9f54ca9e7ce4bf3 before this branch.
 Master source publication stays unchanged. Selected LiveDocs refresh is manual.
+
+## Verified implementation evidence
+
+Implementation `5e1fc8bb60a90a3c30b10573a415705cd11a9f1f` passes full
+[CI 40786144594](https://github.com/MichalBoczula/ECommerceStoreInvoice/actions/runs/40786144594).
+Tested merge `e7b0f8ea02ea5491063b307faf8a3c37cda05482` exactly matches submitted
+tree `c5935fec36b5881e6b9af94150943a0ec9af8e56`. Release build, formatting,
+audited restore, generated OpenAPI, dependency/secret checks, packaging, quality
+gate, Docker build and high/critical image scan pass.
+
+| Suite | Passed, zero failures/skips | Line coverage |
+| --- | ---: | ---: |
+| Domain | 133 | 89.5% |
+| Application | 95 | 86.3% |
+| Infrastructure | 73 | 93.2% |
+| ExternalProviders | 3 | — |
+| Acceptance | 229 | — |
+
+All **533 tests** pass above unchanged separate 70% coverage floors. Actual TRX
+preserves all prior suite members with multiplicity and adds exactly 96 BDD cases
+and 21 Domain cases. All 106 prior BDD scenario/instance identities and titles
+remain; three original cart cases now have complete populated evidence. The 39
+features contain 87 declarations and 202 exact expanded matrix links. All 22
+source regressions and the fixed 77-case baseline pass, with the same two later
+status gaps. Task 08 merged-master CI 40782266531 also passed including publication.
+
+Independently downloaded outer Actions ZIPs match their official digests. The
+inner documentation bundle is **9027876 bytes**, SHA-256
+`33d7f810cf957b781c0d398255274404342f0b26d0bb07f172ecfbaf0e84a9a6`.
+All **9817 manifest entries** have verified hashes/sizes and closed inventory;
+all 39 feature files byte-match reviewed source. The existing 10000-file schema
+limit is enforced; later additions must keep budgeting complete evidence within
+that limit. OpenAPI and flow/policy exports are unchanged. All 15 original
+operation profiles and 106 prior case links remain; projection adds 96 links.
+The nullable-string contract mismatch described above remains explicit Task 13
+work rather than being hidden by the passing current OpenAPI gate.
+
+The independent raw-state/HTTP audit verifies all **99 affected cases** and
+**99 primary requests**: 59 exact safe rejections and 40 complete successes.
+Successes append 31 distinct client versions, replace five cart line collections
+and make four legal status changes. Generated values have bounded UTC timestamps.
+Both eight-error client aggregation and four-error repeated-line aggregation
+retain exact order/multiplicity. The separate postal short-circuit also matches
+the declared rule behavior. All **891 supporting GETs** return complete profiles
+for both carts/latest client versions, three orders/snapshots and two historical
+invoices. All five populated collections match their complete expected state;
+old versions/references remain exact and actual Products attempts stay zero.
+An independent rule model also agrees with all 90 isolated Gherkin input/outcome
+pairs. Earlier Task 05–08 state, recovery, private-Blob and PDF audits still pass.
+
+All 202 passed BDD results contain **1616 paired captured HTTP exchanges**:
+1611 API, three checkout-catalog and two fixture probes; phases are 11 Given /
+222 When / 1383 Then. All **9370 attachments** resolve without orphans: 7910
+valid JSON, 1453 CSV tables and seven PDFs. Captured byte counts/base64/hashes
+match. Grouping all nine expected supporting profiles into one JSON per business
+scenario saves 792 files while retaining each actual request/response, every
+expected field and all raw state observations. No exchange filtering or schema
+limit change is used. All seven existing binary PDFs still match their actual
+responses and declared artifacts and parse with at least one page.
+
+Pinned Allure **2.46.1** renders all 202 passed cases. Every identity, title,
+description and attachment name/type/bytes matches raw results; every case,
+attachment and entry asset resolves over local static HTTP. These checks do not
+claim browser pixels, deployed Azure permissions or a refreshed portal. This
+snapshot stays frozen to the implementation run; the documentation-only
+completion commit receives the normal full CI and independent artifact recheck.
