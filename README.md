@@ -165,7 +165,9 @@ state, actual catalog exchanges and isolated catalog-change/outage evidence.
 filtering and exact populated state for accepted/rejected status changes.
 [Task 6](docs/bdd-06-client-data-versions.md) adds immutable client-data histories,
 timestamp-based latest selection, isolation and historical invoice-reference evidence.
-The current acceptance inventory is **94 BDD + 27 standalone = 121**; recorder
+[Task 7](docs/bdd-07-invoice-generation-recovery.md) adds complete invoice creation,
+reservation, attempt cleanup, retry and lost-acknowledgment evidence.
+The current acceptance inventory is **99 BDD + 27 standalone = 126**; recorder
 regressions remain standalone checks. Generated `.feature.cs` files are ignored
 build outputs, not maintained source.
 
