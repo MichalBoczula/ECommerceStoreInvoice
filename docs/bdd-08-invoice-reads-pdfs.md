@@ -89,3 +89,74 @@ repository/index/transaction, CI/security/coverage gate or Azure configuration
 changes. All local files/Azurite containers belong to their scenario and are
 cleaned after evidence capture. Existing successful-master publication remains;
 selected LiveDocs refresh and deployment remain manual.
+
+
+## Verified implementation evidence
+
+Implementation `9da89ffd99d82429b831a7fa68e072ab1f5debbf` passes full
+[CI 40767337541](https://github.com/MichalBoczula/ECommerceStoreInvoice/actions/runs/40767337541).
+Tested merge `576ef065850361b4f0dd22e510a4eb26eae0dc08` exactly matches submitted
+tree `13af46feceb50481c667b545f3bd3f9f86162848`. Release build, formatting,
+audited restore, generated OpenAPI, dependency/secret checks, packaging, quality
+gate, Docker build and high/critical image scan pass.
+
+| Suite | Passed, zero failures/skips | Line coverage |
+| --- | ---: | ---: |
+| Domain | 112 | 89.5% |
+| Application | 95 | 86.3% |
+| Infrastructure | 73 | 93.2% |
+| ExternalProviders | 3 | — |
+| Acceptance | 133 | — |
+
+All **416 tests** pass with unchanged separate 70% coverage floors. Actual TRX
+preserves all 126 previous acceptance members and adds exactly seven BDD cases.
+All 99 previous BDD scenario/instance identities and titles remain. The 38 feature
+files now contain 75 declarations and 106 expanded cases. All 22 source regressions
+and 106 exact matrix links pass with the same two later-package gaps. Task 07's
+merged master CI 40763054167 also passed, including image/archive publication.
+
+Independently downloaded outer Actions ZIPs match their official digests. The
+inner bundle is **3963813 bytes**, SHA-256
+`b81722267b1461cf34c79a1003479c59cc1e3155f5caf2cced77178768ade1b4`.
+All **4426 manifest entries** have verified hashes/sizes and closed inventory;
+all 38 features byte-match reviewed source. OpenAPI, flow/policy exports, all
+15 original operation profiles and 99 prior case links stay unchanged. The
+operation projection adds only seven case links.
+
+The independent audit joins all **23 Task 08 cases** and **23 primary requests**
+(seven successes, 16 rejections) to raw Mongo data, explicit table values, complete
+HTTP metadata/problems, all five unchanged populated collections and unchanged
+storage inventories. All **116 supporting GETs** check both metadata routes,
+repeat the complete primary outcome and download the genuine rendered setup PDF.
+One actual setup POST creates that invoice from the explicit paid-order inputs.
+
+All **15 storage-reader calls** match their declared URL/outcome and mode. All
+metadata, incomplete, missing-invoice and invalid-ID paths avoid storage reads.
+There are three private-Blob HTTP cases. Two actual SDK authentication 403 results
+map to generic API 500 problems; two deliberately simulated local-reader faults
+remain separately identified. Missing local/Blob artifacts return the exact PDF
+404 while metadata remains available. The three legacy cases keep all generation
+fields absent. Both clients' historical references and every artifact's bytes,
+write timestamps, content type and Blob ETag remain exact; Products calls stay zero.
+Earlier Task 05/06/07 state and response audits also pass unchanged.
+
+All 106 passed BDD results contain **631 paired captured HTTP exchanges**:
+626 API, three checkout-catalog and two fixture probes; phases are 13 Given /
+126 When / 492 Then. Direct SDK fixture writes/inventories are separately labelled
+storage observations and are not counted as captured application HTTP exchanges.
+All **4172 attachments** resolve without orphans: 3491 valid JSON, 672 CSV tables,
+seven PDFs and two text files. Captured byte counts/base64/hashes match.
+
+The seven binary attachments are byte-identical to their actual HTTP responses
+and declared local/Blob artifacts, including the real Chromium output. Each PDF
+parses successfully with at least one page. The six static responses preserve the
+non-UTF8 binary marker. Download MIME, filename/filename-star and exact private/
+no-store directive set match; present lengths equal body bytes. Error cache
+control is the existing no-cache/no-store set, with no PDF disposition.
+
+Pinned Allure **2.46.1** renders all 106 passed cases. Every identity, title,
+description and attachment name/type/bytes matches raw results. Every rendered
+case, attachment and entry asset resolves over local static HTTP. These checks
+do not claim browser pixels or deployed ACA/Nginx/Azure permissions. This audit
+snapshot stays frozen to the implementation run; the documentation-only
+completion commit receives the normal full CI recheck.

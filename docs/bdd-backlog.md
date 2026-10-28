@@ -37,9 +37,10 @@ place, while application deployment and selected LiveDocs refresh remain manual.
   paid-order/client-version checks, reservations, duplicates, retries, hidden
   incomplete states and lost-acknowledgment evidence.
   Implementation and verification: [invoice generation and recovery](bdd-07-invoice-generation-recovery.md).
-- [ ] **INV-BDD-08 — Invoice reads and PDFs.** Complete by-ID/by-order metadata,
+- [x] **INV-BDD-08 — Invoice reads and PDFs.** Complete by-ID/by-order metadata,
   legacy/completed-only behavior, binary download evidence/headers and truthful
   missing/storage failure state. Keep real Blob adapter checks distinct from local files.
+  Implementation and verification: [invoice reads and PDFs](bdd-08-invoice-reads-pdfs.md).
 - [ ] **INV-BDD-09 — Business validation.** Isolated invalid values and accepted
   boundaries, exact safe errors, unchanged populated state and honest classification
   of HTTP-reachable versus standalone policies/rules.
