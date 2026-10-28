@@ -55,16 +55,24 @@ public sealed class BusinessValidationSteps(ScenarioApiContext context)
             var versionId = Guid.NewGuid();
             orders.Add(new BsonDocument
             {
-                ["_id"] = Binary(id), ["ClientId"] = Binary(_clients[row["Client"]]),
-                ["CreatedAt"] = Date(row["CreatedAt"]), ["UpdatedAt"] = NullableDate(row["UpdatedAt"]),
+                ["_id"] = Binary(id),
+                ["ClientId"] = Binary(_clients[row["Client"]]),
+                ["CreatedAt"] = Date(row["CreatedAt"]),
+                ["UpdatedAt"] = NullableDate(row["UpdatedAt"]),
                 ["Status"] = Status(row["Status"]),
                 ["Lines"] = new BsonArray { new BsonDocument { ["ProductVersionId"] = Binary(versionId), ["Quantity"] = Integer(row["Quantity"]) } }
             });
             products.Add(new BsonDocument
             {
-                ["_id"] = Binary(versionId), ["ProductId"] = Binary(Guid.Parse(row["ProductId"])),
-                ["CreatedAt"] = Date(row["CreatedAt"]), ["DeactivatedAt"] = BsonNull.Value, ["IsActive"] = true,
-                ["Name"] = row["Name"], ["Brand"] = row["Brand"], ["PriceAmount"] = decimal.Parse(row["PriceAmount"], CultureInfo.InvariantCulture), ["PriceCurrency"] = row["PriceCurrency"]
+                ["_id"] = Binary(versionId),
+                ["ProductId"] = Binary(Guid.Parse(row["ProductId"])),
+                ["CreatedAt"] = Date(row["CreatedAt"]),
+                ["DeactivatedAt"] = BsonNull.Value,
+                ["IsActive"] = true,
+                ["Name"] = row["Name"],
+                ["Brand"] = row["Brand"],
+                ["PriceAmount"] = decimal.Parse(row["PriceAmount"], CultureInfo.InvariantCulture),
+                ["PriceCurrency"] = row["PriceCurrency"]
             });
         }
         _known.Add("orders", orders.ToArray());
@@ -77,8 +85,10 @@ public sealed class BusinessValidationSteps(ScenarioApiContext context)
         context.RecordEvidence("Business cart fixture table", Rows(table));
         _known.Add("shoppingCarts", table.Rows.GroupBy(row => row["Client"]).Select(group => new BsonDocument
         {
-            ["_id"] = Binary(Guid.NewGuid()), ["ClientId"] = Binary(_clients[group.Key]),
-            ["CreatedAt"] = Date(group.First()["CreatedAt"]), ["UpdatedAt"] = Date(group.First()["UpdatedAt"]),
+            ["_id"] = Binary(Guid.NewGuid()),
+            ["ClientId"] = Binary(_clients[group.Key]),
+            ["CreatedAt"] = Date(group.First()["CreatedAt"]),
+            ["UpdatedAt"] = Date(group.First()["UpdatedAt"]),
             ["Lines"] = new BsonArray(group.Select(row => new BsonDocument { ["ProductId"] = Binary(Guid.Parse(row["ProductId"])), ["Quantity"] = Integer(row["Quantity"]) }))
         }).ToArray());
     }
@@ -93,9 +103,14 @@ public sealed class BusinessValidationSteps(ScenarioApiContext context)
             _invoices.Add(row["Invoice"], id);
             return new BsonDocument
             {
-                ["_id"] = Binary(id), ["OrderId"] = Binary(_orders[row["Order"]]), ["ClientDataVersionId"] = Binary(_versions[row["Version"]]),
-                ["StorageUrl"] = row["StorageUrl"], ["CreatedAt"] = Date(row["CreatedAt"]),
-                ["GenerationStatus"] = "Completed", ["GenerationAttemptId"] = BsonNull.Value, ["GenerationLeaseUntil"] = BsonNull.Value
+                ["_id"] = Binary(id),
+                ["OrderId"] = Binary(_orders[row["Order"]]),
+                ["ClientDataVersionId"] = Binary(_versions[row["Version"]]),
+                ["StorageUrl"] = row["StorageUrl"],
+                ["CreatedAt"] = Date(row["CreatedAt"]),
+                ["GenerationStatus"] = "Completed",
+                ["GenerationAttemptId"] = BsonNull.Value,
+                ["GenerationLeaseUntil"] = BsonNull.Value
             };
         }).ToArray());
         _known = Sorted(_known);
@@ -248,7 +263,8 @@ public sealed class BusinessValidationSteps(ScenarioApiContext context)
             cart["UpdatedAt"] = Milliseconds(updated);
             cart["Lines"] = new BsonArray(_body["lines"]!.AsArray().Select(line => new BsonDocument
             {
-                ["ProductId"] = Binary(Guid.Parse(line!["productId"]!.GetValue<string>())), ["Quantity"] = line["quantity"]!.GetValue<int>()
+                ["ProductId"] = Binary(Guid.Parse(line!["productId"]!.GetValue<string>())),
+                ["Quantity"] = line["quantity"]!.GetValue<int>()
             }));
             var profile = CartProfile(cart);
             profile["updatedAt"] = JsonValue.Create(updated);
@@ -342,7 +358,10 @@ public sealed class BusinessValidationSteps(ScenarioApiContext context)
 
     private static JsonObject CartProfile(BsonDocument doc) => new()
     {
-        ["id"] = Id(doc).ToString(), ["clientId"] = GuidField(doc, "ClientId").ToString(), ["createdAt"] = JsonValue.Create(doc["CreatedAt"].ToUniversalTime()), ["updatedAt"] = JsonValue.Create(doc["UpdatedAt"].ToUniversalTime()),
+        ["id"] = Id(doc).ToString(),
+        ["clientId"] = GuidField(doc, "ClientId").ToString(),
+        ["createdAt"] = JsonValue.Create(doc["CreatedAt"].ToUniversalTime()),
+        ["updatedAt"] = JsonValue.Create(doc["UpdatedAt"].ToUniversalTime()),
         ["lines"] = new JsonArray(doc["Lines"].AsBsonArray.Select(line => (JsonNode)new JsonObject { ["productId"] = GuidField(line.AsBsonDocument, "ProductId").ToString(), ["quantity"] = line["Quantity"].AsInt32 }).ToArray())
     };
 
@@ -355,7 +374,11 @@ public sealed class BusinessValidationSteps(ScenarioApiContext context)
 
     private static JsonObject InvoiceProfile(BsonDocument doc) => new()
     {
-        ["id"] = Id(doc).ToString(), ["orderId"] = GuidField(doc, "OrderId").ToString(), ["clietDataVersionId"] = GuidField(doc, "ClientDataVersionId").ToString(), ["storageUrl"] = doc["StorageUrl"].AsString, ["createdAt"] = JsonValue.Create(doc["CreatedAt"].ToUniversalTime())
+        ["id"] = Id(doc).ToString(),
+        ["orderId"] = GuidField(doc, "OrderId").ToString(),
+        ["clietDataVersionId"] = GuidField(doc, "ClientDataVersionId").ToString(),
+        ["storageUrl"] = doc["StorageUrl"].AsString,
+        ["createdAt"] = JsonValue.Create(doc["CreatedAt"].ToUniversalTime())
     };
 
     private static JsonObject OrderProfile(BsonDocument order, Dictionary<string, BsonDocument[]> state)
@@ -373,21 +396,33 @@ public sealed class BusinessValidationSteps(ScenarioApiContext context)
             currency ??= product["PriceCurrency"].AsString;
             lines.Add(new JsonObject
             {
-                ["productVersionId"] = Id(product).ToString(), ["quantity"] = quantity, ["lineTotalAmount"] = amount * quantity,
+                ["productVersionId"] = Id(product).ToString(),
+                ["quantity"] = quantity,
+                ["lineTotalAmount"] = amount * quantity,
                 ["productVersion"] = new JsonObject
                 {
-                    ["id"] = Id(product).ToString(), ["productId"] = GuidField(product, "ProductId").ToString(), ["isActive"] = product["IsActive"].AsBoolean,
-                    ["createdAt"] = JsonValue.Create(product["CreatedAt"].ToUniversalTime()), ["deactivatedAt"] = null,
-                    ["name"] = product["Name"].AsString, ["brand"] = product["Brand"].AsString, ["priceAmount"] = amount, ["priceCurrency"] = product["PriceCurrency"].AsString
+                    ["id"] = Id(product).ToString(),
+                    ["productId"] = GuidField(product, "ProductId").ToString(),
+                    ["isActive"] = product["IsActive"].AsBoolean,
+                    ["createdAt"] = JsonValue.Create(product["CreatedAt"].ToUniversalTime()),
+                    ["deactivatedAt"] = null,
+                    ["name"] = product["Name"].AsString,
+                    ["brand"] = product["Brand"].AsString,
+                    ["priceAmount"] = amount,
+                    ["priceCurrency"] = product["PriceCurrency"].AsString
                 }
             });
         }
         return new JsonObject
         {
-            ["id"] = Id(order).ToString(), ["clientId"] = GuidField(order, "ClientId").ToString(), ["createdAt"] = JsonValue.Create(order["CreatedAt"].ToUniversalTime()),
+            ["id"] = Id(order).ToString(),
+            ["clientId"] = GuidField(order, "ClientId").ToString(),
+            ["createdAt"] = JsonValue.Create(order["CreatedAt"].ToUniversalTime()),
             ["updatedAt"] = order["UpdatedAt"].IsBsonNull ? null : JsonValue.Create(order["UpdatedAt"].ToUniversalTime()),
             ["status"] = order["Status"].AsInt32 switch { 0 => "Paid", 1 => "Cancelled", 2 => "Created", _ => throw new InvalidOperationException("Unexpected fixture status.") },
-            ["totalAmount"] = total, ["totalCurrency"] = currency ?? "USD", ["lines"] = lines
+            ["totalAmount"] = total,
+            ["totalCurrency"] = currency ?? "USD",
+            ["lines"] = lines
         };
     }
 
