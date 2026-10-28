@@ -53,7 +53,9 @@ class EvidenceLinkTests(unittest.TestCase):
 
     def test_changed_behavioral_example_is_rejected(self):
         changed = copy.deepcopy(self.cases)
-        next(c for c in changed if c['example'])['example']['newBehavior'] = 'changed'
+        baseline = json.loads((self.root / 'docs/bdd-baseline.json').read_text())
+        original = {links.case_key(case) for case in baseline['cases']}
+        next(c for c in changed if c['example'] and links.case_key(c) in original)['example']['newBehavior'] = 'changed'
         with self.assertRaisesRegex(AssertionError, 'Missing original'), patch.object(links, 'ROOT', self.root):
             links.verify_baseline(changed)
 

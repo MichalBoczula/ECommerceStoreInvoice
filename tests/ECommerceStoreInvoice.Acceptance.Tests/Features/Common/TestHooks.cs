@@ -38,6 +38,8 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Common
                     _factory.CatalogEvidenceHandlerFactory = _apiContext.CreateOrderCatalogHandler;
                 else if (_scenarioContext.ScenarioInfo.Tags.Contains("client-version-evidence"))
                     _factory.CatalogEvidenceHandlerFactory = _apiContext.CreateClientVersionCatalogHandler;
+                else if (_scenarioContext.ScenarioInfo.Tags.Contains("business-validation-evidence"))
+                    _factory.CatalogEvidenceHandlerFactory = _apiContext.CreateBusinessCatalogHandler;
                 if (_scenarioContext.ScenarioInfo.Tags.Contains("invoice-generation-evidence"))
                 {
                     _factory.CatalogEvidenceHandlerFactory = _apiContext.CreateInvoiceCatalogHandler;
