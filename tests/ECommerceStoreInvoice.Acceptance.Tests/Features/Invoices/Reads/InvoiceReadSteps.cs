@@ -334,7 +334,7 @@ public sealed class InvoiceReadSteps(ScenarioApiContext context)
             disposition.DispositionType.ShouldBe("attachment");
             disposition.FileNameStar.ShouldBe($"invoice-{_invoiceId:D}.pdf");
             disposition.FileName?.Trim('"').ShouldBe($"invoice-{_invoiceId:D}.pdf");
-            response.Headers.GetValues("Cache-Control").Single().ShouldBe("private, no-store");
+            response.Headers.GetValues("Cache-Control").SelectMany(value => value.Split(',')).Select(value => value.Trim()).Order().ShouldBe(new[] { "no-store", "private" });
             response.Headers.CacheControl?.Private.ShouldBeTrue();
             response.Headers.CacheControl?.NoStore.ShouldBeTrue();
             var bytes = await response.Content.ReadAsByteArrayAsync();
@@ -398,7 +398,7 @@ public sealed class InvoiceReadSteps(ScenarioApiContext context)
         ((int)response.StatusCode).ShouldBe(Integer(expected["StatusCode"]));
         response.Content.Headers.ContentType?.MediaType.ShouldBe(expected["ContentType"]);
         response.Content.Headers.ContentDisposition.ShouldBeNull();
-        response.Headers.CacheControl.ShouldBeNull();
+        response.Headers.GetValues("Cache-Control").SelectMany(value => value.Split(',')).Select(value => value.Trim()).Order().ShouldBe(expected["CacheControl"].Split(',').Select(value => value.Trim()).Order());
         using var json = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
         var value = json.RootElement;
         context.RecordEvidence("Complete actual invoice read problem", new { path, problem = value.Clone() });

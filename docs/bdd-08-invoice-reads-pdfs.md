@@ -37,7 +37,9 @@ attachment filename/filename-star, `Cache-Control: private, no-store`, and exact
 Content-Length when the streaming response provides it. The primary request is
 repeated and must produce the same complete outcome. Shared capture preserves
 actual bytes/base64/hash plus a binary PDF attachment, rather than decoding PDFs
-as text. Complete error responses have no PDF disposition or cache headers.
+as text. Complete error responses have no PDF disposition and retain the existing
+no-cache/no-store middleware policy. Cache directives are compared as an exact
+set because HTTP client parsing normalizes their order.
 
 Raw snapshots compare all five collections before/after every primary and
 supporting phase. Storage inventories independently compare all owned artifacts'
