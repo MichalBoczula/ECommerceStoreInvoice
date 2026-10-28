@@ -41,7 +41,7 @@ internal sealed class InvoiceGenerationProbe(Action<string, object> record, Func
     }
     internal bool FailWrittenPdf() => Interlocked.Exchange(ref _afterWriteRemaining, 0) == 1;
     internal Task<Dictionary<string, BsonDocument[]>> Snapshot() => snapshot();
-    internal void Observe(InvoiceRepositoryObservation value)
+    internal void ObserveRepository(InvoiceRepositoryObservation value)
     {
         Repository.Enqueue(value);
         record("Observed real invoice repository exchange", new
@@ -57,7 +57,7 @@ internal sealed class InvoiceGenerationProbe(Action<string, object> record, Func
             before = JsonSnapshot(value.Before), after = JsonSnapshot(value.After)
         });
     }
-    internal void Observe(InvoicePdfObservation value)
+    internal void ObservePdf(InvoicePdfObservation value)
     {
         Pdf.Enqueue(value);
         record("Observed real invoice PDF attempt", value);
@@ -88,7 +88,7 @@ internal sealed class ObservedInvoiceGenerationRepository(IInvoiceGenerationRepo
         var before = await probe.Snapshot();
         var started = DateTime.UtcNow;
         var claim = await inner.TryClaimAsync(reservation, attemptId);
-        probe.Observe(new("TryClaim", reservation, attemptId, claim, null, started, DateTime.UtcNow, null, before, await probe.Snapshot()));
+        probe.ObserveRepository(new("TryClaim", reservation, attemptId, claim, null, started, DateTime.UtcNow, null, before, await probe.Snapshot()));
         return claim;
     }
     public async Task<Invoice> CompleteAsync(InvoiceGenerationClaim claim, string storageUrl)
@@ -98,14 +98,14 @@ internal sealed class ObservedInvoiceGenerationRepository(IInvoiceGenerationRepo
         string? exceptionType = null;
         try { return await inner.CompleteAsync(claim, storageUrl); }
         catch (Exception exception) { exceptionType = exception.GetType().FullName; throw; }
-        finally { probe.Observe(new("Complete", null, claim.AttemptId, claim, storageUrl, started, DateTime.UtcNow, exceptionType, before, await probe.Snapshot())); }
+        finally { probe.ObserveRepository(new("Complete", null, claim.AttemptId, claim, storageUrl, started, DateTime.UtcNow, exceptionType, before, await probe.Snapshot())); }
     }
     public async Task ReleaseAsync(InvoiceGenerationClaim claim)
     {
         var before = await probe.Snapshot();
         var started = DateTime.UtcNow;
         await inner.ReleaseAsync(claim);
-        probe.Observe(new("Release", null, claim.AttemptId, claim, null, started, DateTime.UtcNow, null, before, await probe.Snapshot()));
+        probe.ObserveRepository(new("Release", null, claim.AttemptId, claim, null, started, DateTime.UtcNow, null, before, await probe.Snapshot()));
     }
 }
 
@@ -124,7 +124,7 @@ internal sealed class ObservedInvoicePdfService(IInvoicePdfService inner, Invoic
             return url;
         }
         catch (Exception exception) { exceptionType = exception.GetType().FullName; throw; }
-        finally { probe.Observe(new(invoiceId, attemptId, order, productVersions.ToArray(), clientDataVersion, url, exceptionType, probe.FileState(invoiceId, attemptId))); }
+        finally { probe.ObservePdf(new(invoiceId, attemptId, order, productVersions.ToArray(), clientDataVersion, url, exceptionType, probe.FileState(invoiceId, attemptId))); }
     }
     public async Task DeleteGeneratedPdf(Guid invoiceId, Guid attemptId)
     {
