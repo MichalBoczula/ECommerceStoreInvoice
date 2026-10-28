@@ -59,6 +59,7 @@ Feature: Download invoice PDF
       | Field          | Value                    |
       | MetadataRoutes | both-complete-and-hidden |
       | Repeat         | same-complete-outcome    |
+      | GeneratedSetupPdf | exact-real-rendered-download |
 
     Examples:
       | state        | status | scenarioId                  |
@@ -128,6 +129,7 @@ Feature: Download invoice PDF
       | Field          | Value                    |
       | MetadataRoutes | both-complete-and-hidden |
       | Repeat         | same-complete-outcome    |
+      | GeneratedSetupPdf | exact-real-rendered-download |
 
   @invoice-read-evidence  @allure.label.scenarioId:INV08_DownloadInvoicePdf_Legacy
   Scenario: A legacy completed invoice streams its exact binary PDF
@@ -188,6 +190,7 @@ Feature: Download invoice PDF
       | Field          | Value                    |
       | MetadataRoutes | both-complete-and-hidden |
       | Repeat         | same-complete-outcome    |
+      | GeneratedSetupPdf | exact-real-rendered-download |
 
   @invoice-read-evidence @invoice-blob-read @allure.label.scenarioId:INV08_DownloadInvoicePdf_BlobSuccess
   Scenario: A private Blob invoice streams exact bytes through the API
@@ -248,6 +251,7 @@ Feature: Download invoice PDF
       | Field          | Value                    |
       | MetadataRoutes | both-complete-and-hidden |
       | Repeat         | same-complete-outcome    |
+      | GeneratedSetupPdf | exact-real-rendered-download |
 
   @invoice-read-evidence @invoice-blob-read @allure.label.scenarioId:INV08_DownloadInvoicePdf_BlobMissing
   Scenario: A missing Blob PDF returns the complete safe missing-file problem
@@ -308,6 +312,7 @@ Feature: Download invoice PDF
       | Field          | Value                    |
       | MetadataRoutes | both-complete-and-hidden |
       | Repeat         | same-complete-outcome    |
+      | GeneratedSetupPdf | exact-real-rendered-download |
 
   @invoice-read-evidence @invoice-blob-read @invoice-blob-denied @allure.label.scenarioId:INV08_DownloadInvoicePdf_BlobDenied
   Scenario: Blob authentication failure returns a safe server problem without storage changes
@@ -368,3 +373,4 @@ Feature: Download invoice PDF
       | Field          | Value                    |
       | MetadataRoutes | both-complete-and-hidden |
       | Repeat         | same-complete-outcome    |
+      | GeneratedSetupPdf | exact-real-rendered-download |

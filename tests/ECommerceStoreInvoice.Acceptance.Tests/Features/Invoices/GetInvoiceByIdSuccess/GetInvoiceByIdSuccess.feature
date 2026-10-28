@@ -59,6 +59,7 @@ Feature: Get invoice by id
       | Field          | Value                    |
       | MetadataRoutes | both-complete-and-hidden |
       | Repeat         | same-complete-outcome    |
+      | GeneratedSetupPdf | exact-real-rendered-download |
 
   @invoice-read-evidence
   Scenario Outline: Invoice ID lookup hides incomplete records and retains legacy metadata
@@ -119,6 +120,7 @@ Feature: Get invoice by id
       | Field          | Value                    |
       | MetadataRoutes | both-complete-and-hidden |
       | Repeat         | same-complete-outcome    |
+      | GeneratedSetupPdf | exact-real-rendered-download |
 
     Examples:
       | state      | status | scenarioId                      |

@@ -30,7 +30,8 @@ safe signature, including the ShoppingCart-labelled empty-ID validation rule.
 The local/private-Blob fixtures are valid one-page PDFs with a deliberately
 non-UTF8 binary header marker, complete object offsets and cross-reference table.
 They are explicit binary fixtures, not claims of invoice rendering. The original
-by-ID setup uses a genuinely rendered PDF instead. Successful downloads must
+by-ID setup uses a genuinely rendered PDF instead and also downloads that real
+artifact through the API after both metadata lookups. Successful downloads must
 match every declared byte and SHA-256, `application/pdf` without a charset,
 attachment filename/filename-star, `Cache-Control: private, no-store`, and exact
 Content-Length when the streaming response provides it. The primary request is

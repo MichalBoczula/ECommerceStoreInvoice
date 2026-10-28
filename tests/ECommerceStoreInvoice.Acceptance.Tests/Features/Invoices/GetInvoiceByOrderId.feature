@@ -59,6 +59,7 @@ Feature: Get completed invoice by order id
       | Field          | Value                    |
       | MetadataRoutes | both-complete-and-hidden |
       | Repeat         | same-complete-outcome    |
+      | GeneratedSetupPdf | exact-real-rendered-download |
 
     Examples:
       | state      | status | scenarioId                   |

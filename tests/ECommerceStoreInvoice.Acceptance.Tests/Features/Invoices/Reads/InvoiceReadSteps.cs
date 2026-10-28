@@ -252,6 +252,7 @@ public sealed class InvoiceReadSteps(ScenarioApiContext context)
         context.RecordEvidence("Invoice read supporting expectations", values);
         values["MetadataRoutes"].ShouldBe("both-complete-and-hidden");
         values["Repeat"].ShouldBe("same-complete-outcome");
+        values["GeneratedSetupPdf"].ShouldBe("exact-real-rendered-download");
         var before = await context.Factory.GetCheckoutDocumentsAsync();
         var filesBefore = await Storage.ReadStateAsync();
         Attach("Invoice read database before supporting requests", before);
@@ -279,7 +280,15 @@ public sealed class InvoiceReadSteps(ScenarioApiContext context)
         _responseExpectations.ShouldNotBeNull();
         using var repeated = await Send(_path, _accept);
         await AssertOutcome(repeated, _path, _route, _status, _responseExpectations);
-        VerifyStorageReads(Probe.Reads.Skip(_readOffset).ToArray(), 2);
+        var generatedDownloads = 0;
+        if (_state == "real-created")
+        {
+            var path = $"/invoices/{_invoiceId}/pdf";
+            using var pdf = await Send(path, "application/pdf");
+            await AssertOutcome(pdf, path, "pdf", 200, _responseExpectations);
+            generatedDownloads = 1;
+        }
+        VerifyStorageReads(Probe.Reads.Skip(_readOffset).ToArray(), 2, generatedDownloads);
         var after = await context.Factory.GetCheckoutDocumentsAsync();
         var filesAfter = await Storage.ReadStateAsync();
         Attach("Invoice read database after supporting requests", after);
@@ -348,10 +357,10 @@ public sealed class InvoiceReadSteps(ScenarioApiContext context)
         }
     }
 
-    private void VerifyStorageReads(InvoiceStorageRead[] reads, int repetitions)
+    private void VerifyStorageReads(InvoiceStorageRead[] reads, int repetitions, int generatedDownloads = 0)
     {
         var completed = _selected["Document"] != "absent" && _selected["GenerationStatus"] is "Completed" or "absent";
-        var expectedCalls = _route == "pdf" && completed ? repetitions : 0;
+        var expectedCalls = (_route == "pdf" && completed ? repetitions : 0) + generatedDownloads;
         reads.Length.ShouldBe(expectedCalls);
         foreach (var read in reads)
         {
@@ -378,7 +387,7 @@ public sealed class InvoiceReadSteps(ScenarioApiContext context)
                 read.Found.ShouldBe(_selected["Pdf"] is "present" or "real-created");
             }
         }
-        context.RecordEvidence("Verified invoice storage read boundaries", new { route = _route, state = _state, readerFault = _readerFault, repetitions, expectedCalls, actualCalls = reads.Length, reads });
+        context.RecordEvidence("Verified invoice storage read boundaries", new { route = _route, state = _state, readerFault = _readerFault, repetitions, generatedDownloads, expectedCalls, actualCalls = reads.Length, reads });
     }
 
     private async Task AssertProblem(HttpResponseMessage response, string path, string route, int status, bool missingPdf)

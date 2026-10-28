@@ -59,3 +59,4 @@ Feature: Get invoice by id validation error
       | Field          | Value                    |
       | MetadataRoutes | both-complete-and-hidden |
       | Repeat         | same-complete-outcome    |
+      | GeneratedSetupPdf | exact-real-rendered-download |
