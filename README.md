@@ -167,7 +167,9 @@ filtering and exact populated state for accepted/rejected status changes.
 timestamp-based latest selection, isolation and historical invoice-reference evidence.
 [Task 7](docs/bdd-07-invoice-generation-recovery.md) adds complete invoice creation,
 reservation, attempt cleanup, retry and lost-acknowledgment evidence.
-The current acceptance inventory is **99 BDD + 27 standalone = 126**; recorder
+[Task 8](docs/bdd-08-invoice-reads-pdfs.md) adds complete completed-only/legacy
+metadata, exact binary downloads and real private Blob adapter HTTP evidence.
+The current acceptance inventory is **106 BDD + 27 standalone = 133**; recorder
 regressions remain standalone checks. Generated `.feature.cs` files are ignored
 build outputs, not maintained source.
 

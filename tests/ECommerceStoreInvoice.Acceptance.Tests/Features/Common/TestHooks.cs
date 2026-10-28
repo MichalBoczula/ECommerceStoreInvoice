@@ -44,6 +44,13 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Common
                     _factory.InvoiceProbe = new InvoiceGenerationProbe(_apiContext.RecordEvidence, _factory.GetCheckoutDocumentsAsync,
                         _scenarioContext.ScenarioInfo.Tags.Contains("invoice-hold-pdf"), _scenarioContext.ScenarioInfo.Tags.Contains("invoice-fails-after-write"));
                 }
+                if (_scenarioContext.ScenarioInfo.Tags.Contains("invoice-read-evidence"))
+                {
+                    _factory.CatalogEvidenceHandlerFactory = _apiContext.CreateInvoiceReadCatalogHandler;
+                    _factory.ReadStorage = new InvoiceReadStorage(_scenarioContext.ScenarioInfo.Tags.Contains("invoice-blob-read"),
+                        _scenarioContext.ScenarioInfo.Tags.Contains("invoice-blob-denied"));
+                    _factory.ReadProbe = new InvoiceReadProbe(_apiContext.RecordEvidence);
+                }
                 await _factory.InitializeAsync();
                 _apiContext.Factory = _factory;
                 using var swaggerClient = _factory.CreateClient();

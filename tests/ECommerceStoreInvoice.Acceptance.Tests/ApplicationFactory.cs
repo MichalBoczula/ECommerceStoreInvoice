@@ -47,6 +47,8 @@ public class ApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
     private ProductCatalogContainerFixture? _ownedProducts;
     private int _catalogRequests;
     internal Func<DelegatingHandler>? CatalogEvidenceHandlerFactory { get; set; }
+    internal InvoiceReadStorage? ReadStorage { get; set; }
+    internal InvoiceReadProbe? ReadProbe { get; set; }
     internal InvoiceGenerationProbe? InvoiceProbe { get; set; }
     internal int CatalogRequestCount => Volatile.Read(ref _catalogRequests);
     internal Uri ProductCatalogBaseAddress => new(_productCatalogBaseUrl ?? throw new InvalidOperationException("Products is not enabled."));
@@ -75,6 +77,11 @@ public class ApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment("Testing");
+        if (ReadStorage is not null)
+        {
+            builder.UseSetting("InvoiceStorage:ConnectionString", ReadStorage.IsBlob ? ReadStorage.ApplicationConnectionString : string.Empty);
+            builder.UseSetting("InvoiceStorage:ContainerName", ReadStorage.ContainerName);
+        }
         if (_useProductCatalog)
             builder.UseSetting("ExternalServices:ProductCatalog:BaseUrl", _productCatalogBaseUrl!);
 
@@ -139,11 +146,24 @@ public class ApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
             });
         }
 
+        if (ReadProbe is not null)
+        {
+            builder.ConfigureTestServices(services =>
+            {
+                var pdf = services.Last(descriptor => descriptor.ServiceType == typeof(IInvoicePdfService));
+                services.Remove(pdf);
+                services.AddScoped<IInvoicePdfService>(provider => new ObservedInvoiceReadService(
+                    (IInvoicePdfService)(pdf.ImplementationFactory?.Invoke(provider)
+                        ?? ActivatorUtilities.CreateInstance(provider, pdf.ImplementationType!)), ReadProbe));
+            });
+        }
+
     }
 
     public async Task InitializeAsync()
     {
         await EnsurePlaywrightInstalledAsync();
+        if (ReadStorage is not null) await ReadStorage.InitializeAsync();
 
         if (_useProductCatalog)
         {
@@ -297,7 +317,8 @@ public class ApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
         }
         finally
         {
-            if (_ownedProducts is not null) await _ownedProducts.DisposeAsync();
+            try { if (ReadStorage is not null) await ReadStorage.DisposeAsync(); }
+            finally { if (_ownedProducts is not null) await _ownedProducts.DisposeAsync(); }
         }
     }
 
