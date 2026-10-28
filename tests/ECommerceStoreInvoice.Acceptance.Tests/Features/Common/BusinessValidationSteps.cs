@@ -36,8 +36,9 @@ public sealed class BusinessValidationSteps(ScenarioApiContext context)
         {
             var id = Guid.NewGuid();
             _versions.Add(row["Version"], id);
-            var doc = new BsonDocument { ["_id"] = Binary(id), ["ClientId"] = Binary(_clients[row["Client"]]), ["CreatedAt"] = Date(row["CreatedAt"]) };
+            var doc = new BsonDocument { ["_id"] = Binary(id), ["ClientId"] = Binary(_clients[row["Client"]]) };
             foreach (var field in ClientFields) doc[field] = row[field];
+            doc["CreatedAt"] = Date(row["CreatedAt"]);
             return doc;
         }).ToArray());
     }
@@ -57,10 +58,10 @@ public sealed class BusinessValidationSteps(ScenarioApiContext context)
             {
                 ["_id"] = Binary(id),
                 ["ClientId"] = Binary(_clients[row["Client"]]),
+                ["Lines"] = new BsonArray { new BsonDocument { ["ProductVersionId"] = Binary(versionId), ["Quantity"] = Integer(row["Quantity"]) } },
                 ["CreatedAt"] = Date(row["CreatedAt"]),
                 ["UpdatedAt"] = NullableDate(row["UpdatedAt"]),
-                ["Status"] = Status(row["Status"]),
-                ["Lines"] = new BsonArray { new BsonDocument { ["ProductVersionId"] = Binary(versionId), ["Quantity"] = Integer(row["Quantity"]) } }
+                ["Status"] = Status(row["Status"])
             });
             products.Add(new BsonDocument
             {
@@ -251,8 +252,9 @@ public sealed class BusinessValidationSteps(ScenarioApiContext context)
             profile.Add("clientId", _clients["A"].ToString());
             profile.Add("createdAt", JsonValue.Create(created));
             EqualJson(root, profile);
-            var doc = new BsonDocument { ["_id"] = Binary(id), ["ClientId"] = Binary(_clients["A"]), ["CreatedAt"] = Milliseconds(created) };
+            var doc = new BsonDocument { ["_id"] = Binary(id), ["ClientId"] = Binary(_clients["A"]) };
             foreach (var field in ClientFields) doc[field] = _body[Camel(field)] is { } value ? new BsonString(value.GetValue<string>()) : BsonNull.Value;
+            doc["CreatedAt"] = Milliseconds(created);
             expected["clientDataVersions"] = expected["clientDataVersions"].Append(doc).OrderBy(Id).ToArray();
         }
         else if (values["Effect"] == "replace-cart-lines")
