@@ -208,7 +208,7 @@ public sealed class OrderReadStatusSteps(ScenarioApiContext context)
         context.Response.Content.Headers.ContentType?.MediaType.ShouldBe("application/json");
         _actual = _clientKey == "<none>"
             ? [await ReadOrderAsync(context.Response)]
-            : (await context.Response.Content.ReadFromJsonAsync<OrderResponseDto[]>(context.JsonOptions))!;
+            : await ReadOrdersAsync(context.Response);
         _actual.ShouldNotBeNull();
         context.RecordEvidence("Complete actual order response profiles", _actual);
         _actual.Length.ShouldBe(table.Rows.Count);
@@ -380,8 +380,7 @@ public sealed class OrderReadStatusSteps(ScenarioApiContext context)
         {
             using var response = await context.HttpClient.GetAsync($"/orders/client/{clientId}");
             response.StatusCode.ShouldBe(HttpStatusCode.OK);
-            var actual = await response.Content.ReadFromJsonAsync<OrderResponseDto[]>(context.JsonOptions);
-            actual.ShouldNotBeNull();
+            var actual = await ReadOrdersAsync(response);
             var expected = _orders.Values.Where(order => order.ClientId == clientId).ToArray();
             actual.Select(order => order.Id).Order().ShouldBe(expected.Select(order => order.Id).Order());
             foreach (var order in actual) EqualOrder(order, expected.Single(item => item.Id == order.Id));
@@ -426,16 +425,49 @@ public sealed class OrderReadStatusSteps(ScenarioApiContext context)
     private async Task<OrderResponseDto> ReadOrderAsync(HttpResponseMessage response)
     {
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
-        var order = await response.Content.ReadFromJsonAsync<OrderResponseDto>(context.JsonOptions);
+        response.Content.Headers.ContentType?.MediaType.ShouldBe("application/json");
+        using var document = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+        CompleteProfile(document.RootElement);
+        var order = JsonSerializer.Deserialize<OrderResponseDto>(document.RootElement, context.JsonOptions);
         order.ShouldNotBeNull();
         return order;
+    }
+
+    private async Task<OrderResponseDto[]> ReadOrdersAsync(HttpResponseMessage response)
+    {
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        response.Content.Headers.ContentType?.MediaType.ShouldBe("application/json");
+        using var document = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+        document.RootElement.ValueKind.ShouldBe(JsonValueKind.Array);
+        foreach (var order in document.RootElement.EnumerateArray()) CompleteProfile(order);
+        var orders = JsonSerializer.Deserialize<OrderResponseDto[]>(document.RootElement, context.JsonOptions);
+        orders.ShouldNotBeNull();
+        return orders;
+    }
+
+    private static void CompleteProfile(JsonElement order)
+    {
+        Names(order, "id", "clientId", "createdAt", "updatedAt", "status", "totalAmount", "totalCurrency", "lines");
+        order.GetProperty("lines").ValueKind.ShouldBe(JsonValueKind.Array);
+        foreach (var line in order.GetProperty("lines").EnumerateArray())
+        {
+            Names(line, "productVersionId", "quantity", "productVersion", "lineTotalAmount");
+            Names(line.GetProperty("productVersion"), "id", "productId", "isActive", "createdAt", "deactivatedAt", "name", "brand", "priceAmount", "priceCurrency");
+        }
+    }
+
+    private static void Names(JsonElement value, params string[] names)
+    {
+        value.ValueKind.ShouldBe(JsonValueKind.Object);
+        value.EnumerateObject().Select(property => property.Name).Order().ShouldBe(names.Order());
     }
 
     private void EqualOrder(OrderResponseDto actual, OrderResponseDto expected)
     {
         OrderResponseDto Normalize(OrderResponseDto order) => order with
         {
-            CreatedAt = Milliseconds(order.CreatedAt), UpdatedAt = Milliseconds(order.UpdatedAt),
+            CreatedAt = Milliseconds(order.CreatedAt),
+            UpdatedAt = Milliseconds(order.UpdatedAt),
             Lines = order.Lines.OrderBy(line => line.ProductVersionId).Select(line => line with
             {
                 ProductVersion = line.ProductVersion with { CreatedAt = Milliseconds(line.ProductVersion.CreatedAt), DeactivatedAt = Milliseconds(line.ProductVersion.DeactivatedAt) }
@@ -455,16 +487,24 @@ public sealed class OrderReadStatusSteps(ScenarioApiContext context)
 
     private static BsonDocument OrderDocument(OrderResponseDto order) => new()
     {
-        ["_id"] = Binary(order.Id), ["ClientId"] = Binary(order.ClientId),
+        ["_id"] = Binary(order.Id),
+        ["ClientId"] = Binary(order.ClientId),
         ["Lines"] = new BsonArray(order.Lines.Select(line => new BsonDocument { ["ProductVersionId"] = Binary(line.ProductVersionId), ["Quantity"] = line.Quantity })),
-        ["CreatedAt"] = order.CreatedAt, ["UpdatedAt"] = order.UpdatedAt is { } updated ? new BsonDateTime(updated) : BsonNull.Value,
+        ["CreatedAt"] = order.CreatedAt,
+        ["UpdatedAt"] = order.UpdatedAt is { } updated ? new BsonDateTime(updated) : BsonNull.Value,
         ["Status"] = (int)Enum.Parse<OrderStatus>(order.Status)
     };
 
     private static BsonDocument VersionDocument(ProductVersionResponseDto version) => new()
     {
-        ["_id"] = Binary(version.Id), ["ProductId"] = Binary(version.ProductId), ["IsActive"] = version.IsActive,
-        ["CreatedAt"] = version.CreatedAt, ["DeactivatedAt"] = version.DeactivatedAt is { } deactivated ? new BsonDateTime(deactivated) : BsonNull.Value,
-        ["Name"] = version.Name, ["Brand"] = version.Brand, ["PriceAmount"] = version.PriceAmount, ["PriceCurrency"] = version.PriceCurrency
+        ["_id"] = Binary(version.Id),
+        ["ProductId"] = Binary(version.ProductId),
+        ["IsActive"] = version.IsActive,
+        ["CreatedAt"] = version.CreatedAt,
+        ["DeactivatedAt"] = version.DeactivatedAt is { } deactivated ? new BsonDateTime(deactivated) : BsonNull.Value,
+        ["Name"] = version.Name,
+        ["Brand"] = version.Brand,
+        ["PriceAmount"] = version.PriceAmount,
+        ["PriceCurrency"] = version.PriceCurrency
     };
 }
