@@ -328,7 +328,7 @@ public sealed class CheckoutEvidenceSteps(ScenarioApiContext context)
     private static string Required(IReadOnlyDictionary<string, string> values, string key) => values.TryGetValue(key, out var value) ? value : throw new InvalidOperationException($"Missing explicit checkout expectation: {key}");
     private static int Number(IReadOnlyDictionary<string, string> values, string key) => int.Parse(Required(values, key), CultureInfo.InvariantCulture);
     private static decimal Amount(IReadOnlyDictionary<string, string> values, string key) => decimal.Parse(Required(values, key), CultureInfo.InvariantCulture);
-    private static CatalogProduct Product(TableRow row) => new(Guid.Parse(row["ProductId"]), row["Name"], row["Brand"], decimal.Parse(row["PriceAmount"], CultureInfo.InvariantCulture), row["PriceCurrency"]);
+    private static CatalogProduct Product(DataTableRow row) => new(Guid.Parse(row["ProductId"]), row["Name"], row["Brand"], decimal.Parse(row["PriceAmount"], CultureInfo.InvariantCulture), row["PriceCurrency"]);
     private static Guid Id(BsonDocument document) => GuidValue(document, "_id");
     private static Guid GuidValue(BsonDocument document, string field) => document[field].AsBsonBinaryData.ToGuid();
     private static void Fields(BsonDocument document, params string[] names) => document.Names.Order().ShouldBe(names.Order());
