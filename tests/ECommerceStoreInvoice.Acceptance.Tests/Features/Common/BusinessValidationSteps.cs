@@ -313,29 +313,21 @@ public sealed class BusinessValidationSteps(ScenarioApiContext context)
     private async Task SupportingReads()
     {
         Attach("Business database before supporting reads", await context.Factory.GetCheckoutDocumentsAsync());
-        var reads = 0;
+        var expectations = new List<(string Path, JsonObject Expected)>();
         foreach (var cart in _known["shoppingCarts"])
-        {
-            await VerifyRead($"/shopping-carts/client/{GuidField(cart, "ClientId")}", CartProfile(cart));
-            reads++;
-        }
+            expectations.Add(($"/shopping-carts/client/{GuidField(cart, "ClientId")}", CartProfile(cart)));
         foreach (var client in _clients.Values)
         {
             var version = _known["clientDataVersions"].Where(doc => GuidField(doc, "ClientId") == client).MaxBy(doc => doc["CreatedAt"].ToUniversalTime())!;
-            await VerifyRead($"/client-data-versions/client/{client}", ClientProfile(version));
-            reads++;
+            expectations.Add(($"/client-data-versions/client/{client}", ClientProfile(version)));
         }
         foreach (var order in _known["orders"])
-        {
-            await VerifyRead($"/orders/{Id(order)}", OrderProfile(order, _known));
-            reads++;
-        }
+            expectations.Add(($"/orders/{Id(order)}", OrderProfile(order, _known)));
         foreach (var invoice in _known["invoices"])
-        {
-            await VerifyRead($"/invoices/{Id(invoice)}", InvoiceProfile(invoice));
-            reads++;
-        }
-        reads.ShouldBe(9);
+            expectations.Add(($"/invoices/{Id(invoice)}", InvoiceProfile(invoice)));
+        expectations.Count.ShouldBe(9);
+        context.RecordEvidence("Business supporting response expectations", expectations.Select(item => new { path = item.Path, expected = item.Expected }).ToArray());
+        foreach (var item in expectations) await VerifyRead(item.Path, item.Expected);
         var after = await context.Factory.GetCheckoutDocumentsAsync();
         Attach("Business database after supporting reads", after);
         EqualState(after, _known);
@@ -345,7 +337,6 @@ public sealed class BusinessValidationSteps(ScenarioApiContext context)
 
     private async Task VerifyRead(string path, JsonObject expected)
     {
-        context.RecordEvidence("Business supporting response expectation", new { path, expected });
         using var response = await context.HttpClient.GetAsync(path);
         using var actual = await SuccessJson(response);
         EqualJson(actual.RootElement, expected);
