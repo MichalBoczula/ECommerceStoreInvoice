@@ -68,25 +68,42 @@ public sealed class ClientDataVersionHistorySteps(ScenarioApiContext context)
             row["GenerationLeaseUntil"].ShouldBe("<null>");
             snapshots.Add(new BsonDocument
             {
-                ["_id"] = Binary(snapshotId), ["ProductId"] = Binary(productId), ["IsActive"] = bool.Parse(row["IsActive"]),
-                ["CreatedAt"] = created, ["DeactivatedAt"] = BsonNull.Value, ["Name"] = row["ProductName"], ["Brand"] = row["Brand"],
-                ["PriceAmount"] = decimal.Parse(row["PriceAmount"], CultureInfo.InvariantCulture), ["PriceCurrency"] = row["PriceCurrency"]
+                ["_id"] = Binary(snapshotId),
+                ["ProductId"] = Binary(productId),
+                ["IsActive"] = bool.Parse(row["IsActive"]),
+                ["CreatedAt"] = created,
+                ["DeactivatedAt"] = BsonNull.Value,
+                ["Name"] = row["ProductName"],
+                ["Brand"] = row["Brand"],
+                ["PriceAmount"] = decimal.Parse(row["PriceAmount"], CultureInfo.InvariantCulture),
+                ["PriceCurrency"] = row["PriceCurrency"]
             });
             orders.Add(new BsonDocument
             {
-                ["_id"] = Binary(orderId), ["ClientId"] = Binary(clientId),
+                ["_id"] = Binary(orderId),
+                ["ClientId"] = Binary(clientId),
                 ["Lines"] = new BsonArray { new BsonDocument { ["ProductVersionId"] = Binary(snapshotId), ["Quantity"] = Integer(row["Quantity"]) } },
-                ["CreatedAt"] = created, ["UpdatedAt"] = paid, ["Status"] = 0
+                ["CreatedAt"] = created,
+                ["UpdatedAt"] = paid,
+                ["Status"] = 0
             });
             invoices.Add(new BsonDocument
             {
-                ["_id"] = Binary(Guid.NewGuid()), ["OrderId"] = Binary(orderId), ["ClientDataVersionId"] = Binary(version.Id),
-                ["StorageUrl"] = row["StorageUrl"], ["CreatedAt"] = Date(row["InvoiceCreatedAt"]),
-                ["GenerationStatus"] = row["GenerationStatus"], ["GenerationAttemptId"] = BsonNull.Value, ["GenerationLeaseUntil"] = BsonNull.Value
+                ["_id"] = Binary(Guid.NewGuid()),
+                ["OrderId"] = Binary(orderId),
+                ["ClientDataVersionId"] = Binary(version.Id),
+                ["StorageUrl"] = row["StorageUrl"],
+                ["CreatedAt"] = Date(row["InvoiceCreatedAt"]),
+                ["GenerationStatus"] = row["GenerationStatus"],
+                ["GenerationAttemptId"] = BsonNull.Value,
+                ["GenerationLeaseUntil"] = BsonNull.Value
             });
             carts.Add(new BsonDocument
             {
-                ["_id"] = Binary(Guid.NewGuid()), ["ClientId"] = Binary(clientId), ["CreatedAt"] = created, ["UpdatedAt"] = paid,
+                ["_id"] = Binary(Guid.NewGuid()),
+                ["ClientId"] = Binary(clientId),
+                ["CreatedAt"] = created,
+                ["UpdatedAt"] = paid,
                 ["Lines"] = new BsonArray { new BsonDocument { ["ProductId"] = Binary(productId), ["Quantity"] = Integer(row["CartQuantity"]) } }
             });
         }
@@ -348,21 +365,44 @@ public sealed class ClientDataVersionHistorySteps(ScenarioApiContext context)
     private static Guid Id(BsonDocument value) => value["_id"].AsBsonBinaryData.ToGuid();
     private static CreateClientDataVersionRequestDto Request(IReadOnlyDictionary<string, string> values) => new()
     {
-        ClientName = values["ClientName"], PostalCode = values["PostalCode"], City = values["City"], Street = values["Street"],
-        BuildingNumber = values["BuildingNumber"], ApartmentNumber = values["ApartmentNumber"], PhoneNumber = values["PhoneNumber"],
-        PhonePrefix = values["PhonePrefix"], AddressEmail = values["AddressEmail"]
+        ClientName = values["ClientName"],
+        PostalCode = values["PostalCode"],
+        City = values["City"],
+        Street = values["Street"],
+        BuildingNumber = values["BuildingNumber"],
+        ApartmentNumber = values["ApartmentNumber"],
+        PhoneNumber = values["PhoneNumber"],
+        PhonePrefix = values["PhonePrefix"],
+        AddressEmail = values["AddressEmail"]
     };
     private static ClientDataVersionResponseDto Profile(CreateClientDataVersionRequestDto request, Guid clientId, Guid id, DateTime createdAt) => new()
     {
-        Id = id, ClientId = clientId, ClientName = request.ClientName, PostalCode = request.PostalCode, City = request.City, Street = request.Street,
-        BuildingNumber = request.BuildingNumber, ApartmentNumber = request.ApartmentNumber, PhoneNumber = request.PhoneNumber,
-        PhonePrefix = request.PhonePrefix, AddressEmail = request.AddressEmail, CreatedAt = createdAt
+        Id = id,
+        ClientId = clientId,
+        ClientName = request.ClientName,
+        PostalCode = request.PostalCode,
+        City = request.City,
+        Street = request.Street,
+        BuildingNumber = request.BuildingNumber,
+        ApartmentNumber = request.ApartmentNumber,
+        PhoneNumber = request.PhoneNumber,
+        PhonePrefix = request.PhonePrefix,
+        AddressEmail = request.AddressEmail,
+        CreatedAt = createdAt
     };
     private static BsonDocument Document(ClientDataVersionResponseDto value) => new()
     {
-        ["_id"] = Binary(value.Id), ["ClientId"] = Binary(value.ClientId), ["ClientName"] = value.ClientName,
-        ["PostalCode"] = value.PostalCode, ["City"] = value.City, ["Street"] = value.Street, ["BuildingNumber"] = value.BuildingNumber,
-        ["ApartmentNumber"] = value.ApartmentNumber, ["PhoneNumber"] = value.PhoneNumber, ["PhonePrefix"] = value.PhonePrefix,
-        ["AddressEmail"] = value.AddressEmail, ["CreatedAt"] = value.CreatedAt
+        ["_id"] = Binary(value.Id),
+        ["ClientId"] = Binary(value.ClientId),
+        ["ClientName"] = value.ClientName,
+        ["PostalCode"] = value.PostalCode,
+        ["City"] = value.City,
+        ["Street"] = value.Street,
+        ["BuildingNumber"] = value.BuildingNumber,
+        ["ApartmentNumber"] = value.ApartmentNumber,
+        ["PhoneNumber"] = value.PhoneNumber,
+        ["PhonePrefix"] = value.PhonePrefix,
+        ["AddressEmail"] = value.AddressEmail,
+        ["CreatedAt"] = value.CreatedAt
     };
 }
