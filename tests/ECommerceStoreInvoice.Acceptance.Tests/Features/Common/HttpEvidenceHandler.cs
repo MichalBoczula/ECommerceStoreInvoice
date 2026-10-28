@@ -4,7 +4,7 @@ using System.Text.Json;
 namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Common;
 
 /// <summary>Captures actual client-visible bytes inside contract validation without replacing content.</summary>
-internal sealed class HttpEvidenceHandler(ScenarioHttpEvidence evidence) : DelegatingHandler
+internal sealed class HttpEvidenceHandler(ScenarioHttpEvidence evidence, string targetService = "invoices", string exchangeRole = "api") : DelegatingHandler
 {
     internal static readonly HttpRequestOptionsKey<TaskCompletionSource> CompletionKey = new("Invoices.HttpEvidence.Completion");
 
@@ -24,6 +24,8 @@ internal sealed class HttpEvidenceHandler(ScenarioHttpEvidence evidence) : Deleg
             evidence.Record($"HTTP {sequence:000} request", new
             {
                 service = "invoices",
+                targetService,
+                exchangeRole,
                 scenarioId = evidence.ScenarioId,
                 instanceId = evidence.InstanceId,
                 exchangeId,
@@ -45,6 +47,8 @@ internal sealed class HttpEvidenceHandler(ScenarioHttpEvidence evidence) : Deleg
             evidence.Record($"HTTP {sequence:000} response", new
             {
                 service = "invoices",
+                targetService,
+                exchangeRole,
                 scenarioId = evidence.ScenarioId,
                 instanceId = evidence.InstanceId,
                 exchangeId,
@@ -70,6 +74,8 @@ internal sealed class HttpEvidenceHandler(ScenarioHttpEvidence evidence) : Deleg
             evidence.Record($"HTTP {sequence:000} failure", new
             {
                 service = "invoices",
+                targetService,
+                exchangeRole,
                 scenarioId = evidence.ScenarioId,
                 instanceId = evidence.InstanceId,
                 exchangeId,

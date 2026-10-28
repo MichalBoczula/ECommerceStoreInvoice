@@ -30,7 +30,10 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Common
                     _scenarioContext.ScenarioInfo.Tags.Contains("products-api"),
                     _scenarioContext.ScenarioInfo.Tags.Contains("pdf-fails-once"),
                     _scenarioContext.ScenarioInfo.Tags.Contains("completion-ack-lost"),
-                    _scenarioContext.ScenarioInfo.Tags.Contains("pdf-download-fails"));
+                    _scenarioContext.ScenarioInfo.Tags.Contains("pdf-download-fails"),
+                    _scenarioContext.ScenarioInfo.Tags.Contains("isolated-products"));
+                if (_scenarioContext.ScenarioInfo.Tags.Contains("checkout-evidence"))
+                    _factory.CatalogEvidenceHandlerFactory = _apiContext.CreateCheckoutCatalogHandler;
                 await _factory.InitializeAsync();
                 _apiContext.Factory = _factory;
                 using var swaggerClient = _factory.CreateClient();

@@ -58,6 +58,29 @@ public sealed class HttpEvidenceTests
     }
 
     [Fact]
+    public async Task CatalogAndApiExchangesShareIdentityAndSequenceWhileRetainingTheirTargets()
+    {
+        var evidence = Evidence();
+        using var api = Client(evidence, (_, _) => Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)));
+        using var products = new HttpClient(new HttpEvidenceHandler(evidence, "products", "checkout-catalog")
+        {
+            InnerHandler = new StubHandler((_, _) => Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+            { Content = new StringContent("[]", Encoding.UTF8, "application/json") }))
+        });
+        using var apiResponse = await api.GetAsync("http://localhost/orders");
+        using var productsResponse = await products.PostAsync("http://products/mobile-phones/by-ids", new StringContent("[]", Encoding.UTF8, "application/json"));
+        var items = Drain(evidence);
+        Assert.Equal(4, items.Count);
+        Assert.NotEqual(items[0].GetProperty("exchangeId").GetString(), items[2].GetProperty("exchangeId").GetString());
+        Assert.All(items, item => Assert.Equal(evidence.InstanceId, item.GetProperty("instanceId").GetString()));
+        Assert.All(items.Take(2), item => Assert.Equal("invoices", item.GetProperty("targetService").GetString()));
+        Assert.All(items.Skip(2), item => Assert.Equal("products", item.GetProperty("targetService").GetString()));
+        Assert.All(items.Skip(2), item => Assert.Equal("checkout-catalog", item.GetProperty("exchangeRole").GetString()));
+        Assert.Equal("/mobile-phones/by-ids", items[2].GetProperty("path").GetString());
+        Assert.Equal(items[2].GetProperty("exchangeId").GetString(), items[3].GetProperty("exchangeId").GetString());
+    }
+
+    [Fact]
     public async Task BodylessRequestsHaveNoInventedJsonAndMultipleClientsShareTheSequence()
     {
         var evidence = Evidence();
