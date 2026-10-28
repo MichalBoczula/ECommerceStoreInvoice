@@ -189,6 +189,17 @@ public class ApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
         return snapshot;
     }
 
+    public async Task SeedOrderReadDocumentsAsync(Dictionary<string, BsonDocument[]> documents)
+    {
+        var names = new[] { "shoppingCarts", "orders", "productVersions", "invoices", "clientDataVersions" };
+        if (!documents.Keys.Order().SequenceEqual(names.Order()))
+            throw new InvalidOperationException("Order fixtures must explicitly supply all five collections.");
+        var database = new MongoClient(_connectionString).GetDatabase(_database);
+        foreach (var name in names)
+            if (documents[name].Length != 0)
+                await database.GetCollection<BsonDocument>(name).InsertManyAsync(documents[name]);
+    }
+
     internal Task ChangeIsolatedCatalogProductAsync(Guid productId, string name, string brand, decimal amount, string currency) =>
         (_ownedProducts ?? throw new InvalidOperationException("Catalog mutation requires isolated Products containers."))
             .ChangeProductFixtureAsync(productId, name, brand, amount, currency);
