@@ -29,6 +29,7 @@ place, while application deployment and selected LiveDocs refresh remain manual.
 - [ ] **INV-BDD-05 — Order reads and statuses.** Complete get/list/isolation
   responses and stored state for valid and rejected transitions; preserve the
   distinction between terminal rejection and a stale-write conflict.
+  Implementation and verification: [order reads and statuses](bdd-05-order-reads-status.md).
 - [ ] **INV-BDD-06 — Client data versions.** Multiple immutable versions,
   latest selection/client isolation and preservation of existing invoice references.
 - [ ] **INV-BDD-07 — Invoice generation and recovery.** Complete ownership,

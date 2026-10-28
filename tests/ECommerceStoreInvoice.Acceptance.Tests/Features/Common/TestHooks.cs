@@ -34,6 +34,8 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Common
                     _scenarioContext.ScenarioInfo.Tags.Contains("isolated-products"));
                 if (_scenarioContext.ScenarioInfo.Tags.Contains("checkout-evidence"))
                     _factory.CatalogEvidenceHandlerFactory = _apiContext.CreateCheckoutCatalogHandler;
+                else if (_scenarioContext.ScenarioInfo.Tags.Contains("order-state-evidence"))
+                    _factory.CatalogEvidenceHandlerFactory = _apiContext.CreateOrderCatalogHandler;
                 await _factory.InitializeAsync();
                 _apiContext.Factory = _factory;
                 using var swaggerClient = _factory.CreateClient();

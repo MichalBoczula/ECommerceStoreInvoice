@@ -161,7 +161,9 @@ adds actual paired HTTP evidence, explicit IDs and readable descriptions for all
 adds complete cart response/persistence evidence and four populated/empty/replacement
 cases. [Task 4](docs/bdd-04-checkout-snapshots.md) adds complete checkout/snapshot
 state, actual catalog exchanges and isolated catalog-change/outage evidence.
-The current acceptance inventory is **83 BDD + 27 standalone = 110**; recorder
+[Task 5](docs/bdd-05-order-reads-status.md) adds complete order reads, client
+filtering and exact populated state for accepted/rejected status changes.
+The current acceptance inventory is **90 BDD + 27 standalone = 117**; recorder
 regressions remain standalone checks. Generated `.feature.cs` files are ignored
 build outputs, not maintained source.
 
