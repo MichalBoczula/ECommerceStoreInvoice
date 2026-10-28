@@ -157,9 +157,11 @@ example and all 56 declared operation/status pairs: 54 have guaranteed scenario
 intent and two explicit gaps remain. These are source coverage links, not
 a claim of complete runtime cause coverage. [Task 2](docs/bdd-02-http-evidence.md)
 adds actual paired HTTP evidence, explicit IDs and readable descriptions for all
-77 BDD cases. The acceptance inventory is now **77 BDD + 26 standalone = 103**;
-the 18 additional recorder regressions are not Gherkin scenarios. Generated
-`.feature.cs` files are ignored build outputs, not maintained source. [Task 3](docs/bdd-03-shopping-carts.md) adds complete cart response/persistence evidence and four empty/populated/replacement cases: **81 BDD + 26 standalone = 107 acceptance cases**.
+77 BDD cases and 18 recorder regressions. [Task 3](docs/bdd-03-shopping-carts.md)
+adds complete cart response/persistence evidence and four populated/empty/replacement
+cases. The acceptance inventory is **81 BDD + 26 standalone = 107**; recorder
+regressions remain standalone checks. Generated `.feature.cs` files are ignored
+build outputs, not maintained source.
 
 Run from the repository root:
 

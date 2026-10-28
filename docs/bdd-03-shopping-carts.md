@@ -66,10 +66,48 @@ inserts are labelled as database setup, never fabricated as HTTP exchanges.
 
 `bash scripts/ci.sh source` passes all 22 source/link regressions and checks all
 81 expanded cases against the fixed 77-case baseline. `git diff --check` passes.
-The workspace has no .NET SDK or Docker daemon; build/format, the full five suites,
-OpenAPI export, coverage, security, packaging and image checks run in PR CI.
-The PR records actual runtime results and an independent bundle/TRX audit before
-completion.
+The workspace has no .NET SDK or Docker daemon; actual build/format/runtime and
+image verification uses CI.
+
+The implementation at `e48e1776535de10b9882474a7cd69d4af73101c9` was tested by
+[PR CI 40692028779](https://github.com/MichalBoczula/ECommerceStoreInvoice/actions/runs/40692028779)
+through merge commit `92ab12ee7315975f86664a0812567864f0585b9f`. Its tree exactly
+matches the submitted implementation. Release build, formatting, audited restore,
+generated OpenAPI, all five suites, dependency/secret checks, quality gate,
+packaging and Docker build/high-critical image scan pass:
+
+| Suite | Passed, no failures/skips | Line coverage |
+| --- | ---: | ---: |
+| Domain | 112 | 89.5% |
+| Application | 95 | 86.3% |
+| Infrastructure | 73 | 93.2% |
+| ExternalProviders | 3 | — |
+| Acceptance | 107 | — |
+
+The downloaded bundle's outer Actions ZIP SHA-256 matches the official artifact
+metadata. Its inner bundle is **827848 bytes**, SHA-256
+`504404caa1d597ce52135a5c8bd869fb43dc4596679c9c529afb58d0992641b4`.
+All **1024 manifest entries** have verified sizes/hashes and closed inventory.
+All 38 bundled feature files byte-match the reviewed source.
+
+The independent TRX audit preserves all 103 task-2 cases and adds only the four
+new cart cases. All 77 original BDD IDs, titles and explicit instance IDs remain.
+The actual 81 passed results have **219 paired HTTP exchanges** (96 Given,
+88 When, 35 Then) and **820 resolving attachments**: 704 JSON, 113 CSV tables,
+two text and one PDF. All byte-count/base64/hash envelopes match, all JSON parses,
+and the PDF bytes equal the captured response. Every one of the seven cart cases
+contains its complete response/expectations and database before/after/supporting
+read evidence with matching identities. Their stored lines equal the actual
+responses and PUT bodies; every other-client document remains exact.
+
+Pinned Allure **2.46.1** renders all 81 passed cases. Each rendered title,
+description, identity and every attachment name/type/byte content matches its
+raw result. Every case, attachment and entry asset resolves over local static
+HTTP. This is generated-report verification, not a browser-pixel or deployed
+ACA/Nginx check. Exported OpenAPI, flows, policies and original operation metadata
+are unchanged; the link projection adds only the four scenario links. The audit
+snapshot stays frozen to this implementation run; documentation-only completion
+updates do not rewrite its provenance.
 
 Task 2 was independently confirmed from merged PR #221 and successful master
 run 40584879097 at `85327a2d9437046d572fb3a46b37ad502c0adb7f`.

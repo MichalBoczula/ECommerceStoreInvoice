@@ -19,7 +19,7 @@ place, while application deployment and selected LiveDocs refresh remain manual.
   stable scenario/instance/exchange IDs and centralized truthful capture for all
   main, setup, failure, concurrent and supporting clients, including binary PDFs.
   See [HTTP evidence and identity contract](bdd-02-http-evidence.md).
-- [ ] **INV-BDD-03 — Shopping carts.** Complete create/get/update profiles,
+- [x] **INV-BDD-03 — Shopping carts.** Complete create/get/update profiles,
   exact persisted lines/timestamps, empty contents and other-client preservation.
   Implementation and verification: [shopping carts](bdd-03-shopping-carts.md).
 - [ ] **INV-BDD-04 — Checkout and product snapshots.** Multiple products,
