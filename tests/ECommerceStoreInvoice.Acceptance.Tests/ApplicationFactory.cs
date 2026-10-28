@@ -7,6 +7,8 @@ using ECommerceStoreInvoice.Application.Services.Abstract.Invoices;
 using ECommerceStoreInvoice.Domain.AggregatesModel.InvoiceAggregate.Repositories;
 using MongoDB.Bson;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Http;
+using ECommerceStoreInvoice.Infrastructure.ApiClients.Products;
 using Testcontainers.MongoDb;
 using MongoDB.Driver;
 
@@ -41,15 +43,22 @@ public class ApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
     private readonly CompletionAcknowledgementState _completionAckState = new();
     private readonly PdfFailureState _pdfFailureState = new();
     private string? _productCatalogBaseUrl;
+    private readonly bool _isolatedProducts;
+    private ProductCatalogContainerFixture? _ownedProducts;
+    private int _catalogRequests;
+    internal Func<DelegatingHandler>? CatalogEvidenceHandlerFactory { get; set; }
+    internal int CatalogRequestCount => Volatile.Read(ref _catalogRequests);
+    internal Uri ProductCatalogBaseAddress => new(_productCatalogBaseUrl ?? throw new InvalidOperationException("Products is not enabled."));
 
     public ApplicationFactory() : this(false) { }
 
-    internal ApplicationFactory(bool useProductCatalog, bool failPdfOnce = false, bool loseCompletionAckOnce = false, bool failDownload = false)
+    internal ApplicationFactory(bool useProductCatalog, bool failPdfOnce = false, bool loseCompletionAckOnce = false, bool failDownload = false, bool isolatedProducts = false)
     {
         _useProductCatalog = useProductCatalog;
         _failPdfOnce = failPdfOnce;
         _loseCompletionAckOnce = loseCompletionAckOnce;
         _failDownload = failDownload;
+        _isolatedProducts = isolatedProducts;
     }
 
     public static async Task DisposeSharedProductsAsync()
@@ -75,6 +84,16 @@ public class ApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
         builder.UseSetting("MongoDbSettings:ProductVersionsCollectionName", "productVersions");
         builder.UseSetting("MongoDbSettings:InvoicesCollectionName", "invoices");
         builder.UseSetting("MongoDbSettings:ClientDataVersionsCollectionName", "clientDataVersions");
+
+        if (CatalogEvidenceHandlerFactory is not null)
+        {
+            builder.ConfigureTestServices(services => services.Configure<HttpClientFactoryOptions>(nameof(ProductApiClient), options =>
+                options.HttpMessageHandlerBuilderActions.Add(handlerBuilder =>
+                {
+                    handlerBuilder.AdditionalHandlers.Add(CatalogEvidenceHandlerFactory());
+                    handlerBuilder.AdditionalHandlers.Add(new CatalogRequestCounter(this));
+                })));
+        }
 
         if (_loseCompletionAckOnce)
         {
@@ -109,7 +128,14 @@ public class ApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
         await EnsurePlaywrightInstalledAsync();
 
         if (_useProductCatalog)
-            _productCatalogBaseUrl = (await StartProducts.Value).BaseAddress.ToString();
+        {
+            if (_isolatedProducts)
+            {
+                _ownedProducts = new ProductCatalogContainerFixture();
+                await _ownedProducts.InitializeAsync();
+            }
+            _productCatalogBaseUrl = (_ownedProducts ?? await StartProducts.Value).BaseAddress.ToString();
+        }
 
         await StartMongo.Value;
 
@@ -150,6 +176,35 @@ public class ApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
     public Task SeedShoppingCartDocumentAsync(BsonDocument document) =>
         new MongoClient(_connectionString).GetDatabase(_database)
             .GetCollection<BsonDocument>("shoppingCarts").InsertOneAsync(document);
+
+    public async Task<Dictionary<string, BsonDocument[]>> GetCheckoutDocumentsAsync()
+    {
+        var database = new MongoClient(_connectionString).GetDatabase(_database);
+        var snapshot = new Dictionary<string, BsonDocument[]>(StringComparer.Ordinal);
+        foreach (var name in new[] { "shoppingCarts", "orders", "productVersions", "invoices", "clientDataVersions" })
+        {
+            var documents = await database.GetCollection<BsonDocument>(name).Find(FilterDefinition<BsonDocument>.Empty).ToListAsync();
+            snapshot.Add(name, documents.OrderBy(document => document["_id"].AsBsonBinaryData.ToGuid()).ToArray());
+        }
+        return snapshot;
+    }
+
+    internal Task ChangeIsolatedCatalogProductAsync(Guid productId, string name, string brand, decimal amount, string currency) =>
+        (_ownedProducts ?? throw new InvalidOperationException("Catalog mutation requires isolated Products containers."))
+            .ChangeProductFixtureAsync(productId, name, brand, amount, currency);
+
+    internal Task StopIsolatedCatalogAsync() =>
+        (_ownedProducts ?? throw new InvalidOperationException("Stopping Products requires isolated containers."))
+            .StopApiAsync();
+
+    private sealed class CatalogRequestCounter(ApplicationFactory owner) : DelegatingHandler
+    {
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            Interlocked.Increment(ref owner._catalogRequests);
+            return base.SendAsync(request, cancellationToken);
+        }
+    }
 
     public async Task SeedInvoiceLookupAsync(Guid invoiceId, Guid orderId, string state)
     {
@@ -203,10 +258,17 @@ public class ApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
 
     public new async Task DisposeAsync()
     {
-        base.Dispose();
-        foreach (var path in _downloadFiles) File.Delete(path);
-        if (!string.IsNullOrEmpty(_connectionString))
-            await new MongoClient(_connectionString).DropDatabaseAsync(_database);
+        try
+        {
+            base.Dispose();
+            foreach (var path in _downloadFiles) File.Delete(path);
+            if (!string.IsNullOrEmpty(_connectionString))
+                await new MongoClient(_connectionString).DropDatabaseAsync(_database);
+        }
+        finally
+        {
+            if (_ownedProducts is not null) await _ownedProducts.DisposeAsync();
+        }
     }
 
     private static async Task EnsurePlaywrightInstalledAsync()

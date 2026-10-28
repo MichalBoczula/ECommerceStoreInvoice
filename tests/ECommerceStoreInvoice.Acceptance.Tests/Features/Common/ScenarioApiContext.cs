@@ -30,6 +30,17 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Common
             // Capture first so the actual response survives an outer contract failure.
             => factory.CreateDefaultClient(new OpenApiResponseHandler(OpenApiDocument), new HttpEvidenceHandler(Evidence));
 
+        internal DelegatingHandler CreateCheckoutCatalogHandler() => new HttpEvidenceHandler(Evidence, "products", "checkout-catalog");
+
+        public HttpClient CreateCatalogFixtureClient() => new(new HttpEvidenceHandler(Evidence, "products", "catalog-fixture")
+        {
+            InnerHandler = new HttpClientHandler()
+        })
+        {
+            BaseAddress = Factory.ProductCatalogBaseAddress,
+            Timeout = TimeSpan.FromSeconds(15)
+        };
+
         private ScenarioHttpEvidence Evidence => _evidence ?? throw new InvalidOperationException("Scenario evidence is not initialized.");
 
         public JsonSerializerOptions JsonOptions { get; } = new()

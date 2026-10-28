@@ -46,6 +46,29 @@ public sealed class ProductCatalogContainerFixture : IAsyncLifetime
 
     public Uri BaseAddress => new($"http://{_api.Hostname}:{_api.GetMappedPublicPort(ApiPort)}/");
 
+    // Direct test-fixture changes only; callers must own this fixture, never the shared catalogue.
+    internal async Task ChangeProductFixtureAsync(Guid productId, string name, string brand, decimal amount, string currency)
+    {
+        var connectionString = $"Server={_sql.Hostname},{_sql.GetMappedPublicPort(SqlPort)};Database=ProductsDb;" +
+            $"User Id=sa;Password={SqlPassword};TrustServerCertificate=True;Encrypt=False;Connection Timeout=5;";
+        await using var connection = new SqlConnection(connectionString);
+        await connection.OpenAsync();
+        await using var command = connection.CreateCommand();
+        command.CommandText = "UPDATE dbo.TB_MobilePhones SET Name=@name, Brand=@brand, PriceAmount=@amount, PriceCurrency=@currency WHERE Id=@id";
+        command.Parameters.AddWithValue("@id", productId);
+        command.Parameters.AddWithValue("@name", name);
+        command.Parameters.AddWithValue("@brand", brand);
+        var price = command.Parameters.Add("@amount", System.Data.SqlDbType.Decimal);
+        price.Precision = 18;
+        price.Scale = 2;
+        price.Value = amount;
+        command.Parameters.AddWithValue("@currency", currency);
+        if (await command.ExecuteNonQueryAsync() != 1)
+            throw new InvalidOperationException("Expected exactly one isolated catalog fixture row.");
+    }
+
+    internal Task StopApiAsync() => _api.StopAsync();
+
     public async Task InitializeAsync()
     {
         try

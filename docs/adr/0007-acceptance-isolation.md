@@ -13,6 +13,15 @@ The acceptance suite starts one MongoDB replica-set Testcontainer lazily and giv
 
 Only scenarios tagged `@products-api` start the shared ProductsCatalog fixture. That fixture starts the digest-pinned Products image declared in `ProductCatalogContainerFixture.cs` and SQL Server on a dedicated Docker network; catalog migrations seed product data used by checkout scenarios. Catalog and SQL Server containers are reused for those scenarios and disposed after the test run. The scenarios read seeded catalog products; their scenario-specific orders, carts, snapshots and invoices stay in their own MongoDB database. Tags `@pdf-fails-once` and `@completion-ack-lost` install scenario-local failure wrappers for recovery cases. Other acceptance tests can use their own `ApplicationFactory` instances and still get a distinct MongoDB database.
 
+INV-BDD-04 adds an explicit `isolated-products` tag for the scenario that changes
+catalog fixture values and stops its API. That scenario owns a separate Products
+API, SQL Server and Docker network with the same pinned image; all are disposed
+with its factory. Direct parameterized SQL changes are labelled as fixture setup
+and independently confirmed over Products HTTP. The shared seeded catalog stays
+read-only. `checkout-evidence` adds the shared byte recorder to the existing
+Products HttpClient and counts actual application fetches separately from explicit
+fixture probes; it does not replace the real Kiota adapter or Products service.
+
 ## Consequences
 
 Scenarios use isolated invoice data while reusing expensive containers. A failed database drop surfaces as a test failure. Isolation depends on catalog scenarios continuing to treat the shared seeded SQL data as read-only; if tests later mutate catalog data, they need their own SQL reset or database boundary. INV-BDD-01 replaces the mutable `latest` input with the published digest from Products commit `59e1d8f827fac1d1c87cd67eaef884d92a06d1a3` (CI 40398686283). Future pin updates must verify catalog behavior and seed IDs against the checkout tests; an unrelated Products publication no longer silently changes their input. The per-scenario MongoDB boundary does not assert that local PDF files are shared between API instances or that a production database can be upgraded safely. A Docker daemon and Playwright dependencies are required for the complete acceptance suite.

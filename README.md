@@ -161,7 +161,9 @@ adds actual paired HTTP evidence, explicit IDs and readable descriptions for all
 adds complete cart response/persistence evidence and four populated/empty/replacement
 cases. The acceptance inventory is **81 BDD + 26 standalone = 107**; recorder
 regressions remain standalone checks. Generated `.feature.cs` files are ignored
-build outputs, not maintained source.
+build outputs, not maintained source. [Task 4](docs/bdd-04-checkout-snapshots.md)
+adds complete checkout/snapshot state, actual catalog exchanges and isolated
+catalog-change/outage evidence: **83 BDD + 27 standalone = 110 acceptance cases**.
 
 Run from the repository root:
 
