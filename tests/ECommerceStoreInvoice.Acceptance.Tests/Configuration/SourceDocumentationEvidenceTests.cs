@@ -24,6 +24,7 @@ public sealed class SourceDocumentationEvidenceTests(ContractDocumentFixture fix
         var result = Build([.. Pair(1, "Given", CartPath, 200), .. Pair(2, "When", CartPath, 200), .. Pair(3, "Then", CartPath, 200)]);
         Assert.Equal(Instance + "/2", result.GetProperty("witnesses")[0].GetProperty("exchangeId").GetString());
         Assert.Equal("setup", result.GetProperty("exchanges")[0].GetProperty("role").GetString());
+        Assert.Equal("first", result.GetProperty("exchanges")[1].GetProperty("requestAttempt").GetString());
         Assert.All(result.GetProperty("exchanges").EnumerateArray(), link => { Assert.False(link.GetProperty("executedBranchClaimed").GetBoolean()); Assert.Empty(link.GetProperty("executedStepIds").EnumerateArray()); });
     }
     [Fact]
@@ -56,7 +57,7 @@ public sealed class SourceDocumentationEvidenceTests(ContractDocumentFixture fix
     }
     private static JsonElement[] Pair(int sequence, string phase, string path, int status, string? error = null)
     {
-        var request = JsonSerializer.SerializeToElement(new { exchangeId = Instance + "/" + sequence, scenarioId = Scenario, instanceId = Instance, targetService = "invoices", exchangeRole = "api", stepPhase = phase, method = "GET", path });
+        var request = JsonSerializer.SerializeToElement(new { exchangeId = Instance + "/" + sequence, scenarioId = Scenario, instanceId = Instance, targetService = "invoices", exchangeRole = "api", stepPhase = phase, method = "GET", path, requestAttempt = sequence == 2 ? "first" : null });
         var response = JsonSerializer.SerializeToElement(new { exchangeId = Instance + "/" + sequence, scenarioId = Scenario, instanceId = Instance, status, content = new { body = error is null ? (object)new { } : new { errors = new[] { new { name = error } } } } });
         return [request, response];
     }

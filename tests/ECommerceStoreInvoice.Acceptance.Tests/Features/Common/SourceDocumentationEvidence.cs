@@ -76,6 +76,8 @@ internal static class SourceDocumentationEvidence
                 method,
                 path,
                 operationId = operation,
+                query = request.TryGetProperty("query", out var query) ? query.GetString() : null,
+                requestAttempt = request.TryGetProperty("requestAttempt", out var attempt) ? attempt.GetString() : null,
                 legacyAlias = operation == "CreateOrder" && path.Split('/', StringSplitOptions.RemoveEmptyEntries).Length == 2,
                 status,
                 cancelled = status is null && outcome.GetProperty("cancelled").GetBoolean(),
