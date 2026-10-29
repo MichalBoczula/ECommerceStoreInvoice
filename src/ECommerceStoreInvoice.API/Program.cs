@@ -27,6 +27,13 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SupportNonNullableReferenceTypes();
+    c.UseAllOfToExtendReferenceSchemas();
+    foreach (var assembly in new[] { typeof(Program).Assembly,
+        typeof(ECommerceStoreInvoice.Application.Common.ResponsesDto.InvoiceResponseDto).Assembly,
+        typeof(ECommerceStoreInvoice.Domain.Validation.Common.ValidationError).Assembly })
+        c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, $"{assembly.GetName().Name}.xml"));
+    c.SchemaFilter<InvoiceContractSchemaFilter>();
+    c.OperationFilter<InvoiceContractOperationFilter>();
 });
 
 builder.Services.AddHealthChecks()

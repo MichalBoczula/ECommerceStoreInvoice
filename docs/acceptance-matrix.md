@@ -92,3 +92,11 @@ coverage. Two populated-data documentation cases remain named operation links;
 all current flows/policies are compared completely with their source projections.
 Actual bootstrap/index failures remain standalone lifecycle tests because no host
 serves an HTTP response. Their counts are reported separately from BDD cases.
+
+
+INV-BDD-13 adds four named serializer cases and one separate technical contract
+read: 281 named, 28 framework and eleven technical cases, totaling 320. All fifteen
+operations retain 59/59 declared status pairs. Generated schema metadata, all typed
+examples, exact safe problem alternatives and binary PDF headers are verified
+against actual serializer/type information; guard mutation tests remain standalone.
+See [request/response contracts](bdd-13-request-response-contracts.md).

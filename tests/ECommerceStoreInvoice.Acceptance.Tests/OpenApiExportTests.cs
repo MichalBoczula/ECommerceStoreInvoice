@@ -29,6 +29,7 @@ public sealed class OpenApiExportTests
 
         var openApi = await response.Content.ReadAsStringAsync();
         using var document = JsonDocument.Parse(openApi);
+        _ = Features.Common.OpenApiContractAssertions.Check(document);
         var operations = document.RootElement.GetProperty("paths").EnumerateObject().SelectMany(path => path.Value.EnumerateObject())
             .Where(operation => operation.Value.ValueKind == JsonValueKind.Object && operation.Value.TryGetProperty("operationId", out _))
             .Select(operation => operation.Value.GetProperty("operationId").GetString()).ToArray();
