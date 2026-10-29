@@ -48,7 +48,7 @@ public sealed class TechnicalLifecycleTests(ApplicationFactory control) : IClass
     [Theory]
     [InlineData("cart-duplicates", "shoppingCarts", "UX_ShoppingCart_ClientId", 11000)]
     [InlineData("invoice-duplicates", "invoices", "UX_Invoice_OrderId", 11000)]
-    [InlineData("index-options", "shoppingCarts", "UX_ShoppingCart_ClientId", 85)]
+    [InlineData("index-options", "shoppingCarts", "UX_ShoppingCart_ClientId", 86)]
     public async Task RealIndexFailurePreventsServingAndARepairedNewHostCanStart(string cause, string collectionName, string indexName, int expectedCode)
     {
         var name = $"startup-index-{Guid.NewGuid():N}";
@@ -69,7 +69,8 @@ public sealed class TechnicalLifecycleTests(ApplicationFactory control) : IClass
             {
                 var error = await Record.ExceptionAsync(() => Task.Run(() => { using var http = failing.CreateClient(); }));
                 error.ShouldNotBeNull();
-                Chain(error).OfType<MongoCommandException>().ShouldContain(e => e.Code == expectedCode);
+                var commandError = Chain(error).OfType<MongoCommandException>().ShouldHaveSingleItem();
+                commandError.Code.ShouldBe(expectedCode);
                 failing.SuccessfulHosts.ShouldBe(0);
             }
             OrderConcurrencySteps.Equal(await Snapshot(database), before);

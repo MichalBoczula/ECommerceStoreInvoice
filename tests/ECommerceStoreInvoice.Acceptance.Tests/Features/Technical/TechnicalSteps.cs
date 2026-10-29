@@ -56,14 +56,14 @@ public sealed class TechnicalSteps(ScenarioApiContext context, BusinessValidatio
         await Probe("/health/ready", 200);
         await DocumentationSnapshot();
         await context.Factory.StopTechnicalMongoAsync();
-        context.RecordEvidence("Technical owned Mongo lifecycle", new { transition = "stopped", owned = true, sharedMongoTouched = false, database = context.Factory.DatabaseName, ownedContainerId = context.Factory.TechnicalMongoContainerId, sharedContainerId = context.Factory.SharedMongoContainerId });
+        context.RecordEvidence("Technical owned Mongo lifecycle", new { transition = "stopped", owned = true, sharedMongoTouched = false, database = context.Factory.DatabaseName, ownedContainerId = context.Factory.TechnicalMongoContainerId, sharedContainerId = context.Factory.SharedMongoContainerId, boundHostPort = context.Factory.TechnicalBoundPort });
         var commandCount = context.Factory.ReadinessCommands.Count;
         await Probe("/health/live", 200); await Probe("/health", 200);
         context.Factory.ReadinessCommands.Count.ShouldBe(commandCount);
         await Probe("/health/ready", 503);
         await DocumentationSnapshot();
         await context.Factory.RestartTechnicalMongoAsync();
-        context.RecordEvidence("Technical owned Mongo lifecycle", new { transition = "restarted", owned = true, sharedMongoTouched = false, database = context.Factory.DatabaseName, ownedContainerId = context.Factory.TechnicalMongoContainerId, sharedContainerId = context.Factory.SharedMongoContainerId });
+        context.RecordEvidence("Technical owned Mongo lifecycle", new { transition = "restarted", owned = true, sharedMongoTouched = false, database = context.Factory.DatabaseName, ownedContainerId = context.Factory.TechnicalMongoContainerId, sharedContainerId = context.Factory.SharedMongoContainerId, boundHostPort = context.Factory.TechnicalBoundPort });
         await Probe("/health/ready", 200);
         context.RecordEvidence("Technical real readiness commands", context.Factory.ReadinessCommands.Select(c => new { c.Command, c.Database }).ToArray());
     }
@@ -119,8 +119,13 @@ public sealed class TechnicalSteps(ScenarioApiContext context, BusinessValidatio
         {
             representation.ShouldBe("ui"); response.Content.Headers.ContentType?.MediaType.ShouldBe("text/html");
             var html = await response.Content.ReadAsStringAsync();
-            html.ShouldContain("SwaggerUIBundle"); html.ShouldContain("swagger-ui"); html.ShouldContain("v1/swagger.json");
-            context.RecordEvidence("Technical Swagger UI entry verified", new { path, contentType = "text/html", realEntryServed = true, referencesGeneratedDocument = true });
+            html.ShouldContain("swagger-ui"); html.ShouldContain("swagger-ui-bundle.js"); html.ShouldContain("index.js");
+            using var bootstrap = await Technical.GetAsync("/swagger/index.js");
+            bootstrap.StatusCode.ShouldBe(HttpStatusCode.OK);
+            (bootstrap.Content.Headers.ContentType?.MediaType is "application/javascript" or "text/javascript").ShouldBeTrue();
+            var script = await bootstrap.Content.ReadAsStringAsync();
+            script.ShouldContain("SwaggerUIBundle"); script.ShouldContain("v1/swagger.json");
+            context.RecordEvidence("Technical Swagger UI entry verified", new { path, bootstrapPath = "/swagger/index.js", contentType = "text/html", realEntryServed = true, realBootstrapServed = true, referencesGeneratedDocument = true });
         }
     }
 

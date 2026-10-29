@@ -1,3 +1,5 @@
+using System.Net;
+using System.Net.Sockets;
 using System.Collections.Concurrent;
 using ECommerceStoreInvoice.Application.Services.Abstract.Invoices;
 using Microsoft.AspNetCore.Hosting;
@@ -21,12 +23,20 @@ public partial class ApplicationFactory
     internal string MongoConnection => _connectionString;
     private MongoDbContainer? _technicalMongo;
     private bool _technicalMongoRunning;
+    internal int? TechnicalBoundPort { get; private set; }
     internal ConcurrentQueue<(string Command, string Database)> ReadinessCommands { get; } = new();
 
     private async Task<bool> StartTechnicalMongoAsync()
     {
         if (TechnicalMongoMode is null) return false;
-        var builder = new MongoDbBuilder("mongo:8.0").WithUsername(Username).WithPassword(Password);
+        // Docker can assign a different ephemeral published port after Stop/Start.
+        // Reserve one available host port for this owned container's entire lifecycle.
+        var listener = new TcpListener(IPAddress.Loopback, 0);
+        listener.Start();
+        var port = ((IPEndPoint)listener.LocalEndpoint).Port;
+        listener.Stop();
+        TechnicalBoundPort = port;
+        var builder = new MongoDbBuilder("mongo:8.0").WithUsername(Username).WithPassword(Password).WithPortBinding(port, 27017);
         if (TechnicalMongoMode == "replica") builder = builder.WithReplicaSet().WithStartupCallback(async (container, token) =>
         {
             // The module's default callback repeats rs.initiate after Stop/Start.
@@ -44,6 +54,7 @@ public partial class ApplicationFactory
         using var startup = new CancellationTokenSource(TimeSpan.FromSeconds(45));
         await _technicalMongo.StartAsync(startup.Token);
         _technicalMongoRunning = true;
+        if (_technicalMongo.GetMappedPublicPort(27017) != port) throw new InvalidOperationException("Owned Mongo host port was not retained.");
         _connectionString = _technicalMongo.GetConnectionString();
         return true;
     }
@@ -83,6 +94,8 @@ public partial class ApplicationFactory
         using var startup = new CancellationTokenSource(TimeSpan.FromSeconds(45));
         await _technicalMongo.StartAsync(startup.Token);
         _technicalMongoRunning = true;
+        if (_technicalMongo.GetMappedPublicPort(27017) != TechnicalBoundPort || _technicalMongo.GetConnectionString() != _connectionString)
+            throw new InvalidOperationException("Owned Mongo restart changed its host endpoint.");
         using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(15));
         await Services.GetRequiredService<IMongoClient>().GetDatabase(_database)
             .RunCommandAsync<BsonDocument>(new BsonDocument("ping", 1), cancellationToken: deadline.Token);

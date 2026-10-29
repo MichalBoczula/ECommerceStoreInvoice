@@ -20,7 +20,8 @@ the host is running: alias/liveness remain Healthy, readiness becomes Unhealthy
 projections. Restarting the same Mongo restores readiness and every original field
 and ordered line. Shared test containers are never stopped. The owned restart fixture initializes
 the replica only when needed, records owned/shared container identities and bounds
-container operations; it does not repeat first-start initialization on restart. A separate owned
+container operations and retains its fixed host endpoint; it does not repeat
+first-start initialization on restart. A separate owned
 standalone Mongo permits startup indexes but its actual hello is not a replica
 set/router; readiness is 503 and executes no ping. Normal reads remain possible.
 The test-only readiness client records actual commands and uses bounded selection
@@ -56,7 +57,8 @@ including GuidCollectionValidationPolicy. Two new populated-data cases verify re
 byte stability and unchanged data. Source equality and readable structure do not
 claim that reading documentation executes policies or completes Task 14's semantic
 flow/rule/RAG-link audit. Swagger JSON matches the complete generated document with
-fifteen unique operations; the actual UI entry references it. This is HTTP entry
+fifteen unique operations; the actual UI entry and its served index.js bootstrap
+reference it. This is HTTP entry
 verification, not browser rendering or Task 13's complete schema semantics.
 
 Seven standalone cases invoke actual Program bootstrap. Missing Products URL,

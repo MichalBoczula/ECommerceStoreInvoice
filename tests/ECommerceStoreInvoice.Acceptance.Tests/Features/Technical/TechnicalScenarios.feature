@@ -65,7 +65,7 @@ Feature: Technical HTTP behavior preserves invoice data
 
   @technical-evidence
   Scenario Outline: Swagger exposes the generated document and real UI entry
-    The real Swagger JSON matches the host's complete generated source document with fifteen unique named operations. The UI representation serves its actual HTML entry referencing that document. These HTTP checks do not claim browser rendering or full request/response contract semantics, which remain later packages.
+    The real Swagger JSON matches the host's complete generated source document with fifteen unique named operations. The UI representation serves its actual HTML entry and bootstrap script referencing that document. These HTTP checks do not claim browser rendering or full request/response contract semantics, which remain later packages.
     When I request Swagger representation "<Representation>"
     Then technical operations preserve all populated collections and complete supporting reads
 
