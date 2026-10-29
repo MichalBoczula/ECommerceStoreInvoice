@@ -252,6 +252,11 @@ documentation. The existing `invoices` Blob container continues storing business
 PDFs; `livedocs` stores CI documentation sources. See
 [ADR-0009](docs/adr/0009-livedocs-source-publication.md).
 
+The [final BDD audit and manual refresh handoff](docs/bdd-15-final-audit.md)
+records the verified master archive, all 321 BDD cases, complete attachment checks
+and the exact invoices reference to select. LiveDocs manifest/image selection and
+the Terraform rollout remain separate manual actions.
+
 ## Operations
 
 Checkout requires a reachable ProductsCatalog API and a MongoDB deployment capable of transactions. Readiness accepts a writable replica set or the `isdbgrid` router topology used by Azure DocumentDB. Startup creates checkout collections outside transactions, initializes indexes and fails if initialization fails. Hello/ping and native MongoDB tests do not prove every hosted-database transaction behavior; verify real checkout and rollback after deployment.

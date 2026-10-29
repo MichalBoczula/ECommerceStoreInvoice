@@ -68,6 +68,9 @@ place, while application deployment and selected LiveDocs refresh remain manual.
   declared rules and reachable versus standalone documentation. No runtime tracing
   or implemented retrieval service is implied.
   Implementation and verification: [flows, rules and RAG links](bdd-14-flows-rules-rag-links.md).
-- [ ] **INV-BDD-15 — Final report audit.** Full CI, baseline retention, every
+- [x] **INV-BDD-15 — Final report audit.** Full CI, baseline retention, every
   rendered case/attachment, contract/state checks, immutable archive identity and
   the manual LiveDocs image-selection/deployment handoff.
+  Frozen master evidence and exact receipt: [final audit and manual refresh
+  handoff](bdd-15-final-audit.md). The audit/handoff is complete; LiveDocs manifest
+  selection, new image publication and Azure rollout remain manual and pending.
