@@ -1,4 +1,5 @@
 using ECommerceStoreInvoice.API.Configuration;
+using ECommerceStoreInvoice.API.Configuration.Common;
 using ECommerceStoreInvoice.API.Endpoints;
 using ECommerceStoreInvoice.Application;
 using ECommerceStoreInvoice.Domain;
@@ -42,6 +43,15 @@ if (!app.Environment.IsEnvironment("OpenApiExport"))
     await app.Services.InitializeInfrastructureAsync();
 
 app.UseExceptionHandler();
+app.UseStatusCodePages(status =>
+{
+    var context = status.HttpContext;
+    if (context.Response.StatusCode is 404 or 405 or 415 &&
+        !context.Request.Path.StartsWithSegments("/health") &&
+        !context.Request.Path.StartsWithSegments("/swagger"))
+        return FrameworkProblemResponse.WriteAsync(context, context.Response.StatusCode, context.RequestAborted);
+    return Task.CompletedTask;
+});
 
 app.UseSerilogRequestLogging();
 

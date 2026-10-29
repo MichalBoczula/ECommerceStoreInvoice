@@ -45,9 +45,10 @@ place, while application deployment and selected LiveDocs refresh remain manual.
   boundaries, exact safe errors, unchanged populated state and honest classification
   of HTTP-reachable versus standalone policies/rules.
   Implementation and verification: [business validation](bdd-09-business-validation.md).
-- [ ] **INV-BDD-10 — Framework failures.** Raw malformed/missing/null/wrong-type
+- [x] **INV-BDD-10 — Framework failures.** Raw malformed/missing/null/wrong-type
   requests, routing/method/media failures and complete safe problems without writes.
-  Add the missing GetInvoiceByOrderId server-error case.
+  Includes the missing GetInvoiceByOrderId server-error case.
+  Implementation and verification: [framework failures](bdd-10-framework-failures.md).
 - [ ] **INV-BDD-11 — Concurrency and atomicity.** Deterministic stale-status 409,
   competing checkout/claim winners, exact full state, actual rollback and attempt
   cleanup. Keep injected pre-write failure and real transactions distinct.

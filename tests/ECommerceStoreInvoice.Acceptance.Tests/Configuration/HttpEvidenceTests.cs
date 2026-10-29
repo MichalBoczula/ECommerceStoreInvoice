@@ -302,6 +302,79 @@ public sealed class HttpEvidenceTests
         protected override bool TryComputeLength(out long length) { length = 0; return false; }
     }
 
+    [Fact]
+    public async Task GroupedObservationsRetainRepeatedNamesAndIndividualHttpPairs()
+    {
+        var evidence = new ScenarioHttpEvidence("INV10_Framework_Grouping", "Framework", "Grouping", new(), groupObservations: true) { StepPhase = "When" };
+        evidence.RecordObservation("State", new { position = "before", value = 1 });
+        using var client = Client(evidence, (_, _) =>
+        {
+            var response = new HttpResponseMessage(HttpStatusCode.MethodNotAllowed) { Content = new StringContent("{}") };
+            response.Content.Headers.Allow.Add("GET");
+            response.Content.Headers.Allow.Add("POST");
+            return Task.FromResult(response);
+        });
+        using var response = await client.DeleteAsync("http://localhost/orders/id");
+        evidence.RecordObservation("State", new { position = "after", value = 1 });
+        var items = Drain(evidence);
+        Assert.Equal(3, items.Count);
+        Assert.Equal(items[0].GetProperty("exchangeId").GetString(), items[1].GetProperty("exchangeId").GetString());
+        Assert.Equal(new[] { "GET", "POST" }, items[1].GetProperty("allow").EnumerateArray().Select(value => value.GetString()));
+        var observations = items[2].GetProperty("observations").EnumerateArray().ToArray();
+        Assert.Equal(new[] { "State", "State" }, observations.Select(value => value.GetProperty("name").GetString()));
+        Assert.Equal(new[] { "before", "after" }, observations.Select(value => value.GetProperty("value").GetProperty("position").GetString()));
+        Assert.Equal(evidence.ScenarioId, items[2].GetProperty("scenarioId").GetString());
+        Assert.Equal(evidence.InstanceId, items[2].GetProperty("instanceId").GetString());
+        Assert.All(observations, value => Assert.Equal("When", value.GetProperty("stepPhase").GetString()));
+        Assert.Empty(Drain(evidence));
+    }
+
+    [Fact]
+    public void GroupingKeepsIdentityAndStepBoundaries()
+    {
+        var flat = Evidence();
+        var grouped = new ScenarioHttpEvidence(flat.ScenarioId, flat.Feature, flat.Scenario, flat.Parameters, groupObservations: true) { StepPhase = "Given" };
+        Assert.Equal(flat.InstanceId, grouped.InstanceId);
+        var mutable = new Dictionary<string, int> { ["count"] = 2 };
+        grouped.RecordObservation("Fixture", mutable);
+        mutable["count"] = 9;
+        var intermediate = new List<object>();
+        grouped.Flush((_, value) => intermediate.Add(value), flushObservations: false);
+        Assert.Empty(intermediate);
+        grouped.StepPhase = "Then";
+        grouped.RecordObservation("Check", new { count = 2 });
+        var group = Assert.Single(Drain(grouped));
+        var entries = group.GetProperty("observations").EnumerateArray().ToArray();
+        Assert.Equal(2, entries.Length);
+        Assert.Equal("Given", entries[0].GetProperty("stepPhase").GetString());
+        Assert.Equal("Then", entries[1].GetProperty("stepPhase").GetString());
+        Assert.Equal("Fixture", entries[0].GetProperty("name").GetString());
+        Assert.Equal("Check", entries[1].GetProperty("name").GetString());
+        Assert.Equal(2, entries[0].GetProperty("value").GetProperty("count").GetInt32());
+        Assert.Empty(Drain(grouped));
+    }
+
+    [Fact]
+    public async Task ConcurrentObservationsStayCompleteAndScenarioLocal()
+    {
+        var first = new ScenarioHttpEvidence("INV10_Framework_Grouping", "Framework", "Grouping", new() { ["owner"] = "A" }, groupObservations: true);
+        var second = new ScenarioHttpEvidence("INV10_Framework_Grouping", "Framework", "Grouping", new() { ["owner"] = "B" }, groupObservations: true);
+        await Task.WhenAll(Enumerable.Range(0, 16).Select(index => Task.Run(() =>
+        {
+            first.RecordObservation("Entry", new { owner = "A", index });
+            second.RecordObservation("Entry", new { owner = "B", index });
+        })));
+        foreach (var pair in new[] { (Evidence: first, Owner: "A"), (Evidence: second, Owner: "B") })
+        {
+            var group = Assert.Single(Drain(pair.Evidence));
+            var entries = group.GetProperty("observations").EnumerateArray().ToArray();
+            Assert.Equal(16, entries.Length);
+            Assert.Equal(Enumerable.Range(0, 16), entries.Select(entry => entry.GetProperty("value").GetProperty("index").GetInt32()).Order());
+            Assert.All(entries, entry => Assert.Equal(pair.Owner, entry.GetProperty("value").GetProperty("owner").GetString()));
+            Assert.Equal(pair.Evidence.InstanceId, group.GetProperty("instanceId").GetString());
+        }
+    }
+
     private static ScenarioHttpEvidence Evidence() => new("INV01_CreateInvoiceForOrder_01", "Invoices", "Create invoice", new()) { StepPhase = "When" };
     private static HttpClient Client(ScenarioHttpEvidence evidence, Func<HttpRequestMessage, CancellationToken, Task<HttpResponseMessage>> send)
         => new(new HttpEvidenceHandler(evidence) { InnerHandler = new StubHandler(send) });

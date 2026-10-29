@@ -46,10 +46,19 @@ from guaranteed scenario intent; they must not be silently counted as coverage.
 
 ## Shared failure and probe paths
 
-For the 13 operations listed in the shared failure outline, an **injected dependency exception** returns a generic `500` with trace ID and no internal message: [UnexpectedServerErrors.feature](../tests/ECommerceStoreInvoice.Acceptance.Tests/Features/Common/UnexpectedServerErrors.feature). These are injected failures, not evidence for every database, catalog or PDF failure mode. DownloadInvoicePdf has its separate storage-failure case; GetInvoiceByOrderId still lacks its declared 500 case (INV-BDD-10). The concurrent status test permits 400 or 409, so a deterministic stale-write 409 remains INV-BDD-11 rather than guaranteed coverage. The common `CreateOrder` `500` case calls the legacy order route.
+For the 13 operations listed in the shared failure outline, an **injected dependency exception** returns a generic `500` with trace ID and no internal message: [UnexpectedServerErrors.feature](../tests/ECommerceStoreInvoice.Acceptance.Tests/Features/Common/UnexpectedServerErrors.feature). These are injected failures, not evidence for every database, catalog or PDF failure mode. DownloadInvoicePdf has its separate storage-failure case; GetInvoiceByOrderId now has its declared safe 500 case (INV-BDD-10). The concurrent status test permits 400 or 409, so a deterministic stale-write 409 remains INV-BDD-11 rather than guaranteed coverage. The common `CreateOrder` `500` case calls the legacy order route.
 
 The non-business `/health`, `/health/live` and `/health/ready` probes have successful `200` HTTP checks in [HealthEndpointTests.cs](../tests/ECommerceStoreInvoice.Acceptance.Tests/HealthEndpointTests.cs). MongoDB unavailability is covered at the health-check level in [MongoReadinessHealthCheckTests.cs](../tests/ECommerceStoreInvoice.Infrastructure.UnitTests/Health/MongoReadinessHealthCheckTests.cs), not as an HTTP `503` acceptance response. See [startup and health](health-checks.md).
 
 Remaining distinctions: body parsing is checked for cart update, not separately for every endpoint with a body. Task 09 covers isolated phone/email/address rule branches, accepted boundaries and repeated errors with populated-state evidence; see [business validation](bdd-09-business-validation.md). An all-zero GUID `400` does not verify how `{id:guid}` routing handles non-GUID path text. Keep this matrix aligned with endpoint metadata and `.feature` source as those paths change.
 
 `GET /invoices/by-order/{orderId}`: completed/legacy → 200; empty ID → 400; missing/Generating/Failed → 404. See [lookup scenarios](../tests/ECommerceStoreInvoice.Acceptance.Tests/Features/Invoices/GetInvoiceByOrderId.feature).
+
+## Framework rejection links
+
+[Task 10](bdd-10-framework-failures.md) covers raw malformed/missing/null/wrong-type
+bodies, unsupported media and required cart structure on all three JSON-body
+operations. Named binding/media failures remain in acceptance-matrix.tsv.
+Unmatched routes, invalid GUID constraints and wrong methods have no selected
+operation: [framework-scenarios.tsv](framework-scenarios.tsv) separately links all
+28 routing cases without inflating business operation/status coverage.

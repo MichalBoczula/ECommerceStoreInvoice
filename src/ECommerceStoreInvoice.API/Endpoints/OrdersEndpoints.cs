@@ -46,6 +46,7 @@ namespace ECommerceStoreInvoice.API.Endpoints
            .WithName("UpdateOrderStatus")
            .Produces<OrderResponseDto>(StatusCodes.Status200OK)
            .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")
+           .Produces<ProblemDetails>(StatusCodes.Status415UnsupportedMediaType, "application/problem+json")
            .Produces<NotFoundProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")
            .Produces<ConflictProblemDetails>(StatusCodes.Status409Conflict, "application/problem+json")
            .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, "application/problem+json");

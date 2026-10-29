@@ -28,6 +28,14 @@ public sealed class BusinessValidationSteps(ScenarioApiContext context)
     private DateTime _started;
     private DateTime _finished;
 
+    internal Dictionary<string, BsonDocument[]> FixtureState => Clone(_known);
+    internal Task VerifyFixtureReadsAsync() => SupportingReads();
+    internal string ResolveFixturePath(string path) => path
+        .Replace("{clientId}", _clients["A"].ToString())
+        .Replace("{orderId}", _orders["target"].ToString())
+        .Replace("{paidOrderId}", _orders["paid-a"].ToString())
+        .Replace("{invoiceId}", _invoices["a"].ToString());
+
     [Given("these complete client histories support business validation")]
     public void GivenVersions(Table table)
     {

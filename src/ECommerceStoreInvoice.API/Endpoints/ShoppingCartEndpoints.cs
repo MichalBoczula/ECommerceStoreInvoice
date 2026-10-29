@@ -55,6 +55,8 @@ namespace ECommerceStoreInvoice.API.Endpoints
                 UpdateShoppingCartRequestDto request,
                 IShoppingCartService shoppingCartService) =>
             {
+                if (request.Lines is null || request.Lines.Any(line => line is null))
+                    throw new BadHttpRequestException("Shopping cart lines must be a non-null array of non-null objects.");
                 var shoppingCart = await shoppingCartService.UpdateShoppingCart(clientId, request);
 
                 return Results.Ok(shoppingCart);
@@ -64,6 +66,7 @@ namespace ECommerceStoreInvoice.API.Endpoints
             .WithName("UpdateShoppingCart")
             .Produces<ShoppingCartResponseDto>(StatusCodes.Status200OK)
             .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")
+            .Produces<ProblemDetails>(StatusCodes.Status415UnsupportedMediaType, "application/problem+json")
             .Produces<NotFoundProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")
             .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, "application/problem+json");
         }

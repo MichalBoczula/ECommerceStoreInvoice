@@ -1,6 +1,3 @@
-using System.Net;
-using System.Net.Http.Json;
-using System.Text.Json;
 using ECommerceStoreInvoice.Application.Common.RequestsDto.ClientDataVersions;
 using ECommerceStoreInvoice.Application.Common.RequestsDto.Orders;
 using ECommerceStoreInvoice.Application.Common.RequestsDto.ShoppingCarts;
@@ -20,13 +17,11 @@ using Shouldly;
 namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Common;
 
 [Binding]
-public sealed class UnexpectedServerErrorsSteps(ScenarioApiContext context) : IDisposable
+public sealed class UnexpectedServerErrorsSteps(ScenarioApiContext context, FrameworkFailureSteps proof) : IDisposable
 {
     private const string SensitiveDetail = "INVOICE_INTERNAL_FAILURE_DO_NOT_EXPOSE";
-    private readonly Guid _id = Guid.NewGuid();
     private WebApplicationFactory<Program>? _failingFactory;
     private HttpClient? _client;
-    private string? _path;
 
     [Given("the {string} dependency fails unexpectedly")]
     public void GivenDependencyFails(string operationId)
@@ -57,9 +52,11 @@ public sealed class UnexpectedServerErrorsSteps(ScenarioApiContext context) : ID
                     Replace(services, orders);
                     break;
                 case "GetInvoiceById":
+                case "GetInvoiceByOrderId":
                 case "CreateInvoiceForOrder":
                     var invoices = new Mock<IInvoiceService>();
                     invoices.Setup(x => x.GetInvoiceById(It.IsAny<Guid>())).ThrowsAsync(failure);
+                    invoices.Setup(x => x.GetInvoiceByOrderId(It.IsAny<Guid>())).ThrowsAsync(failure);
                     invoices.Setup(x => x.CreateInvoiceForOrder(It.IsAny<Guid>(), It.IsAny<Guid>())).ThrowsAsync(failure);
                     Replace(services, invoices);
                     break;
@@ -92,60 +89,15 @@ public sealed class UnexpectedServerErrorsSteps(ScenarioApiContext context) : ID
     public async Task WhenEndpointIsCalled(string operationId)
     {
         _client.ShouldNotBeNull();
-        _path = operationId switch
-        {
-            "GetShoppingCartByClientId" => $"/shopping-carts/client/{_id}",
-            "CreateShoppingCart" or "UpdateShoppingCart" => $"/shopping-carts/{_id}",
-            "GetOrderById" => $"/orders/{_id}",
-            "GetOrdersByClientId" => $"/orders/client/{_id}",
-            "CreateOrder" => $"/orders/{_id}",
-            "UpdateOrderStatus" => $"/orders/{_id}/status",
-            "GetInvoiceById" => $"/invoices/{_id}",
-            "CreateInvoiceForOrder" => $"/invoices/{_id}/{Guid.NewGuid()}",
-            "GetClientDataVersionByClientId" => $"/client-data-versions/client/{_id}",
-            "CreateClientDataVersion" => $"/client-data-versions/{_id}",
-            "GetFlowDocumentation" => "/orders-documentation/flows",
-            "GetValidationDocumentation" => "/orders-documentation/validations",
-            _ => throw new ArgumentOutOfRangeException(nameof(operationId), operationId, "Unknown operation.")
-        };
-
-        context.Response = operationId switch
-        {
-            "CreateShoppingCart" or "CreateOrder" or "CreateInvoiceForOrder" => await _client.PostAsync(_path, null),
-            "UpdateShoppingCart" => await _client.PutAsJsonAsync(_path, new UpdateShoppingCartRequestDto { Lines = [] }),
-            "UpdateOrderStatus" => await _client.PatchAsJsonAsync(_path, new UpdateOrderStatusRequestDto { Status = "Paid" }),
-            "CreateClientDataVersion" => await _client.PostAsJsonAsync(_path, new CreateClientDataVersionRequestDto
-            {
-                ClientName = "Example",
-                PostalCode = "00-001",
-                City = "Warsaw",
-                Street = "Street",
-                BuildingNumber = "1",
-                ApartmentNumber = "1",
-                PhoneNumber = "123456789",
-                PhonePrefix = "48",
-                AddressEmail = "example@example.com"
-            }),
-            _ => await _client.GetAsync(_path)
-        };
+        context.RecordEvidence("Controlled dependency failure", new { operationId, boundary = "application-service-or-descriptor", privateMarker = SensitiveDetail });
+        await proof.SendFaultAsync(operationId, _client);
     }
 
     [Then("the Invoice server error is safe")]
     public async Task ThenServerErrorIsSafe()
     {
-        context.Response.ShouldNotBeNull();
-        context.Response.StatusCode.ShouldBe(HttpStatusCode.InternalServerError);
-        context.Response.Content.Headers.ContentType?.MediaType.ShouldBe("application/problem+json");
-        var body = await context.Response.Content.ReadAsStringAsync();
-        using var json = JsonDocument.Parse(body);
-        json.RootElement.GetProperty("status").GetInt32().ShouldBe(500);
-        json.RootElement.GetProperty("title").GetString().ShouldBe("Server error.");
-        json.RootElement.GetProperty("detail").GetString().ShouldBe("An unexpected error occurred.");
-        json.RootElement.GetProperty("instance").GetString().ShouldBe(_path);
-        json.RootElement.GetProperty("traceId").GetString().ShouldNotBeNullOrWhiteSpace();
-        body.ShouldNotContain(SensitiveDetail);
-        body.ShouldNotContain("InvalidOperationException");
-        body.ShouldNotContain("stackTrace");
+        await proof.AssertProblemAsync(500, "<none>");
+        await proof.ThenUnchanged();
     }
 
     private static void Replace<T>(IServiceCollection services, Mock<T> mock) where T : class

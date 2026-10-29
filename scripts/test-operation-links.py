@@ -30,7 +30,7 @@ class EvidenceLinkTests(unittest.TestCase):
         self.addCleanup(self.temporary.cleanup)
         self.root = Path(self.temporary.name)
         (self.root / 'docs').mkdir()
-        for filename in ['bdd-baseline.json', 'acceptance-matrix.tsv', 'acceptance-gaps.tsv']:
+        for filename in ['bdd-baseline.json', 'acceptance-matrix.tsv', 'acceptance-gaps.tsv', 'framework-scenarios.tsv']:
             (self.root / 'docs' / filename).write_bytes((links.ROOT / 'docs' / filename).read_bytes())
 
     def matrix(self, filename='acceptance-matrix.tsv'):
@@ -38,8 +38,9 @@ class EvidenceLinkTests(unittest.TestCase):
             return list(csv.DictReader(stream, delimiter='\t'))
 
     def write(self, rows, filename='acceptance-matrix.tsv'):
+        fields = rows[0].keys() if rows else (self.root / 'docs' / filename).read_text().splitlines()[0].split('\t')
         with (self.root / 'docs' / filename).open('w', newline='') as stream:
-            writer = csv.DictWriter(stream, fieldnames=rows[0].keys(), delimiter='\t', lineterminator='\n')
+            writer = csv.DictWriter(stream, fieldnames=fields, delimiter='\t', lineterminator='\n')
             writer.writeheader()
             writer.writerows(rows)
 
@@ -109,7 +110,7 @@ class EvidenceLinkTests(unittest.TestCase):
     def test_optional_race_status_does_not_close_guaranteed_coverage_gap(self):
         rows, gaps, covered = self.verify()
         self.assertTrue(any(r['optionalStatuses'] == '400,409' for r in rows))
-        self.assertEqual(covered, 54)
+        self.assertEqual(covered, 58)
         self.write([g for g in gaps if g['operationId'] != 'UpdateOrderStatus'], 'acceptance-gaps.tsv')
         with self.assertRaisesRegex(AssertionError, 'Undocumented or stale'):
             self.verify()
@@ -209,6 +210,26 @@ class EvidenceLinkTests(unittest.TestCase):
             with self.subTest(code=code), self.assertRaisesRegex(AssertionError, 'bypasses shared'):
                 links.verify_client_source(code)
         links.verify_client_source('context.CreateClient(factory); _apiContext.CreateClient(factory);')
+
+    def test_missing_framework_case_is_rejected(self):
+        rows = self.matrix('framework-scenarios.tsv')
+        self.write(rows[1:], 'framework-scenarios.tsv')
+        with self.assertRaisesRegex(AssertionError, 'Missing or stale scenario'):
+            self.verify()
+
+    def test_framework_case_cannot_claim_a_business_conflict_status(self):
+        rows = self.matrix('framework-scenarios.tsv')
+        rows[0]['statuses'] = '409'
+        self.write(rows, 'framework-scenarios.tsv')
+        with self.assertRaisesRegex(AssertionError, 'framework status intent'):
+            self.verify()
+
+    def test_framework_identity_cannot_duplicate_an_operation_case(self):
+        rows = self.matrix('framework-scenarios.tsv')
+        rows[0]['scenarioId'] = self.matrix()[0]['scenarioId']
+        self.write(rows, 'framework-scenarios.tsv')
+        with self.assertRaisesRegex(AssertionError, 'duplicate scenarioId'):
+            self.verify()
 
 
 if __name__ == '__main__':

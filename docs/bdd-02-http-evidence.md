@@ -131,3 +131,15 @@ pulls the same Mongo 8 image and checks mongosh before running the full suites.
 That CLI preflight is diagnostic, not a substitute for replica-set/write tests.
 No tests, startup requirements, thresholds or security gates are skipped. Review
 the runner pin when its support or Mongo/kernel compatibility changes.
+
+## INV-BDD-10 observation grouping
+
+Actual HTTP request/response/PDF attachments retain individual exchange IDs and
+bytes. Responses also record the actual Allow method set. Named non-HTTP
+observations are snapshotted immediately and stored in one Scenario observations
+JSON per scenario. Each ordered entry has name, stepPhase and value; repeated
+names remain distinct. The outer service/scenarioId/instanceId identifies the
+whole collection. AfterStep flushes HTTP; final AfterScenario flushes observations
+even if cleanup fails. This preserves every value while respecting the existing
+10000-file report limit. Three additional recorder regressions cover grouping,
+immutable snapshots/phases and concurrent isolation.
