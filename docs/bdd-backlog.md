@@ -57,11 +57,12 @@ place, while application deployment and selected LiveDocs refresh remain manual.
   failures, cancellation, host/database isolation and documentation behavior.
   Retain appropriate lifecycle facts outside BDD and report their counts separately.
   Implementation and verification: [technical scenarios](bdd-12-technical-scenarios.md).
-- [ ] **INV-BDD-13 — Request/response contracts.** Scalar types, required fields,
+- [x] **INV-BDD-13 — Request/response contracts.** Scalar types, required fields,
   nullability/formats/nesting, complete safe error shapes, typed descriptions/examples
   and PDF contracts derived from source, without a second handwritten OpenAPI.
-  Reconcile Task 09's observed nullable client name/address values with the current
-  non-null string schemas and the response checker's null-property gap.
+  Aligns Task 09's accepted nullable client values with required member presence
+  and closes the response checker's null-property gap.
+  Implementation and verification: [request/response contracts](bdd-13-request-response-contracts.md).
 - [ ] **INV-BDD-14 — Flows, rules and RAG links.** Stable identities and authored
   conditions/effects/failures, operation-to-scenario/exchange joins, observed versus
   declared rules and reachable versus standalone documentation. No runtime tracing

@@ -100,3 +100,87 @@ archive/state/rendered-Allure audits must pass before review. Production service
 policies, mappings, dependencies, workflows and security/coverage floors remain
 unchanged. Tasks 14–15 stay open; master publication and the selected manual
 LiveDocs refresh/deployment remain unchanged.
+
+## Frozen implementation evidence
+
+[CI run 40877013276](https://github.com/MichalBoczula/ECommerceStoreInvoice/actions/runs/40877013276)
+passed for implementation head `d20be263a8d9e494548e8859d67d09760cc78f72`.
+The packaged tested merge `88b42a77492922c48ac11029a24d991ee5efe955`
+has Task 12 master and that head as parents and the exact implementation tree
+`37ff95b5223038605001f584ca5a9d7c31b91c06`. Build, full formatting,
+generated OpenAPI, source/link regressions, audited restores, secret/dependency
+checks, all five suites, package/quality and Docker build/image scan passed.
+The completion-documentation head requires full CI and the same fresh-artifact
+checks before review; its exact head/run/archive are recorded on the PR. This is
+a frozen runtime/package reference rather than a self-referential final CI claim.
+
+| Suite | Passed | Failed/skipped | Line coverage |
+| --- | ---: | ---: | ---: |
+| Domain | 133 | 0 | 89.5% |
+| Application | 95 | 0 | 86.3% |
+| Infrastructure | 75 | 0 | 94.4% |
+| External providers | 3 | 0 | n/a |
+| Acceptance | 383 | 0 | n/a |
+| Total | 689 | 0 | n/a |
+
+All **658 previous TRX members** remain. Exactly five new BDD cases and 26
+standalone guard regressions are added; the standalone count remains explicit.
+All **315** prior scenario/instance identities, titles, descriptions, behavioral
+Examples and named observation occurrences (including duplicates) remain.
+Inventory: **44 feature files, 105 declarations, 320 BDD + 63 standalone**.
+The 28 source regressions and all 320 matrix links pass, retaining fifteen named
+operations and 59/59 declared status pairs with zero gaps and unchanged floors.
+
+Every official Actions ZIP digest passes before safe extraction. The inner
+`documentation-bundle.zip` is **10370054 bytes**, SHA-256
+`b3e6b7444639adae638dac44eb9bb973167b6db6095f8aa3c3588aa3349f97ea`.
+The outer Actions artifact SHA-256 is
+`04684109094729b6ed7418577626c934ba4c17bf713ff2bba2b5a12b87809898`.
+Its manifest records the tested merge/run above. Every file length/hash and the
+exact file set pass: **9575 entries**, below the unchanged 10000-file cap.
+
+All 320 passed BDD results have readable descriptions, explicit service/scenario/
+instance labels, identified JSON and at least one Gherkin CSV table. All **8887
+referenced attachments** exist without orphans: **6657 JSON, 2216 CSV, four text
+DocStrings and ten binary PDFs**. All 312 observation groups join their correct
+AfterScenario fixture. New instance IDs are independently reproduced from stable
+IDs and sorted authored parameters. All ten PDFs match successful HTTP bytes/hashes
+and parse as nonempty PDFs.
+
+The independent audit joins **2987 actual HTTP request/outcome pairs**: 2946 API,
+sixteen technical API, nine peer API, fourteen checkout catalog and two catalog
+fixture exchanges. Phases are twelve Given, 394 When and 2581 Then. Exact byte
+lengths/base64/SHA-256, identities, request attempts and phases pass. Two retained
+cancellation failures have no fabricated completed status.
+
+An independent **jsonschema 4.23.0** check converts only OpenAPI 3.0 nullable
+semantics and verifies all 22 complete typed examples, all 97 field examples and
+**2942 complete real JSON responses**, including **289 safe problems**, against
+the packaged generated contract. Health text, Swagger source, binary streams and
+bodyless routing responses are checked in their separate evidence paths. Flow and
+policy exports remain byte-equivalent to Task 12; all previous link records remain,
+with exactly four named and one separate technical case added.
+
+Independent new-case checks reconstruct the full five-collection expected state
+from BSON and verify all **45 supporting reads**. They check required-nullable
+omissions and exact safe 400/no-write state, actual uppercase/unknown and quoted
+quantity requests, exact ordered cart replacements, UTC response timestamp bounds
+and its exact stored millisecond value, complete responses and every unrelated
+field/reference. Existing Task 11 race/rollback/checkout/claim and Task 12 probe,
+outage, cancellation, host-isolation and cleanup audits also pass.
+
+Pinned **Allure 2.46.1**, checked against its official release SHA-256, renders all
+320 cases. Every rendered identity/title/description/outcome and attachment name/
+type/byte hash matches raw results, including AfterScenario JSON. Every case JSON,
+attachment and entry-page asset passes local static HTTP. This verifies generated
+report/archive integrity; it does not claim deployed Azure or browser rendering.
+
+Local Release solution build, all 27 focused contract/export tests, Domain 133,
+Application 95, External providers 3, Redocly 2.53.3 lint, source checks and
+`git diff --check` pass. Folder whitespace formatting passes; CI verifies the full
+formatter because local Roslyn named pipes are unavailable. Local publish confirms
+all three required XML files travel with the API. Runtime container behavior and
+image scanning are verified by CI. No dependency/workflow/security/coverage floor
+changes. The final documentation head must pass full CI and the same fresh checks
+before the PR is ready; PR publication/archive remain skipped. Tasks 14–15 stay open
+and the selected LiveDocs refresh/deployment remains manual.
