@@ -6,6 +6,9 @@ winners, three real checkout rollback stages, two checkout winners and one expir
 invoice attempt. Inventory: **303 BDD + 30 standalone = 333 Acceptance**; all five
 suites total **637** tests. The original status race is strengthened without
 replacing its identity, setup table or conservative optional-status matrix row.
+The report audit also found and repairs an inherited duplicate-cart case missing
+a Gherkin table: it now checks its declared request table and identified JSON
+contract, retaining its identity, title and original behavior.
 
 ## Real writes and deterministic order
 

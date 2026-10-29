@@ -141,6 +141,17 @@ public sealed class StaleInvoiceAttemptSteps(ScenarioApiContext context, Invoice
         {
             using var response = await context.HttpClient.GetAsync(route); response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
             response.Content.Headers.ContentType?.MediaType.ShouldBe("application/problem+json");
+            using var document = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+            var body = document.RootElement;
+            body.EnumerateObject().Select(p => p.Name).Order().ShouldBe(new[] { "detail", "instance", "status", "title", "traceId", "type" });
+            body.GetProperty("status").GetInt32().ShouldBe(404);
+            body.GetProperty("title").GetString().ShouldBe("Resource not found.");
+            body.GetProperty("type").GetString().ShouldBe("https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.4");
+            var byOrder = route.Contains("/by-order/", StringComparison.Ordinal);
+            body.GetProperty("detail").GetString().ShouldBe($"Resource Invoice identified by id {(byOrder ? orderId : invoiceId)} cannot be found in database during action {(byOrder ? "LoadInvoiceByOrderId" : "LoadInvoiceById")}.");
+            body.GetProperty("instance").GetString().ShouldBe(route);
+            body.GetProperty("traceId").GetString().ShouldNotBeNullOrWhiteSpace();
+            context.RecordEvidence("Stale invoice hidden reservation verified", new { path = route, completeProblem = body.Clone() });
         }
     }
 }
