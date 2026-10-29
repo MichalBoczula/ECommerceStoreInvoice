@@ -48,8 +48,9 @@ clients/hosts even after a failure and surfaces cleanup errors.
 
 Complete flow and validation responses are compared to the current source-owned
 projections, including fifteen flow descriptors and all eight registered policies.
-The original two documentation cases retain their partial authored tables and
-receive the same complete comparison. Two new populated-data cases verify repeat
+The original two documentation cases retain their identities and receive the same
+complete comparison. The validation table now explicitly records all eight policies,
+including GuidCollectionValidationPolicy. Two new populated-data cases verify repeat
 byte stability and unchanged data. Source equality and readable structure do not
 claim that reading documentation executes policies or completes Task 14's semantic
 flow/rule/RAG-link audit. Swagger JSON matches the complete generated document with

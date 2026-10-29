@@ -22,7 +22,7 @@ internal sealed class PdfCancellationProbe(Action<string, object> record)
     internal async Task BlockAsync(CancellationToken token)
     {
         _entered.TrySetResult();
-        try { await Task.Delay(Timeout.InfiniteTimeSpan, token); }
+        try { await Task.Delay(Timeout.InfiniteTimeSpan, token).WaitAsync(TimeSpan.FromSeconds(30)); }
         catch (OperationCanceledException) when (token.IsCancellationRequested)
         {
             ServerCancelled = true;

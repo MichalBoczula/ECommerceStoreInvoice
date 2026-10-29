@@ -8,7 +8,7 @@ Feature: Get validation documentation
     Then the validation documentation is returned successfully
       | Field                                       | Value |
       | StatusCode                                  | 200   |
-      | ValidationsCount                            | 7     |
+      | ValidationsCount                            | 8     |
       | HasPolicy_ClientValidationPolicy            | true  |
       | HasPolicy_ShoppingCartLineValidationPolicy  | true  |
       | HasPolicy_ClientDataVersionValidationPolicy | true  |
@@ -16,3 +16,4 @@ Feature: Get validation documentation
       | HasPolicy_UpdateOrderValidationPolicy       | true  |
       | HasPolicy_InvoiceValidationPolicy           | true  |
       | HasPolicy_ProductVersionValidationPolicy    | true  |
+      | HasPolicy_GuidCollectionValidationPolicy   | true  |
