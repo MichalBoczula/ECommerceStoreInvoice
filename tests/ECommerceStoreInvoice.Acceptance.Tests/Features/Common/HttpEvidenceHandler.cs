@@ -16,6 +16,7 @@ internal sealed class HttpEvidenceHandler(ScenarioHttpEvidence evidence, string 
         var method = request.Method.Method;
         var path = request.RequestUri?.AbsolutePath;
         var query = request.RequestUri?.Query;
+        var requestAttempt = request.Headers.TryGetValues("X-Bdd-Attempt", out var attempts) ? attempts.Single() : null;
         var stage = "request-body";
         var requestRecorded = false;
         HttpResponseMessage? response = null;
@@ -29,6 +30,7 @@ internal sealed class HttpEvidenceHandler(ScenarioHttpEvidence evidence, string 
                 scenarioId = evidence.ScenarioId,
                 instanceId = evidence.InstanceId,
                 exchangeId,
+                requestAttempt,
                 stepPhase = phase,
                 method,
                 path,
@@ -52,6 +54,7 @@ internal sealed class HttpEvidenceHandler(ScenarioHttpEvidence evidence, string 
                 scenarioId = evidence.ScenarioId,
                 instanceId = evidence.InstanceId,
                 exchangeId,
+                requestAttempt,
                 stepPhase = phase,
                 method,
                 path,
@@ -80,6 +83,7 @@ internal sealed class HttpEvidenceHandler(ScenarioHttpEvidence evidence, string 
                 scenarioId = evidence.ScenarioId,
                 instanceId = evidence.InstanceId,
                 exchangeId,
+                requestAttempt,
                 stepPhase = phase,
                 method,
                 path,

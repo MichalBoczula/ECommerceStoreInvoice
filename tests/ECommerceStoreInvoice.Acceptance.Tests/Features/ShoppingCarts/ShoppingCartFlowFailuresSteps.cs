@@ -12,8 +12,15 @@ public sealed class ShoppingCartFlowFailuresSteps(ScenarioApiContext context)
     private readonly Guid _clientId = Guid.NewGuid();
 
     [Given("a shopping cart has already been created")]
-    public async Task GivenCartAlreadyExists()
+    public async Task GivenCartAlreadyExists(Table table)
     {
+        var values = table.Rows.ToDictionary(row => row["Field"], row => row["Value"]);
+        values["Method"].ShouldBe("POST");
+        values["Endpoint"].ShouldBe("/shopping-carts/{clientId}");
+        values["HasBody"].ShouldBe("false");
+        values["SetupStatus"].ShouldBe("200");
+        values["DuplicateStatus"].ShouldBe("409");
+        context.RecordEvidence("Duplicate cart checked request contract", new { values, clientId = _clientId, path = $"/shopping-carts/{_clientId}" });
         using var response = await context.HttpClient.PostAsync($"/shopping-carts/{_clientId}", null);
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
     }

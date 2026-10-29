@@ -49,9 +49,10 @@ place, while application deployment and selected LiveDocs refresh remain manual.
   requests, routing/method/media failures and complete safe problems without writes.
   Includes the missing GetInvoiceByOrderId server-error case.
   Implementation and verification: [framework failures](bdd-10-framework-failures.md).
-- [ ] **INV-BDD-11 — Concurrency and atomicity.** Deterministic stale-status 409,
+- [x] **INV-BDD-11 — Concurrency and atomicity.** Deterministic stale-status 409,
   competing checkout/claim winners, exact full state, actual rollback and attempt
   cleanup. Keep injected pre-write failure and real transactions distinct.
+  Implementation and verification: [concurrency and atomicity](bdd-11-concurrency-atomicity.md).
 - [ ] **INV-BDD-12 — Technical scenarios.** Health/readiness/startup/index
   failures, cancellation, host/database isolation and documentation behavior.
   Retain appropriate lifecycle facts outside BDD and report their counts separately.

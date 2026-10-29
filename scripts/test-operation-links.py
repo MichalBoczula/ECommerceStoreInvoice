@@ -110,8 +110,12 @@ class EvidenceLinkTests(unittest.TestCase):
     def test_optional_race_status_does_not_close_guaranteed_coverage_gap(self):
         rows, gaps, covered = self.verify()
         self.assertTrue(any(r['optionalStatuses'] == '400,409' for r in rows))
-        self.assertEqual(covered, 58)
-        self.write([g for g in gaps if g['operationId'] != 'UpdateOrderStatus'], 'acceptance-gaps.tsv')
+        self.assertEqual(covered, 59)
+        self.assertEqual(gaps, [])
+        for row in rows:
+            if row['operationId'] == 'UpdateOrderStatus' and '409' in row['statuses'].split(','):
+                row['statuses'] = ','.join(s for s in row['statuses'].split(',') if s != '409')
+        self.write(rows)
         with self.assertRaisesRegex(AssertionError, 'Undocumented or stale'):
             self.verify()
 
@@ -124,7 +128,7 @@ class EvidenceLinkTests(unittest.TestCase):
 
     def test_gap_cannot_hide_multiple_statuses_in_one_cell(self):
         gaps = self.matrix('acceptance-gaps.tsv')
-        gaps[0]['status'] = '500,502'
+        gaps.append(dict(operationId='UpdateOrderStatus', status='500,502', task='INV-BDD-11', reason='Invalid combined statuses'))
         self.write(gaps, 'acceptance-gaps.tsv')
         with self.assertRaisesRegex(AssertionError, 'exactly one'):
             self.verify()

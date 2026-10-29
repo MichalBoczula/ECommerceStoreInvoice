@@ -16,6 +16,10 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Invoices.Generation;
 [Binding]
 public sealed class InvoiceGenerationSteps(ScenarioApiContext context)
 {
+    internal Guid TargetOrderId => _orders["target"];
+    internal Guid TargetClientId => _clients["A"];
+    internal Dictionary<string, BsonDocument[]> FixtureState => Clone(_known);
+
     private readonly Dictionary<string, Guid> _clients = new(StringComparer.Ordinal)
     {
         ["A"] = Guid.Parse("11111111-1111-1111-1111-111111111111"),

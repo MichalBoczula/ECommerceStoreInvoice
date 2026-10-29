@@ -11,6 +11,10 @@ using Microsoft.Extensions.Http;
 using ECommerceStoreInvoice.Infrastructure.ApiClients.Products;
 using Testcontainers.MongoDb;
 using MongoDB.Driver;
+using ECommerceStoreInvoice.Infrastructure.Context;
+using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate.Repositories;
+using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate.Repositories;
+using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.Repositories;
 
 namespace ECommerceStoreInvoice.Acceptance.Tests;
 
@@ -50,6 +54,7 @@ public class ApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
     internal InvoiceReadStorage? ReadStorage { get; set; }
     internal InvoiceReadProbe? ReadProbe { get; set; }
     internal InvoiceGenerationProbe? InvoiceProbe { get; set; }
+    internal OrderConcurrencyProbe? OrderProbe { get; set; }
     internal int CatalogRequestCount => Volatile.Read(ref _catalogRequests);
     internal Uri ProductCatalogBaseAddress => new(_productCatalogBaseUrl ?? throw new InvalidOperationException("Products is not enabled."));
 
@@ -146,6 +151,19 @@ public class ApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
             });
         }
 
+        if (OrderProbe is not null)
+        {
+            builder.ConfigureTestServices(services =>
+            {
+                services.AddHttpContextAccessor();
+                services.AddScoped<OrderProbeScope>();
+                Decorate<IOrderRepository>(services, (inner, provider) => new ObservedOrderRepository(inner, provider.GetRequiredService<MongoDbContext>(), OrderProbe, provider.GetRequiredService<OrderProbeScope>()));
+                Decorate<IProductVersionRepository>(services, (inner, provider) => new ObservedProductVersionRepository(inner, provider.GetRequiredService<MongoDbContext>(), OrderProbe, provider.GetRequiredService<OrderProbeScope>()));
+                Decorate<IShoppingCartRepository>(services, (inner, provider) => new ObservedShoppingCartRepository(inner, provider.GetRequiredService<MongoDbContext>(), OrderProbe, provider.GetRequiredService<OrderProbeScope>()));
+                Decorate<IOrderWriteTransaction>(services, (inner, provider) => new ObservedOrderTransaction(inner, provider.GetRequiredService<MongoDbContext>(), OrderProbe, provider.GetRequiredService<OrderProbeScope>()));
+            });
+        }
+
         if (ReadProbe is not null)
         {
             builder.ConfigureTestServices(services =>
@@ -158,6 +176,22 @@ public class ApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
             });
         }
 
+    }
+
+    private static void Decorate<T>(IServiceCollection services, Func<T, IServiceProvider, T> decorate) where T : class
+    {
+        var original = services.Last(descriptor => descriptor.ServiceType == typeof(T));
+        services.Remove(original);
+        services.AddScoped<T>(provider => decorate((T)(original.ImplementationFactory?.Invoke(provider)
+            ?? ActivatorUtilities.CreateInstance(provider, original.ImplementationType!)), provider));
+    }
+
+    internal async Task ExpireInvoiceLeaseAsync(Guid invoiceId)
+    {
+        var collection = new MongoClient(_connectionString).GetDatabase(_database).GetCollection<BsonDocument>("invoices");
+        var result = await collection.UpdateOneAsync(Builders<BsonDocument>.Filter.Eq("_id", new BsonBinaryData(invoiceId, GuidRepresentation.Standard)),
+            Builders<BsonDocument>.Update.Set("GenerationLeaseUntil", new DateTime(2020, 1, 1, 0, 0, 0, DateTimeKind.Utc)));
+        if (result.ModifiedCount != 1) throw new InvalidOperationException("Lease fixture did not change exactly one live claim.");
     }
 
     public async Task InitializeAsync()
@@ -310,6 +344,7 @@ public class ApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
         try
         {
             base.Dispose();
+            OrderProbe?.ResumeAll();
             InvoiceProbe?.CleanupFiles();
             foreach (var path in _downloadFiles) File.Delete(path);
             if (!string.IsNullOrEmpty(_connectionString))

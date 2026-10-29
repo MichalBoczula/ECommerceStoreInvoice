@@ -54,5 +54,11 @@ Feature: Shopping cart flow failures
   Scenario: An existing shopping cart cannot be created twice
     A client already has a shopping cart. Creating another cart for that same client returns a conflict.
     Given a shopping cart has already been created
+      | Field           | Value                       |
+      | Method          | POST                        |
+      | Endpoint        | /shopping-carts/{clientId}  |
+      | HasBody         | false                       |
+      | SetupStatus     | 200                         |
+      | DuplicateStatus | 409                         |
     When I create the same shopping cart again
     Then the cart response is problem 409

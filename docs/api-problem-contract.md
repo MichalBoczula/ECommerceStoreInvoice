@@ -25,3 +25,7 @@ Null cart line arrays/items are rejected before mapping using the existing safe
 400 body signature. See [framework evidence](bdd-10-framework-failures.md) and
 [ADR-0010](adr/0010-framework-rejections.md). Optional client null strings and null
 status still follow Task 09 behavior; contract-nullability alignment is Task 13.
+
+INV-BDD-11 exercises actual stale status 409s and real checkout cart-write
+conflicts. Checkout's unhandled Mongo conflict retains the generic safe 500; it is
+not remapped to the order-status 409. See [concurrency evidence](bdd-11-concurrency-atomicity.md).

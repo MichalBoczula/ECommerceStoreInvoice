@@ -40,8 +40,12 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Common
                     _factory.CatalogEvidenceHandlerFactory = _apiContext.CreateClientVersionCatalogHandler;
                 else if (_scenarioContext.ScenarioInfo.Tags.Contains("business-validation-evidence"))
                     _factory.CatalogEvidenceHandlerFactory = _apiContext.CreateBusinessCatalogHandler;
+                else if (_scenarioContext.ScenarioInfo.Tags.Contains("order-concurrency-evidence"))
+                    _factory.CatalogEvidenceHandlerFactory = _apiContext.CreateCheckoutCatalogHandler;
                 else if (_scenarioContext.ScenarioInfo.Tags.Contains("framework-evidence"))
                     _factory.CatalogEvidenceHandlerFactory = _apiContext.CreateFrameworkCatalogHandler;
+                if (_scenarioContext.ScenarioInfo.Tags.Contains("order-concurrency-evidence"))
+                    _factory.OrderProbe = new OrderConcurrencyProbe(_apiContext.RecordEvidence, _factory.GetCheckoutDocumentsAsync);
                 if (_scenarioContext.ScenarioInfo.Tags.Contains("invoice-generation-evidence"))
                 {
                     _factory.CatalogEvidenceHandlerFactory = _apiContext.CreateInvoiceCatalogHandler;

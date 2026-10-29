@@ -23,7 +23,7 @@ from guaranteed scenario intent; they must not be silently counted as coverage.
 | `POST /orders/client/{clientId}` | Cart with catalog product → `200`; empty cart → `400`; missing cart → `404`; missing catalog product → `404`, with cart/order state checked | [Success](../tests/ECommerceStoreInvoice.Acceptance.Tests/Features/Orders/CreateOrderSuccess/CreateOrderSuccess.feature), [empty cart](../tests/ECommerceStoreInvoice.Acceptance.Tests/Features/Orders/CreateOrderValidationError/CreateOrderValidationError.feature), [missing cart](../tests/ECommerceStoreInvoice.Acceptance.Tests/Features/Orders/CreateOrderNotFound/CreateOrderNotFound.feature), [missing product](../tests/ECommerceStoreInvoice.Acceptance.Tests/Features/Orders/CreateOrderMissingProduct.feature) |
 | `GET /orders/{orderId}` | Existing order → `200`; empty GUID → `400`; missing order → `404` | [Success](../tests/ECommerceStoreInvoice.Acceptance.Tests/Features/Orders/GetOrdersByIdSuccess/GetOrdersByIdSuccess.feature), [validation](../tests/ECommerceStoreInvoice.Acceptance.Tests/Features/Orders/GetOrdersByIdValidationError/GetOrdersByIdValidationError.feature), [missing](../tests/ECommerceStoreInvoice.Acceptance.Tests/Features/Orders/GetOrdersByIdNotFound/GetOrdersByIdNotFound.feature) |
 | `GET /orders/client/{clientId}` | Orders or empty list → `200`; empty GUID → `400` | [Orders](../tests/ECommerceStoreInvoice.Acceptance.Tests/Features/Orders/GetOrdersByClientIdSuccess/GetOrdersByClientIdSuccess.feature), [empty list](../tests/ECommerceStoreInvoice.Acceptance.Tests/Features/Orders/GetOrdersByClientIdEmptySuccess/GetOrdersByClientIdEmptySuccess.feature), [validation](../tests/ECommerceStoreInvoice.Acceptance.Tests/Features/Orders/GetOrdersByClientIdValidationError/GetOrdersByClientIdValidationError.feature) |
-| `PATCH /orders/{orderId}/status` | `Created → Paid/Cancelled` → `200`; unknown/unchanged/terminal status or empty GUID → `400`; missing order → `404`; concurrent changes → one `200`, the other `400` or `409` depending on when it reads the order | [Status scenarios](../tests/ECommerceStoreInvoice.Acceptance.Tests/Features/Orders/UpdateOrderStatus.feature), including repeat `Paid` → `400` |
+| `PATCH /orders/{orderId}/status` | `Created → Paid/Cancelled` → `200`; unknown/unchanged/terminal status or empty GUID → `400`; missing order → `404`; concurrent changes → one `200`, the other `400` or `409` depending on when it reads the order; deterministic held writes guarantee the stale `409` | [Status scenarios](../tests/ECommerceStoreInvoice.Acceptance.Tests/Features/Orders/UpdateOrderStatus.feature), including repeat `Paid` → `400` |
 
 ## Invoices
 
@@ -46,11 +46,11 @@ from guaranteed scenario intent; they must not be silently counted as coverage.
 
 ## Shared failure and probe paths
 
-For the 13 operations listed in the shared failure outline, an **injected dependency exception** returns a generic `500` with trace ID and no internal message: [UnexpectedServerErrors.feature](../tests/ECommerceStoreInvoice.Acceptance.Tests/Features/Common/UnexpectedServerErrors.feature). These are injected failures, not evidence for every database, catalog or PDF failure mode. DownloadInvoicePdf has its separate storage-failure case; GetInvoiceByOrderId now has its declared safe 500 case (INV-BDD-10). The concurrent status test permits 400 or 409, so a deterministic stale-write 409 remains INV-BDD-11 rather than guaranteed coverage. The common `CreateOrder` `500` case calls the legacy order route.
+For the 13 operations listed in the shared failure outline, an **injected dependency exception** returns a generic `500` with trace ID and no internal message: [UnexpectedServerErrors.feature](../tests/ECommerceStoreInvoice.Acceptance.Tests/Features/Common/UnexpectedServerErrors.feature). These are injected failures, not evidence for every database, catalog or PDF failure mode. DownloadInvoicePdf has its separate storage-failure case; GetInvoiceByOrderId now has its declared safe 500 case (INV-BDD-10). INV-BDD-11 guarantees a real stale-write 409 after both requests validate Created, with either status selected as winner. The original optional matrix annotation remains conservative; the new cases close the final declared status gap. The common `CreateOrder` `500` case calls the legacy order route.
 
 The non-business `/health`, `/health/live` and `/health/ready` probes have successful `200` HTTP checks in [HealthEndpointTests.cs](../tests/ECommerceStoreInvoice.Acceptance.Tests/HealthEndpointTests.cs). MongoDB unavailability is covered at the health-check level in [MongoReadinessHealthCheckTests.cs](../tests/ECommerceStoreInvoice.Infrastructure.UnitTests/Health/MongoReadinessHealthCheckTests.cs), not as an HTTP `503` acceptance response. See [startup and health](health-checks.md).
 
-Remaining distinctions: body parsing is checked for cart update, not separately for every endpoint with a body. Task 09 covers isolated phone/email/address rule branches, accepted boundaries and repeated errors with populated-state evidence; see [business validation](bdd-09-business-validation.md). An all-zero GUID `400` does not verify how `{id:guid}` routing handles non-GUID path text. Keep this matrix aligned with endpoint metadata and `.feature` source as those paths change.
+Current distinctions: Task 10 checks binding/media paths on all three body operations and invalid GUID route constraints. Task 09 covers isolated phone/email/address rule branches, accepted boundaries and repeated errors with populated-state evidence; see [business validation](bdd-09-business-validation.md). An all-zero GUID `400` does not verify how `{id:guid}` routing handles non-GUID path text. Keep this matrix aligned with endpoint metadata and `.feature` source as those paths change.
 
 `GET /invoices/by-order/{orderId}`: completed/legacy → 200; empty ID → 400; missing/Generating/Failed → 404. See [lookup scenarios](../tests/ECommerceStoreInvoice.Acceptance.Tests/Features/Invoices/GetInvoiceByOrderId.feature).
 
@@ -62,3 +62,21 @@ operations. Named binding/media failures remain in acceptance-matrix.tsv.
 Unmatched routes, invalid GUID constraints and wrong methods have no selected
 operation: [framework-scenarios.tsv](framework-scenarios.tsv) separately links all
 28 routing cases without inflating business operation/status coverage.
+
+
+## Deterministic concurrency and rollback
+
+[Task 11](bdd-11-concurrency-atomicity.md) links both status winners to exact 409
+problems and complete winning state. Competing checkout transactions each stage
+two actual snapshots and an order before one commits; the other's real cart write
+conflict uses the existing safe 500 and rolls back all losing writes. Separate
+failures after successful snapshot/order/cart writes abort real sessions, preserve
+all five populated collections and allow an HTTP retry. A later empty cart is 400.
+
+An expired held invoice attempt is fenced after a replacement completes: its
+completion fails with the existing safe 500, release changes nothing and the
+winning PDF remains intact. Explicit old-attempt storage cleanup deletes only the
+old file. Production keeps ambiguous completion files; automatic orphan cleanup
+remains deferred. Existing active-claim 409 and failed-attempt cleanup cases remain.
+All 59 named operation/status pairs now have guaranteed intent, distinct from
+complete cause coverage. Routing cases remain separately classified.
