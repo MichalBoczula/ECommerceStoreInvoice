@@ -153,8 +153,8 @@ The [BDD backlog](docs/bdd-backlog.md) groups the Orders/Invoices documentation
 work into small packages. [Task 1's baseline](docs/bdd-01-baseline.md) preserves
 38 feature files, 52 declarations and all 77 original expanded BDD cases, plus
 eight standalone acceptance checks. The source gate now checks every matrix
-example and all 59 declared operation/status pairs: 58 have guaranteed scenario
-intent and one explicit gap remains. These are source coverage links, not
+example and all 59 declared operation/status pairs, all with guaranteed scenario
+intent; no declared status gaps remain. These are source coverage links, not
 a claim of complete runtime cause coverage. [Task 2](docs/bdd-02-http-evidence.md)
 adds actual paired HTTP evidence, explicit IDs and readable descriptions for all
 77 BDD cases and 18 recorder regressions. [Task 3](docs/bdd-03-shopping-carts.md)
@@ -173,7 +173,9 @@ metadata, exact binary downloads and real private Blob adapter HTTP evidence.
 accepted boundaries, complete safe problems and unchanged populated state.
 [Task 10](docs/bdd-10-framework-failures.md) adds exact-byte framework rejections,
 complete safe route/method/media problems and the missing by-order server failure.
-The current acceptance inventory is **295 BDD + 30 standalone = 325**; recorder
+[Task 11](docs/bdd-11-concurrency-atomicity.md) adds deterministic stale status writes,
+actual checkout transaction competition/rollback and stale invoice attempt fencing.
+The current acceptance inventory is **303 BDD + 30 standalone = 333**; recorder
 regressions remain standalone checks. Generated `.feature.cs` files are ignored
 build outputs, not maintained source.
 

@@ -314,12 +314,16 @@ public sealed class HttpEvidenceTests
             response.Content.Headers.Allow.Add("POST");
             return Task.FromResult(response);
         });
-        using var response = await client.DeleteAsync("http://localhost/orders/id");
+        using var request = new HttpRequestMessage(HttpMethod.Delete, "http://localhost/orders/id");
+        request.Headers.Add("X-Bdd-Attempt", "second");
+        using var response = await client.SendAsync(request);
         evidence.RecordObservation("State", new { position = "after", value = 1 });
         var items = Drain(evidence);
         Assert.Equal(3, items.Count);
         Assert.Equal(items[0].GetProperty("exchangeId").GetString(), items[1].GetProperty("exchangeId").GetString());
         Assert.Equal(new[] { "GET", "POST" }, items[1].GetProperty("allow").EnumerateArray().Select(value => value.GetString()));
+        Assert.Equal("second", items[0].GetProperty("requestAttempt").GetString());
+        Assert.Equal("second", items[1].GetProperty("requestAttempt").GetString());
         var observations = items[2].GetProperty("observations").EnumerateArray().ToArray();
         Assert.Equal(new[] { "State", "State" }, observations.Select(value => value.GetProperty("name").GetString()));
         Assert.Equal(new[] { "before", "after" }, observations.Select(value => value.GetProperty("value").GetProperty("position").GetString()));

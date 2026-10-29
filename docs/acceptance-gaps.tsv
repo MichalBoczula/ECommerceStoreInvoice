@@ -1,2 +1,1 @@
 operationId	status	task	reason
-UpdateOrderStatus	409	INV-BDD-11	Concurrent status test permits 400 or 409 depending on the read timing; a deterministic stale-write 409 case is still required.

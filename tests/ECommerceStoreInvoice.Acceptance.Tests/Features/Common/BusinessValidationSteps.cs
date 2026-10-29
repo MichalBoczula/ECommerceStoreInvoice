@@ -357,7 +357,7 @@ public sealed class BusinessValidationSteps(ScenarioApiContext context)
         return JsonDocument.Parse(await response.Content.ReadAsStringAsync());
     }
 
-    private static JsonObject CartProfile(BsonDocument doc) => new()
+    internal static JsonObject CartProfile(BsonDocument doc) => new()
     {
         ["id"] = Id(doc).ToString(),
         ["clientId"] = GuidField(doc, "ClientId").ToString(),
@@ -366,14 +366,14 @@ public sealed class BusinessValidationSteps(ScenarioApiContext context)
         ["lines"] = new JsonArray(doc["Lines"].AsBsonArray.Select(line => (JsonNode)new JsonObject { ["productId"] = GuidField(line.AsBsonDocument, "ProductId").ToString(), ["quantity"] = line["Quantity"].AsInt32 }).ToArray())
     };
 
-    private static JsonObject ClientProfile(BsonDocument doc)
+    internal static JsonObject ClientProfile(BsonDocument doc)
     {
         var result = new JsonObject { ["id"] = Id(doc).ToString(), ["clientId"] = GuidField(doc, "ClientId").ToString(), ["createdAt"] = JsonValue.Create(doc["CreatedAt"].ToUniversalTime()) };
         foreach (var field in ClientFields) result.Add(Camel(field), doc[field].IsBsonNull ? null : JsonValue.Create(doc[field].AsString));
         return result;
     }
 
-    private static JsonObject InvoiceProfile(BsonDocument doc) => new()
+    internal static JsonObject InvoiceProfile(BsonDocument doc) => new()
     {
         ["id"] = Id(doc).ToString(),
         ["orderId"] = GuidField(doc, "OrderId").ToString(),
@@ -382,7 +382,7 @@ public sealed class BusinessValidationSteps(ScenarioApiContext context)
         ["createdAt"] = JsonValue.Create(doc["CreatedAt"].ToUniversalTime())
     };
 
-    private static JsonObject OrderProfile(BsonDocument order, Dictionary<string, BsonDocument[]> state)
+    internal static JsonObject OrderProfile(BsonDocument order, Dictionary<string, BsonDocument[]> state)
     {
         var lines = new JsonArray();
         decimal total = 0;

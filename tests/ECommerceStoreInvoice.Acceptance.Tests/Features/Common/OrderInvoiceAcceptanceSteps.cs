@@ -1,4 +1,5 @@
 using System.Globalization;
+using ECommerceStoreInvoice.Acceptance.Tests.Features.Orders.Concurrency;
 using MongoDB.Bson;
 using System.Net;
 using System.Net.Http.Json;
@@ -16,13 +17,12 @@ using Shouldly;
 namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Common;
 
 [Binding]
-public sealed class OrderInvoiceAcceptanceSteps(ScenarioApiContext context)
+public sealed class OrderInvoiceAcceptanceSteps(ScenarioApiContext context, OrderConcurrencySteps concurrency)
 {
     private Guid _clientId;
     private Guid _orderId;
     private Guid _invoiceId;
     private DateTime? _lastKnownOrderUpdate;
-    private HttpResponseMessage[]? _concurrentStatusResponses;
     private HttpResponseMessage[]? _concurrentInvoiceResponses;
     // From ProductsCatalog's SeedMobilePhone1 migration.
     private static readonly Guid SeededProductId = Guid.Parse("0f62c3e1-8e3e-4b1f-9d74-3d6e2ff2c6d2");
@@ -101,48 +101,10 @@ public sealed class OrderInvoiceAcceptanceSteps(ScenarioApiContext context)
             new UpdateOrderStatusRequestDto { Status = status }, context.JsonOptions);
 
     [When("I concurrently change the order status to Paid and Cancelled")]
-    public async Task WhenConcurrentStatusChanges()
-    {
-        _concurrentStatusResponses = await Task.WhenAll(
-            context.HttpClient.PatchAsJsonAsync($"/orders/{_orderId}/status",
-                new UpdateOrderStatusRequestDto { Status = "Paid" }, context.JsonOptions),
-            context.HttpClient.PatchAsJsonAsync($"/orders/{_orderId}/status",
-                new UpdateOrderStatusRequestDto { Status = "Cancelled" }, context.JsonOptions));
-    }
+    public Task WhenConcurrentStatusChanges() => concurrency.RunStatusAsync(_orderId, "Paid");
 
     [Then("exactly one status change succeeds and the stored order matches it")]
-    public async Task ThenOneStatusChangeWins()
-    {
-        _concurrentStatusResponses.ShouldNotBeNull();
-        try
-        {
-            var successes = _concurrentStatusResponses.Where(response => response.StatusCode == HttpStatusCode.OK).ToArray();
-            successes.Length.ShouldBe(1);
-            var rejected = _concurrentStatusResponses.Single(response => response.StatusCode != HttpStatusCode.OK);
-            (rejected.StatusCode is HttpStatusCode.BadRequest or HttpStatusCode.Conflict).ShouldBeTrue();
-            rejected.Content.Headers.ContentType?.MediaType.ShouldBe("application/problem+json");
-
-            var winner = await successes.Single().Content.ReadFromJsonAsync<OrderResponseDto>(context.JsonOptions);
-            winner.ShouldNotBeNull();
-            (winner.Status is "Paid" or "Cancelled").ShouldBeTrue();
-
-            using var storedResponse = await context.HttpClient.GetAsync($"/orders/{_orderId}");
-            storedResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
-            var stored = await storedResponse.Content.ReadFromJsonAsync<OrderResponseDto>(context.JsonOptions);
-            stored.ShouldNotBeNull();
-            stored.Status.ShouldBe(winner.Status);
-            stored.UpdatedAt.ShouldBe(MongoPrecision(winner.UpdatedAt));
-            stored.UpdatedAt.ShouldNotBeNull();
-            stored.Lines.Single().Quantity.ShouldBe(2);
-            stored.TotalAmount.ShouldBe(4998m);
-            stored.TotalCurrency.ShouldBe("PLN");
-        }
-        finally
-        {
-            foreach (var response in _concurrentStatusResponses)
-                response.Dispose();
-        }
-    }
+    public Task ThenOneStatusChangeWins() => concurrency.ThenStatus();
 
     [When("I request an invoice for the current order")]
     public Task WhenInvoiceRequestedForCurrentOrder() => SendPost($"/invoices/{_clientId}/{_orderId}");

@@ -33,3 +33,13 @@ See `tests/ECommerceStoreInvoice.Acceptance.Tests/ApplicationFactory.cs`, `Produ
 - Reuse one MongoDB database across scenarios: leftover orders, indexes and invoice claims could make tests order dependent.
 - Start MongoDB, ProductsCatalog and SQL Server for every scenario: data would be isolated but container startup and migrations would be repeated for each checkout case.
 - Replace the catalog with a mock for all acceptance tests: checkout would no longer verify the actual HTTP integration and seeded product snapshots.
+
+
+INV-BDD-11 adds scenario-local, bounded test gates around the real scoped Mongo
+repositories and transaction. Both status requests validate before a selected
+write; both checkouts stage writes before the selected cart update. Session-aware
+reads inspect staged documents while independent clients verify invisibility.
+Failure injection occurs after actual successful writes; production services
+perform their normal commit/abort. An Infrastructure friend assembly allows the
+Acceptance tests to observe the internal session, following the existing test
+friend pattern. This adds no runtime coordination or transaction behavior.

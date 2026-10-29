@@ -551,10 +551,10 @@ Feature: Update order status
       | Paid      | INV05_UpdateOrderStatus_MultipleLines_Paid      |
       | Cancelled | INV05_UpdateOrderStatus_MultipleLines_Cancelled |
 
-  @products-api
+  @products-api @order-concurrency-evidence
   @allure.label.scenarioId:INV01_UpdateOrderStatus_12
   Scenario: Concurrent status changes cannot both succeed
-    Paid and Cancelled requests compete for the same Created order. Exactly one succeeds; the loser is a terminal-state 400 or a stale-write 409 depending on read timing, and the saved order matches the winner.
+    Both requests load Created and validate before either real conditional write. Paid is released first; its complete order persists and the stale Cancelled write returns the exact safe 409. All stored fields and supporting reads match the winner.
     Given I have an existing order id with setup data
       | Field    | Value |
       | Quantity | 2     |
