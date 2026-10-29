@@ -43,3 +43,13 @@ Failure injection occurs after actual successful writes; production services
 perform their normal commit/abort. An Infrastructure friend assembly allows the
 Acceptance tests to observe the internal session, following the existing test
 friend pattern. This adds no runtime coordination or transaction behavior.
+
+
+INV-BDD-12 uses owned Mongo containers only for deliberate outage or standalone
+topology tests; shared Mongo is never stopped. Test-only readiness monitoring
+records actual hello/ping commands with bounded client timeouts. Nested peer hosts
+have distinct databases despite identical business IDs, and registered async
+cleanup drops only their owned database. PDF cancellation gates one real local
+stream before headers or during copying; RequestAborted supplies cancellation and
+a healthy retry verifies unchanged bytes. These are native test fixtures, not
+production coordination, shared local storage or deployed outage tests.

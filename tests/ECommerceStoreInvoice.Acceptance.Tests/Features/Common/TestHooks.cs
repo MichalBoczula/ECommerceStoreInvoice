@@ -32,6 +32,18 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Common
                     _scenarioContext.ScenarioInfo.Tags.Contains("completion-ack-lost"),
                     _scenarioContext.ScenarioInfo.Tags.Contains("pdf-download-fails"),
                     _scenarioContext.ScenarioInfo.Tags.Contains("isolated-products"));
+                if (_scenarioContext.ScenarioInfo.Tags.Contains("technical-evidence"))
+                {
+                    _factory.CatalogEvidenceHandlerFactory = _apiContext.CreateTechnicalCatalogHandler;
+                    _factory.ObserveReadiness = true;
+                    if (_scenarioContext.ScenarioInfo.Tags.Contains("owned-mongo-replica")) _factory.TechnicalMongoMode = "replica";
+                    if (_scenarioContext.ScenarioInfo.Tags.Contains("owned-mongo-standalone")) _factory.TechnicalMongoMode = "standalone";
+                    if (_scenarioContext.ScenarioInfo.Tags.Contains("technical-cancellation"))
+                    {
+                        _factory.ReadStorage = new InvoiceReadStorage(false, false);
+                        _factory.CancellationProbe = new PdfCancellationProbe(_apiContext.RecordEvidence);
+                    }
+                }
                 if (_scenarioContext.ScenarioInfo.Tags.Contains("checkout-evidence"))
                     _factory.CatalogEvidenceHandlerFactory = _apiContext.CreateCheckoutCatalogHandler;
                 else if (_scenarioContext.ScenarioInfo.Tags.Contains("order-state-evidence"))
@@ -107,9 +119,13 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Common
             }
             finally
             {
-                if (_factory is not null) await _factory.DisposeAsync();
-                _factory = null;
-                _openApi = null;
+                try { await _apiContext.CleanupAdditionalAsync(); }
+                finally
+                {
+                    if (_factory is not null) await _factory.DisposeAsync();
+                    _factory = null;
+                    _openApi = null;
+                }
             }
         }
     }

@@ -8,6 +8,18 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Common
     public sealed class ScenarioApiContext
     {
         private ScenarioHttpEvidence? _evidence;
+        private readonly List<Func<Task>> _additionalCleanup = [];
+        internal void RegisterCleanup(Func<Task> cleanup) => _additionalCleanup.Add(cleanup);
+        internal async Task CleanupAdditionalAsync()
+        {
+            var failures = new List<Exception>();
+            var callbacks = _additionalCleanup.AsEnumerable().Reverse().ToArray();
+            _additionalCleanup.Clear();
+            foreach (var cleanup in callbacks)
+                try { await cleanup(); }
+                catch (Exception exception) { failures.Add(exception); }
+            if (failures.Count > 0) throw new AggregateException("Additional scenario cleanup failed.", failures);
+        }
         public ApplicationFactory Factory { get; set; } = default!;
         public HttpClient HttpClient { get; set; } = default!;
         public HttpResponseMessage? Response { get; set; }
@@ -20,12 +32,15 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Common
 
         public void RecordEvidence(string name, object value) => Evidence.RecordObservation(name, value);
 
-        public HttpClient CreateClient(WebApplicationFactory<Program> factory)
+        public HttpClient CreateClient(WebApplicationFactory<Program> factory, string exchangeRole = "api")
             // Capture first so the actual response survives an outer contract failure.
-            => factory.CreateDefaultClient(new OpenApiResponseHandler(OpenApiDocument), new HttpEvidenceHandler(Evidence));
+            => factory.CreateDefaultClient(new OpenApiResponseHandler(OpenApiDocument), new HttpEvidenceHandler(Evidence, exchangeRole: exchangeRole));
 
         // Routing failures have no selected OpenAPI operation. Their complete problems
         // are checked by framework steps and their HTTP bytes use the same recorder.
+        internal HttpClient CreateTechnicalClient(WebApplicationFactory<Program> factory) => factory.CreateDefaultClient(new HttpEvidenceHandler(Evidence, exchangeRole: "technical-api"));
+        internal DelegatingHandler CreateTechnicalCatalogHandler() => new HttpEvidenceHandler(Evidence, "products", "technical-catalog");
+
         internal HttpClient CreateRoutingClient() => Factory.CreateDefaultClient(new HttpEvidenceHandler(Evidence));
 
         internal DelegatingHandler CreateCheckoutCatalogHandler() => new HttpEvidenceHandler(Evidence, "products", "checkout-catalog");

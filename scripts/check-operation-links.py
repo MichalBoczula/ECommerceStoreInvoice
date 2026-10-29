@@ -212,6 +212,22 @@ def verify_matrix(operations, cases):
         key = case_key(dict(row, example=json.loads(row['example'])))
         assert key not in mapped, 'Expanded example linked more than once'
         mapped.add(key)
+    for row in technical_rows():
+        assert re.fullmatch(r'INV\d{2}_[A-Za-z0-9_]+', row['scenarioId']) and row['scenarioId'] not in ids, 'Invalid or duplicate scenarioId'
+        ids.add(row['scenarioId'])
+        assert row['stage'] == 'technical' and row['method'] == 'GET' and row['optionalStatuses'] == '' and row['cause'].strip(), 'Invalid technical route metadata'
+        allowed = {'/health': {200}, '/health/live': {200}, '/health/ready': {200, 503},
+                   '/swagger/v1/swagger.json': {200}, '/swagger/index.html': {200},
+                   '/shopping-carts/client/{clientId:guid}': {200}, '/invoices/{invoiceId:guid}/pdf': set()}
+        assert row['path'] in allowed, 'Unknown technical route'
+        statuses = status_set(row['statuses'])
+        if row['outcome'] == 'cancelled':
+            assert row['path'] == '/invoices/{invoiceId:guid}/pdf' and not statuses, 'Cancellation has no HTTP status'
+        else:
+            assert row['outcome'] == 'response' and statuses and statuses <= allowed[row['path']], 'Invalid technical status intent'
+        key = case_key(dict(row, example=json.loads(row['example'])))
+        assert key not in mapped, 'Expanded example linked more than once'
+        mapped.add(key)
     assert mapped == {case_key(case) for case in cases}, 'Missing or stale scenario/example links'
     declared = {(op['operationId'], status) for op in operations for status in op['responses']}
     gaps = read_tsv(ROOT / 'docs/acceptance-gaps.tsv', {'operationId', 'status', 'task', 'reason'})
@@ -229,6 +245,10 @@ def verify_matrix(operations, cases):
 
 def framework_rows():
     return read_tsv(ROOT / 'docs/framework-scenarios.tsv', {'scenarioId', 'stage', 'method', 'path', 'statuses', 'optionalStatuses', 'cause', 'feature', 'scenario', 'example'})
+
+
+def technical_rows():
+    return read_tsv(ROOT / 'docs/technical-scenarios.tsv', {'scenarioId', 'stage', 'method', 'path', 'statuses', 'optionalStatuses', 'outcome', 'cause', 'feature', 'scenario', 'example'})
 
 
 def verify_generation_sources():
@@ -310,7 +330,8 @@ def generate():
     assert names and len(names) == len(set(names)), f"Duplicate/empty operation inventory: {names}"
     rows, gaps, covered = verify_matrix(operations, cases)
     framework = framework_rows()
-    verify_evidence_sources(rows + framework)
+    technical = technical_rows()
+    verify_evidence_sources(rows + framework + technical)
     for operation in operations:
         linked = [row for row in rows if row['operationId'] == operation['operationId']]
         operation['scenarios'] = sorted({'tests/ECommerceStoreInvoice.Acceptance.Tests/Features/' + row['feature'] for row in linked})
@@ -320,9 +341,12 @@ def generate():
     framework_cases = [dict(scenarioId=row['scenarioId'], stage=row['stage'], method=row['method'], path=row['path'],
                             feature=row['feature'], scenario=row['scenario'], example=json.loads(row['example']),
                             statuses=sorted(status_set(row['statuses'])), cause=row['cause']) for row in framework]
-    return {"operations": operations, "frameworkCases": framework_cases,
-            "coverage": {"expandedBddCases": len(cases), "matrixCases": len(rows) + len(framework),
-            "operationCases": len(rows), "frameworkCases": len(framework),
+    technical_cases = [dict(scenarioId=row['scenarioId'], stage=row['stage'], method=row['method'], path=row['path'],
+                            feature=row['feature'], scenario=row['scenario'], example=json.loads(row['example']),
+                            statuses=sorted(status_set(row['statuses'])), outcome=row['outcome'], cause=row['cause']) for row in technical]
+    return {"operations": operations, "frameworkCases": framework_cases, "technicalCases": technical_cases,
+            "coverage": {"expandedBddCases": len(cases), "matrixCases": len(rows) + len(framework) + len(technical),
+            "operationCases": len(rows), "frameworkCases": len(framework), "technicalCases": len(technical),
             "declaredOperationStatusPairs": sum(len(op['responses']) for op in operations),
             "guaranteedScenarioStatusPairs": covered, "gaps": gaps}}
 
