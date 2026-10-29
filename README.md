@@ -178,7 +178,10 @@ actual checkout transaction competition/rollback and stale invoice attempt fenci
 [Task 12](docs/bdd-12-technical-scenarios.md) adds real probe outage/recovery,
 standalone-topology rejection, PDF cancellation, host/database isolation, complete
 documentation payloads and separate startup/index lifecycle checks.
-The current acceptance inventory is **315 BDD + 37 standalone = 352**; recorder
+[Task 13](docs/bdd-13-request-response-contracts.md) aligns generated schemas with
+serializer nullability/presence, adds typed source examples and strict scalar/nested
+response checks, complete problem alternatives and binary PDF headers.
+The current acceptance inventory is **320 BDD + 63 standalone = 383**; recorder
 regressions remain standalone checks. Generated `.feature.cs` files are ignored
 build outputs, not maintained source.
 

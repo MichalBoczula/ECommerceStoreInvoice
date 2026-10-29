@@ -23,3 +23,14 @@ See `scripts/check-operation-links.py`, `scripts/validate-openapi.sh`, `scripts/
 
 - Maintain a separate handwritten OpenAPI file: route and DTO changes could drift from the published contract.
 - Maintain operation-to-flow and scenario links in a manual table: those links could disagree with the executed service and `.feature` sources.
+
+
+INV-BDD-13 keeps the generated document as the sole schema. Source XML and typed
+examples describe published DTOs; schema/operation filters describe existing
+serializer output, complete safe problem writers and PDF headers. Required member
+presence is distinct from nullability, including the five accepted nullable client
+values. Body operations distinguish business validation from binding problems with
+oneOf. The response checker validates emitted scalar/format/nesting/null semantics
+instead of skipping nulls. Canonical number schemas document web binding's quoted
+int32 compatibility; metadata reads do not add URI validation to legacy storage
+text. This changes documentation and verification, not policies or runtime binding.

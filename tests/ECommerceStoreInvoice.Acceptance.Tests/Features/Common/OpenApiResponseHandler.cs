@@ -32,7 +32,7 @@ internal sealed class OpenApiResponseHandler(JsonDocument document) : Delegating
         var expected = (int)response.StatusCode >= 400 ? "application/problem+json" :
             operation.GetProperty("operationId").GetString() == "DownloadInvoicePdf" ? "application/pdf" : "application/json";
         var actual = response.Content.Headers.ContentType?.MediaType;
-        if (actual != expected || !declared.TryGetProperty("content", out var content) ||
+        if (!string.Equals(actual, expected, StringComparison.OrdinalIgnoreCase) || !declared.TryGetProperty("content", out var content) ||
             !content.TryGetProperty(expected, out var representation) ||
             !representation.TryGetProperty("schema", out var schema))
             throw new InvalidOperationException($"Response media or schema differs from OpenAPI: {request.Method} {path} {status} ({actual})");
@@ -40,12 +40,11 @@ internal sealed class OpenApiResponseHandler(JsonDocument document) : Delegating
         var bytes = await response.Content.ReadAsByteArrayAsync(cancellationToken);
         if (expected == "application/pdf")
         {
-            if (!bytes.AsSpan().StartsWith("%PDF-"u8))
-                throw new InvalidOperationException("Invoice download is not a PDF.");
+            ValidatePdf(schema, response, bytes, path);
             return response;
         }
         using var body = JsonDocument.Parse(bytes);
-        Validate(schema, body.RootElement, document.RootElement.GetProperty("components").GetProperty("schemas"), path, 0);
+        ValidateJson(schema, body.RootElement, document.RootElement.GetProperty("components").GetProperty("schemas"), path);
         return response;
     }
 
@@ -58,41 +57,26 @@ internal sealed class OpenApiResponseHandler(JsonDocument document) : Delegating
             string.Equals(parts.First, parts.Second, StringComparison.OrdinalIgnoreCase));
     }
 
-    private static void Validate(JsonElement schema, JsonElement value, JsonElement components, string path, int depth)
+    internal static void ValidateJson(JsonElement schema, JsonElement value, JsonElement components, string path)
     {
-        if (depth > 16)
-            return;
-        if (schema.TryGetProperty("$ref", out var reference))
-        {
-            Validate(components.GetProperty(reference.GetString()!.Split('/').Last()), value, components, path, depth + 1);
-            return;
-        }
-        if (schema.TryGetProperty("allOf", out var allOf))
-            foreach (var part in allOf.EnumerateArray())
-                Validate(part, value, components, path, depth + 1);
-        if (!schema.TryGetProperty("type", out var type))
-            return;
-        if (type.GetString() == "array")
-        {
-            if (value.ValueKind != JsonValueKind.Array)
-                throw new InvalidOperationException($"Expected array at {path}");
-            if (schema.TryGetProperty("items", out var items))
-                foreach (var element in value.EnumerateArray())
-                    Validate(items, element, components, path, depth + 1);
-        }
-        if (type.GetString() == "object")
-        {
-            if (value.ValueKind != JsonValueKind.Object)
-                throw new InvalidOperationException($"Expected object at {path}");
-            if (schema.TryGetProperty("required", out var required))
-                foreach (var field in required.EnumerateArray())
-                    if (!value.TryGetProperty(field.GetString()!, out _))
-                        throw new InvalidOperationException($"Required response field missing at {path}: {field.GetString()}");
-            if (schema.TryGetProperty("properties", out var properties))
-                foreach (var property in properties.EnumerateObject())
-                    if (value.TryGetProperty(property.Name, out var child) && child.ValueKind != JsonValueKind.Null)
-                        Validate(property.Value, child, components, path, depth + 1);
-        }
+        var errors = JsonContractValidator.Check(schema, value, components);
+        if (errors.Count > 0)
+            throw new InvalidOperationException($"Response contract mismatch at {path}: {string.Join("; ", errors)}");
     }
 
+    private static void ValidatePdf(JsonElement schema, HttpResponseMessage response, byte[] bytes, string path)
+    {
+        if (schema.GetProperty("type").GetString() != "string" || schema.GetProperty("format").GetString() != "binary")
+            throw new InvalidOperationException("PDF response schema must declare binary bytes.");
+        if (!bytes.AsSpan().StartsWith("%PDF-"u8))
+            throw new InvalidOperationException("Invoice download is not a PDF.");
+        var invoiceId = Guid.Parse(path.Split('/', StringSplitOptions.RemoveEmptyEntries)[1]);
+        var filename = $"invoice-{invoiceId:D}.pdf";
+        var disposition = response.Content.Headers.ContentDisposition;
+        if (disposition?.DispositionType != "attachment" || disposition.FileNameStar != filename || disposition.FileName?.Trim('"') != filename)
+            throw new InvalidOperationException("Invoice PDF attachment filename differs from the route invoice.");
+        var cache = response.Headers.CacheControl?.ToString().Split(',').Select(value => value.Trim()).Order().ToArray();
+        if (cache is null || !cache.SequenceEqual(new[] { "no-store", "private" }))
+            throw new InvalidOperationException("Invoice PDF must use private, no-store caching.");
+    }
 }
