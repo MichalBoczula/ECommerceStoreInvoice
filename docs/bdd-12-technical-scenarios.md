@@ -18,7 +18,9 @@ One case owns a real Mongo replica container. It stops only that container after
 the host is running: alias/liveness remain Healthy, readiness becomes Unhealthy
 503 and both documentation routes remain byte-identical to complete source
 projections. Restarting the same Mongo restores readiness and every original field
-and ordered line. Shared test containers are never stopped. A separate owned
+and ordered line. Shared test containers are never stopped. The owned restart fixture initializes
+the replica only when needed, records owned/shared container identities and bounds
+container operations; it does not repeat first-start initialization on restart. A separate owned
 standalone Mongo permits startup indexes but its actual hello is not a replica
 set/router; readiness is 503 and executes no ping. Normal reads remain possible.
 The test-only readiness client records actual commands and uses bounded selection

@@ -56,14 +56,14 @@ public sealed class TechnicalSteps(ScenarioApiContext context, BusinessValidatio
         await Probe("/health/ready", 200);
         await DocumentationSnapshot();
         await context.Factory.StopTechnicalMongoAsync();
-        context.RecordEvidence("Technical owned Mongo lifecycle", new { transition = "stopped", owned = true, sharedMongoTouched = false, database = context.Factory.DatabaseName });
+        context.RecordEvidence("Technical owned Mongo lifecycle", new { transition = "stopped", owned = true, sharedMongoTouched = false, database = context.Factory.DatabaseName, ownedContainerId = context.Factory.TechnicalMongoContainerId, sharedContainerId = context.Factory.SharedMongoContainerId });
         var commandCount = context.Factory.ReadinessCommands.Count;
         await Probe("/health/live", 200); await Probe("/health", 200);
         context.Factory.ReadinessCommands.Count.ShouldBe(commandCount);
         await Probe("/health/ready", 503);
         await DocumentationSnapshot();
         await context.Factory.RestartTechnicalMongoAsync();
-        context.RecordEvidence("Technical owned Mongo lifecycle", new { transition = "restarted", owned = true, sharedMongoTouched = false, database = context.Factory.DatabaseName });
+        context.RecordEvidence("Technical owned Mongo lifecycle", new { transition = "restarted", owned = true, sharedMongoTouched = false, database = context.Factory.DatabaseName, ownedContainerId = context.Factory.TechnicalMongoContainerId, sharedContainerId = context.Factory.SharedMongoContainerId });
         await Probe("/health/ready", 200);
         context.RecordEvidence("Technical real readiness commands", context.Factory.ReadinessCommands.Select(c => new { c.Command, c.Database }).ToArray());
     }

@@ -16,6 +16,8 @@ public partial class ApplicationFactory
     internal string? TechnicalMongoMode { get; set; }
     internal PdfCancellationProbe? CancellationProbe { get; set; }
     internal string DatabaseName => _database;
+    internal string? TechnicalMongoContainerId => _technicalMongo?.Id;
+    internal string? SharedMongoContainerId => SharedMongoContainer.IsValueCreated ? SharedMongoContainer.Value.Id : null;
     internal string MongoConnection => _connectionString;
     private MongoDbContainer? _technicalMongo;
     private bool _technicalMongoRunning;
@@ -25,10 +27,22 @@ public partial class ApplicationFactory
     {
         if (TechnicalMongoMode is null) return false;
         var builder = new MongoDbBuilder("mongo:8.0").WithUsername(Username).WithPassword(Password);
-        if (TechnicalMongoMode == "replica") builder = builder.WithReplicaSet();
+        if (TechnicalMongoMode == "replica") builder = builder.WithReplicaSet().WithStartupCallback(async (container, token) =>
+        {
+            // The module's default callback repeats rs.initiate after Stop/Start.
+            const string script = "var s;try{s=rs.status();}catch(e){if(e.code!==94)throw e;s={ok:0,code:94};}if(s.ok===1)quit(0);if(s.code!==94)quit(1);var r=rs.initiate({_id:'rs0',members:[{_id:0,host:'127.0.0.1:27017'}]});quit(r.ok===1?0:1);";
+            while (true)
+            {
+                token.ThrowIfCancellationRequested();
+                var result = await container.ExecScriptAsync(script, token);
+                if (result.ExitCode == 0) break;
+                await Task.Delay(TimeSpan.FromMilliseconds(500), token);
+            }
+        });
         else if (TechnicalMongoMode != "standalone") throw new InvalidOperationException("Unknown technical Mongo mode.");
         _technicalMongo = builder.Build();
-        await _technicalMongo.StartAsync();
+        using var startup = new CancellationTokenSource(TimeSpan.FromSeconds(45));
+        await _technicalMongo.StartAsync(startup.Token);
         _technicalMongoRunning = true;
         _connectionString = _technicalMongo.GetConnectionString();
         return true;
@@ -58,14 +72,16 @@ public partial class ApplicationFactory
     internal async Task StopTechnicalMongoAsync()
     {
         if (_technicalMongo is null) throw new InvalidOperationException("Stopping shared Mongo is prohibited.");
-        await _technicalMongo.StopAsync();
+        using var stop = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+        await _technicalMongo.StopAsync(stop.Token);
         _technicalMongoRunning = false;
     }
 
     internal async Task RestartTechnicalMongoAsync()
     {
         if (_technicalMongo is null) throw new InvalidOperationException("Restarting shared Mongo is prohibited.");
-        await _technicalMongo.StartAsync();
+        using var startup = new CancellationTokenSource(TimeSpan.FromSeconds(45));
+        await _technicalMongo.StartAsync(startup.Token);
         _technicalMongoRunning = true;
         using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(15));
         await Services.GetRequiredService<IMongoClient>().GetDatabase(_database)
