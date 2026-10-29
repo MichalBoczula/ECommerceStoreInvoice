@@ -1,10 +1,11 @@
-﻿using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.ValueObjects;
+using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.ValueObjects;
 using ECommerceStoreInvoice.Domain.Validation.Abstract;
 using ECommerceStoreInvoice.Domain.Validation.Common;
 using ECommerceStoreInvoice.Domain.Validation.Concrete.Rules.ShoppingCarts;
 
 namespace ECommerceStoreInvoice.Domain.Validation.Concrete.Policies
 {
+    [Documentation("inv.policy.shopping-cart-line", "Validate each supplied line for non-null value, nonempty product UUID and strictly positive quantity. Empty collections are allowed.")]
     internal sealed class ShoppingCartLineValidationPolicy
         : IValidationPolicy<IReadOnlyCollection<ShoppingCartLine>>, IValidationPolicyDescriptorProvider
     {

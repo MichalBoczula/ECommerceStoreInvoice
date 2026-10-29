@@ -17,6 +17,7 @@ case "$command" in
     python3 scripts/test-architecture.py
     python3 scripts/check-architecture.py
     python3 scripts/test-operation-links.py
+    python3 scripts/test-source-documentation.py
     mkdir -p "$results_dir"
     python3 scripts/check-operation-links.py "$results_dir/operation-links.json"
     ;;

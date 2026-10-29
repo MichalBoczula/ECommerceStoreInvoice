@@ -1,9 +1,10 @@
-﻿using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate;
+using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate;
 using ECommerceStoreInvoice.Domain.Validation.Abstract;
 using ECommerceStoreInvoice.Domain.Validation.Common;
 
 namespace ECommerceStoreInvoice.Domain.Validation.Concrete.Rules.ProductVersions
 {
+    [Documentation("inv.rule.product-version-product-id", "For a non-null snapshot, reject an empty product UUID.")]
     internal sealed class ProductVersionProductIdValidationRule : IValidationRule<ProductVersion>
     {
         private readonly ValidationError productIdCannotBeEmpty;

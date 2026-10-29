@@ -23,16 +23,16 @@ public sealed class OrderProductSnapshotsTests
     public void CreateOrderFlow_DescribesFetchCreateAndValidationAsSeparateSteps()
     {
         var flow = new OrderDescriptorService().GetCreateOrderDescriptor();
-        var names = flow.Steps.Select(step => step.StepName).ToList();
+        var names = flow.Steps.Select(step => step.BpmnId).ToList();
 
         names.Skip(4).Take(6).ShouldBe(new[]
         {
             "GetRequestedProductIds",
             "FetchExternalProducts",
-            "ThrowNotFoundExceptionIfProductMissing",
+            "EnsureAllProductsExist",
             "CreateProductSnapshots",
             "ValidateProductSnapshots",
-            "ThrowValidationExceptionIfProductSnapshotInvalid"
+            "EnsureProductSnapshotsValid"
         });
         flow.Steps.Select(step => step.Order).ShouldBe(Enumerable.Range(1, flow.Steps.Count));
     }

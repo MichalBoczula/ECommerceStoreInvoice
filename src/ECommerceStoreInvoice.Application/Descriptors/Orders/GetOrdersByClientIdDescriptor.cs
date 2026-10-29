@@ -11,15 +11,17 @@ namespace ECommerceStoreInvoice.Application.Descriptors.Orders
 {
     internal sealed record GetOrdersByClientId;
 
+    [Documentation("inv.flow.get-orders-by-client-id", "Read only the selected client orders and snapshots; no matches is an empty array, not a not-found error.")]
+
     internal sealed class GetOrdersByClientIdDescriptor : FlowDescriberBase<GetOrdersByClientId>
     {
-        [FlowStep(order: 1, bpmnId: "ValidateClientId")]
+        [FlowStep(order: 1, bpmnId: "ValidateClientId", description: "Validate the client identifier with the registered GUID policy.")]
         public async Task<ValidationResult> ValidateClientId(Guid clientId, IValidationPolicy<Guid> guidValidationPolicy)
         {
             return await guidValidationPolicy.Validate(clientId);
         }
 
-        [FlowStep(order: 2, bpmnId: "IsClientIdValid")]
+        [FlowStep(order: 2, bpmnId: "IsClientIdValid", description: "Reject the flow with the complete registered validation errors when client id invalid.")]
         public void ThrowValidationExceptionIfClientIdInvalid(ValidationResult validationResult)
         {
             if (!validationResult.IsValid)
@@ -28,7 +30,7 @@ namespace ECommerceStoreInvoice.Application.Descriptors.Orders
             }
         }
 
-        [FlowStep(order: 3, bpmnId: "LoadOrdersWithProductVersions")]
+        [FlowStep(order: 3, bpmnId: "LoadOrdersWithProductVersions", description: "Load only the selected client orders joined to their stored product versions.")]
         public async Task<IReadOnlyCollection<(Order Order, IReadOnlyCollection<ProductVersion> ProductVersions)>> LoadOrdersWithProductVersions(
             Guid clientId,
             IOrderRepository orderRepository)
@@ -36,7 +38,7 @@ namespace ECommerceStoreInvoice.Application.Descriptors.Orders
             return await orderRepository.GetOrdersWithProductVersionsByClientId(clientId);
         }
 
-        [FlowStep(order: 4, bpmnId: "MapOrdersResponse")]
+        [FlowStep(order: 4, bpmnId: "MapOrdersResponse", description: "Return the complete get orders by client id response from the domain values; this description is not execution tracing.")]
         public IReadOnlyCollection<OrderResponseDto> MapToResponse(
             IReadOnlyCollection<(Order Order, IReadOnlyCollection<ProductVersion> ProductVersions)> ordersWithProductVersions)
         {

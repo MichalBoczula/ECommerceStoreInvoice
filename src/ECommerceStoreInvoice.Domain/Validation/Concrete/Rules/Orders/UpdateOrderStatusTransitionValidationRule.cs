@@ -5,6 +5,7 @@ using ECommerceStoreInvoice.Domain.Validation.Common;
 
 namespace ECommerceStoreInvoice.Domain.Validation.Concrete.Rules.Orders
 {
+    [Documentation("inv.rule.update-order-status-transition", "Reject every transition except Created to Paid or Cancelled; terminal and repeated targets leave stored state unchanged.")]
     internal sealed class UpdateOrderStatusTransitionValidationRule : IValidationRule<(Order order, OrderStatus newStatus)>
     {
         private readonly ValidationError transitionNotAllowed;

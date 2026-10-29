@@ -10,15 +10,17 @@ namespace ECommerceStoreInvoice.Application.Descriptors.ShoppingCarts
 {
     internal sealed record GetShoppingCartByClientId;
 
+    [Documentation("inv.flow.get-shopping-cart-by-client-id", "Read the complete cart for one client without catalog enrichment or writes.")]
+
     internal sealed class GetShoppingCartByClientIdDescriptor : FlowDescriberBase<GetShoppingCartByClientId>
     {
-        [FlowStep(order: 1, bpmnId: "ValidateClientId")]
+        [FlowStep(order: 1, bpmnId: "ValidateClientId", description: "Validate the client identifier with the registered GUID policy.")]
         public async Task<ValidationResult> ValidateClientId(Guid clientId, IValidationPolicy<Guid> guidValidationPolicy)
         {
             return await guidValidationPolicy.Validate(clientId);
         }
 
-        [FlowStep(order: 2, bpmnId: "IsClientIdValid")]
+        [FlowStep(order: 2, bpmnId: "IsClientIdValid", description: "Reject the flow with the complete registered validation errors when client id invalid.")]
         public void ThrowValidationExceptionIfClientIdInvalid(ValidationResult validationResult)
         {
             if (!validationResult.IsValid)
@@ -27,13 +29,13 @@ namespace ECommerceStoreInvoice.Application.Descriptors.ShoppingCarts
             }
         }
 
-        [FlowStep(order: 3, bpmnId: "GetShoppingCartByClientId")]
+        [FlowStep(order: 3, bpmnId: "GetShoppingCartByClientId", description: "Load the cart belonging to the selected client.")]
         public async Task<ShoppingCart?> LoadShoppingCart(Guid clientId, IShoppingCartRepository shoppingCartRepository)
         {
             return await shoppingCartRepository.GetShoppingCartByClientId(clientId);
         }
 
-        [FlowStep(order: 4, bpmnId: "IsShoppingCartExists")]
+        [FlowStep(order: 4, bpmnId: "IsShoppingCartExists", description: "Reject when the client has no cart.")]
         public void ThrowNotFoundExceptionIfShoppingCartMissing(Guid clientId, ShoppingCart? shoppingCart)
         {
             if (shoppingCart is null)
@@ -42,7 +44,7 @@ namespace ECommerceStoreInvoice.Application.Descriptors.ShoppingCarts
             }
         }
 
-        [FlowStep(order: 5, bpmnId: "MapShoppingCartdResponse")]
+        [FlowStep(order: 5, bpmnId: "MapShoppingCartdResponse", description: "Return the complete get shopping cart by client id response from the domain values; this description is not execution tracing.")]
         public ShoppingCartResponseDto MapToResponse(ShoppingCart shoppingCart)
         {
             return MappingConfig.MapToResponse(shoppingCart);

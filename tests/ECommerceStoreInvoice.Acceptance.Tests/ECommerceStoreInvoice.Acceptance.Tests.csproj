@@ -44,6 +44,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="../../docs/acceptance-matrix.tsv" LogicalName="Invoices.Bdd.Matrix.tsv" />
+    <EmbeddedResource Include="../../docs/framework-scenarios.tsv" LogicalName="Invoices.Bdd.Framework.tsv" />
+    <EmbeddedResource Include="../../docs/technical-scenarios.tsv" LogicalName="Invoices.Bdd.Technical.tsv" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Using Include="Xunit" />
   </ItemGroup>
 

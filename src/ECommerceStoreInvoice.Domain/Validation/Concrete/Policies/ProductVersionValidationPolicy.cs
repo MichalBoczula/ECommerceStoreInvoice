@@ -1,10 +1,11 @@
-﻿using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate;
+using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate;
 using ECommerceStoreInvoice.Domain.Validation.Abstract;
 using ECommerceStoreInvoice.Domain.Validation.Common;
 using ECommerceStoreInvoice.Domain.Validation.Concrete.Rules.ProductVersions;
 
 namespace ECommerceStoreInvoice.Domain.Validation.Concrete.Policies
 {
+    [Documentation("inv.policy.product-version", "Validate non-null product snapshots, product UUID, required text, supported currency and positive price.")]
     internal sealed class ProductVersionValidationPolicy : IValidationPolicy<ProductVersion>, IValidationPolicyDescriptorProvider
     {
         private readonly List<IValidationRule<ProductVersion>> _rules = [];

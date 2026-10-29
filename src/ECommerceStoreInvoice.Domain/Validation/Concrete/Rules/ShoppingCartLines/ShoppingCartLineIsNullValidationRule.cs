@@ -1,9 +1,10 @@
-﻿using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.ValueObjects;
+using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.ValueObjects;
 using ECommerceStoreInvoice.Domain.Validation.Abstract;
 using ECommerceStoreInvoice.Domain.Validation.Common;
 
 namespace ECommerceStoreInvoice.Domain.Validation.Concrete.Rules.ShoppingCarts
 {
+    [Documentation("inv.rule.shopping-cart-line-is-null", "Reject a null domain cart line; HTTP binding rejects null line objects earlier, so that HTTP failure is not proof this rule executed.")]
     internal sealed class ShoppingCartLineIsNullValidationRule : IValidationRule<ShoppingCartLine>
     {
         private readonly ValidationError shoppingCartLineIsNull;

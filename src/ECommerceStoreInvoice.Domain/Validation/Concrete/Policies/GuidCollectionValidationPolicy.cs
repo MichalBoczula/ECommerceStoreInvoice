@@ -4,6 +4,7 @@ using ECommerceStoreInvoice.Domain.Validation.Concrete.Rules.Common;
 
 namespace ECommerceStoreInvoice.Domain.Validation.Concrete.Policies
 {
+    [Documentation("inv.policy.guid-collection", "Validate a nonempty ID collection without empty UUID members. It is used by the internal bulk service, not a direct HTTP flow.")]
     internal sealed class GuidCollectionValidationPolicy
         : IValidationPolicy<IEnumerable<Guid>>, IValidationPolicyDescriptorProvider
     {

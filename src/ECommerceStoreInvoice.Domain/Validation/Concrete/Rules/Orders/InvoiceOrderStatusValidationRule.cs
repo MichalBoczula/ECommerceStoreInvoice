@@ -4,6 +4,7 @@ using ECommerceStoreInvoice.Domain.Validation.Common;
 
 namespace ECommerceStoreInvoice.Domain.Validation.Concrete.Rules.Orders
 {
+    [Documentation("inv.rule.invoice-order-status", "Reject invoice generation for an order that is not Paid.")]
     internal sealed class InvoiceOrderStatusValidationRule : IValidationRule<InvoiceOrderStatusValidationContext>
     {
         private readonly ValidationError orderMustBePaid;

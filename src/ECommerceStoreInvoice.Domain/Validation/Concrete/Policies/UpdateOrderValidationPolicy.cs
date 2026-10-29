@@ -6,6 +6,7 @@ using ECommerceStoreInvoice.Domain.Validation.Concrete.Rules.Orders;
 
 namespace ECommerceStoreInvoice.Domain.Validation.Concrete.Policies
 {
+    [Documentation("inv.policy.update-order", "Allow only a Created order to become Paid or Cancelled; reject repeated or terminal transitions.")]
     internal sealed class UpdateOrderValidationPolicy
         : IValidationPolicy<(Order order, OrderStatus newStatus)>, IValidationPolicyDescriptorProvider
     {

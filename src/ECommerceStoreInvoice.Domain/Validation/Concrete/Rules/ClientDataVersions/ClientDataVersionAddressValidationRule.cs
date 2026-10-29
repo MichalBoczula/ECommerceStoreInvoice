@@ -5,6 +5,7 @@ using ECommerceStoreInvoice.Domain.Validation.Common;
 
 namespace ECommerceStoreInvoice.Domain.Validation.Concrete.Rules.ClientDataVersions
 {
+    [Documentation("inv.rule.client-data-version-address", "Require postal nn-nnn text; check nonblank address components against the existing ASCII pattern and permit null/blank optional components.")]
     internal sealed class ClientDataVersionAddressValidationRule : IValidationRule<ClientDataVersion>
     {
         private static readonly Regex PostalCodePattern = new(

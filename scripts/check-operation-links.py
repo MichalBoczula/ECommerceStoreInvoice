@@ -2,6 +2,7 @@
 """Project endpoint, executed flow, policy and acceptance links from source."""
 
 import csv
+from runpy import run_path
 import json
 import subprocess
 import re
@@ -15,6 +16,7 @@ DOMAIN = ROOT / "src/ECommerceStoreInvoice.Domain"
 FEATURES = ROOT / "tests/ECommerceStoreInvoice.Acceptance.Tests/Features"
 CALL = re.compile(r'\b(\w+Service)\.(\w+)\(')
 DESCRIPTOR = re.compile(r'var descriptor = new (\w+Descriptor)\(\);')
+SOURCE_DOCUMENTATION = run_path(str(Path(__file__).with_name("source-documentation.py")))
 POLICY = re.compile(r'IValidationPolicy<(.+?)>')
 
 
@@ -344,7 +346,8 @@ def generate():
     technical_cases = [dict(scenarioId=row['scenarioId'], stage=row['stage'], method=row['method'], path=row['path'],
                             feature=row['feature'], scenario=row['scenario'], example=json.loads(row['example']),
                             statuses=sorted(status_set(row['statuses'])), outcome=row['outcome'], cause=row['cause']) for row in technical]
-    return {"operations": operations, "frameworkCases": framework_cases, "technicalCases": technical_cases,
+    documentation = SOURCE_DOCUMENTATION["project"](ROOT, operations, rows)
+    return {"operations": operations, "frameworkCases": framework_cases, "technicalCases": technical_cases, "sourceDocumentation": documentation,
             "coverage": {"expandedBddCases": len(cases), "matrixCases": len(rows) + len(framework) + len(technical),
             "operationCases": len(rows), "frameworkCases": len(framework), "technicalCases": len(technical),
             "declaredOperationStatusPairs": sum(len(op['responses']) for op in operations),

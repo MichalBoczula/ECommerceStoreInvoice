@@ -5,6 +5,7 @@ using ECommerceStoreInvoice.Domain.Validation.Concrete.Rules.ClientDataVersions;
 
 namespace ECommerceStoreInvoice.Domain.Validation.Concrete.Policies
 {
+    [Documentation("inv.policy.client-data-version", "Validate phone digits, email and postal/address rules. Optional address components and client name retain their existing accepted null/whitespace behavior.")]
     internal sealed class ClientDataVersionValidationPolicy : IValidationPolicy<ClientDataVersion>, IValidationPolicyDescriptorProvider
     {
         private readonly List<IValidationRule<ClientDataVersion>> _rules = [];
