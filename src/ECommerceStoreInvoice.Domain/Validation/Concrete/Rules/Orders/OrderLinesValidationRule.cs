@@ -1,9 +1,10 @@
-﻿using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate;
+using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate;
 using ECommerceStoreInvoice.Domain.Validation.Abstract;
 using ECommerceStoreInvoice.Domain.Validation.Common;
 
 namespace ECommerceStoreInvoice.Domain.Validation.Concrete.Rules.Orders
 {
+    [Documentation("inv.rule.order-lines", "Reject null or empty order lines before transactional checkout writes.")]
     internal sealed class OrderLinesValidationRule : IValidationRule<Order>
     {
         private readonly ValidationError linesCannotBeNull;

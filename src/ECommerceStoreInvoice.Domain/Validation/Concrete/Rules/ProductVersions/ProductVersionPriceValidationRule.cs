@@ -1,9 +1,10 @@
-﻿using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate;
+using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate;
 using ECommerceStoreInvoice.Domain.Validation.Abstract;
 using ECommerceStoreInvoice.Domain.Validation.Common;
 
 namespace ECommerceStoreInvoice.Domain.Validation.Concrete.Rules.ProductVersions
 {
+    [Documentation("inv.rule.product-version-price", "For a non-null snapshot, reject a unit price less than or equal to zero.")]
     internal sealed class ProductVersionPriceValidationRule : IValidationRule<ProductVersion>
     {
         private readonly ValidationError priceMustBeGreaterThanZero;

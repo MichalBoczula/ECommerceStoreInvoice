@@ -34,3 +34,13 @@ oneOf. The response checker validates emitted scalar/format/nesting/null semanti
 instead of skipping nulls. Canonical number schemas document web binding's quoted
 int32 compatibility; metadata reads do not add URI validation to legacy storage
 text. This changes documentation and verification, not policies or runtime binding.
+
+
+INV-BDD-14 qualifies stable flow/step/policy/rule identities and authored conditions,
+effects and failure limits in the existing operation-link projection. Actual HTTP
+records are joined in the existing scenario observation group; declared context
+is separate from observed response-error rule IDs and actual When/Then witnesses.
+Source/publication reachability distinguishes direct HTTP, published-only and
+internal unpublished flows. StepName displays authored prose while method/order/
+BPMN identity stays explicit. This is RAG-ready evidence, not branch telemetry or
+an implemented retrieval system.

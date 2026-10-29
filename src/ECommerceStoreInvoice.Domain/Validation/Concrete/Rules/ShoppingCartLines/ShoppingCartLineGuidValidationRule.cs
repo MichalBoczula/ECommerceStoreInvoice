@@ -4,6 +4,7 @@ using ECommerceStoreInvoice.Domain.Validation.Common;
 
 namespace ECommerceStoreInvoice.Domain.Validation.Concrete.Rules.ShoppingCarts
 {
+    [Documentation("inv.rule.shopping-cart-line-guid", "For a non-null line, reject an empty product UUID without changing the cart.")]
     internal sealed class ShoppingCartLineGuidValidationRule : IValidationRule<ShoppingCartLine>
     {
         private readonly ValidationError shoppingCartLineIdIsEmpty;

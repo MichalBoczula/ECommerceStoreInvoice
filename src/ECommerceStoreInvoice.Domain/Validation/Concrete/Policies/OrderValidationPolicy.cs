@@ -1,4 +1,4 @@
-﻿using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate;
+using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate;
 using ECommerceStoreInvoice.Domain.Validation.Abstract;
 using ECommerceStoreInvoice.Domain.Validation.Common;
 using ECommerceStoreInvoice.Domain.Validation.Concrete.Rules.Common;
@@ -6,6 +6,7 @@ using ECommerceStoreInvoice.Domain.Validation.Concrete.Rules.Orders;
 
 namespace ECommerceStoreInvoice.Domain.Validation.Concrete.Policies
 {
+    [Documentation("inv.policy.order", "Validate a non-null order, nonempty lines and client UUID before checkout writes.")]
     internal sealed class OrderValidationPolicy : IValidationPolicy<Order>, IValidationPolicyDescriptorProvider
     {
         private readonly List<IValidationRule<Order>> _rules = [];

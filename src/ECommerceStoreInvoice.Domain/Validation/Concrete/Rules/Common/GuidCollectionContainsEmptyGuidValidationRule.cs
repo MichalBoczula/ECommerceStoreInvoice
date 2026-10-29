@@ -3,6 +3,7 @@ using ECommerceStoreInvoice.Domain.Validation.Common;
 
 namespace ECommerceStoreInvoice.Domain.Validation.Concrete.Rules.Common
 {
+    [Documentation("inv.rule.guid-collection-contains-empty-guid", "Reject any empty UUID member in a supplied ID collection.")]
     internal sealed class GuidCollectionContainsEmptyGuidValidationRule : IValidationRule<IEnumerable<Guid>>
     {
         private readonly ValidationError guidCollectionCannotContainEmptyGuid = new()

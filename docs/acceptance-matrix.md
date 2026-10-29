@@ -100,3 +100,11 @@ operations retain 59/59 declared status pairs. Generated schema metadata, all ty
 examples, exact safe problem alternatives and binary PDF headers are verified
 against actual serializer/type information; guard mutation tests remain standalone.
 See [request/response contracts](bdd-13-request-response-contracts.md).
+
+
+INV-BDD-14 retains all prior case links and adds one source-documentation case:
+282 named, 28 framework and eleven technical cases (321 total). Authored source
+IDs/outcome families join to actual exchange IDs in each scenario observation
+group. Every guaranteed outcome requires a When/Then witness; setup/peer/catalog
+exchanges keep distinct roles. Declared steps/rules are not execution traces.
+See [flows, rules and RAG links](bdd-14-flows-rules-rag-links.md).

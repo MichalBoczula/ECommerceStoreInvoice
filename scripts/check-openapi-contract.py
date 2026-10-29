@@ -45,7 +45,11 @@ def check(document):
 
 if __name__ == "__main__":
     try:
-        count = check(json.loads(Path(sys.argv[1]).read_text(encoding="utf-8")))
+        path = Path(sys.argv[1])
+        count = check(json.loads(path.read_text(encoding="utf-8")))
+        documentation = links.generate()["sourceDocumentation"]
+        links.SOURCE_DOCUMENTATION["check_exports"](
+            documentation, json.loads(path.with_name("flows.json").read_text()), json.loads(path.with_name("validation-policies.json").read_text()))
         print(f"Verified generated OpenAPI for {count} linked operations.")
     except (AssertionError, KeyError, IndexError, OSError, ValueError) as error:
         print(f"OpenAPI contract drift: {error}", file=sys.stderr)

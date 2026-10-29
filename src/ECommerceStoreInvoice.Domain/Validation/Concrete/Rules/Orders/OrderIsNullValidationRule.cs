@@ -1,9 +1,10 @@
-﻿using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate;
+using ECommerceStoreInvoice.Domain.AggregatesModel.OrderAggregate;
 using ECommerceStoreInvoice.Domain.Validation.Abstract;
 using ECommerceStoreInvoice.Domain.Validation.Common;
 
 namespace ECommerceStoreInvoice.Domain.Validation.Concrete.Rules.Orders
 {
+    [Documentation("inv.rule.order-is-null", "Reject a null domain order; normal checkout constructs an order before validation.")]
     internal sealed class OrderIsNullValidationRule : IValidationRule<Order>
     {
         private readonly ValidationError orderIsNull;

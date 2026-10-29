@@ -4,6 +4,7 @@ using ECommerceStoreInvoice.Domain.Validation.Concrete.Rules.Orders;
 
 namespace ECommerceStoreInvoice.Domain.Validation.Concrete.Policies
 {
+    [Documentation("inv.policy.invoice", "Require the order to be Paid before invoice reservation and generation.")]
     internal sealed class InvoiceValidationPolicy
         : IValidationPolicy<InvoiceOrderStatusValidationContext>, IValidationPolicyDescriptorProvider
     {

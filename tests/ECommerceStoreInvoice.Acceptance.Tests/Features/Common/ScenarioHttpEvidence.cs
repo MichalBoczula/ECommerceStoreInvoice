@@ -15,6 +15,8 @@ internal sealed class ScenarioHttpEvidence
     internal static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web) { WriteIndented = true };
     private readonly ConcurrentQueue<(string Name, object? Value, byte[]? Pdf)> _pending = new();
     private readonly ConcurrentQueue<(string Name, string Phase, JsonElement Value)> _observations = new();
+    private readonly ConcurrentQueue<JsonElement> _httpRecords = new();
+    internal JsonElement[] HttpRecords() => _httpRecords.ToArray();
     private int _sequence;
     private bool _publishedIdentity;
     private readonly bool _labelFromTag;
@@ -58,7 +60,12 @@ internal sealed class ScenarioHttpEvidence
 
     internal int NextExchange() => Interlocked.Increment(ref _sequence);
 
-    internal void Record(string name, object value) => _pending.Enqueue((name, value, null));
+    internal void Record(string name, object value)
+    {
+        _pending.Enqueue((name, value, null));
+        if (name.StartsWith("HTTP ", StringComparison.Ordinal))
+            _httpRecords.Enqueue(JsonSerializer.SerializeToElement(value, JsonOptions));
+    }
 
     internal void RecordObservation(string name, object value)
     {

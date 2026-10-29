@@ -105,8 +105,15 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Common
         [AfterScenario]
         public async Task AfterScenario()
         {
-            try { await CleanupAsync(); }
-            finally { _apiContext.FlushEvidence(final: true); }
+            try
+            {
+                if (_openApi is not null) _apiContext.RecordSourceLinks(_scenarioContext.TestError is null);
+            }
+            finally
+            {
+                try { await CleanupAsync(); }
+                finally { _apiContext.FlushEvidence(final: true); }
+            }
         }
 
         private async Task CleanupAsync()

@@ -3,6 +3,7 @@ using ECommerceStoreInvoice.Domain.Validation.Common;
 
 namespace ECommerceStoreInvoice.Domain.Validation.Concrete.Rules.Common
 {
+    [Documentation("inv.rule.guid-collection-is-empty", "Reject null or empty ID collections in the internal bulk service.")]
     internal sealed class GuidCollectionIsEmptyValidationRule : IValidationRule<IEnumerable<Guid>>
     {
         private readonly ValidationError guidCollectionCannotBeEmpty = new()

@@ -11,15 +11,17 @@ namespace ECommerceStoreInvoice.Application.Descriptors.Orders
 {
     internal sealed record GetOrderById;
 
+    [Documentation("inv.flow.get-order-by-id", "Read a complete order joined to its immutable snapshots without querying the live catalog.")]
+
     internal sealed class GetOrderByIdDescriptor : FlowDescriberBase<GetOrderById>
     {
-        [FlowStep(order: 1, bpmnId: "ValidateOrderId")]
+        [FlowStep(order: 1, bpmnId: "ValidateOrderId", description: "Validate the order identifier with the registered GUID policy.")]
         public async Task<ValidationResult> ValidateOrderId(Guid orderId, IValidationPolicy<Guid> guidValidationPolicy)
         {
             return await guidValidationPolicy.Validate(orderId);
         }
 
-        [FlowStep(order: 2, bpmnId: "IsOrderIdValid")]
+        [FlowStep(order: 2, bpmnId: "IsOrderIdValid", description: "Reject the flow with the complete registered validation errors when order id invalid.")]
         public void ThrowValidationExceptionIfOrderIdInvalid(ValidationResult validationResult)
         {
             if (!validationResult.IsValid)
@@ -28,7 +30,7 @@ namespace ECommerceStoreInvoice.Application.Descriptors.Orders
             }
         }
 
-        [FlowStep(order: 3, bpmnId: "LoadOrderWithProductVersions")]
+        [FlowStep(order: 3, bpmnId: "LoadOrderWithProductVersions", description: "Load the order joined to its stored immutable product versions.")]
         public async Task<(Order Order, IReadOnlyCollection<ProductVersion> ProductVersions)?> LoadOrderWithProductVersions(
             Guid orderId,
             IOrderRepository orderRepository)
@@ -36,7 +38,7 @@ namespace ECommerceStoreInvoice.Application.Descriptors.Orders
             return await orderRepository.GetOrderWithProductVersionsById(orderId);
         }
 
-        [FlowStep(order: 4, bpmnId: "IsOrderExists")]
+        [FlowStep(order: 4, bpmnId: "IsOrderExists", description: "Reject when the selected order does not exist.")]
         public void ThrowNotFoundExceptionIfOrderMissing(
             Guid orderId,
             (Order Order, IReadOnlyCollection<ProductVersion> ProductVersions)? orderWithProductVersions)
@@ -47,7 +49,7 @@ namespace ECommerceStoreInvoice.Application.Descriptors.Orders
             }
         }
 
-        [FlowStep(order: 5, bpmnId: "MapOrderResponse")]
+        [FlowStep(order: 5, bpmnId: "MapOrderResponse", description: "Return the complete get order by id response from the domain values; this description is not execution tracing.")]
         public OrderResponseDto MapToResponse(
             (Order Order, IReadOnlyCollection<ProductVersion> ProductVersions) orderWithProductVersions)
         {

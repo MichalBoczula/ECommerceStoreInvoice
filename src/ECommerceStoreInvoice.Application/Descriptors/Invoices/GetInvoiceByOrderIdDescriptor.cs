@@ -10,15 +10,17 @@ namespace ECommerceStoreInvoice.Application.Descriptors.Invoices
 {
     internal sealed record GetInvoiceByOrderId;
 
+    [Documentation("inv.flow.get-invoice-by-order-id", "Read only the completed invoice for an order, supporting reconciliation of a lost creation response.")]
+
     internal sealed class GetInvoiceByOrderIdDescriptor : FlowDescriberBase<GetInvoiceByOrderId>
     {
-        [FlowStep(order: 1, bpmnId: "ValidateOrderId")]
+        [FlowStep(order: 1, bpmnId: "ValidateOrderId", description: "Validate the order identifier with the registered GUID policy.")]
         public async Task<ValidationResult> ValidateOrderId(Guid orderId, IValidationPolicy<Guid> guidValidationPolicy)
         {
             return await guidValidationPolicy.Validate(orderId);
         }
 
-        [FlowStep(order: 2, bpmnId: "IsOrderIdValid")]
+        [FlowStep(order: 2, bpmnId: "IsOrderIdValid", description: "Reject the flow with the complete registered validation errors when order id invalid.")]
         public void ThrowValidationExceptionIfOrderIdInvalid(ValidationResult validationResult)
         {
             if (!validationResult.IsValid)
@@ -27,13 +29,13 @@ namespace ECommerceStoreInvoice.Application.Descriptors.Invoices
             }
         }
 
-        [FlowStep(order: 3, bpmnId: "LoadInvoiceByOrderId")]
+        [FlowStep(order: 3, bpmnId: "LoadInvoiceByOrderId", description: "Read completed invoice metadata by its order identity.")]
         public async Task<Invoice?> LoadInvoiceByOrderId(Guid orderId, IInvoiceRepository invoiceRepository)
         {
             return await invoiceRepository.GetInvoiceByOrderId(orderId);
         }
 
-        [FlowStep(order: 4, bpmnId: "IsInvoiceExists")]
+        [FlowStep(order: 4, bpmnId: "IsInvoiceExists", description: "Reject when no completed invoice is readable by the supplied identity.")]
         public void ThrowNotFoundExceptionIfInvoiceMissing(Guid orderId, Invoice? invoice)
         {
             if (invoice is null)
@@ -42,7 +44,7 @@ namespace ECommerceStoreInvoice.Application.Descriptors.Invoices
             }
         }
 
-        [FlowStep(order: 5, bpmnId: "MapInvoiceResponse")]
+        [FlowStep(order: 5, bpmnId: "MapInvoiceResponse", description: "Return the complete get invoice by order id response from the domain values; this description is not execution tracing.")]
         public InvoiceResponseDto MapToResponse(Invoice invoice)
         {
             return MappingConfig.MapToResponse(invoice);

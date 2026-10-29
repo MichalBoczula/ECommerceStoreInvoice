@@ -5,6 +5,7 @@ using ECommerceStoreInvoice.Domain.Validation.Common;
 
 namespace ECommerceStoreInvoice.Domain.Validation.Concrete.Rules.ClientDataVersions
 {
+    [Documentation("inv.rule.client-data-version-email", "Reject null/whitespace email or text outside the existing email pattern; it is not a general RFC email parser.")]
     internal sealed class ClientDataVersionEmailValidationRule : IValidationRule<ClientDataVersion>
     {
         private static readonly Regex EmailPattern = new(

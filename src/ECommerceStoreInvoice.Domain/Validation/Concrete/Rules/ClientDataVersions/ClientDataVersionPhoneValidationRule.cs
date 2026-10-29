@@ -5,6 +5,7 @@ using ECommerceStoreInvoice.Domain.Validation.Common;
 
 namespace ECommerceStoreInvoice.Domain.Validation.Concrete.Rules.ClientDataVersions
 {
+    [Documentation("inv.rule.client-data-version-phone", "Reject null/whitespace, nondigit or nonpositive phone number/prefix text while retaining valid leading zeroes.")]
     internal sealed class ClientDataVersionPhoneValidationRule : IValidationRule<ClientDataVersion>
     {
         private static readonly Regex DigitsOnlyPattern = new("^[0-9]+$", RegexOptions.Compiled);

@@ -1,9 +1,10 @@
-﻿using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate;
+using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate;
 using ECommerceStoreInvoice.Domain.Validation.Abstract;
 using ECommerceStoreInvoice.Domain.Validation.Common;
 
 namespace ECommerceStoreInvoice.Domain.Validation.Concrete.Rules.ProductVersions
 {
+    [Documentation("inv.rule.product-version-strings", "For a non-null snapshot, require name, brand and currency; allow only the existing USD/PLN currency set.")]
     internal sealed class ProductVersionStringsValidationRule : IValidationRule<ProductVersion>
     {
         private readonly ValidationError nameCannotBeNullOrWhitespace;

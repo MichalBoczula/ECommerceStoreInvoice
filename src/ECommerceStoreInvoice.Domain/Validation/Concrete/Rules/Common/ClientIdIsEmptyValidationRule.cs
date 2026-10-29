@@ -1,8 +1,9 @@
-﻿using ECommerceStoreInvoice.Domain.Validation.Abstract;
+using ECommerceStoreInvoice.Domain.Validation.Abstract;
 using ECommerceStoreInvoice.Domain.Validation.Common;
 
 namespace ECommerceStoreInvoice.Domain.Validation.Concrete.Rules.Common
 {
+    [Documentation("inv.rule.client-id-is-empty", "Reject an empty GUID using the entity name supplied by the installing policy; do not infer the entity from the HTTP route.")]
     internal sealed class ClientIdIsEmptyValidationRule : IValidationRule<Guid>
     {
         private readonly ValidationError clientIdIsEmpty;

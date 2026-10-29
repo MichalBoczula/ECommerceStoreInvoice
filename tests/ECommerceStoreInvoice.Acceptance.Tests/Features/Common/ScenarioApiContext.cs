@@ -28,6 +28,8 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Common
         public void InitializeEvidence(ScenarioInfo scenario, string feature) => _evidence = ScenarioHttpEvidence.From(scenario, feature);
         public void BeginStep(string phase) => Evidence.StepPhase = phase;
         public void PublishEvidenceIdentity() => Evidence.PublishIdentity();
+        internal void RecordSourceLinks(bool verify) => RecordEvidence("Source documentation evidence joins",
+            SourceDocumentationEvidence.Build(Evidence.ScenarioId, Evidence.InstanceId, Evidence.HttpRecords(), OpenApiDocument, verify));
         public void FlushEvidence(bool final = false) => Evidence.Flush(flushObservations: final);
 
         public void RecordEvidence(string name, object value) => Evidence.RecordObservation(name, value);

@@ -10,15 +10,17 @@ namespace ECommerceStoreInvoice.Application.Descriptors.ClientDataVersions
 {
     internal sealed record GetClientDataVersionByClientId;
 
+    [Documentation("inv.flow.get-client-data-version-by-client-id", "Read the latest immutable client version by creation timestamp within that client.")]
+
     internal sealed class GetClientDataVersionByClientIdDescriptor : FlowDescriberBase<GetClientDataVersionByClientId>
     {
-        [FlowStep(order: 1, bpmnId: "ValidateClientId")]
+        [FlowStep(order: 1, bpmnId: "ValidateClientId", description: "Validate the client identifier with the registered GUID policy.")]
         public async Task<ValidationResult> ValidateClientId(Guid clientId, IValidationPolicy<Guid> guidValidationPolicy)
         {
             return await guidValidationPolicy.Validate(clientId);
         }
 
-        [FlowStep(order: 2, bpmnId: "IsClientIdValid")]
+        [FlowStep(order: 2, bpmnId: "IsClientIdValid", description: "Reject the flow with the complete registered validation errors when client id invalid.")]
         public void ThrowValidationExceptionIfClientIdInvalid(ValidationResult validationResult)
         {
             if (!validationResult.IsValid)
@@ -27,13 +29,13 @@ namespace ECommerceStoreInvoice.Application.Descriptors.ClientDataVersions
             }
         }
 
-        [FlowStep(order: 3, bpmnId: "LoadClientDataVersion")]
+        [FlowStep(order: 3, bpmnId: "LoadClientDataVersion", description: "Load the latest stored client version by creation time for the selected client.")]
         public async Task<ClientDataVersion?> Load(Guid clientId, IClientDataVersionRepository clientDataVersionRepository)
         {
             return await clientDataVersionRepository.GetByClientId(clientId);
         }
 
-        [FlowStep(order: 4, bpmnId: "IsClientDataVersionExists")]
+        [FlowStep(order: 4, bpmnId: "IsClientDataVersionExists", description: "Reject when no client data version exists for the requested client.")]
         public void ThrowNotFoundExceptionIfClientDataVersionMissing(Guid clientId, ClientDataVersion? clientDataVersion)
         {
             if (clientDataVersion is null)
@@ -42,7 +44,7 @@ namespace ECommerceStoreInvoice.Application.Descriptors.ClientDataVersions
             }
         }
 
-        [FlowStep(order: 5, bpmnId: "MapClientDataVersionResponse")]
+        [FlowStep(order: 5, bpmnId: "MapClientDataVersionResponse", description: "Return the complete get client data version by client id response from the domain values; this description is not execution tracing.")]
         public ClientDataVersionResponseDto MapToResponse(ClientDataVersion clientDataVersion)
         {
             return MappingConfig.MapToResponse(clientDataVersion);

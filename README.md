@@ -181,7 +181,10 @@ documentation payloads and separate startup/index lifecycle checks.
 [Task 13](docs/bdd-13-request-response-contracts.md) aligns generated schemas with
 serializer nullability/presence, adds typed source examples and strict scalar/nested
 response checks, complete problem alternatives and binary PDF headers.
-The current acceptance inventory is **320 BDD + 63 standalone = 383**; recorder
+[Task 14](docs/bdd-14-flows-rules-rag-links.md) adds authored source identities,
+readable flow steps, explicit outcome semantics and validated links to actual
+scenario exchanges without claiming runtime tracing or a retrieval implementation.
+The current acceptance inventory is **321 BDD + 69 standalone = 390**; recorder
 regressions remain standalone checks. Generated `.feature.cs` files are ignored
 build outputs, not maintained source.
 

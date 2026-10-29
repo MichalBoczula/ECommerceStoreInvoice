@@ -1,10 +1,11 @@
-﻿using ECommerceStoreInvoice.Domain.Validation.Abstract;
+using ECommerceStoreInvoice.Domain.Validation.Abstract;
 using ECommerceStoreInvoice.Domain.Validation.Common;
 using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate;
 using ECommerceStoreInvoice.Domain.Validation.Concrete.Rules.Common;
 
 namespace ECommerceStoreInvoice.Domain.Validation.Concrete.Policies
 {
+    [Documentation("inv.policy.client", "Validate a nonempty GUID. The installed error entity is ShoppingCart even when this shared GUID policy is used by another service.")]
     internal sealed class ClientValidationPolicy : IValidationPolicy<Guid>, IValidationPolicyDescriptorProvider
     {
         private readonly List<IValidationRule<Guid>> _rules = [];

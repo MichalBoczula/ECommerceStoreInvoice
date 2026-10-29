@@ -1,9 +1,10 @@
-﻿using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate;
+using ECommerceStoreInvoice.Domain.AggregatesModel.ProductVersionAggregate;
 using ECommerceStoreInvoice.Domain.Validation.Abstract;
 using ECommerceStoreInvoice.Domain.Validation.Common;
 
 namespace ECommerceStoreInvoice.Domain.Validation.Concrete.Rules.ProductVersions
 {
+    [Documentation("inv.rule.product-version-is-null", "Reject null domain product versions; normal HTTP checkout constructs non-null snapshots before applying this rule.")]
     internal sealed class ProductVersionIsNullValidationRule : IValidationRule<ProductVersion>
     {
         private readonly ValidationError productVersionIsNull;
