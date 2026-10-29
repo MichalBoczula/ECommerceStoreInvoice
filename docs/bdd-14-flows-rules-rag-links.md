@@ -96,3 +96,99 @@ available. Docker-backed suites, full formatting and image scan run in CI. Full
 CI and fresh source/state/exchange/archive/rendered-Allure audits must pass before
 review. Existing separate coverage, security, dependencies and workflows remain.
 Task 15 and the selected manual LiveDocs refresh/deployment remain open.
+
+## Frozen implementation evidence
+
+[CI run 40890855992](https://github.com/MichalBoczula/ECommerceStoreInvoice/actions/runs/40890855992)
+verified implementation head `9897b477e0fcd962c3a7e256934b1b7116cd1811`.
+The packaged tested merge `6ecd66a568301307f5e9741be466d695c7d9eee4`
+has Task 13 master and that head as parents, with exact implementation tree
+`44cb853b970cde1194f13ddc92f744bc3a578992`. Build/full formatting,
+generated OpenAPI and actual source-export comparisons, audited restore, secret/
+dependency checks, all five suites and package/quality gates passed. The completion
+documentation head requires full CI, including image build/scan, and the same
+fresh-artifact checks before review. Its exact head/run/archive are recorded on the
+PR rather than claimed self-referentially in this frozen runtime/package record.
+
+| Suite | Passed | Failed/skipped | Line coverage |
+| --- | ---: | ---: | ---: |
+| Domain | 133 | 0 | 89.2% |
+| Application | 95 | 0 | 85.8% |
+| Infrastructure | 75 | 0 | 94.4% |
+| External providers | 3 | 0 | n/a |
+| Acceptance | 390 | 0 | n/a |
+| Total | 696 | 0 | n/a |
+
+All **689 previous TRX members** remain, with exactly one new BDD case and six
+standalone join regressions. All **320** prior BDD scenario/instance identities,
+titles, descriptions, behavioral Examples and named observation occurrences
+(including duplicates) remain. Inventory is **45 feature files, 106 declarations,
+321 BDD + 69 standalone**. The source stage passes the existing 28 plus seven new
+mutation checks; all 321 links retain fifteen operations and 59/59 declared status
+pairs with zero gaps. Each separate 70% coverage floor is unchanged. Metadata
+constructors/attributes add measured lines; no coverage exclusion is introduced.
+
+Every official Actions ZIP digest passes before safe extraction. The inner
+`documentation-bundle.zip` is **10926063 bytes**, SHA-256
+`3ed4396702d7e781dd65a448068e217893a9162ef07e94ff98cef13d18599ee7`.
+The outer Actions artifact SHA-256 is
+`7822cb400b42b07a22bfc67224c737a413d17f589ef92296b6095986a1467828`.
+The manifest records the exact tested merge/run. Every length/hash and exact path
+passes: **9616 entries**, below the unchanged 10000-file cap.
+
+Every passed BDD result has a readable description, explicit service/scenario/
+instance labels, identified JSON and at least one Gherkin CSV table. All **8925
+referenced attachments** exist without orphans: **6689 JSON, 2222 CSV, four text
+DocStrings and ten binary PDFs**. All 321 cases have correctly joined observation
+groups, including the eight legacy cases that previously needed no grouped state
+observation. New instance identity hashing is independently reproduced. Each PDF
+matches successful HTTP bytes/hash and parses as a nonempty PDF.
+
+Independent graph checks verify **236 globally unique authored IDs**: sixteen
+flows, 128 qualified steps, eight policies, seventeen installed rules, two inline
+rules and 65 outcome families. All graph edges, publication classifications,
+policy/rule membership and actual runtime flow order/BPMN/prose match their source.
+The internal-only ID-collection policy remains distinct from HTTP reachability.
+OpenAPI is unchanged; validation-policy export bytes are identical to Task 13.
+All prior operation/case fields remain, with source context added and one case linked.
+Executable bodies of all original descriptor/policy/rule files are unchanged after
+removing authored attributes and formatting; FlowDescriberBase intentionally selects
+step display prose, and its ordering regression checks preserved BPMN identities.
+
+All **2998 actual request/outcome pairs** resolve to exactly one source join and
+to the correct logical Allure request/response-or-failure attachment. The audit
+checks IDs, phases, target/role, actual query and concurrent attempt labels, UUID-
+constrained nominal routes, legacy aliases, declared flow/step/policy/rule refs,
+outcome-family status and actual response-error rule IDs. It verifies **339 actual
+When/Then guaranteed-outcome witnesses** with exact selection priority and **91
+observed rule references**, without inventing executed steps or branches. There are
+408 eligible scenario-outcome candidates, 2564 supporting links, ten setup links
+and sixteen external-dependency links; candidates remain visible rather than
+being collapsed into one hypothetical request.
+
+Raw request roles remain 2957 API, sixteen technical API, nine peer API, fourteen
+checkout catalog and two catalog fixture. Phases remain twelve Given, 396 When and
+2590 Then. The two retained cancellation failures have null-status witnesses and
+no fabricated 499. New-case BSON reconstruction verifies all five unchanged
+populated collections and nine complete supporting reads. All existing Task 11–13
+state, race, rollback, claim, probe, cancellation, isolation and contract audits pass.
+
+Independent **jsonschema 4.23.0** checks pass all 22 complete typed examples, all
+97 field examples and **2953 actual JSON responses**, including **289 safe
+problems**. Pinned **Allure 2.46.1**, verified against its official release digest,
+renders all 321 cases. Every rendered identity/title/description/outcome and
+attachment name/type/byte hash matches raw results, including AfterScenario JSON.
+Every case, attachment and entry-page asset passes local static HTTP. These checks
+do not claim deployed Azure/browser behavior or RAG retrieval execution.
+
+Local Release solution build, 33 focused contract/export/join tests, Domain 133,
+Application 95, External providers 3, 35 source checks, Redocly 2.53.3 lint and
+`git diff --check` pass. The historical actual-archive replay independently passed
+all 320 previous cases / 2987 request-outcome pairs through the compiled joiner;
+that is historical evidence validation, separate from the fresh live CI suite.
+Local full formatter/Docker restrictions remain explicit; CI verifies those gates.
+
+The final documentation head must pass full CI and the same fresh source/state/
+exchange/archive/rendered-report checks before the PR is ready. PR publication and
+Blob archive remain skipped; existing master publication and the selected manual
+LiveDocs refresh/deployment stay unchanged. Task 15 remains open.

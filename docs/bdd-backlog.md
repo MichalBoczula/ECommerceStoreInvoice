@@ -63,10 +63,11 @@ place, while application deployment and selected LiveDocs refresh remain manual.
   Aligns Task 09's accepted nullable client values with required member presence
   and closes the response checker's null-property gap.
   Implementation and verification: [request/response contracts](bdd-13-request-response-contracts.md).
-- [ ] **INV-BDD-14 — Flows, rules and RAG links.** Stable identities and authored
+- [x] **INV-BDD-14 — Flows, rules and RAG links.** Stable identities and authored
   conditions/effects/failures, operation-to-scenario/exchange joins, observed versus
   declared rules and reachable versus standalone documentation. No runtime tracing
   or implemented retrieval service is implied.
+  Implementation and verification: [flows, rules and RAG links](bdd-14-flows-rules-rag-links.md).
 - [ ] **INV-BDD-15 — Final report audit.** Full CI, baseline retention, every
   rendered case/attachment, contract/state checks, immutable archive identity and
   the manual LiveDocs image-selection/deployment handoff.
