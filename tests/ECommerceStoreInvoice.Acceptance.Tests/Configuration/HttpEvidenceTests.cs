@@ -161,10 +161,13 @@ public sealed class HttpEvidenceTests
         using var client = Client(evidence, (_, _) => Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = body }));
         using var request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/invoices");
         var completed = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var headers = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         request.Options.Set(HttpEvidenceHandler.CompletionKey, completed);
+        request.Options.Set(HttpEvidenceHandler.ResponseHeadersKey, headers);
         var error = await Record.ExceptionAsync(() => client.SendAsync(request, cancellation.Token));
         Assert.True(error is OperationCanceledException or HttpRequestException);
         await completed.Task.WaitAsync(TimeSpan.FromSeconds(5));
+        Assert.True(headers.Task.IsCompletedSuccessfully);
         Assert.True(body.WasDisposed);
         Assert.True(cancellation.IsCancellationRequested);
         var items = Drain(evidence);
@@ -172,6 +175,7 @@ public sealed class HttpEvidenceTests
         Assert.Equal(items[0].GetProperty("exchangeId").GetString(), items[1].GetProperty("exchangeId").GetString());
         Assert.True(items[1].GetProperty("cancelled").GetBoolean());
         Assert.True(items[1].GetProperty("cancellationRequested").GetBoolean());
+        Assert.Equal("response-body", items[1].GetProperty("failureStage").GetString());
         Assert.Equal(transportAbort ? "HttpRequestException" : "OperationCanceledException", items[1].GetProperty("exceptionType").GetString());
         Assert.False(items[1].TryGetProperty("status", out _));
         Assert.DoesNotContain("sensitive message", items[1].GetRawText());

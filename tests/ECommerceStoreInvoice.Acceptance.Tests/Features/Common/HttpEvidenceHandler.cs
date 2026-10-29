@@ -7,6 +7,7 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Common;
 internal sealed class HttpEvidenceHandler(ScenarioHttpEvidence evidence, string targetService = "invoices", string exchangeRole = "api") : DelegatingHandler
 {
     internal static readonly HttpRequestOptionsKey<TaskCompletionSource> CompletionKey = new("Invoices.HttpEvidence.Completion");
+    internal static readonly HttpRequestOptionsKey<TaskCompletionSource> ResponseHeadersKey = new("Invoices.HttpEvidence.ResponseHeaders");
 
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
@@ -45,6 +46,8 @@ internal sealed class HttpEvidenceHandler(ScenarioHttpEvidence evidence, string 
             stage = "transport";
             response = await base.SendAsync(request, cancellationToken);
             stage = "response-body";
+            if (request.Options.TryGetValue(ResponseHeadersKey, out var headers))
+                headers.TrySetResult();
             var content = await ReadContent(response.Content, cancellationToken);
             evidence.Record($"HTTP {sequence:000} response", new
             {

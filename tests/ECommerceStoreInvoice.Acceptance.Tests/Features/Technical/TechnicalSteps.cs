@@ -157,11 +157,17 @@ public sealed class TechnicalSteps(ScenarioApiContext context, BusinessValidatio
         using var cancellation = new CancellationTokenSource();
         using var request = new HttpRequestMessage(HttpMethod.Get, $"/invoices/{_invoiceId}/pdf");
         var captured = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var headers = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         request.Options.Set(HttpEvidenceHandler.CompletionKey, captured);
+        request.Options.Set(HttpEvidenceHandler.ResponseHeadersKey, headers);
         var pending = context.HttpClient.SendAsync(request, cancellation.Token);
         try
         {
             await probe.WaitEnteredAsync();
+            if (mode == "during-body")
+                await headers.Task.WaitAsync(TimeSpan.FromSeconds(20));
+            var headersBeforeCancellation = headers.Task.IsCompletedSuccessfully;
+            headersBeforeCancellation.ShouldBe(mode == "during-body");
             cancellation.Cancel();
             var error = await Record.ExceptionAsync(() => pending);
             (error is OperationCanceledException or HttpRequestException).ShouldBeTrue();
@@ -169,7 +175,7 @@ public sealed class TechnicalSteps(ScenarioApiContext context, BusinessValidatio
             await captured.Task.WaitAsync(TimeSpan.FromSeconds(15));
             probe.ServerCancelled.ShouldBeTrue(); probe.ActualStreamDisposed.ShouldBeTrue();
             probe.BytesRead.ShouldBe(mode == "during-body" ? 32 : 0);
-            context.RecordEvidence("Technical cancelled HTTP outcome verified", new { mode, clientExceptionType = error!.GetType().Name, serverTokenCancelled = true, actualStreamDisposed = true, bytesReadFromActualFile = probe.BytesRead, httpStatus = (int?)null, fabricated499 = false });
+            context.RecordEvidence("Technical cancelled HTTP outcome verified", new { mode, clientResponseHeadersObservedBeforeCancellation = headersBeforeCancellation, clientExceptionType = error!.GetType().Name, serverTokenCancelled = true, actualStreamDisposed = true, bytesReadFromActualFile = probe.BytesRead, httpStatus = (int?)null, fabricated499 = false });
         }
         finally
         {
