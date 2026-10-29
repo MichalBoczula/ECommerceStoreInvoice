@@ -79,6 +79,94 @@ contract follow-up stays open; no later package is marked complete.
 Parent master is Task 10 merge a007d166088970cc35c13d82d1b3f8c255bec033.
 Local .NET/Docker are unavailable. Full CI build/format/generated OpenAPI, all five
 suites, security/package/image gates and independent archive/state/Allure audits
-must pass before marking this package complete. Generated feature C# remains
+must pass before the PR is ready for review or merge. Generated feature C# remains
 ignored output; no dependency, CI gate, Azure resource or runtime behavior change.
 Master image/Blob publication remains, and selected LiveDocs refresh stays manual.
+
+
+## Frozen implementation evidence
+
+[CI run 40850282469](https://github.com/MichalBoczula/ECommerceStoreInvoice/actions/runs/40850282469)
+verified implementation head `6da235bbb9f9433462c76844fca2f8a62741ecc0`.
+The packaged tested merge `bcde1da91ebcbac7ce640900d2f066781a07b0dd`
+has parents Task 10 master and that head, with the exact implementation tree
+`40b71071285cc61d47af52eb6335b4a46b609273`. Build, formatting, generated
+OpenAPI, source/link checks, audited restores, secret/dependency checks, all five
+runtime suites, packaging and the quality gate passed. The documentation head
+is verified by full CI again, including the Docker build/image scan, and its exact
+head/run/archive is recorded on the PR before ready-for-review. This section is a
+frozen runtime/package reference and does not claim an overall final-head CI
+conclusion in a self-referential documentation commit.
+
+| Suite | Passed | Failed/skipped | Line coverage |
+| --- | ---: | ---: | ---: |
+| Domain | 133 | 0 | 89.5% |
+| Application | 95 | 0 | 86.3% |
+| Infrastructure | 73 | 0 | 93.2% |
+| External providers | 3 | 0 | n/a |
+| Acceptance | 333 | 0 | n/a |
+| Total | 637 | 0 | n/a |
+
+All 629 previous TRX members remain, with exactly eight new BDD cases and no
+additional standalone cases. All 295 previous scenario/instance identities,
+titles and behavioral Examples remain; only the strengthened original status
+race description changes. Inventory: **42 feature files, 95 declarations,
+303 BDD + 30 standalone Acceptance**. Source checks pass 25 regressions and all
+303 links: 275 named operation cases plus 28 separate routing cases. All fifteen
+named operations and all 59 declared status pairs have guaranteed scenario intent.
+Coverage retains each separate 70% floor and existing generated-code exclusions.
+
+Every official Actions ZIP digest was verified before extraction. The inner
+`documentation-bundle.zip` is **9650578 bytes**, SHA-256
+`1ebcbeb78b2295cc33055f66d08ada45d9d0bf9f2f20c1b8c2a3c41344d8bc50`.
+Its manifest identifies the tested merge/run above; its exact file set and every
+length/hash pass the independent audit: **9006 manifest entries**, within the
+unchanged 10000-file cap. The outer Actions artifact digest is
+`023a225f6e05966d12d5be45a2b4d4c323eb673769b3774d1d233ef79a0a3201`.
+
+All **303** actual passed results have readable descriptions and explicit
+service/scenario/instance identities. Every case has identified JSON and at least
+one rendered Gherkin CSV table, including the repaired inherited duplicate-cart
+case. All **8354 referenced attachments** exist with no orphan attachment:
+**6215 JSON, 2131 CSV and eight binary PDFs**. The 293 scenario observation
+collections retain all prior named occurrences and duplicates through correctly
+linked AfterScenario fixtures. Every new instance ID is independently reproduced
+from its stable identity and sorted authored parameters.
+
+The audit joins all **2784 real paired HTTP exchanges**: 2768 API, fourteen
+checkout catalog and two catalog fixture exchanges. Exact body lengths/base64/
+SHA-256, request/response identities, actual attempt headers and phases are checked:
+12 Given, 346 When and 2426 Then. All eight captured PDF attachments match the
+HTTP response bytes and parse as nonempty PDFs.
+
+Independent state checks cover both new status winners and the strengthened
+original race, all three rollback/retry stages and both checkout winners. Session
+identities/activity, reached write stages, complete session-visible collections,
+external invisibility, exact winning state and absence of losing snapshots/orders
+are checked. They reconstruct full API profiles, quantities, prices, totals and
+historical references directly from BSON and verify all **85 complete supporting
+GETs**. Real catalog HTTP requests supply the two exact product IDs and expected
+names/brands/prices; reads and the later empty-cart rejection add no catalog fetch.
+All 409/500/empty-cart 400 signatures are checked independently.
+
+The invoice audit verifies both real claim attempts, the completed replacement,
+its retained invoice creation timestamp/latest client reference, rejected stale
+completion, no-op old release and complete unchanged winning collections. Both
+real PDF attempts have distinct attempt paths. Production's ambiguous old PDF is
+preserved until the explicit old-attempt cleanup removes only that file; the exact
+winning PDF and both metadata routes remain intact. This is local file behavior
+and explicit cleanup, not automated orphan recovery or deployed Blob validation.
+
+Pinned Allure **2.46.1**, checked against its official release SHA-256, generates
+all 303 cases. Every rendered identity/title/description/outcome and attachment
+name/type/byte hash matches the raw results, including AfterScenario JSON.
+Every case JSON, attachment and entry-page asset passes local static HTTP.
+This verifies source/archive/report integrity; it does not claim deployed Azure
+browser or database behavior. OpenAPI, flows and validation policies are unchanged
+from Task 10; every prior operation/link record is retained, with eight named cases
+added and the final stale-write gap removed. `git diff --check` passes.
+
+The final documentation head must pass full CI and the same fresh-artifact audit
+before the PR becomes ready. PRs do not publish images or Blob archives. Master
+publication and the manual selected LiveDocs refresh/deployment remain unchanged.
+Tasks 12–15 stay open, including Task 13's nullable-client contract follow-up.
