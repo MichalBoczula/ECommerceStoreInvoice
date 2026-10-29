@@ -50,8 +50,17 @@ internal sealed class OrderConcurrencyProbe(Action<string, object> record, Func<
         var value = new OrderWriteObservation(scope.Attempt, scope.Id, stage, session?.ServerSession.Id.ToJson(),
             session?.IsInTransaction == true, exception?.GetType().FullName, inside, await snapshot());
         Events.Enqueue(value);
-        record("Observed real order write stage", new { value.Attempt, value.ScopeId, value.Stage, value.SessionId, value.SessionActive, value.ExceptionType,
-            inside = inside is null ? null : InvoiceGenerationProbe.JsonSnapshot(inside), outside = InvoiceGenerationProbe.JsonSnapshot(value.Outside) });
+        record("Observed real order write stage", new
+        {
+            value.Attempt,
+            value.ScopeId,
+            value.Stage,
+            value.SessionId,
+            value.SessionActive,
+            value.ExceptionType,
+            inside = inside is null ? null : InvoiceGenerationProbe.JsonSnapshot(inside),
+            outside = InvoiceGenerationProbe.JsonSnapshot(value.Outside)
+        });
     }
     internal async Task AfterStageAsync(OrderProbeScope scope, MongoDbContext context, string stage)
     {
