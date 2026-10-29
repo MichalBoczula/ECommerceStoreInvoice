@@ -41,7 +41,9 @@ fields; another verifies quoted int32 quantities. Schemas show canonical JSON
 numbers and descriptions explicitly record this web-binding compatibility. They
 are not a complete grammar of every accepted lexical spelling. Both cases verify
 exact ordered stored lines, full responses, update timestamp bounds, every other
-field and all unrelated populated collections. Complete supporting reads make no
+field and all unrelated populated collections. The primary response retains UTC
+ticks while Mongo persists milliseconds: its timestamp must lie in the request
+window and truncate exactly to the stored value; subsequent reads match storage. Complete supporting reads make no
 catalog requests. No stricter deserialization options are enabled.
 
 ## Safe problems and binary PDFs

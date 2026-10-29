@@ -132,9 +132,15 @@ public sealed class ContractSteps(ScenarioApiContext context, BusinessValidation
         Equal(after, _expected);
         var profile = BusinessValidationSteps.CartProfile(expected);
         using var body = JsonDocument.Parse(await context.Response.Content.ReadAsByteArrayAsync());
+        // The primary response keeps the service's UTC ticks; Mongo persists milliseconds.
+        var responseUpdatedAt = body.RootElement.GetProperty("updatedAt").GetDateTime();
+        responseUpdatedAt.Kind.ShouldBe(DateTimeKind.Utc);
+        responseUpdatedAt.ShouldBeInRange(_started, _finished);
+        new DateTimeOffset(responseUpdatedAt).ToUnixTimeMilliseconds().ShouldBe(actual["UpdatedAt"].AsBsonDateTime.MillisecondsSinceEpoch);
+        profile["updatedAt"] = JsonValue.Create(responseUpdatedAt);
         JsonElement.DeepEquals(body.RootElement, JsonSerializer.SerializeToElement(profile)).ShouldBeTrue();
         fixture.SetTechnicalFixtureState(_expected);
-        context.RecordEvidence("Contract complete serializer cart verified", new { expected = InvoiceGenerationProbe.JsonSnapshot(_expected), actual = InvoiceGenerationProbe.JsonSnapshot(after), expectedResponse = profile, actualResponse = body.RootElement.Clone(), fromUtc = _started, toUtc = _finished, onlyTargetCartLinesAndUpdatedAtChanged = true });
+        context.RecordEvidence("Contract complete serializer cart verified", new { expected = InvoiceGenerationProbe.JsonSnapshot(_expected), actual = InvoiceGenerationProbe.JsonSnapshot(after), expectedResponse = profile, actualResponse = body.RootElement.Clone(), fromUtc = _started, toUtc = _finished, responseUpdatedAtUtc = responseUpdatedAt, storedUpdatedAtMilliseconds = actual["UpdatedAt"].AsBsonDateTime.MillisecondsSinceEpoch, onlyTargetCartLinesAndUpdatedAtChanged = true });
     }
 
     [Then("the contract operation preserves complete expected state and supporting reads")]
