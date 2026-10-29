@@ -1,3 +1,4 @@
+using ECommerceStoreInvoice.Acceptance.Tests.Features.Technical;
 using ECommerceStoreInvoice.Application.Common.ResponsesDto;
 using ECommerceStoreInvoice.Acceptance.Tests.Features.Common;
 using Reqnroll;
@@ -40,6 +41,8 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Documentation.GetFlowS
 
             _apiContext.Response.ShouldNotBeNull();
             _apiContext.Response!.StatusCode.ShouldBe(ParseStatusCode(expected, "StatusCode"));
+
+            await TechnicalDocumentation.AssertAsync(_apiContext, _apiContext.Response!, "flows");
 
             var documentation = await DeserializeResponse<FlowDescriptorsResponseDto>(_apiContext.Response);
             documentation.ShouldNotBeNull();

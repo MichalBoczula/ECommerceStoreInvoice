@@ -29,6 +29,7 @@ public sealed class BusinessValidationSteps(ScenarioApiContext context)
     private DateTime _finished;
 
     internal Dictionary<string, BsonDocument[]> FixtureState => Clone(_known);
+    internal void SetTechnicalFixtureState(Dictionary<string, BsonDocument[]> state) => _known = Clone(state);
     internal Task VerifyFixtureReadsAsync() => SupportingReads();
     internal string ResolveFixturePath(string path) => path
         .Replace("{clientId}", _clients["A"].ToString())

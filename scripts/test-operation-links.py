@@ -30,7 +30,7 @@ class EvidenceLinkTests(unittest.TestCase):
         self.addCleanup(self.temporary.cleanup)
         self.root = Path(self.temporary.name)
         (self.root / 'docs').mkdir()
-        for filename in ['bdd-baseline.json', 'acceptance-matrix.tsv', 'acceptance-gaps.tsv', 'framework-scenarios.tsv']:
+        for filename in ['bdd-baseline.json', 'acceptance-matrix.tsv', 'acceptance-gaps.tsv', 'framework-scenarios.tsv', 'technical-scenarios.tsv']:
             (self.root / 'docs' / filename).write_bytes((links.ROOT / 'docs' / filename).read_bytes())
 
     def matrix(self, filename='acceptance-matrix.tsv'):
@@ -214,6 +214,25 @@ class EvidenceLinkTests(unittest.TestCase):
             with self.subTest(code=code), self.assertRaisesRegex(AssertionError, 'bypasses shared'):
                 links.verify_client_source(code)
         links.verify_client_source('context.CreateClient(factory); _apiContext.CreateClient(factory);')
+
+    def test_missing_technical_case_is_rejected(self):
+        self.write(self.matrix('technical-scenarios.tsv')[1:], 'technical-scenarios.tsv')
+        with self.assertRaisesRegex(AssertionError, 'Missing or stale'):
+            self.verify()
+
+    def test_cancelled_exchange_cannot_invent_http_499(self):
+        rows = self.matrix('technical-scenarios.tsv')
+        next(row for row in rows if row['outcome'] == 'cancelled')['statuses'] = '499'
+        self.write(rows, 'technical-scenarios.tsv')
+        with self.assertRaisesRegex(AssertionError, 'Cancellation has no HTTP status'):
+            self.verify()
+
+    def test_technical_status_cannot_inflate_business_coverage(self):
+        rows = self.matrix('technical-scenarios.tsv')
+        rows[0]['statuses'] = '409'
+        self.write(rows, 'technical-scenarios.tsv')
+        with self.assertRaisesRegex(AssertionError, 'Invalid technical status intent'):
+            self.verify()
 
     def test_missing_framework_case_is_rejected(self):
         rows = self.matrix('framework-scenarios.tsv')

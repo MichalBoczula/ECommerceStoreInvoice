@@ -80,3 +80,15 @@ old file. Production keeps ambiguous completion files; automatic orphan cleanup
 remains deferred. Existing active-claim 409 and failed-attempt cleanup cases remain.
 All 59 named operation/status pairs now have guaranteed intent, distinct from
 complete cause coverage. Routing cases remain separately classified.
+
+
+## Technical outcomes
+
+[Task 12](bdd-12-technical-scenarios.md) uses [technical-scenarios.tsv](technical-scenarios.tsv)
+for health/Swagger, host isolation and cancelled PDF reads. Healthy/Unhealthy
+probes are plain text with cache protection. Cancelled exchanges have no invented
+HTTP status, in particular no synthetic 499, and cannot inflate named status
+coverage. Two populated-data documentation cases remain named operation links;
+all current flows/policies are compared completely with their source projections.
+Actual bootstrap/index failures remain standalone lifecycle tests because no host
+serves an HTTP response. Their counts are reported separately from BDD cases.

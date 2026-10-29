@@ -53,9 +53,10 @@ place, while application deployment and selected LiveDocs refresh remain manual.
   competing checkout/claim winners, exact full state, actual rollback and attempt
   cleanup. Keep injected pre-write failure and real transactions distinct.
   Implementation and verification: [concurrency and atomicity](bdd-11-concurrency-atomicity.md).
-- [ ] **INV-BDD-12 — Technical scenarios.** Health/readiness/startup/index
+- [x] **INV-BDD-12 — Technical scenarios.** Health/readiness/startup/index
   failures, cancellation, host/database isolation and documentation behavior.
   Retain appropriate lifecycle facts outside BDD and report their counts separately.
+  Implementation and verification: [technical scenarios](bdd-12-technical-scenarios.md).
 - [ ] **INV-BDD-13 — Request/response contracts.** Scalar types, required fields,
   nullability/formats/nesting, complete safe error shapes, typed descriptions/examples
   and PDF contracts derived from source, without a second handwritten OpenAPI.

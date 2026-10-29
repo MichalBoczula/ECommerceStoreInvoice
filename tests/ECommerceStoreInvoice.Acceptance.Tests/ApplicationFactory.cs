@@ -18,7 +18,7 @@ using ECommerceStoreInvoice.Domain.AggregatesModel.ShoppingCartAggregate.Reposit
 
 namespace ECommerceStoreInvoice.Acceptance.Tests;
 
-public class ApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
+public partial class ApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
 {
     private const string Username = "root";
     private const string Password = "yourStrong(!)Password";
@@ -176,6 +176,8 @@ public class ApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
             });
         }
 
+        ConfigureTechnicalServices(builder);
+
     }
 
     private static void Decorate<T>(IServiceCollection services, Func<T, IServiceProvider, T> decorate) where T : class
@@ -209,9 +211,11 @@ public class ApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
             _productCatalogBaseUrl = (_ownedProducts ?? await StartProducts.Value).BaseAddress.ToString();
         }
 
-        await StartMongo.Value;
-
-        _connectionString = SharedMongoContainer.Value.GetConnectionString();
+        if (!await StartTechnicalMongoAsync())
+        {
+            await StartMongo.Value;
+            _connectionString = SharedMongoContainer.Value.GetConnectionString();
+        }
 
         using var scope = Services.CreateScope();
 
@@ -347,13 +351,17 @@ public class ApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
             OrderProbe?.ResumeAll();
             InvoiceProbe?.CleanupFiles();
             foreach (var path in _downloadFiles) File.Delete(path);
-            if (!string.IsNullOrEmpty(_connectionString))
+            if (!string.IsNullOrEmpty(_connectionString) && (_technicalMongo is null || _technicalMongoRunning))
                 await new MongoClient(_connectionString).DropDatabaseAsync(_database);
         }
         finally
         {
             try { if (ReadStorage is not null) await ReadStorage.DisposeAsync(); }
-            finally { if (_ownedProducts is not null) await _ownedProducts.DisposeAsync(); }
+            finally
+            {
+                try { if (_ownedProducts is not null) await _ownedProducts.DisposeAsync(); }
+                finally { if (_technicalMongo is not null) await _technicalMongo.DisposeAsync(); }
+            }
         }
     }
 

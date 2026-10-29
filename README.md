@@ -175,7 +175,10 @@ accepted boundaries, complete safe problems and unchanged populated state.
 complete safe route/method/media problems and the missing by-order server failure.
 [Task 11](docs/bdd-11-concurrency-atomicity.md) adds deterministic stale status writes,
 actual checkout transaction competition/rollback and stale invoice attempt fencing.
-The current acceptance inventory is **303 BDD + 30 standalone = 333**; recorder
+[Task 12](docs/bdd-12-technical-scenarios.md) adds real probe outage/recovery,
+standalone-topology rejection, PDF cancellation, host/database isolation, complete
+documentation payloads and separate startup/index lifecycle checks.
+The current acceptance inventory is **315 BDD + 37 standalone = 352**; recorder
 regressions remain standalone checks. Generated `.feature.cs` files are ignored
 build outputs, not maintained source.
 

@@ -1,3 +1,4 @@
+using ECommerceStoreInvoice.Acceptance.Tests.Features.Technical;
 using ECommerceStoreInvoice.Acceptance.Tests.Features.Common;
 using ECommerceStoreInvoice.Application.Common.ResponsesDto;
 using Reqnroll;
@@ -48,6 +49,8 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Documentation.GetValid
 
             _apiContext.Response.ShouldNotBeNull();
             _apiContext.Response!.StatusCode.ShouldBe(ParseStatusCode(expected, "StatusCode"));
+
+            await TechnicalDocumentation.AssertAsync(_apiContext, _apiContext.Response!, "validations");
 
             var response = await DeserializeResponse<ValidationDescriptorsResponseDto>(_apiContext.Response);
             response.ShouldNotBeNull();
