@@ -66,7 +66,16 @@ public class MongoReadinessHealthCheckTests
             });
         database.Setup(d => d.RunCommandAsync<BsonDocument>(It.IsAny<Command<BsonDocument>>(), It.IsAny<ReadPreference>(), cancellation.Token))
             .Returns(() => { cancellation.Cancel(); return Task.FromCanceled<BsonDocument>(cancellation.Token); });
-        var settings = Options.Create(new MongoDbSettings { DatabaseName = "invoices" });
+        var settings = Options.Create(new MongoDbSettings
+        {
+            ConnectionString = "mongodb://localhost:27017",
+            DatabaseName = "invoices",
+            ShoppingCartsCollectionName = "shoppingCarts",
+            OrdersCollectionName = "orders",
+            ProductVersionsCollectionName = "productVersions",
+            InvoicesCollectionName = "invoices",
+            ClientDataVersionsCollectionName = "clientDataVersions"
+        });
         var check = new MongoReadinessHealthCheck(client.Object, settings);
 
         await Should.ThrowAsync<OperationCanceledException>(() => check.CheckHealthAsync(new HealthCheckContext(), cancellation.Token));

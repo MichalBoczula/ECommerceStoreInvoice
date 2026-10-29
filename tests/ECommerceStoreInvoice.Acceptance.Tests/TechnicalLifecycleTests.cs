@@ -94,7 +94,8 @@ public sealed class TechnicalLifecycleTests(ApplicationFactory control) : IClass
                 var indexes = await (await collection.Indexes.ListAsync()).ToListAsync();
                 indexes.ShouldContain(d => d["name"] == indexName && d["unique"].AsBoolean);
                 var versions = await (await database.GetCollection<BsonDocument>("clientDataVersions").Indexes.ListAsync()).ToListAsync();
-                versions.ShouldContain(d => d["name"] == "IX_ClientDataVersion_ClientId_CreatedAtDesc" && d["key"].AsBsonDocument.Equals(new BsonDocument { ["ClientId"] = 1, ["CreatedAt"] = -1 }));
+                var versionKey = new BsonDocument { ["ClientId"] = 1, ["CreatedAt"] = -1 };
+                versions.ShouldContain(d => d["name"] == "IX_ClientDataVersion_ClientId_CreatedAtDesc" && d["key"].AsBsonDocument.Equals(versionKey));
             }
         }
         finally { await client.DropDatabaseAsync(name); }
