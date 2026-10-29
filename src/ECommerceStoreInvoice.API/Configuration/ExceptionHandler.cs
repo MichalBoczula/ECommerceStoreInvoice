@@ -2,6 +2,7 @@
 using ECommerceStoreInvoice.API.Configuration.Extensions;
 using ECommerceStoreInvoice.Domain.Validation.Common;
 using Microsoft.AspNetCore.Diagnostics;
+using ECommerceStoreInvoice.API.Configuration.Common;
 
 namespace ECommerceStoreInvoice.API.Configuration;
 
@@ -31,6 +32,9 @@ public sealed class ExceptionHandler : IExceptionHandler
             BadHttpRequestException badHttpRequestException when badHttpRequestException.StatusCode == StatusCodes.Status400BadRequest =>
                 JsonDeserializationExceptionHandlerExtension.HandleJsonDeserializationException(
                     context, badHttpRequestException, _logger, cancellationToken),
+
+            BadHttpRequestException badHttpRequestException when badHttpRequestException.StatusCode == StatusCodes.Status415UnsupportedMediaType =>
+                FrameworkProblemResponse.WriteAsync(context, StatusCodes.Status415UnsupportedMediaType, cancellationToken),
 
             JsonException jsonException =>
                 JsonDeserializationExceptionHandlerExtension.HandleJsonDeserializationException(

@@ -14,11 +14,13 @@ internal sealed class ScenarioHttpEvidence
 {
     internal static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web) { WriteIndented = true };
     private readonly ConcurrentQueue<(string Name, object? Value, byte[]? Pdf)> _pending = new();
+    private readonly ConcurrentQueue<(string Name, string Phase, JsonElement Value)> _observations = new();
     private int _sequence;
     private bool _publishedIdentity;
     private readonly bool _labelFromTag;
+    private readonly bool _groupObservations;
 
-    internal ScenarioHttpEvidence(string scenarioId, string feature, string scenario, SortedDictionary<string, string?> parameters, bool labelFromTag = false)
+    internal ScenarioHttpEvidence(string scenarioId, string feature, string scenario, SortedDictionary<string, string?> parameters, bool labelFromTag = false, bool groupObservations = false)
     {
         if (!Regex.IsMatch(scenarioId, "^INV[0-9]{2}_[A-Za-z0-9_]+$"))
             throw new InvalidOperationException("A stable scenarioId is required for HTTP evidence.");
@@ -27,6 +29,7 @@ internal sealed class ScenarioHttpEvidence
         Scenario = scenario;
         Parameters = new SortedDictionary<string, string?>(parameters, StringComparer.Ordinal);
         _labelFromTag = labelFromTag;
+        _groupObservations = groupObservations;
         InstanceId = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(
             JsonSerializer.Serialize(new { scenarioId, parameters = Parameters })))).ToLowerInvariant();
     }
@@ -50,12 +53,18 @@ internal sealed class ScenarioHttpEvidence
             foreach (DictionaryEntry entry in info.Arguments)
                 if ((string)entry.Key != "scenarioId")
                     parameters.Add((string)entry.Key, entry.Value?.ToString());
-        return new ScenarioHttpEvidence(argument ?? tag![prefix.Length..], feature, info.Title, parameters, tag is not null);
+        return new ScenarioHttpEvidence(argument ?? tag![prefix.Length..], feature, info.Title, parameters, tag is not null, groupObservations: true);
     }
 
     internal int NextExchange() => Interlocked.Increment(ref _sequence);
 
     internal void Record(string name, object value) => _pending.Enqueue((name, value, null));
+
+    internal void RecordObservation(string name, object value)
+    {
+        if (_groupObservations) _observations.Enqueue((name, StepPhase, JsonSerializer.SerializeToElement(value, JsonOptions)));
+        else Record(name, new { service = "invoices", scenarioId = ScenarioId, instanceId = InstanceId, value });
+    }
 
     internal void RecordPdf(string name, byte[] bytes) => _pending.Enqueue((name, null, bytes.ToArray()));
 
@@ -74,8 +83,13 @@ internal sealed class ScenarioHttpEvidence
         Attach("Scenario identity", Identity());
     }
 
-    internal void Flush(Action<string, object>? attach = null, Action<string, byte[]>? attachPdf = null)
+    internal void Flush(Action<string, object>? attach = null, Action<string, byte[]>? attachPdf = null, bool flushObservations = true)
     {
+        var observations = new List<object>();
+        if (flushObservations)
+            while (_observations.TryDequeue(out var observation)) observations.Add(new { name = observation.Name, stepPhase = observation.Phase, value = observation.Value });
+        if (observations.Count != 0)
+            Record("Scenario observations", new { service = "invoices", scenarioId = ScenarioId, instanceId = InstanceId, observations });
         while (_pending.TryDequeue(out var item))
         {
             if (item.Pdf is not null)

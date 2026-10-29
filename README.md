@@ -131,7 +131,7 @@ Stop the stack with `docker compose -f docker-compose.yml down`; add `--volumes`
 
 The public route groups are `/shopping-carts`, `/orders`, `/invoices` and `/client-data-versions`. `POST /orders/client/{clientId}` creates an order from a cart; the older `POST /orders/{clientId}` alias remains callable but is excluded from OpenAPI. `GET /orders/{orderId}` includes status, total amount, currency and snapshot-backed lines. Its total is a decimal amount in the product currency; do not treat it as integer minor units. The response mapping currently takes the first line's currency, so mixed-currency orders require a separate domain decision before a payment integration assumes a single currency.
 
-Validation and malformed JSON return `400`, missing resources `404`, duplicate invoices/carts and stale order writes `409`, and unexpected errors `500`. Business errors use `application/problem+json`; unexpected errors have a generic detail and a trace ID. Probe responses use the ASP.NET health-check format rather than the business problem contract. For the exact request/response DTOs and status declarations, use generated OpenAPI. Acceptance tests assert observed HTTP responses against the generated specification; this validates exercised responses and is not a proof of all possible runtime paths.
+Validation and malformed/invalid required bodies return `400`, missing resources/routes `404`, unsupported methods `405`, duplicate invoices/carts and stale order writes `409`, unsupported JSON-body media `415`, and unexpected errors `500`. Business errors use `application/problem+json`; unexpected errors have a generic detail and a trace ID. Probe responses use the ASP.NET health-check format rather than the business problem contract. For the exact request/response DTOs and status declarations, use generated OpenAPI. Acceptance tests assert observed HTTP responses against the generated specification; this validates exercised responses and is not a proof of all possible runtime paths.
 
 See the [public error contract](docs/api-problem-contract.md) and [response scenario matrix](docs/acceptance-matrix.md) for mapped causes and actual acceptance evidence.
 
@@ -153,8 +153,8 @@ The [BDD backlog](docs/bdd-backlog.md) groups the Orders/Invoices documentation
 work into small packages. [Task 1's baseline](docs/bdd-01-baseline.md) preserves
 38 feature files, 52 declarations and all 77 original expanded BDD cases, plus
 eight standalone acceptance checks. The source gate now checks every matrix
-example and all 56 declared operation/status pairs: 54 have guaranteed scenario
-intent and two explicit gaps remain. These are source coverage links, not
+example and all 59 declared operation/status pairs: 58 have guaranteed scenario
+intent and one explicit gap remains. These are source coverage links, not
 a claim of complete runtime cause coverage. [Task 2](docs/bdd-02-http-evidence.md)
 adds actual paired HTTP evidence, explicit IDs and readable descriptions for all
 77 BDD cases and 18 recorder regressions. [Task 3](docs/bdd-03-shopping-carts.md)
@@ -171,7 +171,9 @@ reservation, attempt cleanup, retry and lost-acknowledgment evidence.
 metadata, exact binary downloads and real private Blob adapter HTTP evidence.
 [Task 9](docs/bdd-09-business-validation.md) adds isolated business-rule errors,
 accepted boundaries, complete safe problems and unchanged populated state.
-The current acceptance inventory is **202 BDD + 27 standalone = 229**; recorder
+[Task 10](docs/bdd-10-framework-failures.md) adds exact-byte framework rejections,
+complete safe route/method/media problems and the missing by-order server failure.
+The current acceptance inventory is **295 BDD + 30 standalone = 325**; recorder
 regressions remain standalone checks. Generated `.feature.cs` files are ignored
 build outputs, not maintained source.
 

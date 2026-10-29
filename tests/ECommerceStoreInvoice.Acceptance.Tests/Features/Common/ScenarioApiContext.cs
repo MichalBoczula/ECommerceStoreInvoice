@@ -16,19 +16,17 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Common
         public void InitializeEvidence(ScenarioInfo scenario, string feature) => _evidence = ScenarioHttpEvidence.From(scenario, feature);
         public void BeginStep(string phase) => Evidence.StepPhase = phase;
         public void PublishEvidenceIdentity() => Evidence.PublishIdentity();
-        public void FlushEvidence() => Evidence.Flush();
+        public void FlushEvidence(bool final = false) => Evidence.Flush(flushObservations: final);
 
-        public void RecordEvidence(string name, object value) => Evidence.Record(name, new
-        {
-            service = "invoices",
-            scenarioId = Evidence.ScenarioId,
-            instanceId = Evidence.InstanceId,
-            value
-        });
+        public void RecordEvidence(string name, object value) => Evidence.RecordObservation(name, value);
 
         public HttpClient CreateClient(WebApplicationFactory<Program> factory)
             // Capture first so the actual response survives an outer contract failure.
             => factory.CreateDefaultClient(new OpenApiResponseHandler(OpenApiDocument), new HttpEvidenceHandler(Evidence));
+
+        // Routing failures have no selected OpenAPI operation. Their complete problems
+        // are checked by framework steps and their HTTP bytes use the same recorder.
+        internal HttpClient CreateRoutingClient() => Factory.CreateDefaultClient(new HttpEvidenceHandler(Evidence));
 
         internal DelegatingHandler CreateCheckoutCatalogHandler() => new HttpEvidenceHandler(Evidence, "products", "checkout-catalog");
 
@@ -41,6 +39,8 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Common
         internal DelegatingHandler CreateInvoiceReadCatalogHandler() => new HttpEvidenceHandler(Evidence, "products", "invoice-read-catalog");
 
         internal DelegatingHandler CreateBusinessCatalogHandler() => new HttpEvidenceHandler(Evidence, "products", "business-validation-catalog");
+
+        internal DelegatingHandler CreateFrameworkCatalogHandler() => new HttpEvidenceHandler(Evidence, "products", "framework-catalog");
 
         public HttpClient CreateCatalogFixtureClient() => new(new HttpEvidenceHandler(Evidence, "products", "catalog-fixture")
         {

@@ -50,6 +50,7 @@ namespace ECommerceStoreInvoice.API.Endpoints
             .WithName("CreateClientDataVersion")
             .Produces<ClientDataVersionResponseDto>(StatusCodes.Status200OK)
             .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")
+            .Produces<ProblemDetails>(StatusCodes.Status415UnsupportedMediaType, "application/problem+json")
             .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, "application/problem+json");
         }
     }

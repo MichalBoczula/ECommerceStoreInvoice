@@ -60,6 +60,7 @@ internal sealed class HttpEvidenceHandler(ScenarioHttpEvidence evidence, string 
                 location = response.Headers.Location?.ToString(),
                 contentDisposition = response.Content.Headers.ContentDisposition?.ToString(),
                 cacheControl = response.Headers.CacheControl?.ToString(),
+                allow = response.Content.Headers.Allow.ToArray(),
                 content
             });
             if (response.Content.Headers.ContentType?.MediaType?.Equals("application/pdf", StringComparison.OrdinalIgnoreCase) == true)

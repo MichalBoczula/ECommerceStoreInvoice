@@ -204,6 +204,14 @@ def verify_matrix(operations, cases):
         assert key not in mapped, 'Expanded example linked more than once'
         mapped.add(key)
         covered.update((op['operationId'], status) for status in guaranteed)
+    for row in framework_rows():
+        assert re.fullmatch(r'INV\d{2}_[A-Za-z0-9_]+', row['scenarioId']) and row['scenarioId'] not in ids, 'Invalid or duplicate scenarioId'
+        ids.add(row['scenarioId'])
+        assert row['stage'] == 'framework' and re.fullmatch(r'[A-Z]+', row['method']) and row['path'].startswith('/'), 'Invalid framework route metadata'
+        assert row['cause'].strip() and row['optionalStatuses'] == '' and status_set(row['statuses']) in ({404}, {405}), 'Invalid framework status intent'
+        key = case_key(dict(row, example=json.loads(row['example'])))
+        assert key not in mapped, 'Expanded example linked more than once'
+        mapped.add(key)
     assert mapped == {case_key(case) for case in cases}, 'Missing or stale scenario/example links'
     declared = {(op['operationId'], status) for op in operations for status in op['responses']}
     gaps = read_tsv(ROOT / 'docs/acceptance-gaps.tsv', {'operationId', 'status', 'task', 'reason'})
@@ -217,6 +225,10 @@ def verify_matrix(operations, cases):
         gap_pairs.add(pair)
     assert gap_pairs == declared - covered, 'Undocumented or stale operation/status gaps'
     return rows, gaps, len(covered)
+
+
+def framework_rows():
+    return read_tsv(ROOT / 'docs/framework-scenarios.tsv', {'scenarioId', 'stage', 'method', 'path', 'statuses', 'optionalStatuses', 'cause', 'feature', 'scenario', 'example'})
 
 
 def verify_generation_sources():
@@ -297,14 +309,20 @@ def generate():
     names = [item["operationId"] for item in operations]
     assert names and len(names) == len(set(names)), f"Duplicate/empty operation inventory: {names}"
     rows, gaps, covered = verify_matrix(operations, cases)
-    verify_evidence_sources(rows)
+    framework = framework_rows()
+    verify_evidence_sources(rows + framework)
     for operation in operations:
         linked = [row for row in rows if row['operationId'] == operation['operationId']]
         operation['scenarios'] = sorted({'tests/ECommerceStoreInvoice.Acceptance.Tests/Features/' + row['feature'] for row in linked})
         operation['cases'] = [dict(scenarioId=row['scenarioId'], feature=row['feature'], scenario=row['scenario'],
                                    example=json.loads(row['example']), statuses=sorted(status_set(row['statuses'])),
                                    optionalStatuses=sorted(status_set(row['optionalStatuses'])), cause=row['cause']) for row in linked]
-    return {"operations": operations, "coverage": {"expandedBddCases": len(cases), "matrixCases": len(rows),
+    framework_cases = [dict(scenarioId=row['scenarioId'], stage=row['stage'], method=row['method'], path=row['path'],
+                            feature=row['feature'], scenario=row['scenario'], example=json.loads(row['example']),
+                            statuses=sorted(status_set(row['statuses'])), cause=row['cause']) for row in framework]
+    return {"operations": operations, "frameworkCases": framework_cases,
+            "coverage": {"expandedBddCases": len(cases), "matrixCases": len(rows) + len(framework),
+            "operationCases": len(rows), "frameworkCases": len(framework),
             "declaredOperationStatusPairs": sum(len(op['responses']) for op in operations),
             "guaranteedScenarioStatusPairs": covered, "gaps": gaps}}
 

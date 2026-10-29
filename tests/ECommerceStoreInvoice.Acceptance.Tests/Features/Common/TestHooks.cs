@@ -40,6 +40,8 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Common
                     _factory.CatalogEvidenceHandlerFactory = _apiContext.CreateClientVersionCatalogHandler;
                 else if (_scenarioContext.ScenarioInfo.Tags.Contains("business-validation-evidence"))
                     _factory.CatalogEvidenceHandlerFactory = _apiContext.CreateBusinessCatalogHandler;
+                else if (_scenarioContext.ScenarioInfo.Tags.Contains("framework-evidence"))
+                    _factory.CatalogEvidenceHandlerFactory = _apiContext.CreateFrameworkCatalogHandler;
                 if (_scenarioContext.ScenarioInfo.Tags.Contains("invoice-generation-evidence"))
                 {
                     _factory.CatalogEvidenceHandlerFactory = _apiContext.CreateInvoiceCatalogHandler;
@@ -87,8 +89,8 @@ namespace ECommerceStoreInvoice.Acceptance.Tests.Features.Common
         [AfterScenario]
         public async Task AfterScenario()
         {
-            try { _apiContext.FlushEvidence(); }
-            finally { await CleanupAsync(); }
+            try { await CleanupAsync(); }
+            finally { _apiContext.FlushEvidence(final: true); }
         }
 
         private async Task CleanupAsync()
