@@ -18,6 +18,8 @@ Application services execute flow descriptors, and Domain policies describe vali
 
 CI packages these generated sources with real Reqnroll/Allure results for the
 shared LiveDocs portal; see [BDD report publication](#bdd-reports-in-livedocs).
+The [Payments Pact pilot](docs/payments-pact-provider.md) verifies the consumer's
+order-read contract against a running Invoice candidate in CI.
 
 ## Architecture
 
