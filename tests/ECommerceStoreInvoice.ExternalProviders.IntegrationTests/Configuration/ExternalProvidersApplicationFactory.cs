@@ -47,11 +47,13 @@ public sealed class ExternalProvidersApplicationFactory : IDisposable
         _client.BaseAddress = new Uri("http://localhost");
     }
 
-    public IProductServiceClient CreateClient()
+    public IProductServiceClient CreateClient() => CreateClient(_client);
+
+    internal static IProductServiceClient CreateClient(HttpClient client)
     {
-        var adapter = new HttpClientRequestAdapter(new AnonymousAuthenticationProvider(), httpClient: _client)
+        var adapter = new HttpClientRequestAdapter(new AnonymousAuthenticationProvider(), httpClient: client)
         {
-            BaseUrl = _client.BaseAddress!.ToString().TrimEnd('/')
+            BaseUrl = client.BaseAddress!.ToString().TrimEnd('/')
         };
         return new ExternalProductServiceClient(new ProductApiClient(adapter));
     }

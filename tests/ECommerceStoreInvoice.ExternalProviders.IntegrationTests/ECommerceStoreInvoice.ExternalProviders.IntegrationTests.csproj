@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="10.0.1" />
+    <PackageReference Include="PactNet" Version="5.0.1" />
     
     <!-- Testing Framework & Assertions -->
     <PackageReference Include="Shouldly" Version="4.3.0" />
