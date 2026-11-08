@@ -1,0 +1,296 @@
+{
+  "consumer": {
+    "name": "payments"
+  },
+  "interactions": [
+    {
+      "description": "read a Created order in JPY",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "a Created order exists for payment",
+          "params": {
+            "currency": "JPY",
+            "lineAmounts": [
+              "200",
+              "300"
+            ],
+            "orderId": "10000000-0000-4000-8000-000000000002",
+            "totalAmount": "500"
+          }
+        }
+      ],
+      "request": {
+        "headers": {
+          "Accept": [
+            "application/json"
+          ]
+        },
+        "method": "GET",
+        "path": "/orders/10000000-0000-4000-8000-000000000002"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "id": "10000000-0000-4000-8000-000000000002",
+            "lines": [
+              {
+                "lineTotalAmount": 200,
+                "productVersion": {
+                  "priceCurrency": "JPY"
+                }
+              },
+              {
+                "lineTotalAmount": 300,
+                "productVersion": {
+                  "priceCurrency": "JPY"
+                }
+              }
+            ],
+            "status": "Created",
+            "totalAmount": 500,
+            "totalCurrency": "JPY"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "read a Created order in KWD",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "a Created order exists for payment",
+          "params": {
+            "currency": "KWD",
+            "lineAmounts": [
+              "1",
+              "0.234"
+            ],
+            "orderId": "10000000-0000-4000-8000-000000000003",
+            "totalAmount": "1.234"
+          }
+        }
+      ],
+      "request": {
+        "headers": {
+          "Accept": [
+            "application/json"
+          ]
+        },
+        "method": "GET",
+        "path": "/orders/10000000-0000-4000-8000-000000000003"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "id": "10000000-0000-4000-8000-000000000003",
+            "lines": [
+              {
+                "lineTotalAmount": 1,
+                "productVersion": {
+                  "priceCurrency": "KWD"
+                }
+              },
+              {
+                "lineTotalAmount": 0.234,
+                "productVersion": {
+                  "priceCurrency": "KWD"
+                }
+              }
+            ],
+            "status": "Created",
+            "totalAmount": 1.234,
+            "totalCurrency": "KWD"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "read a Created order in PLN",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "a Created order exists for payment",
+          "params": {
+            "currency": "PLN",
+            "lineAmounts": [
+              "0.1",
+              "0.19"
+            ],
+            "orderId": "10000000-0000-4000-8000-000000000001",
+            "totalAmount": "0.29"
+          }
+        }
+      ],
+      "request": {
+        "headers": {
+          "Accept": [
+            "application/json"
+          ]
+        },
+        "method": "GET",
+        "path": "/orders/10000000-0000-4000-8000-000000000001"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "id": "10000000-0000-4000-8000-000000000001",
+            "lines": [
+              {
+                "lineTotalAmount": 0.1,
+                "productVersion": {
+                  "priceCurrency": "PLN"
+                }
+              },
+              {
+                "lineTotalAmount": 0.19,
+                "productVersion": {
+                  "priceCurrency": "PLN"
+                }
+              }
+            ],
+            "status": "Created",
+            "totalAmount": 0.29,
+            "totalCurrency": "PLN"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "read a Created order in USD",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "a Created order exists for payment",
+          "params": {
+            "currency": "USD",
+            "lineAmounts": [
+              "12300",
+              "45.67"
+            ],
+            "orderId": "10000000-0000-4000-8000-000000000004",
+            "totalAmount": "12345.67"
+          }
+        }
+      ],
+      "request": {
+        "headers": {
+          "Accept": [
+            "application/json"
+          ]
+        },
+        "method": "GET",
+        "path": "/orders/10000000-0000-4000-8000-000000000004"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "id": "10000000-0000-4000-8000-000000000004",
+            "lines": [
+              {
+                "lineTotalAmount": 12300,
+                "productVersion": {
+                  "priceCurrency": "USD"
+                }
+              },
+              {
+                "lineTotalAmount": 45.67,
+                "productVersion": {
+                  "priceCurrency": "USD"
+                }
+              }
+            ],
+            "status": "Created",
+            "totalAmount": 12345.67,
+            "totalCurrency": "USD"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "read an order that does not exist",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "the order does not exist",
+          "params": {
+            "orderId": "10000000-0000-4000-8000-000000000099"
+          }
+        }
+      ],
+      "request": {
+        "headers": {
+          "Accept": [
+            "application/json"
+          ]
+        },
+        "method": "GET",
+        "path": "/orders/10000000-0000-4000-8000-000000000099"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "status": 404
+          },
+          "contentType": "application/problem+json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/problem+json"
+          ]
+        },
+        "status": 404
+      },
+      "type": "Synchronous/HTTP"
+    }
+  ],
+  "metadata": {
+    "pactRust": {
+      "ffi": "0.5.12",
+      "models": "1.3.16"
+    },
+    "pactSpecification": {
+      "version": "4.0"
+    }
+  },
+  "provider": {
+    "name": "invoice"
+  }
+}

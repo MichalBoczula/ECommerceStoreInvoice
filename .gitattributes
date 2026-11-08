@@ -61,3 +61,5 @@
 #*.PDF   diff=astextplain
 #*.rtf   diff=astextplain
 #*.RTF   diff=astextplain
+# The provider verifier hashes the exact artifact bytes from Payments CI.
+contracts/pact/payments-invoice.json -text

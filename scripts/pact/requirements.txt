@@ -1,0 +1,6 @@
+cffi==2.1.1
+dnspython==2.9.2
+pact-python==4.2.0
+pact-python-ffi==0.5.12.1
+pycparser==3.12
+pymongo==4.18.3

@@ -186,6 +186,57 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
+  pact-provider:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+      - uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
+        with:
+          version: "0.12.18"
+      - name: Build the Invoice candidate
+        run: dotnet build src/ECommerceStoreInvoice.API/ECommerceStoreInvoice.API.csproj --configuration Release
+      - name: Verify the pinned Payments Pact
+        run: bash scripts/pact/run.sh
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: payments-invoice-verification
+          path: artifacts/verification/pact-provider/
+          if-no-files-found: warn
+          retention-days: 14
+
+  publish-pact-verification:
+    if: >-
+      always() && !cancelled() && github.event_name == 'push' &&
+      github.ref == 'refs/heads/master' && vars.PACT_REGISTRY_URL != '' &&
+      (needs.pact-provider.result == 'success' || needs.pact-provider.result == 'failure')
+    needs: pact-provider
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          name: payments-invoice-verification
+          path: pact-evidence
+      - name: Publish the exact provider result
+        env:
+          PACT_REGISTRY_URL: ${{ vars.PACT_REGISTRY_URL }}
+          PACT_PUBLISHER_TOKEN: ${{ secrets.PACT_PUBLISHER_TOKEN }}
+        run: python3 scripts/pact/publish.py pact-evidence/verification.json pact-verification-receipt.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pact-verification-receipt
+          path: pact-verification-receipt.json
+          if-no-files-found: error
+
   documentation-bundle:
     needs: [build, acceptance-tests]
     uses: MichalBoczula/ECommerceStore.LiveDocs/.github/workflows/package-producer.yml@01631ab47e49c6f7411bfb9dbe1328c6e40e21fe
@@ -279,6 +330,7 @@ jobs:
       - infrastructure-tests
       - external-providers-tests
       - acceptance-tests
+      - pact-provider
       - documentation-bundle
       - secret-scan
       - dependency-review
@@ -292,11 +344,12 @@ jobs:
           INFRASTRUCTURE: ${{ needs.infrastructure-tests.result }}
           EXTERNAL_PROVIDERS: ${{ needs.external-providers-tests.result }}
           ACCEPTANCE: ${{ needs.acceptance-tests.result }}
+          PACT_PROVIDER: ${{ needs.pact-provider.result }}
           DOCUMENTATION: ${{ needs.documentation-bundle.result }}
           SECRET_SCAN: ${{ needs.secret-scan.result }}
           DEPENDENCY_REVIEW: ${{ needs.dependency-review.result }}
         run: |
-          for job in BUILD DOMAIN APPLICATION INFRASTRUCTURE EXTERNAL_PROVIDERS ACCEPTANCE DOCUMENTATION SECRET_SCAN; do
+          for job in BUILD DOMAIN APPLICATION INFRASTRUCTURE EXTERNAL_PROVIDERS ACCEPTANCE PACT_PROVIDER DOCUMENTATION SECRET_SCAN; do
             if [[ "${!job}" != success ]]; then
               echo "$job must succeed; actual result: ${!job}" >&2
               exit 1
