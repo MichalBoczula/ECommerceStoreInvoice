@@ -373,6 +373,7 @@ jobs:
 
   publish-invoice-products-pact:
     if: >-
+      always() && !cancelled() && needs.quality-gate.result == 'success' &&
       github.event_name == 'push' && github.ref == 'refs/heads/master' &&
       vars.PACT_REGISTRY_URL != ''
     needs: quality-gate
