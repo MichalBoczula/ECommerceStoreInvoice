@@ -5,17 +5,12 @@ import hashlib
 import json
 import os
 from pathlib import Path
-from urllib.error import HTTPError
-from urllib.parse import urlencode, urlsplit
-from urllib.request import HTTPRedirectHandler, Request, build_opener
+from urllib.parse import urlencode
+
+from registry import Registry
 
 ROOT = Path(__file__).resolve().parents[2]
 REPOSITORY = "https://github.com/MichalBoczula/ECommerceStoreInvoice"
-
-
-class NoRedirect(HTTPRedirectHandler):
-    def redirect_request(self, req, fp, code, msg, headers, newurl):
-        return None
 
 
 def main():
@@ -26,14 +21,6 @@ def main():
 
     if os.environ["GITHUB_EVENT_NAME"] != "push" or os.environ["GITHUB_REF"] != "refs/heads/master":
         raise ValueError("Registry publication requires an Invoice master push.")
-    registry = urlsplit(os.environ.get("PACT_REGISTRY_URL", ""))
-    token = os.environ.get("PACT_PUBLISHER_TOKEN", "")
-    if (
-        registry.scheme != "https" or not registry.hostname or registry.username is not None
-        or registry.password is not None or registry.path not in ("", "/")
-        or registry.query or registry.fragment or not token
-    ):
-        raise ValueError("Configure an HTTPS PACT_REGISTRY_URL origin and the Invoice PACT_PUBLISHER_TOKEN.")
 
     source = json.loads((ROOT / "contracts/pact/payments-source.json").read_bytes())
     report = json.loads(args.report.read_bytes())
@@ -45,20 +32,7 @@ def main():
     ):
         raise ValueError("The provider report does not match the pinned Pact and workflow commit.")
 
-    opener = build_opener(NoRedirect())
-
-    def call(path, body=None, raw=False):
-        headers = {} if body is None else {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
-        req = Request(
-            f"https://{registry.netloc}{path}",
-            data=None if body is None else json.dumps(body).encode(),
-            headers=headers,
-        )
-        try:
-            with opener.open(req, timeout=30) as response:
-                return response.read() if raw else json.load(response)
-        except HTTPError as error:
-            raise RuntimeError(f"Pact registry rejected {path.partition('?')[0]} with HTTP {error.code}.") from None
+    call = Registry().call
 
     filter_by = {
         "sourceApplicationId": "payments", "consumerApplicationId": "payments",

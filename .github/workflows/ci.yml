@@ -152,7 +152,15 @@ jobs:
         with:
           global-json-file: global.json
       - name: Verify external-providers suite
+        env:
+          INVOICE_PACT_DIR: ${{ github.workspace }}/artifacts/verification/external-providers/pacts
+          PACT_DO_NOT_TRACK: "true"
         run: VERIFY_SUMMARY_FILE="$GITHUB_STEP_SUMMARY" bash scripts/ci.sh test external-providers
+      - uses: actions/upload-artifact@v4
+        with:
+          name: invoice-products-pact
+          path: artifacts/verification/external-providers/pacts/
+          if-no-files-found: error
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -362,6 +370,32 @@ jobs:
             exit 1
           fi
 
+
+  publish-invoice-products-pact:
+    if: >-
+      github.event_name == 'push' && github.ref == 'refs/heads/master' &&
+      vars.PACT_REGISTRY_URL != ''
+    needs: quality-gate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          name: invoice-products-pact
+          path: pact-input
+      - name: Publish Invoice consumer Pact
+        env:
+          PACT_REGISTRY_URL: ${{ vars.PACT_REGISTRY_URL }}
+          PACT_PUBLISHER_TOKEN: ${{ secrets.PACT_PUBLISHER_TOKEN }}
+        run: python3 scripts/pact/publish_consumer.py pact-input invoice-products-publication.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: invoice-products-publication
+          path: invoice-products-publication.json
+          if-no-files-found: error
 
   docker-image:
     if: ${{ always() && !cancelled() && needs.quality-gate.result == 'success' }}

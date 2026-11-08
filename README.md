@@ -20,6 +20,8 @@ CI packages these generated sources with real Reqnroll/Allure results for the
 shared LiveDocs portal; see [BDD report publication](#bdd-reports-in-livedocs).
 The [Payments Pact pilot](docs/payments-pact-provider.md) verifies the consumer's
 order-read contract against a running Invoice candidate in CI.
+The [Products consumer Pact](docs/products-pact-consumer.md) covers the product
+lookup used to create checkout snapshots.
 
 ## Architecture
 
