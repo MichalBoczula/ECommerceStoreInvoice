@@ -7,10 +7,11 @@ It uses the registry identities `invoice` and `products`.
 
 | Interaction | Consumer expectation |
 | --- | --- |
-| One requested phone is active and the other is missing | HTTP 200 returns the matching phone with its ID, name, brand and exact price/currency. Invoice sends a deduplicated array and maps only the returned snapshot. |
-| The requested phone is missing | HTTP 404 with a problem response maps to an empty snapshot collection. |
+| Every distinct requested ID belongs to an active phone | HTTP 200 returns the priced phone with its ID, name, brand and exact price/currency. Invoice deduplicates repeated IDs and maps the returned snapshot. |
+| One requested phone exists and the other is missing | HTTP 404 for the whole lookup maps to an empty snapshot collection. |
 
-The provider states carry synthetic IDs and the exact priced fixture values.
+Both interactions use the same provider state with synthetic IDs and exact
+priced fixture values.
 Extra fields such as photos and specifications are outside this consumer
 contract. Empty IDs and Invoice's handling of missing checkout snapshots remain
 covered by Invoice's own tests.

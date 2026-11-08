@@ -65,30 +65,32 @@ public sealed class ProductsConsumerPactTests
     private static async Task<byte[]> VerifyAsync(string directory)
     {
         var pact = Pact.V4("invoice", "products", new PactConfig { PactDir = directory }).WithHttpInteractions();
+        const string catalogState = "one priced phone exists and another phone is missing";
+        var catalogParameters = new Dictionary<string, string>
+        {
+            ["productId"] = ProductId.ToString(),
+            ["missingId"] = MissingId.ToString(),
+            ["name"] = ProductName,
+            ["brand"] = Brand,
+            ["amount"] = "2499.50",
+            ["currency"] = Currency
+        };
 
-        pact.UponReceiving("look up a priced phone when another requested phone is missing")
-            .Given("one priced phone exists and the other requested phone is missing", new Dictionary<string, string>
-            {
-                ["productId"] = ProductId.ToString(),
-                ["missingId"] = MissingId.ToString(),
-                ["name"] = ProductName,
-                ["brand"] = Brand,
-                ["amount"] = "2499.50",
-                ["currency"] = Currency
-            })
+        pact.UponReceiving("look up a priced phone when all requested IDs exist")
+            .Given(catalogState, catalogParameters)
             .WithRequest(HttpMethod.Post, PathByIds)
             .WithHeader("Content-Type", Json)
-            .WithJsonBody(new[] { ProductId, MissingId })
+            .WithJsonBody(new[] { ProductId })
             .WillRespond()
             .WithStatus(HttpStatusCode.OK)
             .WithHeader("Content-Type", Json)
             .WithJsonBody(new[] { new { id = ProductId, name = ProductName, brand = Brand, price = new { amount = Amount, currency = Currency } } });
 
-        pact.UponReceiving("look up a phone that does not exist")
-            .Given("the requested phone does not exist", new Dictionary<string, string> { ["missingId"] = MissingId.ToString() })
+        pact.UponReceiving("look up an existing phone and a missing phone together")
+            .Given(catalogState, catalogParameters)
             .WithRequest(HttpMethod.Post, PathByIds)
             .WithHeader("Content-Type", Json)
-            .WithJsonBody(new[] { MissingId })
+            .WithJsonBody(new[] { ProductId, MissingId })
             .WillRespond()
             .WithStatus(HttpStatusCode.NotFound)
             .WithHeader("Content-Type", ProblemJson)
@@ -98,14 +100,14 @@ public sealed class ProductsConsumerPactTests
         {
             using var http = new HttpClient { BaseAddress = context.MockServerUri };
             var client = ExternalProvidersApplicationFactory.CreateClient(http);
-            var products = await client.GetProductsByIds([ProductId, MissingId, ProductId]);
+            var products = await client.GetProductsByIds([ProductId, ProductId]);
             var snapshot = products.ShouldHaveSingleItem();
             snapshot.ProductId.ShouldBe(ProductId);
             snapshot.Name.ShouldBe(ProductName);
             snapshot.Brand.ShouldBe(Brand);
             snapshot.Price.Amount.ShouldBe(Amount);
             snapshot.Price.Currency.ShouldBe(Currency);
-            (await client.GetProductsByIds([MissingId])).ShouldBeEmpty();
+            (await client.GetProductsByIds([ProductId, MissingId])).ShouldBeEmpty();
         });
         return await File.ReadAllBytesAsync(Path.Combine(directory, PactFile));
     }
