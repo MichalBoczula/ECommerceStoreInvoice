@@ -209,12 +209,23 @@ jobs:
       - name: Build the Invoice candidate
         run: dotnet build src/ECommerceStoreInvoice.API/ECommerceStoreInvoice.API.csproj --configuration Release
       - name: Verify the pinned Payments Pact
+        id: payments_pact
         run: bash scripts/pact/run.sh
+      - name: Verify the pinned Web cart Pact
+        if: ${{ !cancelled() && (success() || steps.payments_pact.outcome == 'failure') }}
+        run: bash scripts/pact/run.sh web
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: payments-invoice-verification
           path: artifacts/verification/pact-provider/
+          if-no-files-found: warn
+          retention-days: 14
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: web-invoice-verification
+          path: artifacts/verification/pact-provider-web/
           if-no-files-found: warn
           retention-days: 14
 
@@ -226,22 +237,29 @@ jobs:
     needs: pact-provider
     runs-on: ubuntu-24.04
     timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        consumer: [payments, web]
     steps:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
       - uses: actions/download-artifact@v4
         with:
-          name: payments-invoice-verification
+          name: ${{ matrix.consumer }}-invoice-verification
           path: pact-evidence
       - name: Publish the exact provider result
         env:
           PACT_REGISTRY_URL: ${{ vars.PACT_REGISTRY_URL }}
           PACT_PUBLISHER_TOKEN: ${{ secrets.PACT_PUBLISHER_TOKEN }}
-        run: python3 scripts/pact/publish.py pact-evidence/verification.json pact-verification-receipt.json
+          PACT_CONSUMER: ${{ matrix.consumer }}
+        run: >-
+          python3 scripts/pact/publish.py pact-evidence/verification.json pact-verification-receipt.json
+          --consumer "$PACT_CONSUMER"
       - uses: actions/upload-artifact@v4
         with:
-          name: pact-verification-receipt
+          name: ${{ matrix.consumer == 'payments' && 'pact-verification-receipt' || 'web-invoice-verification-receipt' }}
           path: pact-verification-receipt.json
           if-no-files-found: error
 
