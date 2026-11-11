@@ -2,7 +2,12 @@
 set -euo pipefail
 
 cd "$(dirname "$0")/../.."
-results="$PWD/artifacts/verification/pact-provider"
+consumer=${1:-payments}
+case "$consumer" in
+  payments) results="$PWD/artifacts/verification/pact-provider" ;;
+  web) results="$PWD/artifacts/verification/pact-provider-web" ;;
+  *) echo "Usage: $0 [payments|web]" >&2; exit 2 ;;
+esac
 mkdir -p "$results"
 rm -f "$results"/{verification.json,pact-results.json,negative-control.json,restored-control.json,invoice.log,mongo.log}
 container=$(docker run --rm -d -p 127.0.0.1::27017 mongo:8.0 --replSet pact --bind_ip_all)
@@ -13,6 +18,6 @@ cleanup() {
 trap cleanup EXIT
 address=$(docker port "$container" 27017/tcp)
 PACT_DO_NOT_TRACK=true uv run --no-project --python 3.14.7 --with-requirements scripts/pact/requirements.txt \
-  python scripts/pact/verify.py \
+  python scripts/pact/verify.py --consumer "$consumer" \
     --provider-dll src/ECommerceStoreInvoice.API/bin/Release/net10.0/ECommerceStoreInvoice.API.dll \
     --mongo-port "${address##*:}" --mongo-member localhost:27017 --results "$results"

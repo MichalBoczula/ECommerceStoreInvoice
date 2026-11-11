@@ -1,0 +1,131 @@
+{
+  "consumer": {
+    "name": "web"
+  },
+  "interactions": [
+    {
+      "description": "load a populated shopping cart by client ID",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "one populated shopping cart exists and another client has no cart",
+          "params": {
+            "cart": {
+              "clientId": "44000000-0000-4000-8000-000000000002",
+              "createdAt": "2026-09-29T12:00:00Z",
+              "id": "44000000-0000-4000-8000-000000000001",
+              "lines": [
+                {
+                  "productId": "44000000-0000-4000-8000-000000000003",
+                  "quantity": 2
+                },
+                {
+                  "productId": "44000000-0000-4000-8000-000000000004",
+                  "quantity": 1
+                }
+              ],
+              "updatedAt": "2026-09-29T12:05:00Z"
+            },
+            "missingClientId": "44000000-0000-4000-8000-000000000098"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/shopping-carts/client/44000000-0000-4000-8000-000000000002"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "clientId": "44000000-0000-4000-8000-000000000002",
+            "createdAt": "2026-09-29T12:00:00Z",
+            "id": "44000000-0000-4000-8000-000000000001",
+            "lines": [
+              {
+                "productId": "44000000-0000-4000-8000-000000000003",
+                "quantity": 2
+              },
+              {
+                "productId": "44000000-0000-4000-8000-000000000004",
+                "quantity": 1
+              }
+            ],
+            "updatedAt": "2026-09-29T12:05:00Z"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "look up a shopping cart for a client without one",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "one populated shopping cart exists and another client has no cart",
+          "params": {
+            "cart": {
+              "clientId": "44000000-0000-4000-8000-000000000002",
+              "createdAt": "2026-09-29T12:00:00Z",
+              "id": "44000000-0000-4000-8000-000000000001",
+              "lines": [
+                {
+                  "productId": "44000000-0000-4000-8000-000000000003",
+                  "quantity": 2
+                },
+                {
+                  "productId": "44000000-0000-4000-8000-000000000004",
+                  "quantity": 1
+                }
+              ],
+              "updatedAt": "2026-09-29T12:05:00Z"
+            },
+            "missingClientId": "44000000-0000-4000-8000-000000000098"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/shopping-carts/client/44000000-0000-4000-8000-000000000098"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "status": 404
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/problem+json"
+          ]
+        },
+        "status": 404
+      },
+      "type": "Synchronous/HTTP"
+    }
+  ],
+  "metadata": {
+    "pact-js": {
+      "version": "17.1.4"
+    },
+    "pactRust": {
+      "ffi": "0.5.8",
+      "models": "1.3.16"
+    },
+    "pactSpecification": {
+      "version": "4.0"
+    }
+  },
+  "provider": {
+    "name": "invoice"
+  }
+}

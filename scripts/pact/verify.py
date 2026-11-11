@@ -1,4 +1,4 @@
-"""Replay the pinned Payments Pact against an isolated Invoice HTTP process."""
+"""Replay a pinned consumer Pact against an isolated Invoice HTTP process."""
 
 import argparse
 import hashlib
@@ -24,11 +24,10 @@ from pymongo import MongoClient
 from pymongo.errors import AutoReconnect, OperationFailure
 
 ROOT = Path(__file__).resolve().parents[2]
-CONTRACT = ROOT / "contracts/pact/payments-invoice.json"
-SOURCE = CONTRACT.with_name("payments-source.json")
 HOST = "127.0.0.1"
 CREATED = "a Created order exists for payment"
 MISSING = "the order does not exist"
+CART_LOOKUP = "one populated shopping cart exists and another client has no cart"
 
 
 def timestamp():
@@ -97,12 +96,38 @@ def invoice_api(dll, mongo_uri, database_name, results):
                     process.wait()
 
 
-def provider_state(database, name, action, parameters):
-    params = parameters or {}
+def cart_lookup_state(database, action, params):
+    cart = params["cart"]
+    client_id = Binary.from_uuid(UUID(cart["clientId"]))
+    missing_client_id = Binary.from_uuid(UUID(params["missingClientId"]))
+    if client_id == missing_client_id:
+        raise ValueError("The Web Pact requires distinct cart clients")
+    carts = database["shopping-carts"]
+    carts.delete_many({"ClientId": {"$in": [client_id, missing_client_id]}})
+    if action == "setup":
+        carts.insert_one({
+            "_id": Binary.from_uuid(UUID(cart["id"])),
+            "ClientId": client_id,
+            "CreatedAt": datetime.fromisoformat(cart["createdAt"]),
+            "UpdatedAt": datetime.fromisoformat(cart["updatedAt"]),
+            "Lines": [
+                {"ProductId": Binary.from_uuid(UUID(line["productId"])), "Quantity": line["quantity"]}
+                for line in cart["lines"]
+            ],
+        })
+
+
+def provider_state(database, name, action, params):
+    if action not in ("setup", "teardown"):
+        raise ValueError("Unknown Pact provider action")
+    if name == CART_LOOKUP:
+        cart_lookup_state(database, action, params)
+        return
+    if name not in (CREATED, MISSING):
+        raise ValueError("Unknown Pact provider state")
+
     order_id = UUID(params["orderId"])
     snapshot_ids = [uuid5(order_id, f"snapshot-{index}") for index in range(2)]
-    if name not in (CREATED, MISSING) or action not in ("setup", "teardown"):
-        raise ValueError("Unknown Pact provider state or action")
 
     database.orders.delete_one({"_id": Binary.from_uuid(order_id)})
     database["product-versions"].delete_many({"_id": {"$in": [Binary.from_uuid(value) for value in snapshot_ids]}})
@@ -129,14 +154,14 @@ def provider_state(database, name, action, parameters):
     })
 
 
-def verify(port, database, results, name):
+def verify(port, database, contract, results, name):
     def handle_state(state, action, parameters):
         provider_state(database, state, action, parameters)
 
     verifier = (
         Verifier("invoice", host=HOST)
         .add_transport(url=f"http://{HOST}:{port}")
-        .add_source(CONTRACT)
+        .add_source(contract)
         .state_handler(handle_state, teardown=True)
     )
     try:
@@ -224,6 +249,7 @@ def normalize(result, interactions):
 
 def main():
     parser = argparse.ArgumentParser()
+    parser.add_argument("--consumer", choices=("payments", "web"), default="payments")
     parser.add_argument("--provider-dll", type=Path, required=True)
     parser.add_argument("--mongo-port", type=int, required=True)
     parser.add_argument("--mongo-member", required=True)
@@ -232,16 +258,19 @@ def main():
     args.results.mkdir(parents=True, exist_ok=True)
     os.environ["PACT_DO_NOT_TRACK"] = "true"
 
-    source = json.loads(SOURCE.read_bytes())
-    content = CONTRACT.read_bytes()
+    contract = ROOT / f"contracts/pact/{args.consumer}-invoice.json"
+    source = json.loads(contract.with_name(f"{args.consumer}-source.json").read_bytes())
+    content = contract.read_bytes()
     pact = json.loads(content)
     interactions = pact["interactions"]
     if (
         hashlib.sha256(content).hexdigest() != source["contractSha256"]
         or len(interactions) != source["interactionCount"]
-        or pact["consumer"]["name"] != "payments" or pact["provider"]["name"] != "invoice"
+        or pact["consumer"]["name"] != args.consumer
+        or pact["provider"]["name"] != "invoice"
+        or pact["metadata"]["pactSpecification"]["version"] != "4.0"
     ):
-        raise ValueError("Pinned Payments Pact identity or bytes changed")
+        raise ValueError(f"Pinned {args.consumer} Pact identity or bytes changed")
 
     started = timestamp()
     mongo_uri = f"mongodb://{HOST}:{args.mongo_port}/?directConnection=true"
@@ -259,12 +288,12 @@ def main():
         database = mongo[f"invoice_pact_{uuid4().hex}"]
         try:
             with invoice_api(args.provider_dll.resolve(strict=True), mongo_uri, database.name, args.results) as port:
-                result = verify(port, database, args.results, "pact-results")
+                result = verify(port, database, contract, args.results, "pact-results")
                 status, passed, failed, issues = normalize(result, interactions)
-                if status == "Passed":
+                if args.consumer == "payments" and status == "Passed":
                     case, = [item for item in interactions if item["description"] == "read a Created order in PLN"]
                     with without_total_amount(port, case["request"]["path"]) as proxy_port:
-                        broken = verify(proxy_port, database, args.results, "negative-control")
+                        broken = verify(proxy_port, database, contract, args.results, "negative-control")
                     probe, probe_passed, probe_failed, probe_issues = normalize(broken, interactions)
                     if (
                         (probe, probe_passed, probe_failed) != ("Failed", len(interactions) - 1, 1)
@@ -274,7 +303,7 @@ def main():
                         or probe_issues[0]["actualPresent"] is not False
                     ):
                         raise RuntimeError("Pact did not isolate the missing totalAmount regression")
-                    restored = verify(port, database, args.results, "restored-control")
+                    restored = verify(port, database, contract, args.results, "restored-control")
                     if normalize(restored, interactions)[0] != "Passed":
                         raise RuntimeError("Pact did not pass after restoring the provider response")
         finally:
