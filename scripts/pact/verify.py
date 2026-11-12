@@ -30,6 +30,8 @@ HOST = "127.0.0.1"
 CREATED = "a Created order exists for payment"
 MISSING = "the order does not exist"
 CART_LOOKUP = "one populated shopping cart exists and another client has no cart"
+BFF_CART_EXISTS = "the BFF registration cart exists"
+BFF_CART_ABSENT = "the BFF registration cart is absent"
 PAID_FOR_FULFILLMENT = "a Paid order exists for fulfillment"
 CREATED_FOR_FULFILLMENT = "a Created order exists for fulfillment"
 COMPLETED_INVOICE = "a completed invoice exists for the order"
@@ -135,6 +137,22 @@ def cart_lookup_state(database, action, params):
         })
 
 
+def registration_cart_state(database, name, action, params):
+    client = UUID(params["clientId"])
+    client_id = Binary.from_uuid(client)
+    carts = database["shopping-carts"]
+    carts.delete_many({"ClientId": client_id})
+    if action == "setup" and name == BFF_CART_EXISTS:
+        created = datetime(2026, 1, 1, tzinfo=UTC)
+        carts.insert_one({
+            "_id": Binary.from_uuid(uuid5(client, "registration-cart")),
+            "ClientId": client_id,
+            "CreatedAt": created,
+            "UpdatedAt": created,
+            "Lines": [{"ProductId": Binary.from_uuid(UUID(params["productId"])), "Quantity": params["quantity"]}],
+        })
+
+
 def order_state(database, name, action, params):
     order_id = UUID(params["orderId"])
     snapshot_ids = [uuid5(order_id, f"snapshot-{index}") for index in range(2)]
@@ -208,6 +226,9 @@ def provider_state(database, name, action, params):
         raise ValueError("Unknown Pact provider action")
     if name == CART_LOOKUP:
         cart_lookup_state(database, action, params)
+        return
+    if name in (BFF_CART_EXISTS, BFF_CART_ABSENT):
+        registration_cart_state(database, name, action, params)
         return
     if name not in ORDER_STATES and name not in INVOICE_STATES:
         raise ValueError("Unknown Pact provider state")
@@ -321,7 +342,7 @@ def normalize(result, interactions):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--consumer", choices=("payments", "web"), default="payments")
+    parser.add_argument("--consumer", choices=("payments", "web", "bff"), default="payments")
     parser.add_argument("--provider-dll", type=Path, required=True)
     parser.add_argument("--mongo-port", type=int, required=True)
     parser.add_argument("--mongo-member", required=True)

@@ -22,6 +22,8 @@ The [Payments Pact](docs/payments-pact-provider.md) verifies order reads and
 fulfillment against a running Invoice candidate in CI.
 The [Web cart Pact](docs/web-cart-pact-provider.md) verifies the cart lookup
 against that same Invoice API.
+The [BFF registration cart Pact](docs/bff-cart-pact-provider.md) verifies the
+cart lookup and creation calls the BFF uses during registration.
 The [Products consumer Pact](docs/products-pact-consumer.md) covers the product
 lookup used to create checkout snapshots.
 

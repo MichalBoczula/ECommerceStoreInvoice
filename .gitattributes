@@ -64,3 +64,4 @@
 # The provider verifier hashes the exact artifact bytes from consumer CI.
 contracts/pact/payments-invoice.json -text
 contracts/pact/web-invoice.json -text
+contracts/pact/bff-invoice.json -text

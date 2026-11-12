@@ -14,6 +14,7 @@ REPOSITORY = "https://github.com/MichalBoczula/ECommerceStoreInvoice"
 CONSUMERS = {
     "payments": ("refs/heads/main", "payments-invoice-order-read"),
     "web": ("refs/heads/master", "web-invoice-cart-lookup"),
+    "bff": ("refs/heads/master", "bff-invoice-registration-cart"),
 }
 
 
