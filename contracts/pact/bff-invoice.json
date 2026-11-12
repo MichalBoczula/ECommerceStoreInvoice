@@ -1,0 +1,186 @@
+{
+  "consumer": {
+    "name": "bff"
+  },
+  "interactions": [
+    {
+      "description": "create an empty registration cart",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "the BFF registration cart is absent",
+          "params": {
+            "clientId": "48000000-0000-4000-8000-000000000002"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "path": "/shopping-carts/48000000-0000-4000-8000-000000000002"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "clientId": "48000000-0000-4000-8000-000000000002",
+            "id": "48000000-0000-4000-8000-000000000003",
+            "lines": []
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$.id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "^[0-9a-fA-F]{8}-(?:[0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "look up a missing registration cart",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "the BFF registration cart is absent",
+          "params": {
+            "clientId": "48000000-0000-4000-8000-000000000002"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/shopping-carts/client/48000000-0000-4000-8000-000000000002"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "status": 404
+          },
+          "contentType": "application/problem+json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/problem+json"
+          ]
+        },
+        "status": 404
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "look up the existing registration cart",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "the BFF registration cart exists",
+          "params": {
+            "clientId": "48000000-0000-4000-8000-000000000001",
+            "productId": "48000000-0000-4000-8000-000000000004",
+            "quantity": 2
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/shopping-carts/client/48000000-0000-4000-8000-000000000001"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "clientId": "48000000-0000-4000-8000-000000000001",
+            "id": "48000000-0000-4000-8000-000000000003",
+            "lines": [
+              {
+                "productId": "48000000-0000-4000-8000-000000000004",
+                "quantity": 2
+              }
+            ]
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$.id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "^[0-9a-fA-F]{8}-(?:[0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "receive a conflict when the registration cart was already created",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "the BFF registration cart exists",
+          "params": {
+            "clientId": "48000000-0000-4000-8000-000000000001",
+            "productId": "48000000-0000-4000-8000-000000000004",
+            "quantity": 2
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "path": "/shopping-carts/48000000-0000-4000-8000-000000000001"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "status": 409
+          },
+          "contentType": "application/problem+json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/problem+json"
+          ]
+        },
+        "status": 409
+      },
+      "type": "Synchronous/HTTP"
+    }
+  ],
+  "metadata": {
+    "pactRust": {
+      "ffi": "0.4.27",
+      "models": "1.2.8"
+    },
+    "pactSpecification": {
+      "version": "4.0"
+    }
+  },
+  "provider": {
+    "name": "invoice"
+  }
+}

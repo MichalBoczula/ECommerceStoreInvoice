@@ -6,7 +6,8 @@ consumer=${1:-payments}
 case "$consumer" in
   payments) results="$PWD/artifacts/verification/pact-provider" ;;
   web) results="$PWD/artifacts/verification/pact-provider-web" ;;
-  *) echo "Usage: $0 [payments|web]" >&2; exit 2 ;;
+  bff) results="$PWD/artifacts/verification/pact-provider-bff" ;;
+  *) echo "Usage: $0 [payments|web|bff]" >&2; exit 2 ;;
 esac
 mkdir -p "$results"
 rm -f "$results"/{verification.json,pact-results.json,negative-control.json,restored-control.json,invoice.log,mongo.log}

@@ -214,8 +214,12 @@ jobs:
           pwsh src/ECommerceStoreInvoice.API/bin/Release/net10.0/playwright.ps1 install --with-deps chromium --only-shell
           bash scripts/pact/run.sh
       - name: Verify the pinned Web cart Pact
+        id: web_pact
         if: ${{ !cancelled() && (success() || steps.payments_pact.outcome == 'failure') }}
         run: bash scripts/pact/run.sh web
+      - name: Verify the pinned BFF registration cart Pact
+        if: ${{ !cancelled() && (success() || steps.payments_pact.outcome == 'failure' || steps.web_pact.outcome == 'failure') }}
+        run: bash scripts/pact/run.sh bff
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -230,6 +234,13 @@ jobs:
           path: artifacts/verification/pact-provider-web/
           if-no-files-found: warn
           retention-days: 14
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bff-invoice-verification
+          path: artifacts/verification/pact-provider-bff/
+          if-no-files-found: warn
+          retention-days: 14
 
   publish-pact-verification:
     if: >-
@@ -242,7 +253,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        consumer: [payments, web]
+        consumer: [payments, web, bff]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -261,7 +272,7 @@ jobs:
           --consumer "$PACT_CONSUMER"
       - uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.consumer == 'payments' && 'pact-verification-receipt' || 'web-invoice-verification-receipt' }}
+          name: ${{ matrix.consumer == 'payments' && 'pact-verification-receipt' || format('{0}-invoice-verification-receipt', matrix.consumer) }}
           path: pact-verification-receipt.json
           if-no-files-found: error
 
