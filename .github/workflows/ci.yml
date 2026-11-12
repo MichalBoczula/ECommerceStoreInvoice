@@ -210,7 +210,9 @@ jobs:
         run: dotnet build src/ECommerceStoreInvoice.API/ECommerceStoreInvoice.API.csproj --configuration Release
       - name: Verify the pinned Payments Pact
         id: payments_pact
-        run: bash scripts/pact/run.sh
+        run: |
+          pwsh src/ECommerceStoreInvoice.API/bin/Release/net10.0/playwright.ps1 install --with-deps chromium --only-shell
+          bash scripts/pact/run.sh
       - name: Verify the pinned Web cart Pact
         if: ${{ !cancelled() && (success() || steps.payments_pact.outcome == 'failure') }}
         run: bash scripts/pact/run.sh web
