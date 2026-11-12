@@ -5,6 +5,7 @@ import hashlib
 import http.client
 import json
 import os
+import shutil
 import socket
 import subprocess
 import threading
@@ -15,6 +16,7 @@ from decimal import Decimal
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from importlib.metadata import version
 from pathlib import Path
+from tempfile import TemporaryDirectory
 from uuid import UUID, uuid4, uuid5
 
 from bson.binary import Binary
@@ -28,6 +30,15 @@ HOST = "127.0.0.1"
 CREATED = "a Created order exists for payment"
 MISSING = "the order does not exist"
 CART_LOOKUP = "one populated shopping cart exists and another client has no cart"
+PAID_FOR_FULFILLMENT = "a Paid order exists for fulfillment"
+CREATED_FOR_FULFILLMENT = "a Created order exists for fulfillment"
+COMPLETED_INVOICE = "a completed invoice exists for the order"
+NO_INVOICE = "the order has no completed invoice"
+INVOICE_CREATION = "a Paid order and client data exist without an invoice"
+ORDER_STATES = {CREATED, MISSING, PAID_FOR_FULFILLMENT, CREATED_FOR_FULFILLMENT, INVOICE_CREATION}
+INVOICE_STATES = {COMPLETED_INVOICE, NO_INVOICE, INVOICE_CREATION}
+PAID_ORDER_STATUS = 0
+CREATED_ORDER_STATUS = 2
 
 
 def timestamp():
@@ -50,10 +61,10 @@ def wait_for(operation, timeout=60):
     raise RuntimeError(f"Timed out waiting for {operation.__name__}")
 
 
-def request(port, path):
+def request(port, path, *, method="GET", body=None, headers=None):
     connection = http.client.HTTPConnection(HOST, port, timeout=5)
     try:
-        connection.request("GET", path)
+        connection.request(method, path, body=body, headers=headers or {})
         response = connection.getresponse()
         return response.status, response.getheader("Content-Type"), response.read()
     finally:
@@ -73,10 +84,17 @@ def invoice_api(dll, mongo_uri, database_name, results):
         "MongoDbSettings__ConnectionString": mongo_uri,
         "MongoDbSettings__DatabaseName": database_name,
         "ExternalServices__ProductCatalog__BaseUrl": f"http://{HOST}:1",
+        "InvoiceStorage__ConnectionString": "",
     }
-    with (results / "invoice.log").open("w", encoding="utf-8") as log:
+    with (
+        TemporaryDirectory(prefix="invoice-pact-") as directory,
+        (results / "invoice.log").open("w", encoding="utf-8") as log,
+    ):
+        # The local PDF store locates the solution root from the assembly path or working directory.
+        candidate = Path(directory)
+        shutil.copytree(dll.parent, candidate, dirs_exist_ok=True)
         process = subprocess.Popen(
-            ["dotnet", str(dll)], cwd=dll.parent, env=env, stdout=log, stderr=subprocess.STDOUT
+            ["dotnet", str(candidate / dll.name)], cwd=candidate, env=env, stdout=log, stderr=subprocess.STDOUT
         )
         try:
             def invoice_ready():
@@ -117,15 +135,7 @@ def cart_lookup_state(database, action, params):
         })
 
 
-def provider_state(database, name, action, params):
-    if action not in ("setup", "teardown"):
-        raise ValueError("Unknown Pact provider action")
-    if name == CART_LOOKUP:
-        cart_lookup_state(database, action, params)
-        return
-    if name not in (CREATED, MISSING):
-        raise ValueError("Unknown Pact provider state")
-
+def order_state(database, name, action, params):
     order_id = UUID(params["orderId"])
     snapshot_ids = [uuid5(order_id, f"snapshot-{index}") for index in range(2)]
 
@@ -139,6 +149,8 @@ def provider_state(database, name, action, params):
     if len(amounts) != len(snapshot_ids) or sum(amounts) != Decimal(params["totalAmount"]):
         raise ValueError("Inconsistent Payments Pact state amounts")
     created = datetime(2026, 1, 1, tzinfo=UTC)
+    client_id = uuid5(order_id, "client") if name == CREATED else UUID(params["clientId"])
+    status = PAID_ORDER_STATUS if name in (PAID_FOR_FULFILLMENT, INVOICE_CREATION) else CREATED_ORDER_STATUS
     database["product-versions"].insert_many([
         {
             "_id": Binary.from_uuid(snapshot_id), "IsActive": True, "CreatedAt": created, "DeactivatedAt": None,
@@ -148,10 +160,61 @@ def provider_state(database, name, action, params):
         for index, (snapshot_id, amount) in enumerate(zip(snapshot_ids, amounts, strict=True))
     ])
     database.orders.insert_one({
-        "_id": Binary.from_uuid(order_id), "ClientId": Binary.from_uuid(uuid5(order_id, "client")),
-        "CreatedAt": created, "UpdatedAt": None, "Status": 2,
+        "_id": Binary.from_uuid(order_id), "ClientId": Binary.from_uuid(client_id),
+        "CreatedAt": created, "UpdatedAt": None, "Status": status,
         "Lines": [{"ProductVersionId": Binary.from_uuid(value), "Quantity": 1} for value in snapshot_ids],
     })
+
+
+def invoice_state(database, name, action, params):
+    order_id = Binary.from_uuid(UUID(params["orderId"]))
+    database.invoices.delete_many({"OrderId": order_id})
+    if name == NO_INVOICE:
+        return
+
+    version_id = Binary.from_uuid(UUID(params["clientDataVersionId"]))
+    created = datetime(2026, 10, 1, tzinfo=UTC)
+    if name == COMPLETED_INVOICE and action == "setup":
+        database.invoices.insert_one({
+            "_id": Binary.from_uuid(UUID(params["invoiceId"])),
+            "OrderId": order_id,
+            "ClientDataVersionId": version_id,
+            "StorageUrl": "file:///invoice.pdf",
+            "CreatedAt": created,
+            "GenerationStatus": "Completed",
+        })
+    if name == INVOICE_CREATION:
+        versions = database["client-data-versions"]
+        versions.delete_one({"_id": version_id})
+        if action == "setup":
+            versions.insert_one({
+                "_id": version_id,
+                "ClientId": Binary.from_uuid(UUID(params["clientId"])),
+                "ClientName": "Pact Buyer",
+                "PostalCode": "00-001",
+                "City": "Warsaw",
+                "Street": "Sample",
+                "BuildingNumber": "1",
+                "ApartmentNumber": "2",
+                "PhoneNumber": "500600700",
+                "PhonePrefix": "+48",
+                "AddressEmail": "buyer@example.test",
+                "CreatedAt": created,
+            })
+
+
+def provider_state(database, name, action, params):
+    if action not in ("setup", "teardown"):
+        raise ValueError("Unknown Pact provider action")
+    if name == CART_LOOKUP:
+        cart_lookup_state(database, action, params)
+        return
+    if name not in ORDER_STATES and name not in INVOICE_STATES:
+        raise ValueError("Unknown Pact provider state")
+    if name in ORDER_STATES:
+        order_state(database, name, action, params)
+    if name in INVOICE_STATES:
+        invoice_state(database, name, action, params)
 
 
 def verify(port, database, contract, results, name):
@@ -177,9 +240,14 @@ def verify(port, database, contract, results, name):
 @contextmanager
 def without_total_amount(provider_port, target):
     class FaultProxy(BaseHTTPRequestHandler):
-        def do_GET(self):
-            status, content_type, body = request(provider_port, self.path)
-            if self.path == target and status == 200:
+        def forward(self):
+            length = int(self.headers.get("Content-Length", 0))
+            payload = self.rfile.read(length) if length else None
+            headers = {key: self.headers[key] for key in ("Accept", "Content-Type") if key in self.headers}
+            status, content_type, body = request(
+                provider_port, self.path, method=self.command, body=payload, headers=headers
+            )
+            if self.command == "GET" and self.path == target and status == 200:
                 data = json.loads(body)
                 del data["totalAmount"]
                 body = json.dumps(data).encode("utf-8")
@@ -189,6 +257,10 @@ def without_total_amount(provider_port, target):
             self.send_header("Content-Length", str(len(body)))
             self.end_headers()
             self.wfile.write(body)
+
+        do_GET = forward
+        do_PATCH = forward
+        do_POST = forward
 
     with ThreadingHTTPServer((HOST, 0), FaultProxy) as server:
         thread = threading.Thread(target=server.serve_forever, daemon=True)

@@ -4,6 +4,165 @@
   },
   "interactions": [
     {
+      "description": "create an invoice for a Paid order",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "a Paid order and client data exist without an invoice",
+          "params": {
+            "clientDataVersionId": "10000000-0000-4000-8000-000000000014",
+            "clientId": "10000000-0000-4000-8000-000000000012",
+            "currency": "PLN",
+            "lineAmounts": [
+              "7.5",
+              "5.49"
+            ],
+            "orderId": "10000000-0000-4000-8000-000000000011",
+            "totalAmount": "12.99"
+          }
+        }
+      ],
+      "request": {
+        "headers": {
+          "Accept": [
+            "application/json"
+          ]
+        },
+        "method": "POST",
+        "path": "/invoices/10000000-0000-4000-8000-000000000012/10000000-0000-4000-8000-000000000011"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "clietDataVersionId": "10000000-0000-4000-8000-000000000014",
+            "createdAt": "2026-10-01T00:00:00Z",
+            "id": "10000000-0000-4000-8000-000000000015",
+            "orderId": "10000000-0000-4000-8000-000000000011",
+            "storageUrl": "file:///invoice.pdf"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$.createdAt": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,7})?(Z|[+-]\\d{2}:\\d{2})$"
+                }
+              ]
+            },
+            "$.id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "^([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}|[0-9A-F]{8}(-[0-9A-F]{4}){3}-[0-9A-F]{12})$"
+                }
+              ]
+            },
+            "$.storageUrl": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "^\\s*\\S.*$"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "find no completed invoice for an order",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "the order has no completed invoice",
+          "params": {
+            "orderId": "10000000-0000-4000-8000-000000000011"
+          }
+        }
+      ],
+      "request": {
+        "headers": {
+          "Accept": [
+            "application/json"
+          ]
+        },
+        "method": "GET",
+        "path": "/invoices/by-order/10000000-0000-4000-8000-000000000011"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "status": 404
+          },
+          "contentType": "application/problem+json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/problem+json"
+          ]
+        },
+        "status": 404
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "mark a Created order Paid",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "a Created order exists for fulfillment",
+          "params": {
+            "clientId": "10000000-0000-4000-8000-000000000012",
+            "currency": "PLN",
+            "lineAmounts": [
+              "7.5",
+              "5.49"
+            ],
+            "orderId": "10000000-0000-4000-8000-000000000010",
+            "totalAmount": "12.99"
+          }
+        }
+      ],
+      "request": {
+        "body": {
+          "content": {
+            "status": "Paid"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "method": "PATCH",
+        "path": "/orders/10000000-0000-4000-8000-000000000010/status"
+      },
+      "response": {
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
       "description": "read a Created order in JPY",
       "pending": false,
       "providerStates": [
@@ -277,6 +436,133 @@
           ]
         },
         "status": 404
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "read the Paid order and its owner for fulfillment",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "a Paid order exists for fulfillment",
+          "params": {
+            "clientId": "10000000-0000-4000-8000-000000000012",
+            "currency": "PLN",
+            "lineAmounts": [
+              "7.5",
+              "5.49"
+            ],
+            "orderId": "10000000-0000-4000-8000-000000000010",
+            "totalAmount": "12.99"
+          }
+        }
+      ],
+      "request": {
+        "headers": {
+          "Accept": [
+            "application/json"
+          ]
+        },
+        "method": "GET",
+        "path": "/orders/10000000-0000-4000-8000-000000000010"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "clientId": "10000000-0000-4000-8000-000000000012",
+            "id": "10000000-0000-4000-8000-000000000010",
+            "lines": [
+              {
+                "lineTotalAmount": 7.5,
+                "productVersion": {
+                  "priceCurrency": "PLN"
+                }
+              },
+              {
+                "lineTotalAmount": 5.49,
+                "productVersion": {
+                  "priceCurrency": "PLN"
+                }
+              }
+            ],
+            "status": "Paid",
+            "totalAmount": 12.99,
+            "totalCurrency": "PLN"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "read the completed invoice for an order",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "a completed invoice exists for the order",
+          "params": {
+            "clientDataVersionId": "10000000-0000-4000-8000-000000000014",
+            "invoiceId": "10000000-0000-4000-8000-000000000013",
+            "orderId": "10000000-0000-4000-8000-000000000010"
+          }
+        }
+      ],
+      "request": {
+        "headers": {
+          "Accept": [
+            "application/json"
+          ]
+        },
+        "method": "GET",
+        "path": "/invoices/by-order/10000000-0000-4000-8000-000000000010"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "clietDataVersionId": "10000000-0000-4000-8000-000000000014",
+            "createdAt": "2026-10-01T00:00:00Z",
+            "id": "10000000-0000-4000-8000-000000000013",
+            "orderId": "10000000-0000-4000-8000-000000000010",
+            "storageUrl": "file:///invoice.pdf"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$.createdAt": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,7})?(Z|[+-]\\d{2}:\\d{2})$"
+                }
+              ]
+            },
+            "$.storageUrl": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "^\\s*\\S.*$"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
       },
       "type": "Synchronous/HTTP"
     }
