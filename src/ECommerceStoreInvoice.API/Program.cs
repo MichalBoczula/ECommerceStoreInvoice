@@ -1,3 +1,4 @@
+using Azure.Monitor.OpenTelemetry.AspNetCore;
 using ECommerceStoreInvoice.API.Configuration;
 using ECommerceStoreInvoice.API.Configuration.Common;
 using ECommerceStoreInvoice.API.Endpoints;
@@ -11,8 +12,24 @@ using Microsoft.Kiota.Http.HttpClientLibrary;
 using Serilog;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using OpenTelemetry.Instrumentation.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var applicationInsightsConnectionString = builder.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"];
+if (!string.IsNullOrWhiteSpace(applicationInsightsConnectionString))
+{
+    builder.Services.AddOpenTelemetry().UseAzureMonitor(options =>
+    {
+        options.ConnectionString = applicationInsightsConnectionString;
+        options.EnableLiveMetrics = false;
+    });
+    builder.Services.Configure<AspNetCoreTraceInstrumentationOptions>(options =>
+    {
+        options.Filter = context => !context.Request.Path.StartsWithSegments("/health");
+        options.RecordException = true;
+    });
+}
 
 if (builder.Environment.IsProduction() && string.IsNullOrWhiteSpace(builder.Configuration["InvoiceStorage:ConnectionString"]))
     throw new InvalidOperationException("InvoiceStorage:ConnectionString is required in Production for durable invoice PDFs.");
