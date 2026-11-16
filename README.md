@@ -51,6 +51,16 @@ An order checkout loads the client's cart, fetches the selected products from Pr
 
 An invoice requires a paid order owned by the client and a client data version. Generation reserves a unique `OrderId` in MongoDB, uploads its attempt PDF to private Azure Blob Storage, then marks the reservation completed. `GET /invoices/{invoiceId}/pdf` streams only completed invoice PDFs through the API. Local Development/Testing can retain instance-local `file://` storage when Blob settings are absent; Production requires Blob configuration. See [the ADR index](docs/adr/README.md) for recovery behavior and limitations.
 
+## Application telemetry
+
+Orders/Invoice exports OpenTelemetry request and HTTP dependency spans when
+`APPLICATIONINSIGHTS_CONNECTION_STRING` is configured. DEV Terraform supplies
+that setting and sets `OTEL_SERVICE_NAME` to `ecommercestore-orders`.
+Health probes are excluded from request tracing.
+Serilog continues writing application logs to the console for the Container Apps
+diagnostic setting. To verify trace continuity, call the Orders Swagger endpoint
+through the BFF and find the Orders request under the same `OperationId`.
+
 ## Technology stack
 
 | Area | Technology |
